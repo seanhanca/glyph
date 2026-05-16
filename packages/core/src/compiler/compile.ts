@@ -198,95 +198,185 @@ export interface CompileInput {
   readonly schema: ReadonlyArray<CompileFieldInfo>;
 }
 
+/** Y-axis side a layer renders against. */
+type YSide = "left" | "right";
+
+function ySideOfLayer(enc: Encoding): YSide {
+  const y = enc.y;
+  if (y && typeof y !== "string" && y.scale?.side === "right") return "right";
+  return "left";
+}
+
 export function compileSpec(input: CompileInput): Scene {
   const { spec, rows, schema } = input;
   const width = spec.width ?? DEFAULT_WIDTH;
   const height = spec.height ?? DEFAULT_HEIGHT;
   const theme = spec.theme === "dark" ? DARK_THEME : LIGHT_THEME;
 
+  // Adjust right padding when we'll need a right-side axis.
+  const anyRight = spec.layers.some((l) => ySideOfLayer(l.encoding) === "right");
+  const padRight = anyRight ? PADDING.left : PADDING.right;
   const plotArea = {
     x: PADDING.left,
     y: PADDING.top,
-    width: width - PADDING.left - PADDING.right,
+    width: width - PADDING.left - padRight,
     height: height - PADDING.top - PADDING.bottom,
   };
 
-  // Phase 0: single-layer compilation.
-  const layer = spec.layers[0];
-  if (!layer) throw new Error("Spec has no layers");
+  if (spec.layers.length === 0) throw new Error("Spec has no layers");
 
-  const enc = layer.encoding;
-  const xField = fieldOf(enc.x);
-  const yField = fieldOf(enc.y);
-  if (!xField || !yField) {
-    throw new Error("Phase 0 requires both x and y encodings");
+  // Phase-1 scope guard: per-layer data overrides need separate materialization
+  // and aren't supported by this compiler yet. (Re-enabled in a follow-up PR.)
+  for (let i = 0; i < spec.layers.length; i++) {
+    if (spec.layers[i]?.data !== undefined) {
+      throw new Error(
+        `Layer ${i}: per-layer 'data' overrides not yet supported in the multi-layer compiler`,
+      );
+    }
   }
 
-  const xKind = fieldType(enc.x, schema);
-  const yKind = fieldType(enc.y, schema);
+  // Validate every layer's mark + encoding upfront.
+  for (let i = 0; i < spec.layers.length; i++) {
+    const l = spec.layers[i];
+    if (!l) continue;
+    if (l.mark !== "bar" && l.mark !== "point") {
+      throw new Error(`Phase 1 supports marks bar|point; layer ${i} has ${l.mark}`);
+    }
+    if (fieldOf(l.encoding.x) === undefined || fieldOf(l.encoding.y) === undefined) {
+      throw new Error(`Layer ${i} requires both x and y encodings`);
+    }
+    if (fieldType(l.encoding.y, schema) !== "quantitative") {
+      throw new Error(`Layer ${i}: y encoding must be quantitative`);
+    }
+  }
 
-  // Build scales.
+  // ---- Shared x scale --------------------------------------------------
+  // All layers must agree on x-field kind for now. Mixing band + linear x
+  // across layers is undefined; the compiler picks band when any layer's x
+  // is categorical (the safer choice for shared axes).
   const xRange: readonly [number, number] = [plotArea.x, plotArea.x + plotArea.width];
   const yRange: readonly [number, number] = [plotArea.y + plotArea.height, plotArea.y];
 
-  const marks: SceneMark[] = [];
-  const axes: SceneAxis[] = [];
+  const allXFields = spec.layers.map((l) => fieldOf(l.encoding.x) as string);
+  const anyXCategorical = spec.layers.some(
+    (l) => fieldType(l.encoding.x, schema) !== "quantitative",
+  );
+  const anyBarLayer = spec.layers.some((l) => l.mark === "bar");
 
-  if (yKind !== "quantitative") {
-    throw new Error("Phase 0 requires the y encoding to be quantitative");
-  }
-  const yExtent = numericExtent(rows, schema, yField);
-  const yNice = niceTicks(Math.min(0, yExtent[0]), yExtent[1], 5);
-  const yScale = linearScale(yNice.domain, yRange);
-
-  const ctx: MarkCtx = {
-    interactive: spec.interactive,
-    xField,
-    yField,
-    colorField: fieldOf(enc.color),
-  };
-
-  // ---- BAR --------------------------------------------------------------
-  if (layer.mark === "bar") {
-    if (xKind === "quantitative") {
-      // Treat numeric x as discrete bins for bars (Phase 0 simplification).
-      const domain = distinctOrdered(rows, schema, xField);
-      const xScale = bandScale(domain, xRange, 0.1);
-      buildBars(marks, rows, schema, enc, xField, yField, xScale, yScale, theme, ctx);
-      axes.push(makeBottomAxis(xScale, plotArea, xField));
-    } else {
-      const domain = distinctOrdered(rows, schema, xField);
-      const xScale = bandScale(domain, xRange, 0.1);
-      buildBars(marks, rows, schema, enc, xField, yField, xScale, yScale, theme, ctx);
-      axes.push(makeBottomAxis(xScale, plotArea, xField));
+  // x scale resolver: returns either a bandScale or a linearScale
+  type XScaleAny = ReturnType<typeof bandScale> | ReturnType<typeof linearScale>;
+  let xScale: XScaleAny;
+  let xTicksLinear: ReadonlyArray<number> | undefined;
+  if (anyXCategorical || anyBarLayer) {
+    // Use band: union of distinct values, in first-seen order across layers.
+    const domain: string[] = [];
+    const seen = new Set<string>();
+    for (const f of allXFields) {
+      for (const v of distinctOrdered(rows, schema, f)) {
+        if (!seen.has(v)) {
+          seen.add(v);
+          domain.push(v);
+        }
+      }
     }
-  }
-  // ---- POINT ------------------------------------------------------------
-  else if (layer.mark === "point") {
-    if (xKind === "quantitative") {
-      const xExtent = numericExtent(rows, schema, xField);
-      const xNice = niceTicks(xExtent[0], xExtent[1], 6);
-      const xScale = linearScale(xNice.domain, xRange);
-      buildPoints(marks, rows, schema, enc, xField, yField, xScale, yScale, theme, ctx);
-      axes.push(makeBottomAxisLinear(xNice.ticks, xScale, plotArea, xField));
-    } else {
-      const domain = distinctOrdered(rows, schema, xField);
-      const xScale = bandScale(domain, xRange, 0.1);
-      buildPoints(marks, rows, schema, enc, xField, yField, xScale, yScale, theme, ctx);
-      axes.push(makeBottomAxis(xScale, plotArea, xField));
-    }
+    xScale = bandScale(domain, xRange, 0.1);
   } else {
-    throw new Error(`Phase 0 supports marks bar|point; got ${layer.mark}`);
+    // Linear: union of numeric extents.
+    let xMin = Number.POSITIVE_INFINITY;
+    let xMax = Number.NEGATIVE_INFINITY;
+    for (const f of allXFields) {
+      const [a, b] = numericExtent(rows, schema, f);
+      if (a < xMin) xMin = a;
+      if (b > xMax) xMax = b;
+    }
+    const nice = niceTicks(xMin, xMax, 6);
+    xScale = linearScale(nice.domain, xRange);
+    xTicksLinear = nice.ticks;
   }
 
-  axes.push(makeLeftAxis(yNice.ticks, yScale, plotArea, yField));
+  // ---- Y scales (left + optional right) --------------------------------
+  function buildYScaleFor(
+    side: YSide,
+  ): { scale: ReturnType<typeof linearScale>; ticks: number[] } | null {
+    const layersOnSide = spec.layers.filter((l) => ySideOfLayer(l.encoding) === side);
+    if (layersOnSide.length === 0) return null;
+    let yMin = Number.POSITIVE_INFINITY;
+    let yMax = Number.NEGATIVE_INFINITY;
+    for (const l of layersOnSide) {
+      const f = fieldOf(l.encoding.y) as string;
+      const [a, b] = numericExtent(rows, schema, f);
+      if (a < yMin) yMin = a;
+      if (b > yMax) yMax = b;
+    }
+    const nice = niceTicks(Math.min(0, yMin), yMax, 5);
+    return { scale: linearScale(nice.domain, yRange), ticks: nice.ticks };
+  }
 
-  // Emit scene-level schema metadata when interactive — gives the SVG root
-  // a self-describing channel→field map for hydration.
+  const leftY = buildYScaleFor("left");
+  const rightY = buildYScaleFor("right");
+  if (!leftY && !rightY) throw new Error("No y scales could be built (no layers?)");
+
+  // ---- Build marks per layer -------------------------------------------
+  const marks: SceneMark[] = [];
+  // For the scene.schema (interactive metadata) we use the FIRST layer's
+  // encoding fields — agents that don't yet know about multi-layer get a
+  // sensible default. Future PR may emit per-layer schemas.
+  const firstLayer = spec.layers[0];
+  if (!firstLayer) throw new Error("Spec has no layers");
+
+  for (const layer of spec.layers) {
+    const enc = layer.encoding;
+    const xField = fieldOf(enc.x) as string;
+    const yField = fieldOf(enc.y) as string;
+    const yScale = (ySideOfLayer(enc) === "right" ? rightY : leftY)?.scale;
+    if (!yScale) continue; // unreachable: validated above
+    const ctx: MarkCtx = {
+      interactive: spec.interactive,
+      xField,
+      yField,
+      colorField: fieldOf(enc.color),
+    };
+    if (layer.mark === "bar") {
+      if (xScale.type !== "band") {
+        throw new Error("bar mark requires a band x scale");
+      }
+      buildBars(marks, rows, schema, enc, xField, yField, xScale, yScale, theme, ctx);
+    } else {
+      // point
+      buildPoints(marks, rows, schema, enc, xField, yField, xScale, yScale, theme, ctx);
+    }
+  }
+
+  // ---- Axes ------------------------------------------------------------
+  const axes: SceneAxis[] = [];
+  const xLabel = allXFields[0] ?? "x";
+  if (xScale.type === "band") {
+    axes.push(makeBottomAxis(xScale, plotArea, xLabel));
+  } else if (xTicksLinear) {
+    axes.push(makeBottomAxisLinear(xTicksLinear, xScale, plotArea, xLabel));
+  }
+  if (leftY) {
+    const leftLabel = fieldOf(
+      spec.layers.find((l) => ySideOfLayer(l.encoding) === "left")?.encoding.y,
+    );
+    axes.push(makeLeftAxis(leftY.ticks, leftY.scale, plotArea, leftLabel ?? "y"));
+  }
+  if (rightY) {
+    const rightLabel = fieldOf(
+      spec.layers.find((l) => ySideOfLayer(l.encoding) === "right")?.encoding.y,
+    );
+    axes.push(makeRightAxis(rightY.ticks, rightY.scale, plotArea, rightLabel ?? "y"));
+  }
+
+  // ---- Scene-level schema (interactivity metadata) ---------------------
   let sceneSchema: SceneSchema | undefined;
   if (spec.interactive) {
-    const fields: Record<string, string> = { x: xField, y: yField };
-    if (ctx.colorField) fields.color = ctx.colorField;
+    const fields: Record<string, string> = {
+      x: fieldOf(firstLayer.encoding.x) as string,
+      y: fieldOf(firstLayer.encoding.y) as string,
+    };
+    const cf = fieldOf(firstLayer.encoding.color);
+    if (cf) fields.color = cf;
     sceneSchema = { fields };
   }
 
@@ -462,6 +552,25 @@ function makeLeftAxis(
   return {
     orientation: "left",
     origin: { x: plotArea.x, y: plotArea.y },
+    length: plotArea.height,
+    ticks,
+    label,
+  };
+}
+
+function makeRightAxis(
+  tickValues: ReadonlyArray<number>,
+  scale: ReturnType<typeof linearScale>,
+  plotArea: Scene["plotArea"],
+  label: string,
+): SceneAxis {
+  const ticks: AxisTick[] = tickValues.map((t) => ({
+    position: scale.apply(t),
+    label: formatTick(t),
+  }));
+  return {
+    orientation: "right",
+    origin: { x: plotArea.x + plotArea.width, y: plotArea.y },
     length: plotArea.height,
     ticks,
     label,

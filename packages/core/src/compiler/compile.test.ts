@@ -103,12 +103,14 @@ describe("compileSpec — point", () => {
 });
 
 describe("compileSpec — error cases", () => {
-  it("rejects an unsupported Phase 0 mark", () => {
+  it("rejects an unsupported mark", () => {
     const spec: GlyphSpec = {
       data: { source: "x" },
       layers: [{ mark: "area", encoding: { x: "hour", y: "rides" } }],
     };
-    expect(() => compileSpec({ spec, rows, schema })).toThrow(/Phase 0/);
+    expect(() => compileSpec({ spec, rows, schema })).toThrow(
+      /supports marks bar\|point/,
+    );
   });
 
   it("rejects when x or y is missing", () => {

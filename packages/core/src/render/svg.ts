@@ -137,7 +137,7 @@ function renderAxis(axis: SceneAxis): string {
         }" font-family="${FONT_FAMILY}" font-size="12" fill="${AXIS_LABEL_COLOR}" text-anchor="middle" dominant-baseline="hanging">${esc(axis.label)}</text>`,
       );
     }
-  } else {
+  } else if (axis.orientation === "left") {
     parts.push(
       `<line x1="${origin.x}" y1="${origin.y}" x2="${origin.x}" y2="${
         origin.y + length
@@ -160,6 +160,32 @@ function renderAxis(axis: SceneAxis): string {
         `<text x="${origin.x - 40}" y="${
           origin.y + length / 2
         }" font-family="${FONT_FAMILY}" font-size="12" fill="${AXIS_LABEL_COLOR}" text-anchor="middle" dominant-baseline="alphabetic" transform="rotate(-90 ${origin.x - 40} ${origin.y + length / 2})">${esc(axis.label)}</text>`,
+      );
+    }
+  } else {
+    // right axis — labels live to the right of the tick line
+    parts.push(
+      `<line x1="${origin.x}" y1="${origin.y}" x2="${origin.x}" y2="${
+        origin.y + length
+      }" stroke="${AXIS_COLOR}" stroke-width="1"/>`,
+    );
+    for (const t of axis.ticks) {
+      parts.push(
+        `<line x1="${origin.x}" y1="${t.position}" x2="${
+          origin.x + 4
+        }" y2="${t.position}" stroke="${AXIS_COLOR}" stroke-width="1"/>`,
+      );
+      parts.push(
+        `<text x="${origin.x + 8}" y="${
+          t.position
+        }" font-family="${FONT_FAMILY}" font-size="11" fill="${AXIS_LABEL_COLOR}" text-anchor="start" dominant-baseline="middle">${esc(t.label)}</text>`,
+      );
+    }
+    if (axis.label) {
+      parts.push(
+        `<text x="${origin.x + 40}" y="${
+          origin.y + length / 2
+        }" font-family="${FONT_FAMILY}" font-size="12" fill="${AXIS_LABEL_COLOR}" text-anchor="middle" dominant-baseline="alphabetic" transform="rotate(90 ${origin.x + 40} ${origin.y + length / 2})">${esc(axis.label)}</text>`,
       );
     }
   }

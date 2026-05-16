@@ -82,7 +82,7 @@ export interface AxisTick {
 
 /** An axis is a derived collection of marks; carried explicitly so renderers can style consistently. */
 export interface SceneAxis {
-  readonly orientation: "bottom" | "left";
+  readonly orientation: "bottom" | "left" | "right";
   readonly origin: { readonly x: number; readonly y: number };
   readonly length: number;
   readonly ticks: ReadonlyArray<AxisTick>;
