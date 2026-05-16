@@ -214,6 +214,40 @@ The eight items below were missing from `phase-3-agent-graph.md`.
 - Documented boundary: ≤ 1 update per second per subscription; bursts coalesce to the latest version.
 - Streaming charts (Perspective territory) remain explicitly out of scope.
 
+### B9 — Cross-MCP data exchange (the multi-tool scenario)
+
+**Why.** A realistic Claude Code session combines several MCP servers — e.g. ClickHouse MCP for warehouse data, Publora MCP for social data, a local CSV, plus Glyph. Today data crosses these tools as JSON-stringified text content (token-expensive, schema-lossy, no lineage). The user-flow target: *"render trend + outlier + distribution from these three sources inline, then let me click into the chart to drive next steps."* That flow works end-to-end today only with friction in (a) cross-tool data hand-off, (b) inline rendering, (c) click-back routing.
+
+**Acceptance — four small additions to Phase 3 Tier A.**
+
+#### B9a — `glyph_import(payload, name)` MCP verb
+
+Accepts:
+- `payload.kind: "arrow-ipc" | "json-rows" | "csv" | "url"`
+- `payload.data` (string or base64) plus a `payload.schema?` hint
+
+Returns a fresh `DataHandle` (GDF URI) the agent can pass to `glyph_render`. This collapses "ClickHouse returned 5000 rows → I need to chart them" from a multi-step JSON dance to one tool call.
+
+#### B9b — Cross-MCP `data_handle` convention
+
+Glyph's `glyph_render` learns to accept:
+
+```json
+{ "data": { "source": { "fromTool": "clickhouse_query.result.data_handle" } } }
+```
+
+When the spec's `data.source` is a `{ fromTool }` reference, the MCP server resolves it against the conversation's recent tool results. Any tool that voluntarily returns a `data_handle: { schema, rows | uri | arrow }` block becomes trivially chartable. Zero coordination required with the upstream MCP — it's read-if-present, ignored otherwise. Standard documented in Glyph's docs so other MCP authors can opt in.
+
+#### B9c — Server-side PNG rasterization in `glyph_render`
+
+Today `glyph_render` returns SVG text in a `text` content block. Add a sibling `image/png` content block (rasterized via `resvg-wasm`, deterministic). Hosts that render images inline (current and future Claude Code, Cursor, Codex, etc.) display the chart inline; hosts that don't fall back to the SVG text. Cost: ~50 LOC + one dep.
+
+#### B9d — `@glyph/preview` Claude Code plugin (long-term, host-gated)
+
+Once Claude Code exposes a hotspot-routing primitive for tool results (a feature ask, not currently shipped), a Glyph plugin can open a sidebar pane that hosts an interactive Glyph chart with native click → tool-call routing using `data-key`. Tracked here so we're ready the day the host supports it.
+
+**Net effect.** With B9a–c, the scenario *"ClickHouse + CSV + Publora → trend + outlier + distribution → click-driven next-step"* runs end-to-end without flow breaks and without expensive row stringification.
+
 ---
 
 ## §C — Execution sequence
@@ -263,6 +297,10 @@ Reflecting both `post-mvp.md` + `phase-3-agent-graph.md` plus §A and §B above.
 | 39 | `glyph_publish` / `glyph_subscribe` / `glyph_lineage` / `glyph_handles` MCP verbs (in-process only) | phase-3 §10 PR12 |
 | 40 | `data.source: "gdf://..."` URI resolution | phase-3 §10 PR13 |
 | 41 | Local IPC transport (`ATTACH` + UNIX socket) | phase-3 §10 PR14 |
+| 41a | `glyph_import(payload, name)` MCP verb (Arrow IPC / JSON-rows / CSV / URL → handle) | **B9a** |
+| 41b | Cross-MCP `data_handle` convention; `data.source: { fromTool: "..." }` resolution | **B9b** |
+| 41c | Server-side PNG rasterization via `resvg-wasm` in `glyph_render` | **B9c** |
+| 41d | `@glyph/preview` Claude Code plugin *(host-gated)* | **B9d** |
 | 42 | Handle GC + TTL + refcount | B2 |
 | 43 | Semantic / metric layer + `glyph_metrics` MCP verb | phase-3 §1 |
 | 44 | `glyph_explain` (deterministic SQL pipelines) | phase-3 §2, B3 |
@@ -304,6 +342,69 @@ Things that would dilute the wedge and **will not ship** without an explicit re-
 | Vector / embedding-based "semantic search" | Stay declarative |
 | Workflow engine (Airflow / Dagster) | Different concern |
 | R / ggplot bidirectional port | Maybe; demand-gated only |
+
+---
+
+## §G — Worked scenario — ClickHouse + CSV + Publora + Glyph
+
+A realistic Claude Code session combining multiple MCP servers, validating that B9 closes the cross-MCP gaps. Lines marked **✓** work today; **○** unlock with B9; **□** are existing roadmap items.
+
+```
+USER  ▸ "From last month's web sessions in ClickHouse, joined with my
+         campaigns.csv, plus Publora's reach numbers — show me the daily
+         trend, flag outlier days, and the distribution of session length.
+         Let me click bars to dig deeper."
+
+CC    ▸ tool_use: clickhouse_query(SELECT … FROM sessions WHERE …)        ✓
+        → result.data_handle = { schema, arrow: <…ipc…> }                  ○ B9b
+CC    ▸ tool_use: read_local_file(./campaigns.csv)                         ✓
+        → CSV text content
+CC    ▸ tool_use: publora_metrics(window=30d)                              ✓
+        → result.data_handle = { schema, rows: […] }                       ○ B9b
+
+CC    ▸ tool_use: glyph_import({ kind: "csv", data: "<csv text>" },        ○ B9a
+                                "campaigns")
+        → gdf://session/campaigns
+
+CC    ▸ tool_use: glyph_render({
+          version: "glyph/0.1",
+          data: { source: "gdf://session/sessions" },                      □ PR40
+          layers: [
+            { mark: "line",  encoding: { x: "day", y: "sessions" } },      □ PR15
+            { mark: "rule",
+              encoding: { y: { metric: "p95_sessions" }, color: "red" } }, □ PR43 (metric layer)
+            { mark: "point", encoding: { x: "day", y: "sessions",
+                                         color: { stat: "anomaly" } } }    □ PR45
+          ],
+          interactive: { key: "day" }
+        })
+        → { svg, png, handle_id, schema, ... }                             ○ B9c (PNG inline)
+
+USER  ▸ [clicks the 2024-03-12 bar]
+        (B9d would route this back natively;
+         until then, user types: "the 2024-03-12 bar")                     ○ B9d / ✓ via text
+
+CC    ▸ tool_use: glyph_drill(handle_id, field: "day", equals: "2024-03-12") ✓
+        → rows: 1, predicate: "\"day\" = '2024-03-12'"
+CC    ▸ tool_use: glyph_explain(handle_id)                                  □ PR44
+        → "2024-03-12 is +3.1σ above the 30-day mean. Sessions hit 8.4k
+           (avg ~ 4.1k). Top contributing campaigns: spring_promo (38%),
+           email_resub (17%)."
+
+USER  ▸ "Email the email_resub team about the spike. Render the next
+         seven days' forecast against this trend."
+
+CC    ▸ tool_use: glyph_act(handle_id, "email_marketing_team",
+                            { team_id: "email_resub", chart_png: ... },
+                            confirmed: true)                               □ PR47
+CC    ▸ tool_use: glyph_forecast(handle_id, horizon: "7 days")             □ PR46
+        → new gdf://session/forecast-xyz
+CC    ▸ tool_use: glyph_render({ overlays the original + forecast bands })
+
+USER  ▸ Final answer: chart + narrative + audit trail of action.
+```
+
+**What's needed to make this real**: B9a–c (small, three PRs, ~200 LOC each + tests) and the rest of the existing Phase 1/3 plan. **B9d** is host-gated — not blocking; the text-based click handoff works in the interim.
 
 ---
 
