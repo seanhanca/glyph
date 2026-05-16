@@ -1,6 +1,34 @@
 import { describe, expect, it } from "vitest";
 import { parseSpec, safeParseSpec, safeParseSpecJson } from "./parse.js";
 
+describe("Glyph spec — version field", () => {
+  it("accepts a spec with no version (defaults are applied downstream)", () => {
+    const spec = parseSpec({
+      data: { source: "x" },
+      layers: [{ mark: "bar", encoding: { x: "a", y: "b" } }],
+    });
+    expect(spec.version).toBeUndefined();
+  });
+
+  it("accepts an explicit glyph/0.1 version", () => {
+    const spec = parseSpec({
+      version: "glyph/0.1",
+      data: { source: "x" },
+      layers: [{ mark: "bar", encoding: { x: "a", y: "b" } }],
+    });
+    expect(spec.version).toBe("glyph/0.1");
+  });
+
+  it("rejects an unknown version", () => {
+    const r = safeParseSpec({
+      version: "glyph/9.99",
+      data: { source: "x" },
+      layers: [{ mark: "bar", encoding: { x: "a", y: "b" } }],
+    });
+    expect(r.ok).toBe(false);
+  });
+});
+
 describe("Glyph spec — minimal valid specs", () => {
   it("accepts a single-layer bar chart with shorthand encodings", () => {
     const spec = parseSpec({

@@ -16,3 +16,4 @@ export * from "./compute/index.js";
 export * from "./scenegraph/index.js";
 export * from "./compiler/index.js";
 export * from "./render/index.js";
+export * from "./capabilities.js";

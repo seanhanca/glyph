@@ -10,13 +10,22 @@
  * agent burns minimal context on the API surface itself.
  */
 
-import { compileSpec, renderSvg, safeParseSpec } from "@glyph/core";
+import { compileSpec, getCapabilities, renderSvg, safeParseSpec } from "@glyph/core";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { ServerState, materializeSpec } from "./state.js";
 
 export const SERVER_NAME = "glyph-mcp";
 export const SERVER_VERSION = "0.0.0";
+
+/** Tools this MCP build exposes; surfaced via `glyph_capabilities`. */
+const MCP_TOOLS = [
+  { name: "glyph_describe", since: "0.0.0" },
+  { name: "glyph_render", since: "0.0.0" },
+  { name: "glyph_query", since: "0.0.0" },
+  { name: "glyph_drill", since: "0.0.0" },
+  { name: "glyph_capabilities", since: "0.0.0" },
+] as const;
 
 /** Convert any BigInt values to numbers for JSON-safe serialization. */
 function jsonSafe(value: unknown): unknown {
@@ -35,6 +44,28 @@ export function createServer(state: ServerState = new ServerState()): {
   state: ServerState;
 } {
   const server = new McpServer({ name: SERVER_NAME, version: SERVER_VERSION });
+
+  // ----- glyph_capabilities -----------------------------------------------
+  // Returns the library version, supported spec versions, marks, stats,
+  // renderers, engines, and the MCP tool list. Agents call this once at
+  // session start to detect feature availability.
+  server.registerTool(
+    "glyph_capabilities",
+    {
+      title: "Report Glyph build capabilities",
+      description:
+        "Return this Glyph build's capabilities: library version, supported spec versions, marks, stats, renderers, engines, and the MCP tool list. Call this once at session start to detect feature availability before invoking newer tools.",
+      inputSchema: {},
+    },
+    async () => ({
+      content: [
+        {
+          type: "text" as const,
+          text: JSON.stringify(getCapabilities({ mcpTools: MCP_TOOLS }), null, 2),
+        },
+      ],
+    }),
+  );
 
   // ----- glyph_describe ----------------------------------------------------
   server.registerTool(

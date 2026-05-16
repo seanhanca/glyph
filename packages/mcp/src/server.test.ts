@@ -54,10 +54,33 @@ describe("Glyph MCP server", () => {
     await state.close();
   });
 
-  it("lists the four tools", async () => {
+  it("lists the five tools", async () => {
     const r = await client.listTools();
     const names = r.tools.map((t) => t.name).sort();
-    expect(names).toEqual(["glyph_describe", "glyph_drill", "glyph_query", "glyph_render"]);
+    expect(names).toEqual([
+      "glyph_capabilities",
+      "glyph_describe",
+      "glyph_drill",
+      "glyph_query",
+      "glyph_render",
+    ]);
+  });
+
+  it("glyph_capabilities reports versioned tool list + supported marks", async () => {
+    const r = await callText(client, "glyph_capabilities", {});
+    expect(r.isError).toBe(false);
+    const caps = JSON.parse(r.text);
+    expect(caps.libraryVersion).toBeTypeOf("string");
+    expect(caps.specVersions).toContain("glyph/0.1");
+    expect(caps.defaultSpecVersion).toBe("glyph/0.1");
+    expect(caps.marks).toEqual(["bar", "point"]);
+    expect(caps.mcpTools.map((t: { name: string }) => t.name).sort()).toEqual([
+      "glyph_capabilities",
+      "glyph_describe",
+      "glyph_drill",
+      "glyph_query",
+      "glyph_render",
+    ]);
   });
 
   it("glyph_describe returns schema + suggested encoding types", async () => {

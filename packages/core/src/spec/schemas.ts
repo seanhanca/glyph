@@ -160,8 +160,24 @@ export const InteractiveSchema = z
   })
   .strict();
 
+/**
+ * Spec versions known to the compiler. The compiler dispatches by version so
+ * old specs keep working when new features ship. Bumping the major component
+ * (\`glyph/0\` → \`glyph/1\`) is the breaking-change signal; minor bumps
+ * (\`glyph/0.1\` → \`glyph/0.2\`) are additive.
+ */
+export const SUPPORTED_SPEC_VERSIONS = ["glyph/0.1"] as const;
+export type SpecVersion = (typeof SUPPORTED_SPEC_VERSIONS)[number];
+export const DEFAULT_SPEC_VERSION: SpecVersion = "glyph/0.1";
+
 export const GlyphSpecSchema = z
   .object({
+    /**
+     * Spec format version. Optional in 0.1 (defaults to "glyph/0.1");
+     * required from 0.2 onward. Lets agents and the compiler negotiate
+     * features without breaking older specs.
+     */
+    version: z.enum(SUPPORTED_SPEC_VERSIONS).optional(),
     /**
      * Top-level data source. Layers inherit unless they specify their own
      * `data`. Optional only when every layer overrides.
