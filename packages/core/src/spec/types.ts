@@ -19,6 +19,7 @@ import type {
   DataSourceSchema,
   EncodingSchema,
   GlyphSpecSchema,
+  InteractiveSchema,
   LayerSchema,
   MarkSchema,
   ScaleSchema,
@@ -48,6 +49,9 @@ export type Scale = z.infer<typeof ScaleSchema>;
 
 /** Aggregation/binning statistic applied before drawing. */
 export type Stat = z.infer<typeof StatSchema>;
+
+/** Opt-in interactivity config (see InteractiveSchema for details). */
+export type InteractiveConfig = z.infer<typeof InteractiveSchema>;
 
 /**
  * A QueryHandle is returned alongside the rendered chart. It identifies the

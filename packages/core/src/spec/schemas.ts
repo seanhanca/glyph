@@ -136,6 +136,30 @@ export const LayerSchema = z
 // Top-level Glyph spec
 // ---------------------------------------------------------------------------
 
+/**
+ * Opt-in interactivity. When present, the renderer emits `data-*` attributes
+ * on each mark so:
+ *   1. CSS `:hover` can highlight bars (zero-JS feedback).
+ *   2. `@glyph/live` can hydrate the SVG with click/brush handlers.
+ *   3. `glyph_drill` (MCP) can derive a SQL WHERE clause from a click.
+ * When absent, the rendered SVG is byte-identical to the non-interactive path.
+ */
+export const InteractiveSchema = z
+  .object({
+    /**
+     * Optional source field used as the stable mark key (emitted as
+     * `data-key`). Defaults to the row index. Useful when re-rendering
+     * across data refreshes so the same row keeps its identity.
+     */
+    key: z.string().optional(),
+    /**
+     * Hover highlight: when true (default), inject a small `<style>` block
+     * giving each interactive mark a `:hover` outline. Pure CSS, no JS.
+     */
+    hover: z.boolean().optional(),
+  })
+  .strict();
+
 export const GlyphSpecSchema = z
   .object({
     /**
@@ -152,6 +176,8 @@ export const GlyphSpecSchema = z
     height: z.number().int().positive().optional(),
     /** Color theme; defaults to "light". */
     theme: z.enum(["light", "dark"]).optional(),
+    /** Opt into data-bound, hydratable SVG output. */
+    interactive: InteractiveSchema.optional(),
   })
   .strict()
   .refine((spec) => spec.data !== undefined || spec.layers.every((l) => l.data !== undefined), {

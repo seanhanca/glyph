@@ -11,14 +11,57 @@
  *   - Default colors are picked deterministically from a small fixed palette.
  */
 
-import type { AxisTick, Scene, SceneAxis, SceneMark } from "../scenegraph/types.js";
-import type { Channel, Encoding, GlyphSpec } from "../spec/types.js";
+import type {
+  AxisTick,
+  MarkData,
+  Scene,
+  SceneAxis,
+  SceneMark,
+  SceneSchema,
+} from "../scenegraph/types.js";
+import type { Channel, Encoding, GlyphSpec, InteractiveConfig } from "../spec/types.js";
 import { bandScale, linearScale, niceTicks, roundPx } from "./scales.js";
 
 /** Minimal field metadata needed by the compiler. ColumnInfo is a superset. */
 export interface CompileFieldInfo {
   readonly name: string;
   readonly type: string;
+}
+
+/** Compiler context passed to mark builders for interactive metadata. */
+interface MarkCtx {
+  readonly interactive: InteractiveConfig | undefined;
+  readonly xField: string;
+  readonly yField: string;
+  readonly colorField: string | undefined;
+}
+
+/** Coerce any cell value to a stable string for data attributes. */
+function attrValue(v: unknown): string {
+  if (v === null || v === undefined) return "";
+  if (typeof v === "bigint") return String(v);
+  return String(v);
+}
+
+/** Build optional MarkData for a row. Returns an empty object when off. */
+function markDataFor(
+  ctx: MarkCtx,
+  row: ReadonlyArray<unknown>,
+  schema: ReadonlyArray<CompileFieldInfo>,
+  rowIndex: number,
+): MarkData {
+  if (!ctx.interactive) return {};
+  const dataAttrs: Record<string, string> = {
+    row: String(rowIndex),
+    x: attrValue(valueAt(row, schema, ctx.xField)),
+    y: attrValue(valueAt(row, schema, ctx.yField)),
+  };
+  if (ctx.colorField) {
+    dataAttrs.color = attrValue(valueAt(row, schema, ctx.colorField));
+  }
+  const keyField = ctx.interactive.key;
+  const key = keyField ? attrValue(valueAt(row, schema, keyField)) : String(rowIndex);
+  return { key, dataAttrs };
 }
 
 // ---------------------------------------------------------------------------
@@ -185,18 +228,25 @@ export function compileSpec(input: CompileInput): Scene {
   const yNice = niceTicks(Math.min(0, yExtent[0]), yExtent[1], 5);
   const yScale = linearScale(yNice.domain, yRange);
 
+  const ctx: MarkCtx = {
+    interactive: spec.interactive,
+    xField,
+    yField,
+    colorField: fieldOf(enc.color),
+  };
+
   // ---- BAR --------------------------------------------------------------
   if (layer.mark === "bar") {
     if (xKind === "quantitative") {
       // Treat numeric x as discrete bins for bars (Phase 0 simplification).
       const domain = distinctOrdered(rows, schema, xField);
       const xScale = bandScale(domain, xRange, 0.1);
-      buildBars(marks, rows, schema, enc, xField, yField, xScale, yScale, theme);
+      buildBars(marks, rows, schema, enc, xField, yField, xScale, yScale, theme, ctx);
       axes.push(makeBottomAxis(xScale, plotArea, xField));
     } else {
       const domain = distinctOrdered(rows, schema, xField);
       const xScale = bandScale(domain, xRange, 0.1);
-      buildBars(marks, rows, schema, enc, xField, yField, xScale, yScale, theme);
+      buildBars(marks, rows, schema, enc, xField, yField, xScale, yScale, theme, ctx);
       axes.push(makeBottomAxis(xScale, plotArea, xField));
     }
   }
@@ -206,12 +256,12 @@ export function compileSpec(input: CompileInput): Scene {
       const xExtent = numericExtent(rows, schema, xField);
       const xNice = niceTicks(xExtent[0], xExtent[1], 6);
       const xScale = linearScale(xNice.domain, xRange);
-      buildPoints(marks, rows, schema, enc, xField, yField, xScale, yScale, theme);
+      buildPoints(marks, rows, schema, enc, xField, yField, xScale, yScale, theme, ctx);
       axes.push(makeBottomAxisLinear(xNice.ticks, xScale, plotArea, xField));
     } else {
       const domain = distinctOrdered(rows, schema, xField);
       const xScale = bandScale(domain, xRange, 0.1);
-      buildPoints(marks, rows, schema, enc, xField, yField, xScale, yScale, theme);
+      buildPoints(marks, rows, schema, enc, xField, yField, xScale, yScale, theme, ctx);
       axes.push(makeBottomAxis(xScale, plotArea, xField));
     }
   } else {
@@ -219,6 +269,15 @@ export function compileSpec(input: CompileInput): Scene {
   }
 
   axes.push(makeLeftAxis(yNice.ticks, yScale, plotArea, yField));
+
+  // Emit scene-level schema metadata when interactive — gives the SVG root
+  // a self-describing channel→field map for hydration.
+  let sceneSchema: SceneSchema | undefined;
+  if (spec.interactive) {
+    const fields: Record<string, string> = { x: xField, y: yField };
+    if (ctx.colorField) fields.color = ctx.colorField;
+    sceneSchema = { fields };
+  }
 
   return {
     width,
@@ -228,6 +287,7 @@ export function compileSpec(input: CompileInput): Scene {
     axes,
     marks,
     ...(spec.title ? { title: spec.title } : {}),
+    ...(sceneSchema ? { schema: sceneSchema } : {}),
   };
 }
 
@@ -260,16 +320,24 @@ function buildBars(
   xScale: ReturnType<typeof bandScale>,
   yScale: ReturnType<typeof linearScale>,
   theme: Theme,
+  ctx: MarkCtx,
 ): void {
   const colorField = fieldOf(encoding.color);
   const colorDomain = colorField ? distinctOrdered(rows, schema, colorField) : [];
   const yZero = yScale.apply(0);
+  let i = 0;
   for (const r of rows) {
     const xv = valueAt(r, schema, xField);
     const yv = Number(valueAt(r, schema, yField));
-    if (!Number.isFinite(yv)) continue;
+    if (!Number.isFinite(yv)) {
+      i++;
+      continue;
+    }
     const xpx = xScale.apply(xv == null ? "" : String(xv));
-    if (!Number.isFinite(xpx)) continue;
+    if (!Number.isFinite(xpx)) {
+      i++;
+      continue;
+    }
     const ypx = yScale.apply(yv);
     const top = Math.min(ypx, yZero);
     const h = Math.abs(yZero - ypx);
@@ -280,7 +348,9 @@ function buildBars(
       width: xScale.bandwidth,
       height: roundPx(h),
       fill: colorForRow(encoding, schema, r, colorDomain, theme),
+      ...markDataFor(ctx, r, schema, i),
     });
+    i++;
   }
 }
 
@@ -294,18 +364,26 @@ function buildPoints(
   xScale: ReturnType<typeof bandScale> | ReturnType<typeof linearScale>,
   yScale: ReturnType<typeof linearScale>,
   theme: Theme,
+  ctx: MarkCtx,
 ): void {
   const colorField = fieldOf(encoding.color);
   const colorDomain = colorField ? distinctOrdered(rows, schema, colorField) : [];
+  let i = 0;
   for (const r of rows) {
     const xv = valueAt(r, schema, xField);
     const yv = Number(valueAt(r, schema, yField));
-    if (!Number.isFinite(yv)) continue;
+    if (!Number.isFinite(yv)) {
+      i++;
+      continue;
+    }
     const xpx =
       xScale.type === "linear"
         ? xScale.apply(Number(xv))
         : xScale.apply(xv == null ? "" : String(xv)) + xScale.bandwidth / 2;
-    if (!Number.isFinite(xpx)) continue;
+    if (!Number.isFinite(xpx)) {
+      i++;
+      continue;
+    }
     const ypx = yScale.apply(yv);
     out.push({
       type: "circle",
@@ -313,7 +391,9 @@ function buildPoints(
       cy: ypx,
       r: 3,
       fill: colorForRow(encoding, schema, r, colorDomain, theme),
+      ...markDataFor(ctx, r, schema, i),
     });
+    i++;
   }
 }
 

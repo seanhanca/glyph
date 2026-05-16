@@ -5,11 +5,32 @@
  *
  * Phase 0 marks: rect (bar), circle (point). Line, path, area follow when
  * those grammar marks ship.
+ *
+ * Interactivity (opt-in via spec.interactive):
+ *   - data-bound marks carry an optional `key` (stable row identity) and an
+ *     optional `dataAttrs` map. The SVG renderer emits these as `data-*`
+ *     attributes so the static SVG is also a queryable artifact. A
+ *     browser-side `@glyph/live` package hydrates these for click/brush
+ *     handlers; an MCP `glyph_drill` verb derives WHERE clauses from them.
+ *   - When `interactive` is unset, no extra attributes are emitted and the
+ *     snapshot tests remain byte-identical.
  */
+
+/** Optional per-mark metadata for data-bound rendering. */
+export interface MarkData {
+  /** Stable row identity; emitted as `data-key`. */
+  readonly key?: string;
+  /**
+   * Channel-name → bound value map. Emitted as `data-<channel>="<value>"`.
+   * Channel names are lowercased and constrained to [a-z0-9_-]; values are
+   * coerced to strings.
+   */
+  readonly dataAttrs?: Readonly<Record<string, string | number>>;
+}
 
 /** A single drawn primitive. */
 export type SceneMark =
-  | {
+  | ({
       readonly type: "rect";
       readonly x: number;
       readonly y: number;
@@ -18,8 +39,8 @@ export type SceneMark =
       readonly fill: string;
       readonly stroke?: string;
       readonly strokeWidth?: number;
-    }
-  | {
+    } & MarkData)
+  | ({
       readonly type: "circle";
       readonly cx: number;
       readonly cy: number;
@@ -27,7 +48,7 @@ export type SceneMark =
       readonly fill: string;
       readonly stroke?: string;
       readonly strokeWidth?: number;
-    }
+    } & MarkData)
   | {
       readonly type: "text";
       readonly x: number;
@@ -63,6 +84,14 @@ export interface SceneAxis {
   readonly label?: string;
 }
 
+/** Schema metadata emitted at the SVG root level for interactive scenes. */
+export interface SceneSchema {
+  /** Encoded channel → source-field name. */
+  readonly fields: Readonly<Record<string, string>>;
+  /** When set, the SVG carries `data-handle="<id>"` for `@glyph/live` to find. */
+  readonly handleId?: string;
+}
+
 /** The complete scene a renderer consumes. */
 export interface Scene {
   readonly width: number;
@@ -77,4 +106,6 @@ export interface Scene {
   readonly axes: ReadonlyArray<SceneAxis>;
   readonly marks: ReadonlyArray<SceneMark>;
   readonly title?: string;
+  /** When set, the renderer emits data-* attributes for interactivity. */
+  readonly schema?: SceneSchema;
 }

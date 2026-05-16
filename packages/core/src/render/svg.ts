@@ -6,13 +6,24 @@
  * Output is intentionally compact: no whitespace between attributes, fixed
  * decimal precision (via the compiler's roundPx), and elements emitted in
  * a fixed order (axes, then marks).
+ *
+ * Interactive mode (opt-in via `scene.schema`):
+ *   - Marks render inside a `<g class="glyph-marks" data-*>` group describing
+ *     which source field each channel maps to.
+ *   - Each mark gets `data-key` + `data-x` / `data-y` / `data-color` / `data-row`.
+ *   - A tiny `<style>` block adds a `:hover` outline (zero JS, deterministic).
+ *   - When `scene.schema` is absent, output is byte-identical to the
+ *     non-interactive path so existing snapshots stay green.
  */
 
-import type { Scene, SceneAxis, SceneMark } from "../scenegraph/types.js";
+import type { MarkData, Scene, SceneAxis, SceneMark } from "../scenegraph/types.js";
 
 const AXIS_COLOR = "#999999";
 const AXIS_LABEL_COLOR = "#333333";
 const FONT_FAMILY = "system-ui, -apple-system, sans-serif";
+
+const HOVER_STYLE =
+  "<style>.glyph-marks &gt; *{transition:filter .12s ease-out}.glyph-marks &gt; *:hover{filter:brightness(1.08);outline:1px solid #00000033;outline-offset:1px;cursor:pointer}</style>";
 
 /**
  * Escape user-derived text for inclusion in SVG. Covers the five XML chars
@@ -35,19 +46,37 @@ function esc(s: string): string {
   return out;
 }
 
-function renderMark(m: SceneMark): string {
+/** Render data-* attributes from MarkData. Deterministic ordering: key first, then sorted attrs. */
+function renderDataAttrs(d: MarkData): string {
+  let out = "";
+  if (d.key !== undefined) out += ` data-key="${esc(d.key)}"`;
+  const attrs = d.dataAttrs;
+  if (attrs) {
+    const keys = Object.keys(attrs).sort();
+    for (const k of keys) {
+      const v = attrs[k];
+      if (v === undefined) continue;
+      out += ` data-${k}="${esc(String(v))}"`;
+    }
+  }
+  return out;
+}
+
+function renderMark(m: SceneMark, interactive: boolean): string {
   switch (m.type) {
     case "rect": {
       const stroke = m.stroke ? ` stroke="${esc(m.stroke)}"` : "";
       const sw = m.strokeWidth !== undefined ? ` stroke-width="${m.strokeWidth}"` : "";
+      const data = interactive ? renderDataAttrs(m) : "";
       return `<rect x="${m.x}" y="${m.y}" width="${m.width}" height="${m.height}" fill="${esc(
         m.fill,
-      )}"${stroke}${sw}/>`;
+      )}"${stroke}${sw}${data}/>`;
     }
     case "circle": {
       const stroke = m.stroke ? ` stroke="${esc(m.stroke)}"` : "";
       const sw = m.strokeWidth !== undefined ? ` stroke-width="${m.strokeWidth}"` : "";
-      return `<circle cx="${m.cx}" cy="${m.cy}" r="${m.r}" fill="${esc(m.fill)}"${stroke}${sw}/>`;
+      const data = interactive ? renderDataAttrs(m) : "";
+      return `<circle cx="${m.cx}" cy="${m.cy}" r="${m.r}" fill="${esc(m.fill)}"${stroke}${sw}${data}/>`;
     }
     case "line":
       return `<line x1="${m.x1}" y1="${m.y1}" x2="${m.x2}" y2="${m.y2}" stroke="${esc(
@@ -118,18 +147,36 @@ function renderAxis(axis: SceneAxis): string {
   return parts.join("");
 }
 
+/** Render scene-level data-* attributes (channel→field map + handle). */
+function renderSceneAttrs(scene: Scene): string {
+  const s = scene.schema;
+  if (!s) return "";
+  let out = "";
+  const keys = Object.keys(s.fields).sort();
+  for (const k of keys) {
+    const f = s.fields[k];
+    if (f) out += ` data-${k}-field="${esc(f)}"`;
+  }
+  if (s.handleId) out += ` data-handle="${esc(s.handleId)}"`;
+  return out;
+}
+
 /**
  * Render a Scene as an SVG document string.
  */
 export function renderSvg(scene: Scene): string {
-  const head = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${scene.width} ${scene.height}" width="${scene.width}" height="${scene.height}">`;
+  const interactive = scene.schema !== undefined;
+  const rootAttrs = renderSceneAttrs(scene);
+  const head = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${scene.width} ${scene.height}" width="${scene.width}" height="${scene.height}"${rootAttrs}>`;
   const bg = `<rect x="0" y="0" width="${scene.width}" height="${scene.height}" fill="${esc(scene.background)}"/>`;
   const title = scene.title
     ? `<text x="${scene.width / 2}" y="16" font-family="${FONT_FAMILY}" font-size="14" fill="#1a1a1a" text-anchor="middle" dominant-baseline="middle">${esc(
         scene.title,
       )}</text>`
     : "";
-  const marks = scene.marks.map(renderMark).join("");
+  const markStrs = scene.marks.map((m) => renderMark(m, interactive)).join("");
+  const marks = interactive ? `<g class="glyph-marks">${markStrs}</g>` : markStrs;
+  const hoverStyle = interactive ? HOVER_STYLE : "";
   const axes = scene.axes.map(renderAxis).join("");
-  return `${head}${bg}${title}${marks}${axes}</svg>\n`;
+  return `${head}${hoverStyle}${bg}${title}${marks}${axes}</svg>\n`;
 }
