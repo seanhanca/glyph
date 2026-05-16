@@ -1,0 +1,111 @@
+/**
+ * MCP server integration tests.
+ *
+ * Connects an in-memory pair of transports (the SDK provides one), exercises
+ * each of the three tools end-to-end, and verifies the agent-visible round
+ * trip works: describe → render → query.
+ */
+
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { createServer } from "./server.js";
+import { ServerState } from "./state.js";
+
+const here = dirname(fileURLToPath(import.meta.url));
+const fixture = join(here, "..", "..", "duckdb", "test-fixtures", "taxi.csv");
+
+interface ToolTextContent {
+  type: "text";
+  text: string;
+}
+interface ToolCallResult {
+  content?: ReadonlyArray<ToolTextContent>;
+  isError?: boolean;
+}
+
+async function callText(
+  client: Client,
+  name: string,
+  args: Record<string, unknown>,
+): Promise<{ text: string; isError: boolean }> {
+  const r = (await client.callTool({ name, arguments: args })) as ToolCallResult;
+  const text = r.content?.[0]?.text ?? "";
+  return { text, isError: r.isError === true };
+}
+
+describe("Glyph MCP server", () => {
+  let client: Client;
+  let state: ServerState;
+
+  beforeEach(async () => {
+    state = new ServerState();
+    const { server } = createServer(state);
+    const [clientT, serverT] = InMemoryTransport.createLinkedPair();
+    await server.connect(serverT);
+    client = new Client({ name: "test-client", version: "0.0.0" });
+    await client.connect(clientT);
+  });
+
+  afterEach(async () => {
+    await client.close();
+    await state.close();
+  });
+
+  it("lists the three tools", async () => {
+    const r = await client.listTools();
+    const names = r.tools.map((t) => t.name).sort();
+    expect(names).toEqual(["glyph_describe", "glyph_query", "glyph_render"]);
+  });
+
+  it("glyph_describe returns schema + suggested encoding types", async () => {
+    const r = await callText(client, "glyph_describe", { source: fixture });
+    expect(r.isError).toBe(false);
+    const summary = JSON.parse(r.text);
+    expect(summary.rowCount).toBe(12);
+    expect(summary.columns.map((c: { name: string }) => c.name)).toEqual([
+      "pickup_hour",
+      "fare",
+      "rides",
+    ]);
+  });
+
+  it("glyph_render returns SVG + handle_id, then glyph_query drills in", async () => {
+    const r1 = await callText(client, "glyph_render", {
+      spec: {
+        data: { source: fixture, format: "csv" },
+        layers: [{ mark: "bar", encoding: { x: "pickup_hour", y: "rides" } }],
+      },
+    });
+    expect(r1.isError).toBe(false);
+    const out = JSON.parse(r1.text);
+    expect(out.svg).toContain("<svg");
+    expect(out.handle_id).toBeTruthy();
+
+    const r2 = await callText(client, "glyph_query", {
+      handle_id: out.handle_id,
+      where: "WHERE rides > 200",
+    });
+    expect(r2.isError).toBe(false);
+    const drill = JSON.parse(r2.text);
+    expect(drill.rowCount).toBe(5);
+  });
+
+  it("glyph_render rejects an invalid spec with a clear error", async () => {
+    const r = await callText(client, "glyph_render", {
+      spec: { layers: [] },
+    });
+    expect(r.isError).toBe(true);
+    expect(r.text.toLowerCase()).toMatch(/spec|invalid|layers/);
+  });
+
+  it("glyph_query reports unknown handle_id clearly", async () => {
+    const r = await callText(client, "glyph_query", {
+      handle_id: "nonexistent",
+    });
+    expect(r.isError).toBe(true);
+    expect(r.text).toContain("Unknown handle_id");
+  });
+});

@@ -1,0 +1,27 @@
+{
+  "name": "@glyph/mcp",
+  "version": "0.0.0",
+  "description": "Glyph MCP server — three tools (describe, render, query) for AI agents.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "glyph-mcp": "./dist/bin.js"
+  },
+  "files": ["dist", "README.md"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node ../cli/scripts/make-bin-executable.js",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@glyph/core": "workspace:*",
+    "@glyph/duckdb": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.3"
+  }
+}
