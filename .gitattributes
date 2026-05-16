@@ -1,0 +1,15 @@
+* text=auto eol=lf
+
+# Binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.parquet binary
+*.duckdb binary
+*.woff binary
+*.woff2 binary
+
+# Snapshot SVGs are byte-compared; pin LF
+*.svg text eol=lf
