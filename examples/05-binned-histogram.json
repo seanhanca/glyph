@@ -1,0 +1,12 @@
+{
+  "$schema": "../packages/core/dist/spec.schema.json",
+  "data": { "source": "diamonds.csv" },
+  "layers": [
+    {
+      "mark": "bar",
+      "encoding": { "x": "price", "y": { "field": "price", "aggregate": "count" } },
+      "stat": { "type": "bin", "params": { "maxbins": 30 } }
+    }
+  ],
+  "title": "Diamond price distribution"
+}

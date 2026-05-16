@@ -1,0 +1,16 @@
+{
+  "$schema": "../packages/core/dist/spec.schema.json",
+  "data": { "source": "iris.csv" },
+  "layers": [
+    {
+      "mark": "point",
+      "encoding": {
+        "x": "sepal_length",
+        "y": "sepal_width",
+        "color": "species",
+        "tooltip": ["species", "sepal_length", "sepal_width"]
+      }
+    }
+  ],
+  "title": "Iris sepal width vs length, colored by species"
+}

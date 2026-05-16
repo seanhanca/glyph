@@ -1,0 +1,9 @@
+{
+  "$schema": "../packages/core/dist/spec.schema.json",
+  "data": {
+    "source": "taxi.parquet",
+    "transform": "SELECT pickup_hour, COUNT(*) AS rides FROM taxi GROUP BY pickup_hour ORDER BY pickup_hour"
+  },
+  "layers": [{ "mark": "bar", "encoding": { "x": "pickup_hour", "y": "rides" } }],
+  "title": "Taxi rides by pickup hour"
+}

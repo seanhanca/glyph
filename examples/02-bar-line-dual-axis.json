@@ -1,0 +1,15 @@
+{
+  "$schema": "../packages/core/dist/spec.schema.json",
+  "data": {
+    "source": "taxi.parquet",
+    "transform": "SELECT pickup_hour, AVG(fare) AS avg_fare, COUNT(*) AS rides FROM taxi GROUP BY pickup_hour ORDER BY pickup_hour"
+  },
+  "layers": [
+    { "mark": "bar", "encoding": { "x": "pickup_hour", "y": "rides" } },
+    {
+      "mark": "line",
+      "encoding": { "x": "pickup_hour", "y": { "field": "avg_fare", "scale": { "side": "right" } } }
+    }
+  ],
+  "title": "Rides volume and average fare by hour"
+}

@@ -1,0 +1,15 @@
+{
+  "$schema": "../packages/core/dist/spec.schema.json",
+  "data": {
+    "source": "sales.parquet",
+    "transform": "SELECT month, region, SUM(revenue) AS revenue FROM sales GROUP BY month, region ORDER BY month"
+  },
+  "layers": [
+    {
+      "mark": "area",
+      "encoding": { "x": "month", "y": "revenue", "color": "region" },
+      "position": "stack"
+    }
+  ],
+  "title": "Monthly revenue, stacked by region"
+}

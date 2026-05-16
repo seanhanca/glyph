@@ -10,11 +10,12 @@
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
-    }
+    },
+    "./spec.schema.json": "./dist/spec.schema.json"
   },
   "files": ["dist", "README.md"],
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && tsx scripts/generate-schema.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -22,7 +23,9 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "tsx": "^4.19.1",
     "typescript": "^5.6.3",
-    "vitest": "^2.1.3"
+    "vitest": "^2.1.3",
+    "zod-to-json-schema": "^3.23.5"
   }
 }
