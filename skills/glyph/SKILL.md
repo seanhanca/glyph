@@ -25,9 +25,13 @@ Do **not** use Glyph for:
 - Real-time streaming charts (use Perspective)
 - Bespoke / one-off visualizations that don't fit a grammar (use D3 directly)
 
-## The four tools
+## The five tools (six including `glyph_capabilities`)
 
-Glyph's entire MCP surface is four tools. Call the first three in order; `glyph_drill` closes the chart → click → SQL loop.
+Glyph's MCP surface is five tools. Call the first three in order; `glyph_drill` closes the chart → click → SQL loop; `glyph_import` brings in data from another MCP tool.
+
+### 0. `glyph_capabilities()` *(call once at session start)*
+
+Returns the library version, supported spec versions, marks, stats, renderers, engines, and the versioned tool list. Use it to detect whether a newer verb (e.g. `glyph_act`) is available before invoking it.
 
 ### 1. `glyph_describe(source)`
 
@@ -45,7 +49,30 @@ Run follow-up SQL against the rendered chart's view. The `where` arg is appended
 - `"WHERE region = 'US' ORDER BY revenue DESC LIMIT 10"`
 - `"WHERE hour BETWEEN 7 AND 9"`
 
-### 4. `glyph_drill(handle_id, field, equals | between | in)`
+### 4. `glyph_import(payload, name?)` *(cross-MCP data bridge)*
+
+When data comes from **another MCP tool** (ClickHouse, Postgres, BigQuery, Publora, etc.) and you want to chart it, use this verb instead of stuffing rows into the spec's `data.transform` string. Three kinds:
+
+- `{ kind: "csv", data: "<csv text>" }` — paste the CSV the upstream tool returned
+- `{ kind: "json-rows", rows: [{...}, ...], schema?: [{name, type}] }` — plug in a tool's rows array directly
+- `{ kind: "url", url: "...", format?: "csv|parquet|json" }` — let DuckDB fetch it; works for http/https, local file:// paths, and S3 URIs
+
+Returns `{ name, resolvedSource, schema, rowCount }`. Use `resolvedSource` (or the registered `name`) as `data.source` in the next `glyph_render`. **This is the recommended path for the cross-MCP scenario.**
+
+#### The `data_handle` convention (for MCP tool authors and orchestrators)
+
+Any MCP tool returning tabular data can voluntarily include a `data_handle` block in its result:
+
+```json
+{
+  "content": [{ "type": "text", "text": "..." }],
+  "data_handle": { "kind": "json-rows", "rows": [...], "schema": [...] }
+}
+```
+
+When you (the agent) see a `data_handle` in a tool result, forward it to `glyph_import` directly — no copy, no token-expensive stringification of the full row set. This is opt-in for upstream tools; Glyph reads it if present and ignores it otherwise.
+
+### 5. `glyph_drill(handle_id, field, equals | between | in)`
 
 The chart → click/brush/zoom → SQL loop. Use this when the user (or their IDE preview) reports a selection from a rendered chart. Pass exactly one of:
 

@@ -21,8 +21,14 @@ interface ToolTextContent {
   type: "text";
   text: string;
 }
+interface ToolImageContent {
+  type: "image";
+  data: string;
+  mimeType: string;
+}
+type ToolContent = ToolTextContent | ToolImageContent;
 interface ToolCallResult {
-  content?: ReadonlyArray<ToolTextContent>;
+  content?: ReadonlyArray<ToolContent>;
   isError?: boolean;
 }
 
@@ -30,10 +36,16 @@ async function callText(
   client: Client,
   name: string,
   args: Record<string, unknown>,
-): Promise<{ text: string; isError: boolean }> {
+): Promise<{ text: string; isError: boolean; content: ReadonlyArray<ToolContent> }> {
   const r = (await client.callTool({ name, arguments: args })) as ToolCallResult;
-  const text = r.content?.[0]?.text ?? "";
-  return { text, isError: r.isError === true };
+  const content = r.content ?? [];
+  // Find the first text block — image blocks may precede it (e.g. glyph_render).
+  const textBlock = content.find((c): c is ToolTextContent => c.type === "text");
+  return {
+    text: textBlock?.text ?? "",
+    isError: r.isError === true,
+    content,
+  };
 }
 
 describe("Glyph MCP server", () => {
@@ -54,13 +66,14 @@ describe("Glyph MCP server", () => {
     await state.close();
   });
 
-  it("lists the five tools", async () => {
+  it("lists the six tools", async () => {
     const r = await client.listTools();
     const names = r.tools.map((t) => t.name).sort();
     expect(names).toEqual([
       "glyph_capabilities",
       "glyph_describe",
       "glyph_drill",
+      "glyph_import",
       "glyph_query",
       "glyph_render",
     ]);
@@ -78,6 +91,7 @@ describe("Glyph MCP server", () => {
       "glyph_capabilities",
       "glyph_describe",
       "glyph_drill",
+      "glyph_import",
       "glyph_query",
       "glyph_render",
     ]);
@@ -203,6 +217,94 @@ describe("Glyph MCP server", () => {
       });
       expect(r.isError).toBe(true);
       expect(r.text).toContain("Unknown handle_id");
+    });
+  });
+
+  describe("glyph_render — PNG content block (B9c)", () => {
+    it("returns an image/png block alongside the SVG text", async () => {
+      const r = await callText(client, "glyph_render", {
+        spec: {
+          data: { source: fixture, format: "csv" },
+          layers: [{ mark: "bar", encoding: { x: "pickup_hour", y: "rides" } }],
+        },
+      });
+      expect(r.isError).toBe(false);
+      const imageBlocks = r.content.filter((c) => c.type === "image");
+      expect(imageBlocks).toHaveLength(1);
+      const img = imageBlocks[0];
+      if (img?.type === "image") {
+        expect(img.mimeType).toBe("image/png");
+        // Base64-decode and check the PNG magic number (8 bytes).
+        const bytes = Buffer.from(img.data, "base64");
+        expect(bytes.length).toBeGreaterThan(8);
+        expect(bytes[0]).toBe(0x89);
+        expect(bytes[1]).toBe(0x50);
+        expect(bytes[2]).toBe(0x4e);
+        expect(bytes[3]).toBe(0x47);
+      }
+    });
+  });
+
+  describe("glyph_import (B9a)", () => {
+    it("imports a CSV string and reports the resulting schema", async () => {
+      const csv = "x,y\n1,10\n2,20\n3,30\n";
+      const r = await callText(client, "glyph_import", {
+        payload: { kind: "csv", data: csv },
+        name: "tiny",
+      });
+      expect(r.isError).toBe(false);
+      const out = JSON.parse(r.text);
+      expect(out.rowCount).toBe(3);
+      expect(out.name).toMatch(/^import_tiny_/);
+      expect(out.schema.map((c: { name: string }) => c.name)).toEqual(["x", "y"]);
+    });
+
+    it("imports json-rows and the result can be rendered by glyph_render", async () => {
+      const r1 = await callText(client, "glyph_import", {
+        payload: {
+          kind: "json-rows",
+          rows: [
+            { hour: 0, rides: 10 },
+            { hour: 1, rides: 20 },
+            { hour: 2, rides: 30 },
+          ],
+        },
+      });
+      expect(r1.isError).toBe(false);
+      const imp = JSON.parse(r1.text);
+      // Now render using the imported name as data.source.
+      const r2 = await callText(client, "glyph_render", {
+        spec: {
+          data: { source: imp.resolvedSource, format: "csv" },
+          layers: [{ mark: "bar", encoding: { x: "hour", y: "rides" } }],
+        },
+      });
+      expect(r2.isError).toBe(false);
+      const out = JSON.parse(r2.text);
+      expect(out.row_count).toBe(3);
+    });
+
+    it("returns a clear error for the deferred arrow-ipc kind", async () => {
+      const r = await callText(client, "glyph_import", {
+        payload: { kind: "arrow-ipc", base64: "QVJST1c=" },
+      });
+      expect(r.isError).toBe(true);
+      expect(r.text).toMatch(/arrow-ipc.*not yet implemented/);
+    });
+
+    it("escapes special characters when serializing json-rows to CSV", async () => {
+      const r = await callText(client, "glyph_import", {
+        payload: {
+          kind: "json-rows",
+          rows: [
+            { name: 'O"Brien, Inc.', count: 1 },
+            { name: "Smith\nLtd", count: 2 },
+          ],
+        },
+      });
+      expect(r.isError).toBe(false);
+      const imp = JSON.parse(r.text);
+      expect(imp.rowCount).toBe(2);
     });
   });
 });

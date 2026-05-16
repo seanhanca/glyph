@@ -12,7 +12,9 @@
 
 import { compileSpec, getCapabilities, renderSvg, safeParseSpec } from "@glyph/core";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { Resvg } from "@resvg/resvg-js";
 import { z } from "zod";
+import { importPayload } from "./import.js";
 import { ServerState, materializeSpec } from "./state.js";
 
 export const SERVER_NAME = "glyph-mcp";
@@ -25,7 +27,22 @@ const MCP_TOOLS = [
   { name: "glyph_query", since: "0.0.0" },
   { name: "glyph_drill", since: "0.0.0" },
   { name: "glyph_capabilities", since: "0.0.0" },
+  { name: "glyph_import", since: "0.0.1" },
 ] as const;
+
+/** Rasterize SVG → base64 PNG. Used by `glyph_render` so hosts that render
+ *  images inline (Claude Code, Cursor, etc.) can show the chart directly.
+ *  Hosts that don't fall back to the SVG text in the same response. */
+function svgToPngBase64(svg: string): string | undefined {
+  try {
+    const resvg = new Resvg(svg, { background: "white" });
+    return resvg.render().asPng().toString("base64");
+  } catch {
+    // Best-effort; if rasterization fails, return undefined so the response
+    // still carries the SVG text.
+    return undefined;
+  }
+}
 
 /** Convert any BigInt values to numbers for JSON-safe serialization. */
 function jsonSafe(value: unknown): unknown {
@@ -128,24 +145,27 @@ export function createServer(state: ServerState = new ServerState()): {
           schema: m.handle.schema,
         });
         const svg = renderSvg(scene);
-        return {
-          content: [
-            {
-              type: "text" as const,
-              text: JSON.stringify(
-                jsonSafe({
-                  svg,
-                  handle_id: m.handle.id,
-                  view_name: m.handle.viewName,
-                  schema: m.handle.schema,
-                  row_count: m.result.rowCount,
-                }),
-                null,
-                2,
-              ),
-            },
-          ],
+        // Rasterize once so hosts that render `image/*` content inline can
+        // display the chart directly (Claude Code, Cursor, IDE previews).
+        const pngB64 = svgToPngBase64(svg);
+        const textBlock = {
+          type: "text" as const,
+          text: JSON.stringify(
+            jsonSafe({
+              svg,
+              handle_id: m.handle.id,
+              view_name: m.handle.viewName,
+              schema: m.handle.schema,
+              row_count: m.result.rowCount,
+            }),
+            null,
+            2,
+          ),
         };
+        const content = pngB64
+          ? [{ type: "image" as const, data: pngB64, mimeType: "image/png" }, textBlock]
+          : [textBlock];
+        return { content };
       }),
   );
 
@@ -293,6 +313,90 @@ export function createServer(state: ServerState = new ServerState()): {
             },
           ],
         };
+      }),
+  );
+
+  // ----- glyph_import (B9a) -----------------------------------------------
+  // Cross-MCP data ingestion. Another MCP tool produced rows / CSV text /
+  // a URL; this verb registers it as a DuckDB view so subsequent specs can
+  // chart it via data.source: "<returned name>".
+  //
+  // See ROADMAP §B9 for the broader cross-MCP scenario. The 'data_handle'
+  // convention (B9b) is documented in the Claude Code skill: agents detect
+  // a tool result's `data_handle: { kind, ... }` block and forward it here.
+  server.registerTool(
+    "glyph_import",
+    {
+      title: "Import data from another source",
+      description:
+        "Register an inline dataset as a Glyph data source. Returns a name the agent passes as `data.source` in subsequent glyph_render calls. Use this when another MCP tool returned rows/CSV/URL and you want to chart it without re-uploading. Supported kinds: 'csv', 'json-rows', 'url'. 'arrow-ipc' is reserved for a follow-up.",
+      inputSchema: {
+        payload: z
+          .union([
+            z.object({ kind: z.literal("csv"), data: z.string() }).strict(),
+            z
+              .object({
+                kind: z.literal("json-rows"),
+                rows: z.array(z.record(z.unknown())),
+                schema: z
+                  .array(z.object({ name: z.string(), type: z.string().optional() }))
+                  .optional(),
+              })
+              .strict(),
+            z
+              .object({
+                kind: z.literal("url"),
+                url: z.string().url(),
+                format: z.enum(["csv", "parquet", "json"]).optional(),
+              })
+              .strict(),
+            z.object({ kind: z.literal("arrow-ipc"), base64: z.string() }).strict(),
+          ])
+          .describe(
+            "The data to import. Pick the kind that matches what the upstream MCP tool returned.",
+          ),
+        name: z
+          .string()
+          .optional()
+          .describe(
+            "Optional friendly name suffix; the actual registered name is prefixed and randomized.",
+          ),
+      },
+    },
+    async ({ payload, name }) =>
+      state.serial(async () => {
+        try {
+          const engine = await state.getEngine();
+          const result = await importPayload(engine, payload, name);
+          const summary = await engine.describe(result.name);
+          return {
+            content: [
+              {
+                type: "text" as const,
+                text: JSON.stringify(
+                  jsonSafe({
+                    name: result.name,
+                    resolvedSource: result.resolvedSource,
+                    schema: summary.columns,
+                    rowCount: summary.rowCount,
+                  }),
+                  null,
+                  2,
+                ),
+              },
+            ],
+          };
+        } catch (err) {
+          return {
+            isError: true,
+            content: [
+              {
+                type: "text" as const,
+                text: (err as Error).message ?? String(err),
+              },
+            ],
+          };
+        }
       }),
   );
 
