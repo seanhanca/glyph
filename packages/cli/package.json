@@ -1,0 +1,25 @@
+{
+  "name": "@glyph/cli",
+  "version": "0.0.0",
+  "description": "Glyph CLI — render, describe, query, check from the command line.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "glyph": "./dist/bin.js"
+  },
+  "files": ["dist", "README.md"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node ./scripts/make-bin-executable.js",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@glyph/core": "workspace:*",
+    "@glyph/duckdb": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.3"
+  }
+}

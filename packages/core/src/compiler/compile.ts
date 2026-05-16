@@ -11,10 +11,15 @@
  *   - Default colors are picked deterministically from a small fixed palette.
  */
 
-import type { ColumnInfo } from "../compute/engine.js";
 import type { AxisTick, Scene, SceneAxis, SceneMark } from "../scenegraph/types.js";
 import type { Channel, Encoding, GlyphSpec } from "../spec/types.js";
 import { bandScale, linearScale, niceTicks, roundPx } from "./scales.js";
+
+/** Minimal field metadata needed by the compiler. ColumnInfo is a superset. */
+export interface CompileFieldInfo {
+  readonly name: string;
+  readonly type: string;
+}
 
 // ---------------------------------------------------------------------------
 // Defaults
@@ -61,13 +66,13 @@ function isQuantitativeType(t: string): boolean {
   return /INT|DECIMAL|DOUBLE|FLOAT|REAL|NUMERIC|HUGEINT|BIGINT|SMALLINT|TINYINT/i.test(t);
 }
 
-function typeOfColumn(schema: ReadonlyArray<ColumnInfo>, name: string): string {
+function typeOfColumn(schema: ReadonlyArray<CompileFieldInfo>, name: string): string {
   return schema.find((c) => c.name === name)?.type ?? "VARCHAR";
 }
 
 function fieldType(
   ch: Channel | undefined,
-  schema: ReadonlyArray<ColumnInfo>,
+  schema: ReadonlyArray<CompileFieldInfo>,
 ): "quantitative" | "categorical" {
   if (ch === undefined) return "categorical";
   if (typeof ch !== "string" && ch.type !== undefined) {
@@ -85,7 +90,7 @@ function fieldType(
 
 function valueAt(
   row: ReadonlyArray<unknown>,
-  schema: ReadonlyArray<ColumnInfo>,
+  schema: ReadonlyArray<CompileFieldInfo>,
   field: string,
 ): unknown {
   const i = schema.findIndex((c) => c.name === field);
@@ -94,7 +99,7 @@ function valueAt(
 
 function distinctOrdered(
   rows: ReadonlyArray<ReadonlyArray<unknown>>,
-  schema: ReadonlyArray<ColumnInfo>,
+  schema: ReadonlyArray<CompileFieldInfo>,
   field: string,
 ): string[] {
   const seen = new Set<string>();
@@ -112,7 +117,7 @@ function distinctOrdered(
 
 function numericExtent(
   rows: ReadonlyArray<ReadonlyArray<unknown>>,
-  schema: ReadonlyArray<ColumnInfo>,
+  schema: ReadonlyArray<CompileFieldInfo>,
   field: string,
 ): [number, number] {
   let min = Number.POSITIVE_INFINITY;
@@ -136,7 +141,7 @@ function numericExtent(
 export interface CompileInput {
   readonly spec: GlyphSpec;
   readonly rows: ReadonlyArray<ReadonlyArray<unknown>>;
-  readonly schema: ReadonlyArray<ColumnInfo>;
+  readonly schema: ReadonlyArray<CompileFieldInfo>;
 }
 
 export function compileSpec(input: CompileInput): Scene {
@@ -232,7 +237,7 @@ export function compileSpec(input: CompileInput): Scene {
 
 function colorForRow(
   encoding: Encoding,
-  schema: ReadonlyArray<ColumnInfo>,
+  schema: ReadonlyArray<CompileFieldInfo>,
   row: ReadonlyArray<unknown>,
   colorDomain: ReadonlyArray<string>,
   theme: Theme,
@@ -248,7 +253,7 @@ function colorForRow(
 function buildBars(
   out: SceneMark[],
   rows: ReadonlyArray<ReadonlyArray<unknown>>,
-  schema: ReadonlyArray<ColumnInfo>,
+  schema: ReadonlyArray<CompileFieldInfo>,
   encoding: Encoding,
   xField: string,
   yField: string,
@@ -282,7 +287,7 @@ function buildBars(
 function buildPoints(
   out: SceneMark[],
   rows: ReadonlyArray<ReadonlyArray<unknown>>,
-  schema: ReadonlyArray<ColumnInfo>,
+  schema: ReadonlyArray<CompileFieldInfo>,
   encoding: Encoding,
   xField: string,
   yField: string,
