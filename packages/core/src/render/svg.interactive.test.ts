@@ -92,6 +92,35 @@ describe("renderSvg — interactive opt-in", () => {
     expect(a).toBe(b);
   });
 
+  it("emits <title> children when marks carry a tooltip", () => {
+    const out = renderSvg({
+      ...baseScene,
+      schema: { fields: { x: "hour", y: "rides" } },
+      marks: [
+        {
+          type: "rect",
+          x: 0,
+          y: 0,
+          width: 1,
+          height: 1,
+          fill: "#000",
+          tooltip: "hour: 7 · rides: 210",
+          dataAttrs: { row: "0", x: "7" },
+        },
+        {
+          type: "circle",
+          cx: 5,
+          cy: 5,
+          r: 2,
+          fill: "#000",
+          tooltip: "single point",
+        },
+      ],
+    });
+    expect(out).toContain("<title>hour: 7 · rides: 210</title>");
+    expect(out).toContain("<title>single point</title>");
+  });
+
   it("escapes data-* attribute values", () => {
     const out = renderSvg({
       ...baseScene,

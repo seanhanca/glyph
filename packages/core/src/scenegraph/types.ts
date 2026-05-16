@@ -26,6 +26,11 @@ export interface MarkData {
    * coerced to strings.
    */
   readonly dataAttrs?: Readonly<Record<string, string | number>>;
+  /**
+   * Optional plain-text tooltip rendered as an SVG `<title>` child. Browsers
+   * + assistive tech surface it natively on hover. Zero JS, deterministic.
+   */
+  readonly tooltip?: string;
 }
 
 /** A single drawn primitive. */

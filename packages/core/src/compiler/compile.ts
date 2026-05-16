@@ -51,17 +51,28 @@ function markDataFor(
   rowIndex: number,
 ): MarkData {
   if (!ctx.interactive) return {};
+  const xVal = attrValue(valueAt(row, schema, ctx.xField));
+  const yVal = attrValue(valueAt(row, schema, ctx.yField));
   const dataAttrs: Record<string, string> = {
     row: String(rowIndex),
-    x: attrValue(valueAt(row, schema, ctx.xField)),
-    y: attrValue(valueAt(row, schema, ctx.yField)),
+    x: xVal,
+    y: yVal,
   };
   if (ctx.colorField) {
     dataAttrs.color = attrValue(valueAt(row, schema, ctx.colorField));
   }
   const keyField = ctx.interactive.key;
   const key = keyField ? attrValue(valueAt(row, schema, keyField)) : String(rowIndex);
-  return { key, dataAttrs };
+
+  // Native SVG <title> tooltip — zero JS, deterministic. Stolen from D3.
+  // Example: "pickup_hour: 7 · rides: 210"
+  const tooltipParts = [`${ctx.xField}: ${xVal}`, `${ctx.yField}: ${yVal}`];
+  if (ctx.colorField) {
+    tooltipParts.push(`${ctx.colorField}: ${dataAttrs.color}`);
+  }
+  const tooltip = tooltipParts.join(" · ");
+
+  return { key, dataAttrs, tooltip };
 }
 
 // ---------------------------------------------------------------------------

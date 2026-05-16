@@ -95,6 +95,28 @@ describe("compileSpec — interactive opt-in", () => {
     expect(circles[0]?.dataAttrs?.color).toBe("mon");
   });
 
+  it("emits a human-readable tooltip per mark (D3 'tooltips as data')", () => {
+    const spec: GlyphSpec = {
+      data: { source: "x" },
+      layers: [{ mark: "bar", encoding: { x: "hour", y: "rides" } }],
+      interactive: {},
+    };
+    const scene = compileSpec({ spec, rows, schema });
+    const rects = scene.marks.filter((m) => m.type === "rect");
+    expect(rects[0]?.tooltip).toBe("hour: 0 · rides: 10");
+    expect(rects[2]?.tooltip).toBe("hour: 2 · rides: 30");
+  });
+
+  it("non-interactive scenes do not set tooltip on marks", () => {
+    const spec: GlyphSpec = {
+      data: { source: "x" },
+      layers: [{ mark: "bar", encoding: { x: "hour", y: "rides" } }],
+    };
+    const scene = compileSpec({ spec, rows, schema });
+    const rects = scene.marks.filter((m) => m.type === "rect");
+    expect(rects[0]?.tooltip).toBeUndefined();
+  });
+
   it("interactive determinism: identical input → identical scene", () => {
     const spec: GlyphSpec = {
       data: { source: "x" },

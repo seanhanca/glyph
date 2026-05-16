@@ -63,10 +63,21 @@ export interface GlyphLive {
     handler: (extent: BrushExtent, bindings: ReadonlyArray<MarkBinding>) => void,
   ): () => void;
   /**
-   * Build a WHERE clause from a binding, suitable for `glyph.query(handle, ...)`.
+   * Build a WHERE clause from a single binding (a click). Uses equality.
    * Quotes string values; passes numbers through; uses the channel→field map.
    */
   whereFor(binding: MarkBinding, channels?: ReadonlyArray<"x" | "y" | "color">): string;
+  /**
+   * Build a WHERE clause from a brush extent (a drag). Numeric extents
+   * become `WHERE x BETWEEN a AND b`; discrete extents become `WHERE x IN (...)`.
+   * (D3-brush → SQL.)
+   */
+  whereForExtent(channel: "x" | "y", extent: BrushExtent): string;
+  /**
+   * Build a WHERE clause that restricts a quantitative channel to a numeric
+   * range — the SQL analog of a zoom transform on that axis.
+   */
+  whereForZoom(channel: "x" | "y", min: number, max: number): string;
   /** Tear down all listeners. */
   dispose(): void;
 }
@@ -241,6 +252,25 @@ export function glyphLive(svg: SVGElement | Element, _options: GlyphLiveOptions 
     return `WHERE ${parts.join(" AND ")}`;
   }
 
+  function whereForExtent(channel: "x" | "y", extent: BrushExtent): string {
+    const f = fields[channel];
+    if (!f) return "";
+    if (extent.kind === "numeric") {
+      return `WHERE ${quoteIdent(f)} BETWEEN ${extent.min} AND ${extent.max}`;
+    }
+    // discrete
+    if (extent.values.length === 0) return "";
+    const list = extent.values.map((v) => quoteSqlLiteral(v)).join(", ");
+    return `WHERE ${quoteIdent(f)} IN (${list})`;
+  }
+
+  function whereForZoom(channel: "x" | "y", min: number, max: number): string {
+    const f = fields[channel];
+    if (!f) return "";
+    if (!Number.isFinite(min) || !Number.isFinite(max) || min > max) return "";
+    return `WHERE ${quoteIdent(f)} BETWEEN ${min} AND ${max}`;
+  }
+
   return {
     fields,
     handleId,
@@ -254,6 +284,8 @@ export function glyphLive(svg: SVGElement | Element, _options: GlyphLiveOptions 
       return bindBrush(channel, handler);
     },
     whereFor,
+    whereForExtent,
+    whereForZoom,
     dispose() {
       for (const d of disposers.splice(0)) d();
     },

@@ -170,5 +170,100 @@ export function createServer(state: ServerState = new ServerState()): {
       }),
   );
 
+  // ----- glyph_drill -------------------------------------------------------
+  // Closes the chart → click/brush → SQL loop on the agent side. The IDE or
+  // user surfaces a selection from a rendered chart (mark click, brush
+  // extent, or zoom range); the agent passes it here and gets back both a
+  // SQL predicate and the matching rows. Mirrors @glyph/live's whereFor /
+  // whereForExtent / whereForZoom.
+  server.registerTool(
+    "glyph_drill",
+    {
+      title: "Drill into a rendered chart via a selection",
+      description:
+        "Given a handle_id and a selection (single value, range, or discrete list), return a SQL WHERE predicate plus the matching rows from the chart's underlying view. Use after glyph_render when the user clicks a bar, brushes a range, or zooms an axis.",
+      inputSchema: {
+        handle_id: z.string().describe("The handle_id returned by glyph_render."),
+        field: z
+          .string()
+          .describe("Source field to filter on (a column name from the chart's schema)."),
+        equals: z
+          .union([z.string(), z.number()])
+          .optional()
+          .describe("Single-value equality filter — analog of a mark click."),
+        between: z
+          .tuple([z.number(), z.number()])
+          .optional()
+          .describe("[min, max] inclusive — analog of a brush extent or axis zoom."),
+        in: z
+          .array(z.union([z.string(), z.number()]))
+          .optional()
+          .describe("Discrete value list — analog of a discrete brush selection."),
+      },
+    },
+    async ({ handle_id, field, equals, between, in: inList }) =>
+      state.serial(async () => {
+        const handle = state.getHandle(handle_id);
+        if (!handle) {
+          return {
+            isError: true,
+            content: [{ type: "text" as const, text: `Unknown handle_id: ${handle_id}` }],
+          };
+        }
+        const selectorCount =
+          (equals !== undefined ? 1 : 0) +
+          (between !== undefined ? 1 : 0) +
+          (inList !== undefined ? 1 : 0);
+        if (selectorCount !== 1) {
+          return {
+            isError: true,
+            content: [
+              {
+                type: "text" as const,
+                text: "glyph_drill: provide exactly one of { equals, between, in }.",
+              },
+            ],
+          };
+        }
+        const quotedField = `"${field.replace(/"/g, '""')}"`;
+        let predicate: string;
+        if (equals !== undefined) {
+          predicate =
+            typeof equals === "number"
+              ? `${quotedField} = ${equals}`
+              : `${quotedField} = '${equals.replace(/'/g, "''")}'`;
+        } else if (between !== undefined) {
+          predicate = `${quotedField} BETWEEN ${between[0]} AND ${between[1]}`;
+        } else {
+          // inList is defined (the selector-count check above guarantees it).
+          const list = (inList ?? [])
+            .map((v) => (typeof v === "number" ? String(v) : `'${v.replace(/'/g, "''")}'`))
+            .join(", ");
+          predicate = `${quotedField} IN (${list})`;
+        }
+        const where = `WHERE ${predicate}`;
+        const engine = await state.getEngine();
+        const result = await engine.queryHandle(handle, where);
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: JSON.stringify(
+                jsonSafe({
+                  predicate,
+                  where,
+                  columns: result.columns.map((c) => c.name),
+                  rowCount: result.rowCount,
+                  rows: result.rows,
+                }),
+                null,
+                2,
+              ),
+            },
+          ],
+        };
+      }),
+  );
+
   return { server, state };
 }

@@ -127,3 +127,46 @@ describe("@glyph/live — whereFor()", () => {
     expect(live.whereFor(binding)).toBe("");
   });
 });
+
+describe("@glyph/live — whereForExtent (brush → SQL)", () => {
+  it("numeric extent → BETWEEN", () => {
+    const live = glyphLive(mountSvg(SAMPLE_SVG));
+    expect(live.whereForExtent("x", { kind: "numeric", min: 7, max: 10 })).toBe(
+      'WHERE "pickup_hour" BETWEEN 7 AND 10',
+    );
+  });
+
+  it("discrete extent → IN list", () => {
+    const live = glyphLive(mountSvg(SAMPLE_SVG));
+    expect(live.whereForExtent("x", { kind: "discrete", values: ["a", "b"] })).toBe(
+      `WHERE "pickup_hour" IN ('a', 'b')`,
+    );
+  });
+
+  it("empty discrete extent → empty string", () => {
+    const live = glyphLive(mountSvg(SAMPLE_SVG));
+    expect(live.whereForExtent("x", { kind: "discrete", values: [] })).toBe("");
+  });
+
+  it("missing field → empty string", () => {
+    const live = glyphLive(mountSvg("<svg><g class='glyph-marks'/></svg>"));
+    expect(live.whereForExtent("x", { kind: "numeric", min: 0, max: 1 })).toBe("");
+  });
+});
+
+describe("@glyph/live — whereForZoom (zoom transform → SQL)", () => {
+  it("emits BETWEEN over the zoomed range", () => {
+    const live = glyphLive(mountSvg(SAMPLE_SVG));
+    expect(live.whereForZoom("x", 7, 10)).toBe('WHERE "pickup_hour" BETWEEN 7 AND 10');
+  });
+
+  it("rejects inverted ranges", () => {
+    const live = glyphLive(mountSvg(SAMPLE_SVG));
+    expect(live.whereForZoom("x", 10, 7)).toBe("");
+  });
+
+  it("rejects non-finite bounds", () => {
+    const live = glyphLive(mountSvg(SAMPLE_SVG));
+    expect(live.whereForZoom("x", Number.NaN, 1)).toBe("");
+  });
+});

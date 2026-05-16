@@ -67,7 +67,19 @@ function renderMark(m: SceneMark, interactive: boolean): string {
     case "rect": {
       const stroke = m.stroke ? ` stroke="${esc(m.stroke)}"` : "";
       const sw = m.strokeWidth !== undefined ? ` stroke-width="${m.strokeWidth}"` : "";
-      const data = interactive ? renderDataAttrs(m) : "";
+      if (!interactive) {
+        return `<rect x="${m.x}" y="${m.y}" width="${m.width}" height="${m.height}" fill="${esc(
+          m.fill,
+        )}"${stroke}${sw}/>`;
+      }
+      const data = renderDataAttrs(m);
+      const tooltip = m.tooltip ? `<title>${esc(m.tooltip)}</title>` : "";
+      if (tooltip) {
+        // <rect> with a child <title> must use an opening + closing tag.
+        return `<rect x="${m.x}" y="${m.y}" width="${m.width}" height="${m.height}" fill="${esc(
+          m.fill,
+        )}"${stroke}${sw}${data}>${tooltip}</rect>`;
+      }
       return `<rect x="${m.x}" y="${m.y}" width="${m.width}" height="${m.height}" fill="${esc(
         m.fill,
       )}"${stroke}${sw}${data}/>`;
@@ -75,7 +87,14 @@ function renderMark(m: SceneMark, interactive: boolean): string {
     case "circle": {
       const stroke = m.stroke ? ` stroke="${esc(m.stroke)}"` : "";
       const sw = m.strokeWidth !== undefined ? ` stroke-width="${m.strokeWidth}"` : "";
-      const data = interactive ? renderDataAttrs(m) : "";
+      if (!interactive) {
+        return `<circle cx="${m.cx}" cy="${m.cy}" r="${m.r}" fill="${esc(m.fill)}"${stroke}${sw}/>`;
+      }
+      const data = renderDataAttrs(m);
+      const tooltip = m.tooltip ? `<title>${esc(m.tooltip)}</title>` : "";
+      if (tooltip) {
+        return `<circle cx="${m.cx}" cy="${m.cy}" r="${m.r}" fill="${esc(m.fill)}"${stroke}${sw}${data}>${tooltip}</circle>`;
+      }
       return `<circle cx="${m.cx}" cy="${m.cy}" r="${m.r}" fill="${esc(m.fill)}"${stroke}${sw}${data}/>`;
     }
     case "line":

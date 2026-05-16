@@ -54,10 +54,10 @@ describe("Glyph MCP server", () => {
     await state.close();
   });
 
-  it("lists the three tools", async () => {
+  it("lists the four tools", async () => {
     const r = await client.listTools();
     const names = r.tools.map((t) => t.name).sort();
-    expect(names).toEqual(["glyph_describe", "glyph_query", "glyph_render"]);
+    expect(names).toEqual(["glyph_describe", "glyph_drill", "glyph_query", "glyph_render"]);
   });
 
   it("glyph_describe returns schema + suggested encoding types", async () => {
@@ -107,5 +107,79 @@ describe("Glyph MCP server", () => {
     });
     expect(r.isError).toBe(true);
     expect(r.text).toContain("Unknown handle_id");
+  });
+
+  describe("glyph_drill", () => {
+    async function getHandleId(): Promise<string> {
+      const r = await callText(client, "glyph_render", {
+        spec: {
+          data: { source: fixture, format: "csv" },
+          layers: [{ mark: "bar", encoding: { x: "pickup_hour", y: "rides" } }],
+        },
+      });
+      return JSON.parse(r.text).handle_id as string;
+    }
+
+    it("equals selector → '= value' predicate + matching rows", async () => {
+      const handle_id = await getHandleId();
+      const r = await callText(client, "glyph_drill", {
+        handle_id,
+        field: "pickup_hour",
+        equals: 7,
+      });
+      expect(r.isError).toBe(false);
+      const out = JSON.parse(r.text);
+      expect(out.predicate).toBe('"pickup_hour" = 7');
+      expect(out.where).toBe('WHERE "pickup_hour" = 7');
+      expect(out.rowCount).toBe(1);
+    });
+
+    it("between selector → BETWEEN predicate", async () => {
+      const handle_id = await getHandleId();
+      const r = await callText(client, "glyph_drill", {
+        handle_id,
+        field: "pickup_hour",
+        between: [7, 9],
+      });
+      expect(r.isError).toBe(false);
+      const out = JSON.parse(r.text);
+      expect(out.predicate).toBe('"pickup_hour" BETWEEN 7 AND 9');
+      expect(out.rowCount).toBe(3);
+    });
+
+    it("in selector → IN list with quoted strings", async () => {
+      const handle_id = await getHandleId();
+      const r = await callText(client, "glyph_drill", {
+        handle_id,
+        field: "pickup_hour",
+        in: [7, 17],
+      });
+      expect(r.isError).toBe(false);
+      const out = JSON.parse(r.text);
+      expect(out.predicate).toBe('"pickup_hour" IN (7, 17)');
+      expect(out.rowCount).toBe(2);
+    });
+
+    it("rejects providing zero or multiple selectors", async () => {
+      const handle_id = await getHandleId();
+      const r = await callText(client, "glyph_drill", {
+        handle_id,
+        field: "pickup_hour",
+        equals: 7,
+        between: [7, 9],
+      });
+      expect(r.isError).toBe(true);
+      expect(r.text).toMatch(/exactly one/);
+    });
+
+    it("rejects unknown handle_id", async () => {
+      const r = await callText(client, "glyph_drill", {
+        handle_id: "nope",
+        field: "x",
+        equals: 1,
+      });
+      expect(r.isError).toBe(true);
+      expect(r.text).toContain("Unknown handle_id");
+    });
   });
 });

@@ -25,9 +25,9 @@ Do **not** use Glyph for:
 - Real-time streaming charts (use Perspective)
 - Bespoke / one-off visualizations that don't fit a grammar (use D3 directly)
 
-## The three tools
+## The four tools
 
-Glyph's entire MCP surface is three tools. Call them in this order:
+Glyph's entire MCP surface is four tools. Call the first three in order; `glyph_drill` closes the chart → click → SQL loop.
 
 ### 1. `glyph_describe(source)`
 
@@ -44,6 +44,16 @@ Run follow-up SQL against the rendered chart's view. The `where` arg is appended
 - `"WHERE rides > 1000"`
 - `"WHERE region = 'US' ORDER BY revenue DESC LIMIT 10"`
 - `"WHERE hour BETWEEN 7 AND 9"`
+
+### 4. `glyph_drill(handle_id, field, equals | between | in)`
+
+The chart → click/brush/zoom → SQL loop. Use this when the user (or their IDE preview) reports a selection from a rendered chart. Pass exactly one of:
+
+- `equals: 7` — single-value (a click on one bar)
+- `between: [7, 9]` — numeric range (a brush extent or axis zoom)
+- `in: [7, 17, 18]` — discrete set (a multi-select)
+
+Returns the SQL `predicate`, the full `where` clause, and the matching rows. The same SQL is what `@glyph/live`'s `whereFor` / `whereForExtent` / `whereForZoom` emit browser-side — interaction and query are the same primitive.
 
 ## Spec format (the wire format)
 
