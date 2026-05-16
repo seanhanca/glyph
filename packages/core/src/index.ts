@@ -1,14 +1,18 @@
 /**
  * @glyph/core — public surface.
  *
- * Phase 0 exports:
+ * Exports:
  *   - VERSION: package version constant
  *   - Spec types, schemas, and parsers (from ./spec/*)
  *   - Compute engine interface (from ./compute/*)
- *
- * Subsequent PRs will add the compiler, scenegraph, and SVG renderer.
+ *   - Compiler (spec + rows → scenegraph)
+ *   - Scenegraph types (the IR consumed by renderers)
+ *   - SVG renderer (Scene → SVG string)
  */
 export const VERSION = "0.0.0";
 
 export * from "./spec/index.js";
 export * from "./compute/index.js";
+export * from "./scenegraph/index.js";
+export * from "./compiler/index.js";
+export * from "./render/index.js";

@@ -1,0 +1,9 @@
+{
+  "data": {
+    "source": "../../taxi.csv",
+    "format": "csv",
+    "transform": "SELECT pickup_hour, fare FROM glyph_src_main ORDER BY pickup_hour"
+  },
+  "layers": [{ "mark": "point", "encoding": { "x": "pickup_hour", "y": "fare" } }],
+  "title": "Fare by hour"
+}
