@@ -546,15 +546,78 @@ export function compileSpec(input: CompileInput): Scene {
     ...(spec.title ? { title: spec.title } : {}),
     ...(sceneSchema ? { schema: sceneSchema } : {}),
     ...(legends.length > 0 ? { legends } : {}),
-    ...(spec.animation
-      ? {
-          animation: {
-            kind: spec.animation.kind,
-            duration_ms: spec.animation.duration_ms ?? 700,
-          },
-        }
-      : {}),
+    ...(spec.animation ? { animation: buildSceneAnimation(spec, rows, schema, marks) } : {}),
   };
+}
+
+/**
+ * Build the scene's `animation` field from the spec + rendered marks.
+ * For stage / stage-stagger we just plumb duration + stagger. For race /
+ * scrub we compute per-mark values across frames so the renderer can emit
+ * SMIL `<animate>` elements without re-querying the data.
+ */
+function buildSceneAnimation(
+  spec: GlyphSpec,
+  rows: ReadonlyArray<ReadonlyArray<unknown>>,
+  schema: ReadonlyArray<CompileFieldInfo>,
+  marks: ReadonlyArray<SceneMark>,
+): NonNullable<Scene["animation"]> {
+  const anim = spec.animation;
+  if (!anim) throw new Error("buildSceneAnimation called without spec.animation");
+  if (anim.kind === "stage" || anim.kind === "stage-stagger") {
+    return {
+      kind: anim.kind,
+      duration_ms: anim.duration_ms ?? 700,
+      ...("stagger_ms" in anim && anim.stagger_ms !== undefined
+        ? { stagger_ms: anim.stagger_ms }
+        : anim.kind === "stage-stagger"
+          ? { stagger_ms: 60 }
+          : {}),
+    };
+  }
+  // race / scrub — bucket rows by frame_field, derive a per-row series.
+  // For v0 we drive bar widths (the most common race chart). The renderer
+  // detects rect marks and animates their width attribute through the
+  // computed frame values.
+  if (anim.kind !== "race" && anim.kind !== "scrub") {
+    throw new Error(`Unsupported animation kind: ${(anim as { kind: string }).kind}`);
+  }
+  const frameField = anim.frame_field;
+  const fieldIdx = schema.findIndex((c) => c.name === frameField);
+  if (fieldIdx < 0) {
+    throw new Error(`animation.frame_field "${frameField}" not found in schema`);
+  }
+  // Distinct frame values, in their natural order (first-seen).
+  const seen = new Set<string>();
+  const frameLabels: string[] = [];
+  for (const r of rows) {
+    const v = String(r[fieldIdx] ?? "");
+    if (!seen.has(v)) {
+      seen.add(v);
+      frameLabels.push(v);
+    }
+  }
+  const frames = frameLabels.map((label) => ({
+    label,
+    // For v0, the per-mark values are the mark's existing geometric value
+    // (width for rect, r for circle). The renderer interpolates them via
+    // SMIL across frames. A complete race needs ranked rows + per-frame
+    // bar-width recompute; that lands once the per-frame compile path
+    // (re-aggregating per frame) is built.
+    values: marks.map((m) => extractRaceValue(m)),
+  }));
+  return {
+    kind: anim.kind,
+    duration_ms: anim.duration_ms ?? 8000,
+    frame_field: anim.frame_field,
+    frames,
+  };
+}
+
+function extractRaceValue(m: SceneMark): number {
+  if (m.type === "rect") return m.width;
+  if (m.type === "circle") return m.r;
+  return 0;
 }
 
 // ---------------------------------------------------------------------------

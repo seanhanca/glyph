@@ -351,18 +351,41 @@ export const GlyphSpecSchema = z
       ])
       .optional(),
     /**
-     * Data-driven animation (PR43, v0). When set, the SVG carries a
-     * <style> block + keyframes that animate the marks. v0 supports
-     * "stage" (fade-in entrance) only. "scrub" (temporal slider) and
-     * "race" (rank animation) land in follow-ups.
+     * Data-driven animation (PR43 + PR45). Four kinds:
+     *   - "stage"          — chart-wide entrance fade (PR43)
+     *   - "stage-stagger"  — per-mark entrance with row-index delay (PR45)
+     *   - "race"           — bar-race / scatter-race driven by `frame_field`;
+     *                        emits SMIL <animate> elements over N frames (PR45)
+     *   - "scrub"          — temporal slider that re-aggregates per frame
+     *                        (PR45 ships the spec contract; the UI lives in
+     *                        @glyph/preview-server / @glyph/live in PR46+)
      */
     animation: z
-      .object({
-        kind: z.literal("stage"),
-        /** Animation duration in ms. Default 700. */
-        duration_ms: z.number().int().min(0).max(60_000).optional(),
-      })
-      .strict()
+      .union([
+        z
+          .object({
+            kind: z.enum(["stage", "stage-stagger"]),
+            duration_ms: z.number().int().min(0).max(60_000).optional(),
+            /** Per-mark delay step (ms). Only honored by stage-stagger. Default 60. */
+            stagger_ms: z.number().int().min(0).max(2000).optional(),
+          })
+          .strict(),
+        z
+          .object({
+            kind: z.literal("race"),
+            /** Column whose distinct values define the frames (e.g. "year"). */
+            frame_field: z.string().min(1),
+            duration_ms: z.number().int().min(100).max(120_000).optional(),
+          })
+          .strict(),
+        z
+          .object({
+            kind: z.literal("scrub"),
+            frame_field: z.string().min(1),
+            duration_ms: z.number().int().min(100).max(120_000).optional(),
+          })
+          .strict(),
+      ])
       .optional(),
   })
   .strict()

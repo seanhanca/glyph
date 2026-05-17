@@ -314,14 +314,9 @@ export function renderSvg(scene: Scene): string {
       )}</text>`
     : "";
   const hoverStyle = interactive ? HOVER_STYLE : "";
-  // PR43: opt-in entrance animation. Pure CSS @keyframes; the renderer
-  // tags the marks group with `glyph-stage` so the keyframe applies. Snapshot
-  // byte-identity is preserved when animation is unset (which is the
-  // default for every existing spec + every snapshot baseline).
-  const animationStyle =
-    scene.animation?.kind === "stage"
-      ? `<style>@keyframes glyph-stage{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}.glyph-stage{animation:glyph-stage ${scene.animation.duration_ms}ms ease-out both;transform-box:fill-box;transform-origin:center}</style>`
-      : "";
+  // PR43 + PR45: opt-in animation. Three CSS-driven kinds (stage,
+  // stage-stagger) and two SMIL-driven kinds (race, scrub).
+  const animationStyle = buildAnimationStyle(scene);
   const legends = (scene.legends ?? []).map(renderLegend).join("");
 
   // Faceted scene: render each panel; the top-level marks/axes/grid are
@@ -333,13 +328,119 @@ export function renderSvg(scene: Scene): string {
 
   // Grid sits behind marks; axes + legends in front.
   const grid = renderGrid(scene);
-  const markStrs = scene.marks.map((m) => renderMark(m, interactive)).join("");
-  // PR43: when animation is set, wrap the marks group with the glyph-stage
-  // class so the @keyframes applies. Composes with the existing
-  // glyph-marks wrapper.
-  const animClass = scene.animation?.kind === "stage" ? " glyph-stage" : "";
+  const animKind = scene.animation?.kind;
+  // Per-mark rendering. For stage-stagger, each mark carries an inline
+  // `style="animation-delay:Nms"` driven by row index. For race/scrub,
+  // each mark hosts a SMIL <animate> child built from scene.animation.frames.
+  const stagger =
+    animKind === "stage-stagger"
+      ? ((scene.animation as { stagger_ms?: number }).stagger_ms ?? 60)
+      : 0;
+  const markStrs = scene.marks
+    .map((m, i) => decorateMarkForAnimation(renderMark(m, interactive), i, scene, stagger))
+    .join("");
+  const animClass =
+    animKind === "stage"
+      ? " glyph-stage"
+      : animKind === "stage-stagger"
+        ? " glyph-stage-stagger"
+        : animKind === "race" || animKind === "scrub"
+          ? " glyph-race"
+          : "";
   const marks =
     interactive || animClass ? `<g class="glyph-marks${animClass}">${markStrs}</g>` : markStrs;
   const axes = scene.axes.map(renderAxis).join("");
   return `${head}${desc}${hoverStyle}${animationStyle}${bg}${title}${grid}${marks}${axes}${legends}</svg>\n`;
+}
+
+/**
+ * Build the <style> block for the scene's animation. CSS kinds (stage,
+ * stage-stagger) emit @keyframes; SMIL kinds (race, scrub) animate inline
+ * and need no style block.
+ */
+function buildAnimationStyle(scene: Scene): string {
+  const a = scene.animation;
+  if (!a) return "";
+  if (a.kind === "stage") {
+    return `<style>@keyframes glyph-stage{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}.glyph-stage{animation:glyph-stage ${a.duration_ms}ms ease-out both;transform-box:fill-box;transform-origin:center}</style>`;
+  }
+  if (a.kind === "stage-stagger") {
+    return `<style>@keyframes glyph-stage-stagger{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}.glyph-stage-stagger>*{animation:glyph-stage-stagger ${a.duration_ms}ms ease-out both;transform-box:fill-box;transform-origin:center;opacity:0}</style>`;
+  }
+  return "";
+}
+
+/**
+ * Decorate a mark's SVG markup for animation:
+ *   - stage-stagger: inject `style="animation-delay:Nms"` based on row index.
+ *   - race / scrub: inject a child <animate values="..."> driving the mark's
+ *     animated attribute (width for rect, r for circle).
+ * Falls through unchanged for stage and no-animation specs.
+ */
+/**
+ * Frame-export helper (PR45). Given a scene with a `race` or `scrub`
+ * animation, emit one SVG string per frame — each frame substitutes the
+ * mark values for that frame. Useful for stitching an MP4/GIF outside the
+ * renderer, or for snapshot-testing per-frame state in CI.
+ *
+ * For non-animated scenes this returns a single-element array with the
+ * scene's regular render.
+ */
+export function renderFrames(scene: Scene): ReadonlyArray<string> {
+  const a = scene.animation;
+  if (!a || (a.kind !== "race" && a.kind !== "scrub")) {
+    return [renderSvg(scene)];
+  }
+  return a.frames.map((frame) => {
+    // Strip the animation field via destructure so the per-frame scene is
+    // a plain static Scene.
+    // biome-ignore lint/correctness/noUnusedVariables: destructured to drop.
+    const { animation: _animation, ...rest } = scene;
+    const frameScene: Scene = {
+      ...rest,
+      marks: scene.marks.map((m, i) => {
+        const v = frame.values[i];
+        if (v === undefined) return m;
+        if (m.type === "rect") return { ...m, width: v };
+        if (m.type === "circle") return { ...m, r: v };
+        return m;
+      }),
+      title: `${scene.title ? `${scene.title} — ` : ""}${a.frame_field}=${frame.label}`,
+    };
+    return renderSvg(frameScene);
+  });
+}
+
+function decorateMarkForAnimation(
+  svgFragment: string,
+  index: number,
+  scene: Scene,
+  stagger: number,
+): string {
+  const a = scene.animation;
+  if (!a) return svgFragment;
+  if (a.kind === "stage-stagger") {
+    const delay = index * stagger;
+    return svgFragment.replace(
+      /<(rect|circle|line|path|text)\b/,
+      (m) => `${m} style="animation-delay:${delay}ms"`,
+    );
+  }
+  if (a.kind === "race" || a.kind === "scrub") {
+    const m = scene.marks[index];
+    if (!m) return svgFragment;
+    const dur = a.duration_ms;
+    if (m.type === "rect") {
+      const values = a.frames.map((f) => String(f.values[index] ?? 0)).join(";");
+      const animate = `<animate attributeName="width" values="${values}" dur="${dur}ms" repeatCount="indefinite"/>`;
+      return svgFragment.replace(/<rect\b([^/]*)\/>/, `<rect$1>${animate}</rect>`);
+    }
+    if (m.type === "circle") {
+      const values = a.frames.map((f) => String(f.values[index] ?? 0)).join(";");
+      const animate = `<animate attributeName="r" values="${values}" dur="${dur}ms" repeatCount="indefinite"/>`;
+      return svgFragment.replace(/<circle\b([^/]*)\/>/, `<circle$1>${animate}</circle>`);
+    }
+    return svgFragment;
+  }
+  return svgFragment;
 }

@@ -177,13 +177,30 @@ export interface Scene {
    */
   readonly panels?: ReadonlyArray<ScenePanel>;
   /**
-   * Optional data-driven animation hint (PR43, v0). When set, the renderer
-   * emits a <style> block + applies the animation to the marks group.
-   *   - "stage": entrance fade-in for the whole chart.
-   * Future kinds (scrub, race) extend this union additively.
+   * Optional data-driven animation hint (PR43 + PR45). The renderer
+   * applies CSS / SMIL based on the kind:
+   *   - "stage"          — chart-wide entrance fade
+   *   - "stage-stagger"  — per-mark delay = row-index × stagger_ms
+   *   - "race"           — per-mark SMIL <animate> across N frames
+   *   - "scrub"          — frame metadata only; UI handled by @glyph/live
+   * `frames` is populated by the compiler for "race"/"scrub": the i-th
+   * entry holds the per-mark values at frame i.
    */
-  readonly animation?: {
-    readonly kind: "stage";
-    readonly duration_ms: number;
-  };
+  readonly animation?:
+    | {
+        readonly kind: "stage" | "stage-stagger";
+        readonly duration_ms: number;
+        readonly stagger_ms?: number;
+      }
+    | {
+        readonly kind: "race" | "scrub";
+        readonly duration_ms: number;
+        readonly frame_field: string;
+        readonly frames: ReadonlyArray<{
+          /** Frame label (the distinct frame_field value). */
+          readonly label: string;
+          /** Per-row values keyed by row index in the scene's marks. */
+          readonly values: ReadonlyArray<number>;
+        }>;
+      };
 }
