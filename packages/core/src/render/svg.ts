@@ -101,6 +101,13 @@ function renderMark(m: SceneMark, interactive: boolean): string {
       return `<line x1="${m.x1}" y1="${m.y1}" x2="${m.x2}" y2="${m.y2}" stroke="${esc(
         m.stroke,
       )}" stroke-width="${m.strokeWidth}"/>`;
+    case "path": {
+      const fill = m.fill !== undefined ? esc(m.fill) : "none";
+      const stroke = m.stroke ? ` stroke="${esc(m.stroke)}"` : "";
+      const sw = m.strokeWidth !== undefined ? ` stroke-width="${m.strokeWidth}"` : "";
+      const op = m.opacity !== undefined ? ` opacity="${m.opacity}"` : "";
+      return `<path d="${m.d}" fill="${fill}"${stroke}${sw}${op}/>`;
+    }
     case "text":
       return `<text x="${m.x}" y="${m.y}" font-size="${m.fontSize}" fill="${esc(
         m.fill,

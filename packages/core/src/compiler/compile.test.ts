@@ -108,7 +108,7 @@ describe("compileSpec — error cases", () => {
       data: { source: "x" },
       layers: [{ mark: "area", encoding: { x: "hour", y: "rides" } }],
     };
-    expect(() => compileSpec({ spec, rows, schema })).toThrow(/supports marks bar\|point/);
+    expect(() => compileSpec({ spec, rows, schema })).toThrow(/supports marks bar\|point\|line/);
   });
 
   it("rejects when x or y is missing", () => {

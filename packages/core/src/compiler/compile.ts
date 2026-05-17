@@ -239,8 +239,8 @@ export function compileSpec(input: CompileInput): Scene {
   for (let i = 0; i < spec.layers.length; i++) {
     const l = spec.layers[i];
     if (!l) continue;
-    if (l.mark !== "bar" && l.mark !== "point") {
-      throw new Error(`Phase 1 supports marks bar|point; layer ${i} has ${l.mark}`);
+    if (l.mark !== "bar" && l.mark !== "point" && l.mark !== "line") {
+      throw new Error(`Phase 1 supports marks bar|point|line; layer ${i} has ${l.mark}`);
     }
     if (fieldOf(l.encoding.x) === undefined || fieldOf(l.encoding.y) === undefined) {
       throw new Error(`Layer ${i} requires both x and y encodings`);
@@ -261,6 +261,9 @@ export function compileSpec(input: CompileInput): Scene {
   const anyXCategorical = spec.layers.some(
     (l) => fieldType(l.encoding.x, schema) !== "quantitative",
   );
+  // Bar marks always need a band x scale; lines + points prefer linear when
+  // the x is quantitative. When mixed (a band-shaped bar layer + a line),
+  // band wins so axes align — same Phase-0 trade-off.
   const anyBarLayer = spec.layers.some((l) => l.mark === "bar");
 
   // x scale resolver: returns either a bandScale or a linearScale
@@ -341,9 +344,11 @@ export function compileSpec(input: CompileInput): Scene {
         throw new Error("bar mark requires a band x scale");
       }
       buildBars(marks, rows, schema, enc, xField, yField, xScale, yScale, theme, ctx);
-    } else {
-      // point
+    } else if (layer.mark === "point") {
       buildPoints(marks, rows, schema, enc, xField, yField, xScale, yScale, theme, ctx);
+    } else {
+      // line
+      buildLines(marks, rows, schema, enc, xField, yField, xScale, yScale, theme);
     }
   }
 
@@ -495,6 +500,81 @@ function buildPoints(
       ...markDataFor(ctx, r, schema, i),
     });
     i++;
+  }
+}
+
+/**
+ * buildLines — ported d3-shape `line()` math (PR19 in ROADMAP §C).
+ *
+ * Linear interpolation only; curve types (monotone, step) land in a
+ * follow-up. When a color encoding is set, rows are grouped by color and
+ * one `path` mark is emitted per group. Within each group, points are
+ * sorted by x ascending so the path doesn't self-cross.
+ *
+ * The `path` mark carries an SVG-d string built deterministically:
+ *   "M x0 y0 L x1 y1 L x2 y2 …"
+ * Every coordinate goes through roundPx so byte-identity holds.
+ */
+function buildLines(
+  out: SceneMark[],
+  rows: ReadonlyArray<ReadonlyArray<unknown>>,
+  schema: ReadonlyArray<CompileFieldInfo>,
+  encoding: Encoding,
+  xField: string,
+  yField: string,
+  xScale: ReturnType<typeof bandScale> | ReturnType<typeof linearScale>,
+  yScale: ReturnType<typeof linearScale>,
+  theme: Theme,
+): void {
+  const colorField = fieldOf(encoding.color);
+  const colorDomain = colorField ? distinctOrdered(rows, schema, colorField) : [""];
+
+  // Group rows by color (single group when no color encoding).
+  const groups = new Map<string, Array<{ x: number; y: number }>>();
+  for (const r of rows) {
+    const xv = valueAt(r, schema, xField);
+    const yv = Number(valueAt(r, schema, yField));
+    if (!Number.isFinite(yv)) continue;
+    const xpx =
+      xScale.type === "linear"
+        ? xScale.apply(Number(xv))
+        : xScale.apply(xv == null ? "" : String(xv)) + xScale.bandwidth / 2;
+    if (!Number.isFinite(xpx)) continue;
+    const groupKey = colorField
+      ? (() => {
+          const cv = valueAt(r, schema, colorField);
+          return cv == null ? "" : String(cv);
+        })()
+      : "";
+    let pts = groups.get(groupKey);
+    if (!pts) {
+      pts = [];
+      groups.set(groupKey, pts);
+    }
+    pts.push({ x: roundPx(xpx), y: yScale.apply(yv) });
+  }
+
+  // Emit one path per group, sorted by x for stable, non-crossing lines.
+  for (const [groupKey, pts] of groups) {
+    if (pts.length < 2) continue;
+    pts.sort((a, b) => a.x - b.x);
+    let d = `M ${pts[0]?.x} ${pts[0]?.y}`;
+    for (let i = 1; i < pts.length; i++) {
+      const p = pts[i];
+      if (!p) continue;
+      d += ` L ${p.x} ${p.y}`;
+    }
+    // Color: positional pick from the palette by the group's index in the
+    // domain (first-seen order). Falls back to the first palette entry.
+    const idx = colorField ? Math.max(0, colorDomain.indexOf(groupKey)) : 0;
+    const stroke = theme.marks[idx % theme.marks.length] ?? "#000";
+    out.push({
+      type: "path",
+      d,
+      stroke,
+      strokeWidth: 1.5,
+      fill: "none",
+    });
   }
 }
 

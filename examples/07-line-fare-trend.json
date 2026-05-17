@@ -1,0 +1,9 @@
+{
+  "$schema": "../packages/core/dist/spec.schema.json",
+  "data": {
+    "source": "taxi.parquet",
+    "transform": "SELECT pickup_hour, AVG(fare) AS avg_fare FROM taxi GROUP BY pickup_hour ORDER BY pickup_hour"
+  },
+  "layers": [{ "mark": "line", "encoding": { "x": "pickup_hour", "y": "avg_fare" } }],
+  "title": "Average fare by pickup hour"
+}

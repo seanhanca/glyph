@@ -15,7 +15,7 @@ import { DEFAULT_SPEC_VERSION, SUPPORTED_SPEC_VERSIONS, type SpecVersion } from 
 export const LIBRARY_VERSION = "0.0.0";
 
 /** Marks the current build can compile + render. */
-export const SUPPORTED_MARKS = ["bar", "point"] as const;
+export const SUPPORTED_MARKS = ["bar", "point", "line"] as const;
 export type SupportedMark = (typeof SUPPORTED_MARKS)[number];
 
 /** Stats the current build can compile (SQL-rewritten before materialize). */

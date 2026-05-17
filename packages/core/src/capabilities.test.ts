@@ -20,8 +20,8 @@ describe("capabilities", () => {
     expect(SUPPORTED_SPEC_VERSIONS).toContain("glyph/0.1");
   });
 
-  it("reports the marks the Phase 0 compiler supports", () => {
-    expect(SUPPORTED_MARKS).toEqual(["bar", "point"]);
+  it("reports the marks the Phase 1 compiler supports", () => {
+    expect(SUPPORTED_MARKS).toEqual(["bar", "point", "line"]);
   });
 
   it("getCapabilities() returns a fully populated object", () => {

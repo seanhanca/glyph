@@ -72,6 +72,20 @@ export type SceneMark =
       readonly y2: number;
       readonly stroke: string;
       readonly strokeWidth: number;
+    }
+  | {
+      /**
+       * A multi-point polyline / area. The `d` attribute is a fully formed
+       * SVG path command string (e.g. "M 10 20 L 30 40 L 50 60"). Renderers
+       * emit it verbatim. Glyph's compiler builds these for `line` (open
+       * stroke) and `area` (closed fill) marks.
+       */
+      readonly type: "path";
+      readonly d: string;
+      readonly stroke?: string;
+      readonly strokeWidth?: number;
+      readonly fill?: string;
+      readonly opacity?: number;
     };
 
 /** A single tick on an axis. */
