@@ -17,6 +17,7 @@ import {
   type PreviewServerOptions,
   createPreviewServer,
 } from "@glyph/preview-server";
+import { MemoryStore, defaultMemoryPath } from "./memory.js";
 
 export class ServerState {
   private engine: ComputeEngine | undefined;
@@ -31,10 +32,20 @@ export class ServerState {
   private chain: Promise<unknown> = Promise.resolve();
   private preview: PreviewServer | undefined;
   private readonly previewOptions: PreviewServerOptions;
+  /** Phase 3 §6: lazy-initialized persistent memory store. */
+  readonly memory: MemoryStore;
 
-  constructor(options: { preview?: PreviewServerOptions; sessionId?: string } = {}) {
+  constructor(
+    options: {
+      preview?: PreviewServerOptions;
+      sessionId?: string;
+      /** Override the persistent-memory file path. Tests pass a temp file. */
+      memoryPath?: string;
+    } = {},
+  ) {
     this.previewOptions = options.preview ?? {};
     this.sessionId = options.sessionId ?? randomUUID().replace(/-/g, "").slice(0, 16);
+    this.memory = new MemoryStore(options.memoryPath ?? defaultMemoryPath());
   }
 
   async getEngine(): Promise<ComputeEngine> {

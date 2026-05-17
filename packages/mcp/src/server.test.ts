@@ -6,6 +6,8 @@
  * trip works: describe → render → query.
  */
 
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
@@ -51,9 +53,16 @@ async function callText(
 describe("Glyph MCP server", () => {
   let client: Client;
   let state: ServerState;
+  let tempMemoryDir: string;
 
   beforeEach(async () => {
-    state = new ServerState();
+    // Each test gets its own tempdir-backed memory store so saves don't
+    // bleed into a real ~/.glyph/memory.duckdb on the developer's machine
+    // (or pollute other tests in the same run).
+    tempMemoryDir = mkdtempSync(join(tmpdir(), "glyph-mcp-test-"));
+    state = new ServerState({
+      memoryPath: join(tempMemoryDir, "memory.duckdb"),
+    });
     const { server } = createServer(state);
     const [clientT, serverT] = InMemoryTransport.createLinkedPair();
     await server.connect(serverT);
@@ -64,9 +73,10 @@ describe("Glyph MCP server", () => {
   afterEach(async () => {
     await client.close();
     await state.close();
+    rmSync(tempMemoryDir, { recursive: true, force: true });
   });
 
-  it("lists the twenty tools", async () => {
+  it("lists the twenty-four tools", async () => {
     const r = await client.listTools();
     const names = r.tools.map((t) => t.name).sort();
     expect(names).toEqual([
@@ -83,6 +93,10 @@ describe("Glyph MCP server", () => {
       "glyph_handles",
       "glyph_import",
       "glyph_lineage",
+      "glyph_memory_forget",
+      "glyph_memory_list",
+      "glyph_memory_recall",
+      "glyph_memory_save",
       "glyph_metrics",
       "glyph_metrics_register",
       "glyph_preview",
@@ -115,6 +129,10 @@ describe("Glyph MCP server", () => {
       "glyph_handles",
       "glyph_import",
       "glyph_lineage",
+      "glyph_memory_forget",
+      "glyph_memory_list",
+      "glyph_memory_recall",
+      "glyph_memory_save",
       "glyph_metrics",
       "glyph_metrics_register",
       "glyph_preview",
@@ -1021,6 +1039,125 @@ describe("Glyph MCP server", () => {
       });
       expect(r.isError).toBe(true);
       expect(r.text).toMatch(/exactly one of `field` or `metric`/);
+    });
+  });
+
+  // ---- Phase 3 §6: persistent memory (PR39) ------------------------------
+  describe("persistent memory (PR39 — Phase 3 §6)", () => {
+    async function renderTaxi(): Promise<string> {
+      const r = await callText(client, "glyph_render", {
+        spec: {
+          data: { source: fixture, format: "csv" },
+          layers: [{ mark: "bar", encoding: { x: "pickup_hour", y: "rides" } }],
+        },
+      });
+      return JSON.parse(r.text).handle_id as string;
+    }
+
+    it("save → list → recall round-trips a handle through the file", async () => {
+      const handle_id = await renderTaxi();
+      const save = await callText(client, "glyph_memory_save", {
+        name: "taxi_baseline",
+        handle_id,
+        description: "Baseline taxi rides snapshot.",
+      });
+      expect(save.isError).toBe(false);
+      expect(JSON.parse(save.text)).toMatchObject({ name: "taxi_baseline", sampleRows: 12 });
+
+      const list = await callText(client, "glyph_memory_list", {});
+      const listed = JSON.parse(list.text);
+      expect(listed.count).toBe(1);
+      expect(listed.entries[0].name).toBe("taxi_baseline");
+      expect(listed.entries[0].description).toBe("Baseline taxi rides snapshot.");
+
+      const recalled = await callText(client, "glyph_memory_recall", { name: "taxi_baseline" });
+      expect(recalled.isError).toBe(false);
+      const restored = JSON.parse(recalled.text);
+      // Fresh id + fresh gdf:// URI, but the data is the same.
+      expect(restored.id).not.toBe(handle_id);
+      expect(restored.uri).toMatch(/^gdf:\/\//);
+      expect(restored.lineage.producer.tool).toBe("glyph_memory_recall");
+
+      // The restored handle is queryable.
+      const q = await callText(client, "glyph_query", { handle_id: restored.id });
+      expect(JSON.parse(q.text).rowCount).toBe(12);
+    });
+
+    it("re-saving an existing name replaces the prior content", async () => {
+      const h1 = await renderTaxi();
+      await callText(client, "glyph_memory_save", { name: "snapshot", handle_id: h1 });
+      // Second save with the same name + a different filter; expect REPLACE.
+      const r2 = await callText(client, "glyph_render", {
+        spec: {
+          data: {
+            source: fixture,
+            format: "csv",
+            transform: "SELECT pickup_hour, rides FROM glyph_src_main WHERE rides > 200",
+          },
+          layers: [{ mark: "bar", encoding: { x: "pickup_hour", y: "rides" } }],
+        },
+      });
+      const h2 = JSON.parse(r2.text).handle_id as string;
+      await callText(client, "glyph_memory_save", { name: "snapshot", handle_id: h2 });
+      const list = await callText(client, "glyph_memory_list", {});
+      const listed = JSON.parse(list.text);
+      expect(listed.count).toBe(1);
+      expect(listed.entries[0].sampleRows).toBe(5);
+    });
+
+    it("forget drops the entry; recall then returns an error", async () => {
+      const handle_id = await renderTaxi();
+      await callText(client, "glyph_memory_save", { name: "throwaway", handle_id });
+      const forget = await callText(client, "glyph_memory_forget", { name: "throwaway" });
+      expect(JSON.parse(forget.text).forgotten).toBe(true);
+      const recall = await callText(client, "glyph_memory_recall", { name: "throwaway" });
+      expect(recall.isError).toBe(true);
+      expect(recall.text).toMatch(/Unknown memory name/);
+    });
+
+    it("survives a state restart against the same file path", async () => {
+      const handle_id = await renderTaxi();
+      await callText(client, "glyph_memory_save", { name: "persisted", handle_id });
+      // Tear down + re-open against the same file.
+      await client.close();
+      await state.close();
+      state = new ServerState({
+        memoryPath: join(tempMemoryDir, "memory.duckdb"),
+      });
+      const { server: server2 } = createServer(state);
+      const [t1, t2] = InMemoryTransport.createLinkedPair();
+      await server2.connect(t2);
+      client = new Client({ name: "test-client", version: "0.0.0" });
+      await client.connect(t1);
+      // After restart, list still shows the entry.
+      const list = await callText(client, "glyph_memory_list", {});
+      const listed = JSON.parse(list.text);
+      expect(listed.count).toBe(1);
+      expect(listed.entries[0].name).toBe("persisted");
+      // Recall yields queryable data.
+      const recalled = await callText(client, "glyph_memory_recall", { name: "persisted" });
+      const restored = JSON.parse(recalled.text);
+      const q = await callText(client, "glyph_query", { handle_id: restored.id });
+      expect(JSON.parse(q.text).rowCount).toBe(12);
+    });
+
+    it("rejects unsafe names", async () => {
+      const handle_id = await renderTaxi();
+      const r = await callText(client, "glyph_memory_save", {
+        name: "bad name with spaces",
+        handle_id,
+      });
+      expect(r.isError).toBe(true);
+      expect(r.text).toMatch(/Invalid memory name/);
+    });
+
+    it("rejects an unknown handle_id from glyph_memory_save", async () => {
+      const r = await callText(client, "glyph_memory_save", {
+        name: "x",
+        handle_id: "nope",
+      });
+      expect(r.isError).toBe(true);
+      expect(r.text).toContain("Unknown handle_id");
     });
   });
 });

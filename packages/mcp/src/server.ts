@@ -1,7 +1,7 @@
 /**
  * Glyph MCP server.
  *
- * Twenty tools — the library surface:
+ * Twenty-four tools — the library surface:
  *   Phase 0/1 (9):
  *     - glyph_capabilities()              → feature detection
  *     - glyph_describe(source)            → schema + suggested encodings
@@ -27,6 +27,11 @@
  *   Phase 3 §1 (2, PR37):
  *     - glyph_metrics_register(metrics[]) → register named aggregates
  *     - glyph_metrics(prefix?)            → list registered metrics
+ *   Phase 3 §6 (4, PR39):
+ *     - glyph_memory_save(name, handle)   → persist a handle by name
+ *     - glyph_memory_recall(name)         → restore as a fresh handle
+ *     - glyph_memory_list(prefix?)        → list persisted names
+ *     - glyph_memory_forget(name)         → drop a persisted entry
  *
  * Each diagnostic verb returns { handle_id, rows, explanation } — the new
  * handle_id is a derived DataHandle with chained lineage so the result is
@@ -86,6 +91,11 @@ const MCP_TOOLS = [
   // ---- Phase 3 §1: semantic / metric layer (PR37) ----------------------
   { name: "glyph_metrics_register", since: "0.0.6" },
   { name: "glyph_metrics", since: "0.0.6" },
+  // ---- Phase 3 §6: persistent memory (PR39) ----------------------------
+  { name: "glyph_memory_save", since: "0.0.7" },
+  { name: "glyph_memory_recall", since: "0.0.7" },
+  { name: "glyph_memory_list", since: "0.0.7" },
+  { name: "glyph_memory_forget", since: "0.0.7" },
 ] as const;
 
 /** Best-effort browser launcher. Returns true on success. */
@@ -1343,6 +1353,141 @@ export function createServer(state: ServerState = new ServerState()): {
         ],
       };
     },
+  );
+
+  // ====== Phase 3 §6 persistent memory (PR39) =============================
+  //
+  // Saves named DataHandles to ~/.glyph/memory.duckdb so they survive an
+  // MCP restart. The store ATTACHes the file into the in-memory engine; CRUD
+  // is plain SQL. See packages/mcp/src/memory.ts for the layout.
+
+  server.registerTool(
+    "glyph_memory_save",
+    {
+      title: "Persist a handle to ~/.glyph/memory.duckdb",
+      description:
+        "Save the rows backing `handle_id` under a stable `name` so they survive an MCP restart. Re-saving the same name replaces the prior content. The file lives at ~/.glyph/memory.duckdb by default (override via ServerState options).",
+      inputSchema: {
+        name: z
+          .string()
+          .min(1)
+          .describe("SQL-safe identifier — the key you'll glyph_memory_recall later."),
+        handle_id: z.string().describe("The handle to persist."),
+        description: z
+          .string()
+          .optional()
+          .describe("Human-readable note shown in glyph_memory_list."),
+      },
+    },
+    async ({ name, handle_id, description }) =>
+      state.serial(async () => {
+        const handle = state.getHandle(handle_id);
+        if (!handle) {
+          return {
+            isError: true,
+            content: [{ type: "text" as const, text: `Unknown handle_id: ${handle_id}` }],
+          };
+        }
+        try {
+          const engine = await state.getEngine();
+          const r = await state.memory.save(engine, { name, handle, description });
+          return {
+            content: [{ type: "text" as const, text: JSON.stringify(r, null, 2) }],
+          };
+        } catch (err) {
+          return {
+            isError: true,
+            content: [{ type: "text" as const, text: (err as Error).message ?? String(err) }],
+          };
+        }
+      }),
+  );
+
+  server.registerTool(
+    "glyph_memory_recall",
+    {
+      title: "Restore a saved handle by name",
+      description:
+        "Materialize a fresh in-memory DataHandle from a previously-saved name. The returned handle is queryable + has a new gdf:// URI, but its lineage chain stops at this verb (relation: 'source').",
+      inputSchema: {
+        name: z.string().min(1).describe("The name passed to glyph_memory_save."),
+      },
+    },
+    async ({ name }) =>
+      state.serial(async () => {
+        try {
+          const engine = await state.getEngine();
+          const handle = await state.memory.recall(engine, {
+            name,
+            sessionId: state.sessionId,
+          });
+          if (!handle) {
+            return {
+              isError: true,
+              content: [{ type: "text" as const, text: `Unknown memory name: ${name}` }],
+            };
+          }
+          state.storeHandle(handle);
+          return {
+            content: [
+              {
+                type: "text" as const,
+                text: JSON.stringify(jsonSafe(handle), null, 2),
+              },
+            ],
+          };
+        } catch (err) {
+          return {
+            isError: true,
+            content: [{ type: "text" as const, text: (err as Error).message ?? String(err) }],
+          };
+        }
+      }),
+  );
+
+  server.registerTool(
+    "glyph_memory_list",
+    {
+      title: "List persisted handles",
+      description:
+        "Return every saved entry in ~/.glyph/memory.duckdb (optionally filtered by name prefix). Each entry includes name, description, schema, sampleRows, savedAt.",
+      inputSchema: {
+        prefix: z.string().optional().describe("Filter to names starting with this prefix."),
+      },
+    },
+    async ({ prefix }) =>
+      state.serial(async () => {
+        const engine = await state.getEngine();
+        const list = await state.memory.list(engine, prefix);
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: JSON.stringify({ count: list.length, entries: list }, null, 2),
+            },
+          ],
+        };
+      }),
+  );
+
+  server.registerTool(
+    "glyph_memory_forget",
+    {
+      title: "Drop a persisted handle by name",
+      description:
+        "Remove a previously-saved name from ~/.glyph/memory.duckdb. Returns { forgotten: true } if it existed, { forgotten: false } otherwise.",
+      inputSchema: {
+        name: z.string().min(1).describe("The name to drop."),
+      },
+    },
+    async ({ name }) =>
+      state.serial(async () => {
+        const engine = await state.getEngine();
+        const ok = await state.memory.forget(engine, name);
+        return {
+          content: [{ type: "text" as const, text: JSON.stringify({ forgotten: ok }, null, 2) }],
+        };
+      }),
   );
 
   // ----- glyph_handles (PR33 / Phase 3 Tier A) ----------------------------

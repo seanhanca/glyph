@@ -335,6 +335,40 @@ function buildValuesView(
 }
 
 /**
+ * Materialize an arbitrary view SQL string as a DataHandle, optionally
+ * chained to a parent. The MCP persistent-memory recall path uses this:
+ * it points `viewSql` at an ATTACHed table in `~/.glyph/memory.duckdb`,
+ * and the returned handle is indistinguishable from one produced by
+ * `materializeSpec`. The "source" relation signals that lineage stops here
+ * (no in-session parent).
+ */
+export async function materializeViewAsHandle(
+  engine: ComputeEngine,
+  args: {
+    readonly viewSql: string;
+    readonly sessionId: string;
+    readonly producerTool: string;
+    /** Caller-supplied lineage parents. Empty array = a "fresh" handle. */
+    readonly parents?: ReadonlyArray<{ uri: string; relation: LineageRelation }>;
+    /** Override the lineage.sql preview. Defaults to viewSql. */
+    readonly sqlPreview?: string | undefined;
+  },
+): Promise<DataHandle> {
+  const probe = await engine.query(`SELECT * FROM (${args.viewSql}) LIMIT 0`);
+  const schema: ReadonlyArray<ColumnInfo> = probe.columns;
+  const baseHandle = await engine.materialize(args.viewSql, schema);
+  const result = await engine.queryHandle(baseHandle);
+  return enrichHandle(baseHandle, {
+    sessionId: args.sessionId,
+    sql: args.sqlPreview ?? args.viewSql,
+    producerTool: args.producerTool,
+    parents: args.parents ?? [],
+    sampleRows: result.rowCount,
+    filteredOut: 0,
+  });
+}
+
+/**
  * Materialize an in-memory rows array as a derived DataHandle, chained to
  * `parent` via the given `relation`. The MCP diagnostic verbs use this so
  * their results become first-class queryable handles (with full lineage)

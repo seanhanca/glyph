@@ -25,9 +25,9 @@ Do **not** use Glyph for:
 - Real-time streaming charts (use Perspective)
 - Bespoke / one-off visualizations that don't fit a grammar (use D3 directly)
 
-## The twenty tools
+## The twenty-four tools
 
-Glyph's MCP surface (9 Phase 0/1 + 4 Phase 3 Tier A GDF verbs + 1 explain verb + 4 diagnostic verbs + 2 metric-layer verbs):
+Glyph's MCP surface (9 Phase 0/1 + 4 Phase 3 Tier A GDF verbs + 1 explain verb + 4 diagnostic verbs + 2 metric-layer verbs + 4 persistent-memory verbs):
 
 1. `glyph_describe` — inspect a data file before writing a spec
 2. `glyph_render` — compile + render a spec; returns SVG + PNG + handle
@@ -48,7 +48,15 @@ Glyph's MCP surface (9 Phase 0/1 + 4 Phase 3 Tier A GDF verbs + 1 explain verb +
 17. `glyph_forecast` — seasonal-naive baseline + 2σ confidence bands
 18. `glyph_metrics_register` — register named aggregates (the metric layer)
 19. `glyph_metrics` — list registered metrics (optionally filtered)
+20. `glyph_memory_save` — persist a handle to `~/.glyph/memory.duckdb`
+21. `glyph_memory_recall` — restore a saved handle as a fresh DataHandle
+22. `glyph_memory_list` — list saved entries
+23. `glyph_memory_forget` — drop a saved entry
 0. `glyph_capabilities` — feature detection
+
+### Persistent memory (verbs 20–23) — Phase 3 §6
+
+`glyph_memory_save("daily_baseline", handle_id)` writes the rows backing the handle into `~/.glyph/memory.duckdb`. Across an MCP restart, `glyph_memory_recall("daily_baseline")` returns a fresh DataHandle pointing at the same rows. Use it for: dashboards that span multiple sessions, baselines an anomaly detector should compare against, "what was the answer yesterday?" recall.
 
 ### 0. `glyph_capabilities()` *(call once at session start)*
 
