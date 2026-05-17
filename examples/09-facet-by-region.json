@@ -1,0 +1,10 @@
+{
+  "$schema": "../packages/core/dist/spec.schema.json",
+  "data": {
+    "source": "sales.parquet",
+    "transform": "SELECT month, region, revenue FROM sales WHERE month >= '2024-01' ORDER BY month"
+  },
+  "layers": [{ "mark": "bar", "encoding": { "x": "month", "y": "revenue" } }],
+  "facet": { "col": "region" },
+  "title": "Monthly revenue, faceted by region"
+}

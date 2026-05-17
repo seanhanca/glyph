@@ -133,6 +133,25 @@ export interface SceneLegend {
   readonly entries: ReadonlyArray<LegendEntry>;
 }
 
+/**
+ * A facet panel — one cell in a small-multiples grid. Each panel carries
+ * its own marks + axes; coordinates are already absolute (SVG-space), so
+ * the renderer just iterates them.
+ */
+export interface ScenePanel {
+  readonly title: string;
+  readonly titleX: number;
+  readonly titleY: number;
+  readonly plotArea: {
+    readonly x: number;
+    readonly y: number;
+    readonly width: number;
+    readonly height: number;
+  };
+  readonly marks: ReadonlyArray<SceneMark>;
+  readonly axes: ReadonlyArray<SceneAxis>;
+}
+
 /** The complete scene a renderer consumes. */
 export interface Scene {
   readonly width: number;
@@ -151,4 +170,10 @@ export interface Scene {
   readonly schema?: SceneSchema;
   /** Optional legends (color/size/opacity). Renderer places them on the right. */
   readonly legends?: ReadonlyArray<SceneLegend>;
+  /**
+   * When set, the scene is a faceted grid. `marks` + `axes` at the top level
+   * are unused; the renderer iterates `panels` instead. Each panel carries
+   * its own absolute-coordinate marks + axes.
+   */
+  readonly panels?: ReadonlyArray<ScenePanel>;
 }

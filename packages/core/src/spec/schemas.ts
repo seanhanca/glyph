@@ -161,6 +161,18 @@ export const InteractiveSchema = z
   .strict();
 
 /**
+ * Faceting splits a single chart into a grid of small multiples. Phase 1.0
+ * supports `col` (side-by-side panels with a shared y scale + independent
+ * x scales per panel). `row` and `wrap` land in a follow-up.
+ */
+export const FacetSchema = z
+  .object({
+    /** Source field to partition rows by; one panel per distinct value. */
+    col: z.string().min(1),
+  })
+  .strict();
+
+/**
  * Spec versions known to the compiler. The compiler dispatches by version so
  * old specs keep working when new features ship. Bumping the major component
  * (\`glyph/0\` → \`glyph/1\`) is the breaking-change signal; minor bumps
@@ -225,6 +237,8 @@ export const GlyphSpecSchema = z
      * to e.g. "de-DE" to render 1234.5 as "1.234,5".
      */
     locale: z.string().min(2).optional(),
+    /** Small-multiples layout. Phase 1.0 supports col-faceting only. */
+    facet: FacetSchema.optional(),
     /** Opt into data-bound, hydratable SVG output. */
     interactive: InteractiveSchema.optional(),
   })

@@ -16,7 +16,14 @@
  *     non-interactive path so existing snapshots stay green.
  */
 
-import type { MarkData, Scene, SceneAxis, SceneLegend, SceneMark } from "../scenegraph/types.js";
+import type {
+  MarkData,
+  Scene,
+  SceneAxis,
+  SceneLegend,
+  SceneMark,
+  ScenePanel,
+} from "../scenegraph/types.js";
 
 const AXIS_COLOR = "#999999";
 const AXIS_LABEL_COLOR = "#333333";
@@ -274,6 +281,20 @@ function renderSceneAttrs(scene: Scene): string {
 /**
  * Render a Scene as an SVG document string.
  */
+/**
+ * Render one facet panel: title text + the panel's axes + marks.
+ * Coordinates are already absolute; the renderer just emits them.
+ */
+function renderPanel(p: ScenePanel, interactive: boolean): string {
+  const titleStr = `<text x="${p.titleX}" y="${p.titleY}" font-family="${FONT_FAMILY}" font-size="12" font-weight="600" fill="${AXIS_LABEL_COLOR}" text-anchor="middle" dominant-baseline="alphabetic">${esc(
+    p.title,
+  )}</text>`;
+  const axes = p.axes.map(renderAxis).join("");
+  const markStrs = p.marks.map((m) => renderMark(m, interactive)).join("");
+  const marks = interactive ? `<g class="glyph-marks">${markStrs}</g>` : markStrs;
+  return `${titleStr}${marks}${axes}`;
+}
+
 export function renderSvg(scene: Scene): string {
   const interactive = scene.schema !== undefined;
   const rootAttrs = renderSceneAttrs(scene);
@@ -292,12 +313,20 @@ export function renderSvg(scene: Scene): string {
         scene.title,
       )}</text>`
     : "";
+  const hoverStyle = interactive ? HOVER_STYLE : "";
+  const legends = (scene.legends ?? []).map(renderLegend).join("");
+
+  // Faceted scene: render each panel; the top-level marks/axes/grid are
+  // unused (panels carry their own).
+  if (scene.panels && scene.panels.length > 0) {
+    const panelStrs = scene.panels.map((p) => renderPanel(p, interactive)).join("");
+    return `${head}${desc}${hoverStyle}${bg}${title}${panelStrs}${legends}</svg>\n`;
+  }
+
   // Grid sits behind marks; axes + legends in front.
   const grid = renderGrid(scene);
   const markStrs = scene.marks.map((m) => renderMark(m, interactive)).join("");
   const marks = interactive ? `<g class="glyph-marks">${markStrs}</g>` : markStrs;
-  const hoverStyle = interactive ? HOVER_STYLE : "";
   const axes = scene.axes.map(renderAxis).join("");
-  const legends = (scene.legends ?? []).map(renderLegend).join("");
   return `${head}${desc}${hoverStyle}${bg}${title}${grid}${marks}${axes}${legends}</svg>\n`;
 }

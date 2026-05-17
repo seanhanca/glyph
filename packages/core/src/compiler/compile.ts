@@ -259,6 +259,13 @@ export interface CompileInput {
   readonly spec: GlyphSpec;
   readonly rows: ReadonlyArray<ReadonlyArray<unknown>>;
   readonly schema: ReadonlyArray<CompileFieldInfo>;
+  /**
+   * Internal: override the computed plot area. Used by the facet compiler
+   * when laying out per-panel sub-scenes within the same SVG. Most callers
+   * should leave this unset and let the compiler compute from PADDING +
+   * spec.width / spec.height.
+   */
+  readonly plotAreaOverride?: Scene["plotArea"];
 }
 
 /** Y-axis side a layer renders against. */
@@ -272,6 +279,11 @@ function ySideOfLayer(enc: Encoding): YSide {
 
 export function compileSpec(input: CompileInput): Scene {
   const { spec, rows, schema } = input;
+  // Faceted specs split into multiple panels; handle that upfront before
+  // the single-panel compilation path below.
+  if (spec.facet) {
+    return compileFaceted(input);
+  }
   const width = spec.width ?? DEFAULT_WIDTH;
   const height = spec.height ?? DEFAULT_HEIGHT;
   const theme = resolveTheme(spec.theme);
@@ -280,7 +292,7 @@ export function compileSpec(input: CompileInput): Scene {
   // Adjust right padding when we'll need a right-side axis.
   const anyRight = spec.layers.some((l) => ySideOfLayer(l.encoding) === "right");
   const padRight = anyRight ? PADDING.left : PADDING.right;
-  const plotArea = {
+  const plotArea = input.plotAreaOverride ?? {
     x: PADDING.left,
     y: PADDING.top,
     width: width - PADDING.left - padRight,
@@ -849,6 +861,102 @@ function buildRules(
       });
     }
   }
+}
+
+// ---------------------------------------------------------------------------
+// Facet compiler (PR28)
+// ---------------------------------------------------------------------------
+
+/**
+ * compileFaceted — partition rows by spec.facet.col and produce one
+ * ScenePanel per distinct value. Panels are laid out side-by-side with
+ * a small inter-panel gap.
+ *
+ * Phase 1.0 limitations:
+ *   - `col` faceting only (no `row` or `wrap` yet)
+ *   - Each panel has independent x AND y scales (no shared y yet)
+ *   - Panels share the same theme + locale formatter
+ */
+function compileFaceted(input: CompileInput): Scene {
+  const { spec, rows, schema } = input;
+  if (!spec.facet) throw new Error("compileFaceted called without spec.facet");
+
+  const W = spec.width ?? DEFAULT_WIDTH;
+  const H = spec.height ?? DEFAULT_HEIGHT;
+  const theme = resolveTheme(spec.theme);
+  const facetField = spec.facet.col;
+
+  const values = distinctOrdered(rows, schema, facetField);
+  if (values.length === 0) {
+    return {
+      width: W,
+      height: H,
+      background: theme.background,
+      plotArea: { x: 0, y: 0, width: W, height: H },
+      axes: [],
+      marks: [],
+      panels: [],
+      ...(spec.title ? { title: spec.title } : {}),
+    };
+  }
+
+  const GAP = 16;
+  const HEADER = 24; // per-panel title strip above each panel
+  const titleH = spec.title ? 24 : 0;
+  const panelW = Math.max(40, (W - GAP * (values.length - 1)) / values.length);
+  const panelH = H - titleH - HEADER;
+
+  // Build a sub-spec without `facet` (so compileSpec takes the non-faceted
+  // path) and without `title` (the top-level title renders once at the top).
+  const subSpec: GlyphSpec = { ...spec };
+  // biome-ignore lint/performance/noDelete: simplest way to drop a field
+  delete (subSpec as { facet?: unknown }).facet;
+  // biome-ignore lint/performance/noDelete: simplest way to drop a field
+  delete (subSpec as { title?: unknown }).title;
+
+  const panels: Scene["panels"] = values.map((val, idx) => {
+    // Filter rows for this panel.
+    const subRows = rows.filter((r) => {
+      const v = valueAt(r, schema, facetField);
+      return (v == null ? "" : String(v)) === val;
+    });
+    const offsetX = idx * (panelW + GAP);
+    const offsetY = titleH + HEADER;
+    const padR = spec.layers.some((l) => ySideOfLayer(l.encoding) === "right")
+      ? PADDING.left
+      : PADDING.right;
+    const panelPlot = {
+      x: offsetX + PADDING.left,
+      y: offsetY + PADDING.top,
+      width: panelW - PADDING.left - padR,
+      height: panelH - PADDING.top - PADDING.bottom,
+    };
+    const sub = compileSpec({
+      spec: subSpec,
+      rows: subRows,
+      schema,
+      plotAreaOverride: panelPlot,
+    });
+    return {
+      title: val,
+      titleX: offsetX + panelW / 2,
+      titleY: offsetY - 8,
+      plotArea: sub.plotArea,
+      marks: sub.marks,
+      axes: sub.axes,
+    };
+  });
+
+  return {
+    width: W,
+    height: H,
+    background: theme.background,
+    plotArea: { x: 0, y: 0, width: W, height: H },
+    axes: [],
+    marks: [],
+    panels,
+    ...(spec.title ? { title: spec.title } : {}),
+  };
 }
 
 // ---------------------------------------------------------------------------
