@@ -271,6 +271,134 @@
       .example p { font-size: 12px; color: var(--fg-dim); margin: 0 0 8px 0; }
       .example svg { width: 100%; height: auto; display: block; }
 
+      /* WHYBOARD */
+      .whyboard {
+        margin-top: 20px;
+        padding: 24px;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        background: linear-gradient(180deg, #fafbfd 0%, white 100%);
+      }
+      .whyboard-question {
+        display: inline-block;
+        background: var(--accent-soft);
+        color: var(--accent);
+        font-family: var(--mono);
+        font-size: 12px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        margin-bottom: 16px;
+        font-weight: 600;
+      }
+      .whyboard-root {
+        border: 2px solid var(--accent);
+        border-radius: 12px;
+        padding: 16px;
+        background: white;
+        position: relative;
+        max-width: 640px;
+        margin: 0 auto 8px auto;
+      }
+      .whyboard-root .kind-badge { background: var(--accent); color: white; }
+      .whyboard-root svg { display: block; margin-top: 10px; width: 100%; height: auto; }
+      .kind-badge {
+        display: inline-block;
+        font-family: var(--mono);
+        font-size: 10.5px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        padding: 2px 8px;
+        border-radius: 4px;
+        text-transform: uppercase;
+        background: var(--bg-soft);
+        color: var(--fg-dim);
+      }
+      .kind-badge.anomaly  { background: #fdecea; color: var(--red); }
+      .kind-badge.decompose { background: #fbf2d8; color: #8a6914; }
+      .kind-badge.forecast  { background: #e6f4e8; color: var(--green); }
+      .whyboard-headline {
+        margin: 6px 0 0 0;
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--fg);
+        line-height: 1.35;
+      }
+      .whyboard-subline {
+        font-size: 12.5px;
+        color: var(--fg-dim);
+        margin-top: 4px;
+      }
+      .whyboard-branches {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 14px;
+        margin-top: 6px;
+        position: relative;
+      }
+      /* The downward "tree" connectors from the root to each branch. */
+      .whyboard-branches::before {
+        content: "";
+        position: absolute;
+        top: -16px;
+        left: 16.66%;
+        right: 16.66%;
+        height: 16px;
+        border-top: 1.5px dashed var(--border);
+        border-left: 1.5px dashed var(--border);
+        border-right: 1.5px dashed var(--border);
+        border-bottom: none;
+      }
+      .whyboard-card {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px;
+        cursor: pointer;
+        transition: transform 0.08s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+      }
+      .whyboard-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+        border-color: var(--accent);
+      }
+      .whyboard-card svg { display: block; margin-top: 8px; width: 100%; height: auto; }
+      .whyboard-meta {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 10px;
+        font-size: 11px;
+        color: var(--fg-dim);
+        font-family: var(--mono);
+      }
+      .whyboard-uri {
+        background: var(--bg-soft);
+        padding: 1px 6px;
+        border-radius: 3px;
+      }
+      .whyboard-explain {
+        margin-top: 22px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+      }
+      .whyboard-explain h4 {
+        font-size: 13px;
+        font-weight: 600;
+        margin: 0 0 6px 0;
+        letter-spacing: 0.02em;
+      }
+      .whyboard-explain pre {
+        font-size: 12px;
+        margin: 0;
+      }
+      .whyboard-explain p { font-size: 13px; color: var(--fg-soft); }
+
+      @media (max-width: 760px) {
+        .whyboard-branches { grid-template-columns: 1fr; }
+        .whyboard-branches::before { display: none; }
+        .whyboard-explain { grid-template-columns: 1fr; }
+      }
+
       /* CODE SAMPLES */
       .codeflow {
         display: grid;
@@ -316,6 +444,7 @@
         </a>
         <nav class="nav-links">
           <a href="#examples">Examples</a>
+          <a href="#whyboard">Whyboard</a>
           <a href="#features">Features</a>
           <a href="#compare">Comparison</a>
           <a href="https://github.com/seanhanca/glyph">GitHub →</a>
@@ -627,6 +756,183 @@ npm install @glyph/core @glyph/duckdb @glyph/canvas</code></pre>
               </g>
               <line x1="40" y1="170" x2="280" y2="170" stroke="#999"/>
             </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="whyboard">
+      <div class="wrap">
+        <h2>The Whyboard — agents tell stories, not just charts</h2>
+        <p>
+          One chart answers "what does this look like?". The Whyboard answers <strong>"why?"</strong>
+          When the user asks <em>"why did rides spike at 8am?"</em>, Glyph doesn't return a single chart —
+          it returns a deterministic <strong>tree of diagnostics</strong>: a root, then one branch each for
+          anomaly detection, variance decomposition, and forecast. Every leaf is a real
+          <code>DataHandle</code> with chained lineage — click it, query it, drill in.
+        </p>
+
+        <div class="whyboard">
+          <span class="whyboard-question">User: “Why did rides spike at 8am yesterday?”</span>
+
+          <!-- ROOT NODE -->
+          <div class="whyboard-root">
+            <span class="kind-badge">root</span>
+            <h3 class="whyboard-headline">Rides peaked at 8 (260), 6.5× the 3 low (40).</h3>
+            <div class="whyboard-subline">
+              Source chart · 12 rows · confidence: high · <code class="whyboard-uri">gdf://abc/source</code>
+            </div>
+            <svg viewBox="0 0 640 130" role="img" aria-label="Root: rides by hour with the 8am peak highlighted">
+              <rect width="640" height="130" fill="#fafbfd"/>
+              <g fill="#aac1d8">
+                <rect x="40"  y="78" width="38" height="32"/>
+                <rect x="84"  y="62" width="38" height="48"/>
+                <rect x="128" y="40" width="38" height="70"/>
+                <rect x="172" y="20" width="38" height="90"/>
+              </g>
+              <!-- 8am peak — highlighted as the question's subject -->
+              <rect x="216" y="8" width="38" height="102" fill="#4c78a8" stroke="#1a1a1a" stroke-width="1.5"/>
+              <g fill="#aac1d8">
+                <rect x="260" y="22" width="38" height="88"/>
+                <rect x="304" y="40" width="38" height="70"/>
+                <rect x="348" y="56" width="38" height="54"/>
+                <rect x="392" y="70" width="38" height="40"/>
+                <rect x="436" y="80" width="38" height="30"/>
+                <rect x="480" y="86" width="38" height="24"/>
+                <rect x="524" y="92" width="38" height="18"/>
+              </g>
+              <line x1="30" y1="110" x2="600" y2="110" stroke="#999"/>
+              <g font-family="system-ui" font-size="10" fill="#666" text-anchor="middle">
+                <text x="235" y="124">8am ↑</text>
+              </g>
+            </svg>
+          </div>
+
+          <!-- THREE BRANCHES -->
+          <div class="whyboard-branches">
+            <!-- BRANCH 1: anomaly -->
+            <div class="whyboard-card">
+              <span class="kind-badge anomaly">anomaly</span>
+              <h4 class="whyboard-headline">
+                Hour=17 is +2.4σ from the mean (240 rides).
+              </h4>
+              <div class="whyboard-subline">2 outliers · threshold 2σ · z=2.4 strongest</div>
+              <svg viewBox="0 0 280 90" role="img" aria-label="Anomaly chart">
+                <rect width="280" height="90" fill="#fafbfd"/>
+                <line x1="10" y1="50" x2="270" y2="50" stroke="#e6e6e6" stroke-dasharray="2,3"/>
+                <g fill="#aac1d8">
+                  <circle cx="30"  cy="50" r="3"/>
+                  <circle cx="50"  cy="45" r="3"/>
+                  <circle cx="70"  cy="48" r="3"/>
+                  <circle cx="90"  cy="52" r="3"/>
+                  <circle cx="110" cy="44" r="3"/>
+                  <circle cx="130" cy="50" r="3"/>
+                  <circle cx="150" cy="46" r="3"/>
+                  <circle cx="170" cy="51" r="3"/>
+                </g>
+                <!-- two outliers -->
+                <circle cx="200" cy="20" r="5" fill="#c0392b" stroke="#1a1a1a"/>
+                <circle cx="240" cy="78" r="5" fill="#c0392b" stroke="#1a1a1a"/>
+                <g font-family="system-ui" font-size="10" fill="#c0392b" text-anchor="middle">
+                  <text x="200" y="12">17h ↑</text>
+                </g>
+              </svg>
+              <div class="whyboard-meta">
+                <span>relation: filter</span>
+                <span class="whyboard-uri">gdf://abc/a1</span>
+              </div>
+            </div>
+
+            <!-- BRANCH 2: decompose -->
+            <div class="whyboard-card">
+              <span class="kind-badge decompose">decompose</span>
+              <h4 class="whyboard-headline">
+                day-of-week explains 73% of the variance.
+              </h4>
+              <div class="whyboard-subline">Top factor: weekday (η² 0.73) · weekend 0.18</div>
+              <svg viewBox="0 0 280 90" role="img" aria-label="Decompose chart">
+                <rect width="280" height="90" fill="#fafbfd"/>
+                <g>
+                  <rect x="10"  y="20" width="200" height="20" fill="#d4a017"/>
+                  <rect x="10"  y="50" width="50"  height="20" fill="#e8d09b"/>
+                </g>
+                <g font-family="system-ui" font-size="11" fill="#333" text-anchor="end">
+                  <text x="0" y="34" text-anchor="start">weekday</text>
+                  <text x="0" y="64" text-anchor="start">weekend</text>
+                </g>
+                <g font-family="system-ui" font-size="10" fill="#333" text-anchor="start">
+                  <text x="215" y="34">73%</text>
+                  <text x="65"  y="64">18%</text>
+                </g>
+              </svg>
+              <div class="whyboard-meta">
+                <span>relation: agg</span>
+                <span class="whyboard-uri">gdf://abc/d1</span>
+              </div>
+            </div>
+
+            <!-- BRANCH 3: forecast -->
+            <div class="whyboard-card">
+              <span class="kind-badge forecast">forecast</span>
+              <h4 class="whyboard-headline">
+                Next 7-step forecast averages 232 (±18).
+              </h4>
+              <div class="whyboard-subline">Holt-Winters · season=7 · residual σ 9.0</div>
+              <svg viewBox="0 0 280 90" role="img" aria-label="Forecast chart">
+                <rect width="280" height="90" fill="#fafbfd"/>
+                <!-- historical line -->
+                <path d="M10,60 L40,55 L70,50 L100,40 L130,45 L160,35 L190,30" fill="none" stroke="#4c78a8" stroke-width="2"/>
+                <!-- forecast band -->
+                <path d="M190,20 L260,15 L260,50 L190,40 Z" fill="#d4edda" opacity="0.5"/>
+                <path d="M190,30 L260,32" fill="none" stroke="#2ea84d" stroke-width="2" stroke-dasharray="4,3"/>
+                <line x1="190" y1="5" x2="190" y2="85" stroke="#ccc" stroke-dasharray="2,2"/>
+                <g font-family="system-ui" font-size="9" fill="#2ea84d" text-anchor="start">
+                  <text x="195" y="14">forecast →</text>
+                </g>
+              </svg>
+              <div class="whyboard-meta">
+                <span>relation: transform</span>
+                <span class="whyboard-uri">gdf://abc/f1</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- BOTTOM: invocation + lineage -->
+          <div class="whyboard-explain">
+            <div>
+              <h4>One MCP call. Returns the whole tree.</h4>
+              <pre><code>glyph_whyboard({
+  handle_id: "rides_today",
+  question: "Why did rides spike at 8am?",
+  link_group: "investigate-q4"
+})
+
+→ {
+  root: { kind: "root", explanation: {...},
+    children: [
+      { kind: "anomaly",   uri: "gdf://abc/a1", ... },
+      { kind: "decompose", uri: "gdf://abc/d1", ... },
+      { kind: "forecast",  uri: "gdf://abc/f1", ... }
+    ]
+  }
+}</code></pre>
+            </div>
+            <div>
+              <h4>Every leaf is a real, queryable DataHandle.</h4>
+              <p>
+                Each branch's <code>uri</code> is a chained <code>DataHandle</code> with full lineage —
+                <code>glyph_lineage(uri)</code> walks it back to the source file. <code>glyph_query</code>
+                / <code>glyph_drill</code> work directly against it. <code>glyph_render</code> with
+                <code>data.source: "gdf://abc/a1"</code> re-renders the outlier slice.
+              </p>
+              <p>
+                Pass <code>link_group</code> and a click in any card propagates through the linked-view bus
+                to siblings — the canonical "agents tell a story, humans drive the next step" loop.
+              </p>
+              <p style="margin-top:14px;">
+                <em>Deterministic. Auditable. Same source rows → same tree, every time.</em>
+              </p>
+            </div>
           </div>
         </div>
       </div>
