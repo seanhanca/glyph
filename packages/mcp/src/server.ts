@@ -1,12 +1,24 @@
 /**
  * Glyph MCP server.
  *
- * Three tools — the entire library surface:
- *   - glyph_describe(source)           → schema + suggested encodings
- *   - glyph_render(spec)               → SVG + QueryHandle
- *   - glyph_query(handle_id, where?)   → follow-up rows
+ * Thirteen tools — the library surface:
+ *   Phase 0/1 (9):
+ *     - glyph_capabilities()              → feature detection
+ *     - glyph_describe(source)            → schema + suggested encodings
+ *     - glyph_render(spec)                → SVG + PNG + DataHandle
+ *     - glyph_query(handle_id, where?)    → follow-up rows
+ *     - glyph_drill(handle_id, …)         → selection → SQL predicate + rows
+ *     - glyph_import(payload)             → cross-MCP data bridge
+ *     - glyph_preview(handle_id?)         → interactive 127.0.0.1 chart
+ *     - glyph_await_interaction(handle)   → long-poll for clicks/brushes
+ *     - glyph_close_preview()             → stop preview server
+ *   Phase 3 Tier A (4, PR33):
+ *     - glyph_publish(handle_id)          → publish as gdf:// URI
+ *     - glyph_subscribe(uri)              → resolve URI to DataHandle
+ *     - glyph_lineage(uri, depth?)        → lineage tree walk
+ *     - glyph_handles()                   → list all session handles
  *
- * Total tool-definition payload is intentionally small (<600 tokens) so an
+ * Total tool-definition payload is intentionally small (<1000 tokens) so an
  * agent burns minimal context on the API surface itself.
  */
 
@@ -38,6 +50,11 @@ const MCP_TOOLS = [
   { name: "glyph_preview", since: "0.0.2" },
   { name: "glyph_await_interaction", since: "0.0.2" },
   { name: "glyph_close_preview", since: "0.0.2" },
+  // ---- Phase 3 Tier A: the four GDF verbs (PR33) -----------------------
+  { name: "glyph_publish", since: "0.0.3" },
+  { name: "glyph_subscribe", since: "0.0.3" },
+  { name: "glyph_lineage", since: "0.0.3" },
+  { name: "glyph_handles", since: "0.0.3" },
 ] as const;
 
 /** Best-effort browser launcher. Returns true on success. */
@@ -205,7 +222,7 @@ export function createServer(state: ServerState = new ServerState()): {
           };
         }
         const engine = await state.getEngine();
-        const m = await materializeSpec(engine, parsed.spec);
+        const m = await materializeSpec(engine, parsed.spec, { sessionId: state.sessionId });
         state.storeHandle(m.handle);
         const scene = compileSpec({
           spec: parsed.spec,
@@ -593,6 +610,211 @@ export function createServer(state: ServerState = new ServerState()): {
       await preview.stop();
       return {
         content: [{ type: "text" as const, text: JSON.stringify({ stopped: true }) }],
+      };
+    },
+  );
+
+  // ----- glyph_publish (PR33 / Phase 3 Tier A) ----------------------------
+  // Promote a session-local handle to a globally addressable gdf:// URI so
+  // other agents / sessions can subscribe to it. In the in-process Tier A
+  // build the handle already carries its URI (minted in materializeSpec) —
+  // this verb returns it plus the current version so the caller can hand
+  // the URI off as a cross-agent reference. Tier B/C will wire networked
+  // Arrow Flight transport behind the same signature.
+  server.registerTool(
+    "glyph_publish",
+    {
+      title: "Publish a handle as a gdf:// URI",
+      description:
+        "Promote a session-local handle to a globally addressable gdf:// URI. Returns { uri, version }. Other agents (or other sessions) can pass the URI to glyph_subscribe to access the same DataHandle. In Phase 3 Tier A the transport is in-process; networked Arrow Flight lands in a later tier.",
+      inputSchema: {
+        handle_id: z.string().describe("The local handle id from glyph_render."),
+        scope: z
+          .enum(["session", "process"])
+          .optional()
+          .describe(
+            "Visibility scope. 'session' (default) — visible to this MCP session. 'process' — visible to any session in this process (Tier A).",
+          ),
+      },
+    },
+    async ({ handle_id, scope: _scope }) => {
+      const handle = state.getHandle(handle_id);
+      if (!handle) {
+        return {
+          isError: true,
+          content: [{ type: "text" as const, text: `Unknown handle_id: ${handle_id}` }],
+        };
+      }
+      if (!handle.uri) {
+        return {
+          isError: true,
+          content: [
+            {
+              type: "text" as const,
+              text: `Handle ${handle_id} has no gdf:// URI (pre-Phase-3 handle).`,
+            },
+          ],
+        };
+      }
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: JSON.stringify(
+              {
+                uri: handle.uri,
+                version: handle.version ?? 1,
+              },
+              null,
+              2,
+            ),
+          },
+        ],
+      };
+    },
+  );
+
+  // ----- glyph_subscribe (PR33 / Phase 3 Tier A) --------------------------
+  // Resolve a gdf:// URI back to its DataHandle. In Tier A this is a local
+  // lookup against the session's handle registry. The handle returned is
+  // the same one glyph_render produced — schema, lineage, provenance,
+  // binding, version — so the subscriber can immediately glyph_query /
+  // glyph_drill / glyph_render against it.
+  server.registerTool(
+    "glyph_subscribe",
+    {
+      title: "Subscribe to a published gdf:// URI",
+      description:
+        "Look up a previously-published gdf:// URI and return the full DataHandle (id, viewName, schema, lineage, provenance, binding, version). The returned handle id is usable with glyph_query / glyph_drill / glyph_render's `data.source` (Phase 3).",
+      inputSchema: {
+        uri: z.string().describe("A gdf:// URI returned by glyph_publish."),
+      },
+    },
+    async ({ uri }) => {
+      const handle = state.getHandleByUri(uri);
+      if (!handle) {
+        return {
+          isError: true,
+          content: [{ type: "text" as const, text: `Unknown gdf:// URI: ${uri}` }],
+        };
+      }
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: JSON.stringify(jsonSafe(handle), null, 2),
+          },
+        ],
+      };
+    },
+  );
+
+  // ----- glyph_lineage (PR33 / Phase 3 Tier A) ----------------------------
+  // Walk the lineage chain of a handle. Returns a tree rooted at `uri` with
+  // each node carrying { uri, sql, producer, at } and a children[] array.
+  // Walks at most `depth` levels (default 8) and stops at handles whose
+  // parents aren't resolvable in this session (typically source files).
+  server.registerTool(
+    "glyph_lineage",
+    {
+      title: "Walk a handle's lineage tree",
+      description:
+        "Return the lineage tree of a published handle as { uri, sql, producer, at, children: [...] }. The tree walks parent URIs up to `depth` levels (default 8). Leaves are either handles with no parents (sources) or parents not present in this session.",
+      inputSchema: {
+        uri: z.string().describe("A gdf:// URI returned by glyph_publish."),
+        depth: z
+          .number()
+          .int()
+          .min(1)
+          .max(32)
+          .optional()
+          .describe("Maximum walk depth. Default 8."),
+      },
+    },
+    async ({ uri, depth }) => {
+      const maxDepth = depth ?? 8;
+      interface LineageNode {
+        uri: string;
+        sql: string;
+        producer: { agent: string; tool: string; sessionId: string; at: string };
+        at: string;
+        children: LineageNode[];
+      }
+      const visited = new Set<string>();
+      function walk(currentUri: string, remaining: number): LineageNode | null {
+        if (visited.has(currentUri)) return null; // cycle guard
+        visited.add(currentUri);
+        const h = state.getHandleByUri(currentUri);
+        if (!h || !h.lineage) return null;
+        const parents = h.lineage.parents ?? [];
+        const children: LineageNode[] =
+          remaining > 0
+            ? parents
+                .map((p) => walk(p.uri, remaining - 1))
+                .filter((n): n is LineageNode => n !== null)
+            : [];
+        return {
+          uri: currentUri,
+          sql: h.lineage.sql,
+          producer: h.lineage.producer,
+          at: h.lineage.producer.at,
+          children,
+        };
+      }
+      const root = walk(uri, maxDepth);
+      if (!root) {
+        return {
+          isError: true,
+          content: [
+            {
+              type: "text" as const,
+              text: `Unknown or lineage-less gdf:// URI: ${uri}`,
+            },
+          ],
+        };
+      }
+      return {
+        content: [{ type: "text" as const, text: JSON.stringify(root, null, 2) }],
+      };
+    },
+  );
+
+  // ----- glyph_handles (PR33 / Phase 3 Tier A) ----------------------------
+  // List every DataHandle in the current session. Useful for an agent that
+  // joined a session mid-flight, or for debugging via the inspector.
+  server.registerTool(
+    "glyph_handles",
+    {
+      title: "List all session DataHandles",
+      description:
+        "Return every DataHandle currently registered in this MCP session, in insertion order. Each entry includes the id, gdf:// uri (if present), version, schema column names, and the producing tool. Use this to discover what's queryable without re-rendering.",
+      inputSchema: {},
+    },
+    async () => {
+      const handles = state.allHandles().map((h) => ({
+        id: h.id,
+        uri: h.uri,
+        version: h.version,
+        viewName: h.viewName,
+        columns: h.schema.map((c) => c.name),
+        producer: h.lineage?.producer,
+        confidence: h.provenance?.confidence,
+      }));
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: JSON.stringify(
+              {
+                sessionId: state.sessionId,
+                count: handles.length,
+                handles,
+              },
+              null,
+              2,
+            ),
+          },
+        ],
       };
     },
   );

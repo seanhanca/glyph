@@ -25,9 +25,9 @@ Do **not** use Glyph for:
 - Real-time streaming charts (use Perspective)
 - Bespoke / one-off visualizations that don't fit a grammar (use D3 directly)
 
-## The eight tools (nine including `glyph_capabilities`)
+## The thirteen tools
 
-Glyph's MCP surface:
+Glyph's MCP surface (9 Phase 0/1 + 4 Phase 3 Tier A GDF verbs):
 
 1. `glyph_describe` — inspect a data file before writing a spec
 2. `glyph_render` — compile + render a spec; returns SVG + PNG + handle
@@ -37,6 +37,10 @@ Glyph's MCP surface:
 6. `glyph_await_interaction` — long-poll the click → agent loop
 7. `glyph_close_preview` — stop the preview server
 8. `glyph_drill` — predicate-driven drill-in (selection → rows)
+9. `glyph_publish` — promote a handle to a gdf:// URI (cross-agent ref)
+10. `glyph_subscribe` — resolve a gdf:// URI to its DataHandle
+11. `glyph_lineage` — walk a handle's lineage tree
+12. `glyph_handles` — list every DataHandle in the session
 0. `glyph_capabilities` — feature detection
 
 ### 0. `glyph_capabilities()` *(call once at session start)*
@@ -111,6 +115,22 @@ The chart → click/brush/zoom → SQL loop. Use this when the user (or their ID
 - `in: [7, 17, 18]` — discrete set (a multi-select)
 
 Returns the SQL `predicate`, the full `where` clause, and the matching rows. The same SQL is what `@glyph/live`'s `whereFor` / `whereForExtent` / `whereForZoom` emit browser-side — interaction and query are the same primitive.
+
+### 9. `glyph_publish(handle_id, scope?)` *(Phase 3 GDF)*
+
+Promote a session-local handle to a globally addressable `gdf://<session>/<id>` URI so another agent (or another MCP session in the same process) can reference it. Returns `{ uri, version }`. The URI is the same one already minted in `glyph_render`'s `DataHandle` — calling publish is the explicit "share this" gesture.
+
+### 10. `glyph_subscribe(uri)` *(Phase 3 GDF)*
+
+Resolve a `gdf://` URI back to its full `DataHandle` — id, viewName, schema, **lineage** (sql + parents + producer), **provenance** (freshness, sampleRows, confidence), **binding** (kind: `duckdb-view` in Tier A), and `version`. After subscribing you can pass the handle's `id` to `glyph_query`, `glyph_drill`, or use it as `data.source: "gdf://..."` in `glyph_render` (Phase 3).
+
+### 11. `glyph_lineage(uri, depth?)` *(Phase 3 GDF)*
+
+Walk a handle's lineage tree. Returns `{ uri, sql, producer, at, children: [...] }` recursively up to `depth` levels (default 8). Each node carries the SQL that produced it and the producer record (`agent`, `tool`, `sessionId`, `at`). Useful for trust + audit ("where did this number come from?").
+
+### 12. `glyph_handles()` *(Phase 3 GDF)*
+
+List every `DataHandle` in the current MCP session. Returns `{ sessionId, count, handles: [{ id, uri, version, columns, producer, confidence, viewName }] }`. Use it to discover what's already queryable without re-rendering — typically after a context handoff.
 
 ## Spec format (the wire format)
 

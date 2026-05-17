@@ -9,7 +9,8 @@
  * `glyph_preview` call; stopped on close).
  */
 
-import type { ComputeEngine, QueryHandle } from "@glyph/core";
+import { randomUUID } from "node:crypto";
+import type { ComputeEngine, DataHandle, QueryHandle } from "@glyph/core";
 import { createDuckDBEngine, materializeSpec } from "@glyph/duckdb";
 import {
   type PreviewServer,
@@ -19,14 +20,19 @@ import {
 
 export class ServerState {
   private engine: ComputeEngine | undefined;
-  private readonly handles = new Map<string, QueryHandle>();
+  private readonly handles = new Map<string, DataHandle>();
+  /** Secondary index: gdf:// uri → handle id. Populated when handles are stored. */
+  private readonly handlesByUri = new Map<string, string>();
+  /** Per-session id for minted URIs. Random per ServerState instance. */
+  readonly sessionId: string;
   private readonly svgsByHandle = new Map<string, string>();
   private chain: Promise<unknown> = Promise.resolve();
   private preview: PreviewServer | undefined;
   private readonly previewOptions: PreviewServerOptions;
 
-  constructor(options: { preview?: PreviewServerOptions } = {}) {
+  constructor(options: { preview?: PreviewServerOptions; sessionId?: string } = {}) {
     this.previewOptions = options.preview ?? {};
+    this.sessionId = options.sessionId ?? randomUUID().replace(/-/g, "").slice(0, 16);
   }
 
   async getEngine(): Promise<ComputeEngine> {
@@ -36,12 +42,28 @@ export class ServerState {
     return this.engine;
   }
 
+  /** Store a handle and (if it carries a URI) index it by URI as well. */
   storeHandle(handle: QueryHandle): void {
-    this.handles.set(handle.id, handle);
+    this.handles.set(handle.id, handle as DataHandle);
+    const h = handle as DataHandle;
+    if (h.uri) {
+      this.handlesByUri.set(h.uri, h.id);
+    }
   }
 
-  getHandle(id: string): QueryHandle | undefined {
+  getHandle(id: string): DataHandle | undefined {
     return this.handles.get(id);
+  }
+
+  /** Lookup a handle by its gdf:// URI. */
+  getHandleByUri(uri: string): DataHandle | undefined {
+    const id = this.handlesByUri.get(uri);
+    return id ? this.handles.get(id) : undefined;
+  }
+
+  /** All handles in this session (insertion order). */
+  allHandles(): ReadonlyArray<DataHandle> {
+    return Array.from(this.handles.values());
   }
 
   /** Cache the rendered SVG for a handle so the preview server can serve it. */

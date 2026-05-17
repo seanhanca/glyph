@@ -66,7 +66,7 @@ describe("Glyph MCP server", () => {
     await state.close();
   });
 
-  it("lists the nine tools", async () => {
+  it("lists the thirteen tools", async () => {
     const r = await client.listTools();
     const names = r.tools.map((t) => t.name).sort();
     expect(names).toEqual([
@@ -75,10 +75,14 @@ describe("Glyph MCP server", () => {
       "glyph_close_preview",
       "glyph_describe",
       "glyph_drill",
+      "glyph_handles",
       "glyph_import",
+      "glyph_lineage",
       "glyph_preview",
+      "glyph_publish",
       "glyph_query",
       "glyph_render",
+      "glyph_subscribe",
     ]);
   });
 
@@ -96,10 +100,14 @@ describe("Glyph MCP server", () => {
       "glyph_close_preview",
       "glyph_describe",
       "glyph_drill",
+      "glyph_handles",
       "glyph_import",
+      "glyph_lineage",
       "glyph_preview",
+      "glyph_publish",
       "glyph_query",
       "glyph_render",
+      "glyph_subscribe",
     ]);
   });
 
@@ -455,6 +463,166 @@ describe("Glyph MCP server", () => {
       await callText(client, "glyph_preview", {});
       const b = await callText(client, "glyph_close_preview", {});
       expect(JSON.parse(b.text).stopped).toBe(true);
+    });
+  });
+
+  // ---- Phase 3 Tier A: the four GDF verbs (PR33) -------------------------
+  describe("GDF verbs (PR33 — Phase 3 Tier A)", () => {
+    async function renderOne(): Promise<{ handle_id: string; uri: string }> {
+      const r = await callText(client, "glyph_render", {
+        spec: {
+          data: {
+            source: fixture,
+            format: "csv",
+            transform: "SELECT pickup_hour, rides FROM glyph_src_main WHERE rides > 100",
+          },
+          layers: [{ mark: "bar", encoding: { x: "pickup_hour", y: "rides" } }],
+        },
+      });
+      const out = JSON.parse(r.text);
+      const handle = state.getHandle(out.handle_id);
+      // biome-ignore lint/style/noNonNullAssertion: the handle was just rendered.
+      return { handle_id: out.handle_id, uri: handle!.uri! };
+    }
+
+    it("glyph_publish returns the URI + version 1 for a freshly rendered handle", async () => {
+      const { handle_id, uri } = await renderOne();
+      const r = await callText(client, "glyph_publish", { handle_id });
+      expect(r.isError).toBe(false);
+      const out = JSON.parse(r.text);
+      expect(out.uri).toBe(uri);
+      expect(out.uri).toMatch(/^gdf:\/\/[0-9a-f]+\/[0-9a-f]+$/);
+      expect(out.version).toBe(1);
+    });
+
+    it("glyph_publish rejects unknown handle_id", async () => {
+      const r = await callText(client, "glyph_publish", { handle_id: "nope" });
+      expect(r.isError).toBe(true);
+      expect(r.text).toContain("Unknown handle_id");
+    });
+
+    it("glyph_subscribe resolves a published URI back to the full DataHandle", async () => {
+      const { handle_id, uri } = await renderOne();
+      // Publish first (in-process Tier A: publish is mostly a verb to confirm).
+      await callText(client, "glyph_publish", { handle_id });
+      const r = await callText(client, "glyph_subscribe", { uri });
+      expect(r.isError).toBe(false);
+      const handle = JSON.parse(r.text);
+      expect(handle.id).toBe(handle_id);
+      expect(handle.uri).toBe(uri);
+      expect(handle.version).toBe(1);
+      // Phase 3 metadata survives the round trip.
+      expect(handle.lineage.sql).toContain("WHERE rides > 100");
+      expect(handle.lineage.producer.tool).toBe("materializeSpec");
+      expect(handle.provenance.confidence).toBe("high");
+      expect(handle.binding.kind).toBe("duckdb-view");
+      expect(Array.isArray(handle.schema)).toBe(true);
+    });
+
+    it("glyph_subscribe round-trips in < 50 ms on localhost (Tier A acceptance)", async () => {
+      const { handle_id, uri } = await renderOne();
+      await callText(client, "glyph_publish", { handle_id });
+      const t0 = performance.now();
+      const r = await callText(client, "glyph_subscribe", { uri });
+      const elapsed = performance.now() - t0;
+      expect(r.isError).toBe(false);
+      // Acceptance criterion (3) from phase-3-agent-graph.md §13 Tier A.
+      expect(elapsed).toBeLessThan(50);
+    });
+
+    it("glyph_subscribe + glyph_query: cross-agent handoff lets the subscriber read rows", async () => {
+      // Simulates the two-process demo with two MCP clients sharing one state.
+      // Client A renders + publishes; Client B subscribes + queries.
+      const { handle_id, uri } = await renderOne(); // Client A
+      await callText(client, "glyph_publish", { handle_id });
+
+      // Spin up a second MCP client against the same ServerState.
+      const { server: serverB } = createServer(state);
+      const [bClientT, bServerT] = InMemoryTransport.createLinkedPair();
+      await serverB.connect(bServerT);
+      const clientB = new Client({ name: "test-client-b", version: "0.0.0" });
+      await clientB.connect(bClientT);
+
+      try {
+        const sub = await clientB.callTool({
+          name: "glyph_subscribe",
+          arguments: { uri },
+        });
+        const subContent = (sub as ToolCallResult).content ?? [];
+        const subText = subContent.find((c): c is ToolTextContent => c.type === "text")?.text ?? "";
+        const subHandle = JSON.parse(subText);
+        expect(subHandle.id).toBe(handle_id);
+
+        const q = await clientB.callTool({
+          name: "glyph_query",
+          arguments: { handle_id: subHandle.id, where: "WHERE rides > 200" },
+        });
+        const qContent = (q as ToolCallResult).content ?? [];
+        const qText = qContent.find((c): c is ToolTextContent => c.type === "text")?.text ?? "";
+        const qOut = JSON.parse(qText);
+        expect(qOut.rowCount).toBe(5);
+      } finally {
+        await clientB.close();
+      }
+    });
+
+    it("glyph_subscribe rejects an unknown gdf:// URI", async () => {
+      const r = await callText(client, "glyph_subscribe", {
+        uri: "gdf://nope/abcdef",
+      });
+      expect(r.isError).toBe(true);
+      expect(r.text).toContain("Unknown gdf:// URI");
+    });
+
+    it("glyph_lineage returns a node with sql + producer for a known URI", async () => {
+      const { uri } = await renderOne();
+      const r = await callText(client, "glyph_lineage", { uri });
+      expect(r.isError).toBe(false);
+      const tree = JSON.parse(r.text);
+      expect(tree.uri).toBe(uri);
+      expect(tree.sql).toContain("WHERE rides > 100");
+      expect(tree.producer.tool).toBe("materializeSpec");
+      expect(tree.producer.agent).toBe("glyph");
+      expect(Array.isArray(tree.children)).toBe(true);
+      // No registered parents in the session yet → leaf node.
+      expect(tree.children).toHaveLength(0);
+      // Walking back to a source = lineage.sql tells you the source query.
+      expect(typeof tree.at).toBe("string");
+      expect(Number.isNaN(Date.parse(tree.at))).toBe(false);
+    });
+
+    it("glyph_lineage rejects an unknown URI", async () => {
+      const r = await callText(client, "glyph_lineage", {
+        uri: "gdf://nope/abcdef",
+      });
+      expect(r.isError).toBe(true);
+      expect(r.text).toContain("Unknown");
+    });
+
+    it("glyph_handles lists every handle in the session", async () => {
+      const empty = await callText(client, "glyph_handles", {});
+      expect(empty.isError).toBe(false);
+      const emptyOut = JSON.parse(empty.text);
+      expect(emptyOut.count).toBe(0);
+      expect(emptyOut.handles).toEqual([]);
+      expect(emptyOut.sessionId).toMatch(/^[0-9a-f]+$/);
+
+      const { handle_id: h1 } = await renderOne();
+      const { handle_id: h2 } = await renderOne();
+
+      const r = await callText(client, "glyph_handles", {});
+      expect(r.isError).toBe(false);
+      const out = JSON.parse(r.text);
+      expect(out.count).toBe(2);
+      const ids = out.handles.map((h: { id: string }) => h.id);
+      expect(ids).toEqual([h1, h2]);
+      for (const h of out.handles) {
+        expect(h.uri).toMatch(/^gdf:\/\/[0-9a-f]+\/[0-9a-f]+$/);
+        expect(h.version).toBe(1);
+        expect(h.confidence).toBe("high");
+        expect(h.producer.tool).toBe("materializeSpec");
+        expect(Array.isArray(h.columns)).toBe(true);
+      }
     });
   });
 });
