@@ -320,7 +320,17 @@ export function compileSpec(input: CompileInput): Scene {
   for (let i = 0; i < spec.layers.length; i++) {
     const l = spec.layers[i];
     if (!l) continue;
-    const allowedMarks = ["bar", "point", "line", "area", "rule", "geo-region", "heatmap"];
+    const allowedMarks = [
+      "bar",
+      "point",
+      "line",
+      "area",
+      "rule",
+      "geo-region",
+      "heatmap",
+      "boxplot",
+      "text",
+    ];
     if (!allowedMarks.includes(l.mark)) {
       throw new Error(`Phase 1 supports marks ${allowedMarks.join("|")}; layer ${i} has ${l.mark}`);
     }
@@ -351,6 +361,26 @@ export function compileSpec(input: CompileInput): Scene {
       }
       if (fieldOf(l.encoding.color) === undefined) {
         throw new Error(`Layer ${i} (heatmap) requires color encoding (the cell value)`);
+      }
+      continue;
+    }
+    // PR50 boxplot: categorical x + quantitative y, per-group quartile box.
+    if (l.mark === "boxplot") {
+      if (fieldOf(l.encoding.x) === undefined || fieldOf(l.encoding.y) === undefined) {
+        throw new Error(`Layer ${i} (boxplot) requires both x and y encodings`);
+      }
+      if (fieldType(l.encoding.y, schema) !== "quantitative") {
+        throw new Error(`Layer ${i} (boxplot): y encoding must be quantitative`);
+      }
+      continue;
+    }
+    // PR50 text: x + y + text channel (the label content).
+    if (l.mark === "text") {
+      if (fieldOf(l.encoding.x) === undefined || fieldOf(l.encoding.y) === undefined) {
+        throw new Error(`Layer ${i} (text) requires both x and y encodings`);
+      }
+      if (fieldOf(l.encoding.text) === undefined) {
+        throw new Error(`Layer ${i} (text) requires encoding.text`);
       }
       continue;
     }
@@ -470,6 +500,17 @@ export function compileSpec(input: CompileInput): Scene {
       continue;
     }
     if (!yScale || !xField || !yField) continue;
+    if (layer.mark === "boxplot") {
+      if (xScale.type !== "band") {
+        throw new Error("boxplot mark requires a band x scale");
+      }
+      buildBoxplot(marks, rows, schema, enc, xField, yField, xScale, yScale, theme);
+      continue;
+    }
+    if (layer.mark === "text") {
+      buildTextAnnotations(marks, rows, schema, enc, xField, yField, xScale, yScale, theme);
+      continue;
+    }
     const ctx: MarkCtx = {
       interactive: spec.interactive,
       xField,
@@ -968,6 +1009,211 @@ function buildRules(
         strokeWidth: 1.5,
       });
     }
+  }
+}
+
+/**
+ * buildBoxplot — distribution mark (PR50).
+ *
+ * For each x-group, compute Tukey's five-number summary
+ * (Q1, median, Q3, lo-whisker, hi-whisker = Q1 - 1.5×IQR / Q3 + 1.5×IQR
+ * clamped to the nearest within-bound observation). Emit:
+ *   - rect for the IQR box (Q1 → Q3)
+ *   - line for the median
+ *   - line for the whiskers (lo to Q1, Q3 to hi)
+ *   - circle for any outlier beyond the whisker bounds
+ *
+ * Deterministic — same rows + same theme → byte-identical mark sequence.
+ */
+function buildBoxplot(
+  out: SceneMark[],
+  rows: ReadonlyArray<ReadonlyArray<unknown>>,
+  schema: ReadonlyArray<CompileFieldInfo>,
+  encoding: Encoding,
+  xField: string,
+  yField: string,
+  xScale: ReturnType<typeof bandScale> | ReturnType<typeof linearScale>,
+  yScale: ReturnType<typeof linearScale>,
+  theme: Theme,
+): void {
+  if (xScale.type !== "band") return;
+  const xIdx = schema.findIndex((c) => c.name === xField);
+  const yIdx = schema.findIndex((c) => c.name === yField);
+  if (xIdx < 0 || yIdx < 0) return;
+
+  // Bucket numeric values per x-group.
+  const buckets = new Map<string, number[]>();
+  for (const row of rows) {
+    const key = String(row[xIdx] ?? "");
+    const v = row[yIdx];
+    const n = typeof v === "number" ? v : typeof v === "bigint" ? Number(v) : Number(v);
+    if (!Number.isFinite(n)) continue;
+    let arr = buckets.get(key);
+    if (!arr) {
+      arr = [];
+      buckets.set(key, arr);
+    }
+    arr.push(n);
+  }
+
+  const fill = theme.marks[0] ?? "#999";
+  const cellW = xScale.bandwidth;
+  const inset = cellW * 0.2;
+  const boxW = cellW - 2 * inset;
+
+  for (const [groupKey, values] of buckets) {
+    if (values.length === 0) continue;
+    const sorted = [...values].sort((a, b) => a - b);
+    const q = quantiles(sorted);
+    const iqr = q.q3 - q.q1;
+    const loBound = q.q1 - 1.5 * iqr;
+    const hiBound = q.q3 + 1.5 * iqr;
+    const inBounds = sorted.filter((v) => v >= loBound && v <= hiBound);
+    // biome-ignore lint/style/noNonNullAssertion: inBounds is non-empty (Q1/Q3 are inside).
+    const loWhisker = inBounds.length > 0 ? inBounds[0]! : sorted[0]!;
+    // biome-ignore lint/style/noNonNullAssertion: same.
+    const hiWhisker =
+      inBounds.length > 0 ? inBounds[inBounds.length - 1]! : sorted[sorted.length - 1]!;
+    const outliers = sorted.filter((v) => v < loBound || v > hiBound);
+
+    const xCenter = xScale.apply(groupKey) + cellW / 2;
+    const xLeft = xCenter - boxW / 2;
+    const yQ1 = yScale.apply(q.q1);
+    const yQ3 = yScale.apply(q.q3);
+    const yMed = yScale.apply(q.median);
+    const yLo = yScale.apply(loWhisker);
+    const yHi = yScale.apply(hiWhisker);
+
+    // Box (Q1 → Q3). y axis is inverted so smaller y = higher value.
+    const yTop = Math.min(yQ1, yQ3);
+    const boxH = Math.abs(yQ3 - yQ1);
+    out.push({
+      type: "rect",
+      x: roundPx(xLeft),
+      y: roundPx(yTop),
+      width: roundPx(boxW),
+      height: roundPx(boxH),
+      fill,
+      stroke: theme.fg,
+      strokeWidth: 1,
+    });
+    // Median line across the box.
+    out.push({
+      type: "line",
+      x1: roundPx(xLeft),
+      y1: roundPx(yMed),
+      x2: roundPx(xLeft + boxW),
+      y2: roundPx(yMed),
+      stroke: theme.fg,
+      strokeWidth: 1.5,
+    });
+    // Whiskers: vertical from box edges to whisker bounds.
+    out.push({
+      type: "line",
+      x1: roundPx(xCenter),
+      y1: roundPx(yQ1),
+      x2: roundPx(xCenter),
+      y2: roundPx(yLo),
+      stroke: theme.fg,
+      strokeWidth: 1,
+    });
+    out.push({
+      type: "line",
+      x1: roundPx(xCenter),
+      y1: roundPx(yQ3),
+      x2: roundPx(xCenter),
+      y2: roundPx(yHi),
+      stroke: theme.fg,
+      strokeWidth: 1,
+    });
+    // Outlier dots (small circles beyond the whisker bounds).
+    for (const v of outliers) {
+      out.push({
+        type: "circle",
+        cx: roundPx(xCenter),
+        cy: roundPx(yScale.apply(v)),
+        r: 2,
+        fill: theme.fg,
+      });
+    }
+  }
+  // Silence unused parameter for encoding (color encoding lands when we
+  // add a per-box palette override; v0 uses the theme's first mark color).
+  void encoding;
+}
+
+/** Linear quantile interpolation (R type-7 ⁠— the npm default). */
+function quantiles(sorted: ReadonlyArray<number>): {
+  q1: number;
+  median: number;
+  q3: number;
+} {
+  return {
+    q1: percentile(sorted, 0.25),
+    median: percentile(sorted, 0.5),
+    q3: percentile(sorted, 0.75),
+  };
+}
+
+function percentile(sorted: ReadonlyArray<number>, p: number): number {
+  if (sorted.length === 0) return 0;
+  if (sorted.length === 1) return sorted[0] ?? 0;
+  const idx = p * (sorted.length - 1);
+  const lo = Math.floor(idx);
+  const hi = Math.ceil(idx);
+  // biome-ignore lint/style/noNonNullAssertion: lo/hi bounded by length-1.
+  if (lo === hi) return sorted[lo]!;
+  // biome-ignore lint/style/noNonNullAssertion: same.
+  return sorted[lo]! + (sorted[hi]! - sorted[lo]!) * (idx - lo);
+}
+
+/**
+ * buildTextAnnotations — direct labels on (x, y) (PR50).
+ *
+ * Emits one `text` SceneMark per row at the row's (x, y) with the
+ * value of encoding.text as the rendered string. Composes via multi-
+ * layer specs: bars + text labels, lines + annotations, etc.
+ */
+function buildTextAnnotations(
+  out: SceneMark[],
+  rows: ReadonlyArray<ReadonlyArray<unknown>>,
+  schema: ReadonlyArray<CompileFieldInfo>,
+  encoding: Encoding,
+  xField: string,
+  yField: string,
+  xScale: ReturnType<typeof bandScale> | ReturnType<typeof linearScale>,
+  yScale: ReturnType<typeof linearScale>,
+  theme: Theme,
+): void {
+  const textField = fieldOf(encoding.text);
+  if (!textField) return;
+  const xIdx = schema.findIndex((c) => c.name === xField);
+  const yIdx = schema.findIndex((c) => c.name === yField);
+  const tIdx = schema.findIndex((c) => c.name === textField);
+  if (xIdx < 0 || yIdx < 0 || tIdx < 0) return;
+  const bandShift = xScale.type === "band" ? xScale.bandwidth / 2 : 0;
+  for (const row of rows) {
+    const xRaw = row[xIdx];
+    const yRaw = row[yIdx];
+    const tRaw = row[tIdx];
+    if (tRaw === null || tRaw === undefined) continue;
+    const xVal =
+      xScale.type === "band"
+        ? xScale.apply(String(xRaw ?? "")) + bandShift
+        : xScale.apply(typeof xRaw === "number" ? xRaw : Number(xRaw));
+    const yNum =
+      typeof yRaw === "number" ? yRaw : typeof yRaw === "bigint" ? Number(yRaw) : Number(yRaw);
+    if (!Number.isFinite(yNum)) continue;
+    out.push({
+      type: "text",
+      x: roundPx(xVal),
+      y: roundPx(yScale.apply(yNum) - 6),
+      text: String(tRaw),
+      fontSize: 11,
+      fill: theme.fg,
+      anchor: "middle",
+      baseline: "alphabetic",
+    });
   }
 }
 

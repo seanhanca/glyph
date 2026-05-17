@@ -54,6 +54,14 @@ export const MarkSchema = z.enum([
   // quantitative field. Both axes use band scales; color interpolated
   // between two stops.
   "heatmap",
+  // PR50 — distribution mark. Categorical x, quantitative y; per x-group
+  // the compiler computes Q1 / median / Q3 / whiskers (Tukey, 1.5 × IQR)
+  // and outliers beyond the whisker bounds.
+  "boxplot",
+  // PR50 — direct label annotation. Renders a text mark at each row's
+  // (x, y) with the value of encoding.text. Composes with other marks
+  // via multi-layer specs (e.g. bars + text labels).
+  "text",
 ]);
 
 /**
@@ -156,6 +164,11 @@ export const EncodingSchema = z
      * Used by `geo-region` marks (PR44).
      */
     region: ChannelSchema.optional(),
+    /**
+     * Source field whose value is rendered as the label string by the
+     * `text` mark (PR50).
+     */
+    text: ChannelSchema.optional(),
   })
   .strict();
 
