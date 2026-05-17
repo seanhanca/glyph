@@ -66,7 +66,7 @@ describe("Glyph MCP server", () => {
     await state.close();
   });
 
-  it("lists the thirteen tools", async () => {
+  it("lists the fourteen tools", async () => {
     const r = await client.listTools();
     const names = r.tools.map((t) => t.name).sort();
     expect(names).toEqual([
@@ -75,6 +75,7 @@ describe("Glyph MCP server", () => {
       "glyph_close_preview",
       "glyph_describe",
       "glyph_drill",
+      "glyph_explain",
       "glyph_handles",
       "glyph_import",
       "glyph_lineage",
@@ -100,6 +101,7 @@ describe("Glyph MCP server", () => {
       "glyph_close_preview",
       "glyph_describe",
       "glyph_drill",
+      "glyph_explain",
       "glyph_handles",
       "glyph_import",
       "glyph_lineage",
@@ -666,6 +668,55 @@ describe("Glyph MCP server", () => {
         expect(h.producer.tool).toBe("materializeSpec");
         expect(Array.isArray(h.columns)).toBe(true);
       }
+    });
+  });
+
+  // ---- Phase 3 §2: self-explaining charts (PR35) -------------------------
+  describe("glyph_explain (PR35 — Phase 3 §2)", () => {
+    async function renderTaxi(): Promise<string> {
+      const r = await callText(client, "glyph_render", {
+        spec: {
+          data: { source: fixture, format: "csv" },
+          layers: [{ mark: "bar", encoding: { x: "pickup_hour", y: "rides" } }],
+        },
+      });
+      return JSON.parse(r.text).handle_id as string;
+    }
+
+    it("returns { headline, highlights[], questions[] } for a rendered chart", async () => {
+      const handle_id = await renderTaxi();
+      const r2 = await callText(client, "glyph_explain", { handle_id });
+      expect(r2.isError).toBe(false);
+      const exp = JSON.parse(r2.text);
+      expect(typeof exp.headline).toBe("string");
+      expect(exp.headline.length).toBeGreaterThan(0);
+      expect(Array.isArray(exp.highlights)).toBe(true);
+      expect(Array.isArray(exp.questions)).toBe(true);
+    });
+
+    it("is deterministic across repeat calls", async () => {
+      const handle_id = await renderTaxi();
+      const a = await callText(client, "glyph_explain", { handle_id });
+      const b = await callText(client, "glyph_explain", { handle_id });
+      expect(JSON.parse(a.text)).toEqual(JSON.parse(b.text));
+    });
+
+    it("honors hints to override role inference", async () => {
+      const handle_id = await renderTaxi();
+      // Fixture columns: pickup_hour, fare, rides. Pin the y to rides explicitly.
+      const r = await callText(client, "glyph_explain", {
+        handle_id,
+        hints: { xField: "pickup_hour", yField: "rides" },
+      });
+      expect(r.isError).toBe(false);
+      const exp = JSON.parse(r.text);
+      expect(exp.headline.toLowerCase()).toContain("rides");
+    });
+
+    it("rejects an unknown handle_id with a clear error", async () => {
+      const r = await callText(client, "glyph_explain", { handle_id: "nope" });
+      expect(r.isError).toBe(true);
+      expect(r.text).toContain("Unknown handle_id");
     });
   });
 });

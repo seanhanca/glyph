@@ -1,7 +1,7 @@
 /**
  * Glyph MCP server.
  *
- * Thirteen tools — the library surface:
+ * Fourteen tools — the library surface:
  *   Phase 0/1 (9):
  *     - glyph_capabilities()              → feature detection
  *     - glyph_describe(source)            → schema + suggested encodings
@@ -17,6 +17,8 @@
  *     - glyph_subscribe(uri)              → resolve URI to DataHandle
  *     - glyph_lineage(uri, depth?)        → lineage tree walk
  *     - glyph_handles()                   → list all session handles
+ *   Phase 3 §2 (1, PR35):
+ *     - glyph_explain(handle_id)          → deterministic chart explanation
  *
  * Total tool-definition payload is intentionally small (<1000 tokens) so an
  * agent burns minimal context on the API surface itself.
@@ -24,6 +26,7 @@
 
 import {
   compileSpec,
+  explainHandle,
   getCapabilities,
   isTranslateError,
   renderSvg,
@@ -55,6 +58,8 @@ const MCP_TOOLS = [
   { name: "glyph_subscribe", since: "0.0.3" },
   { name: "glyph_lineage", since: "0.0.3" },
   { name: "glyph_handles", since: "0.0.3" },
+  // ---- Phase 3 §2: self-explaining charts (PR35) -----------------------
+  { name: "glyph_explain", since: "0.0.4" },
 ] as const;
 
 /** Best-effort browser launcher. Returns true on success. */
@@ -788,6 +793,60 @@ export function createServer(state: ServerState = new ServerState()): {
         content: [{ type: "text" as const, text: JSON.stringify(root, null, 2) }],
       };
     },
+  );
+
+  // ----- glyph_explain (PR35 / Phase 3 §2) --------------------------------
+  // Self-explaining charts. Runs a deterministic four-stage pipeline
+  // (top-line / compositional / anomaly / temporal) against the rows that
+  // back a rendered chart and returns { headline, highlights, questions }.
+  // The `questions` array is the next prompt a downstream diagnostician
+  // agent picks up.
+  server.registerTool(
+    "glyph_explain",
+    {
+      title: "Generate a deterministic plain-English explanation of a chart",
+      description:
+        "Run the explain pipeline against a previously rendered chart. Returns { headline, highlights[], questions[] } as JSON. The output is deterministic — same chart + same Glyph version always yields the same explanation. Use this instead of asking an LLM to read the SVG.",
+      inputSchema: {
+        handle_id: z.string().describe("The handle_id returned by glyph_render."),
+        hints: z
+          .object({
+            xField: z.string().optional(),
+            yField: z.string().optional(),
+            groupField: z.string().optional(),
+          })
+          .strict()
+          .optional()
+          .describe(
+            "Optional manual role hints. Without hints the pipeline picks x = first temporal-or-categorical column, y = first quantitative column, group = next categorical column.",
+          ),
+      },
+    },
+    async ({ handle_id, hints }) =>
+      state.serial(async () => {
+        const handle = state.getHandle(handle_id);
+        if (!handle) {
+          return {
+            isError: true,
+            content: [{ type: "text" as const, text: `Unknown handle_id: ${handle_id}` }],
+          };
+        }
+        const engine = await state.getEngine();
+        const result = await engine.queryHandle(handle);
+        const explanation = explainHandle({
+          schema: handle.schema,
+          rows: result.rows,
+          hints,
+        });
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: JSON.stringify(jsonSafe(explanation), null, 2),
+            },
+          ],
+        };
+      }),
   );
 
   // ----- glyph_handles (PR33 / Phase 3 Tier A) ----------------------------

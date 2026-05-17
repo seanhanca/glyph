@@ -18,3 +18,4 @@ export * from "./compiler/index.js";
 export * from "./render/index.js";
 export * from "./capabilities.js";
 export * from "./vegalite/index.js";
+export * from "./explain/index.js";

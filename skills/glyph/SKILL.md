@@ -25,9 +25,9 @@ Do **not** use Glyph for:
 - Real-time streaming charts (use Perspective)
 - Bespoke / one-off visualizations that don't fit a grammar (use D3 directly)
 
-## The thirteen tools
+## The fourteen tools
 
-Glyph's MCP surface (9 Phase 0/1 + 4 Phase 3 Tier A GDF verbs):
+Glyph's MCP surface (9 Phase 0/1 + 4 Phase 3 Tier A GDF verbs + 1 Phase 3 §2 explain verb):
 
 1. `glyph_describe` — inspect a data file before writing a spec
 2. `glyph_render` — compile + render a spec; returns SVG + PNG + handle
@@ -41,6 +41,7 @@ Glyph's MCP surface (9 Phase 0/1 + 4 Phase 3 Tier A GDF verbs):
 10. `glyph_subscribe` — resolve a gdf:// URI to its DataHandle
 11. `glyph_lineage` — walk a handle's lineage tree
 12. `glyph_handles` — list every DataHandle in the session
+13. `glyph_explain` — deterministic plain-English chart explanation
 0. `glyph_capabilities` — feature detection
 
 ### 0. `glyph_capabilities()` *(call once at session start)*
@@ -131,6 +132,38 @@ Walk a handle's lineage tree. Returns `{ uri, sql, producer, at, children: [...]
 ### 12. `glyph_handles()` *(Phase 3 GDF)*
 
 List every `DataHandle` in the current MCP session. Returns `{ sessionId, count, handles: [{ id, uri, version, columns, producer, confidence, viewName }] }`. Use it to discover what's already queryable without re-rendering — typically after a context handoff.
+
+### 13. `glyph_explain(handle_id, hints?)` *(Phase 3 §2 — self-explaining charts)*
+
+Run a **deterministic four-stage pipeline** against a rendered chart and return plain-English observations the user can read at a glance. Don't ask an LLM to read the SVG — call this instead.
+
+```json
+{
+  "headline": "rides peaked at 8 (260), 6.5× the 3 low (40).",
+  "highlights": [
+    "Hour=17 is an outlier: 240 rides (+2.4σ vs the mean).",
+    "Trend is upward (r=0.71) over 12 periods."
+  ],
+  "questions": [
+    "What drives the 6.5× spread between 8 and 3?",
+    "Why is hour=17 anomalous?",
+    "Is the upward trend in rides sustainable?"
+  ]
+}
+```
+
+The four stages:
+
+| Stage | What it computes |
+|---|---|
+| 1. Top-line | extent, peak label + value, trough label + value, ratio |
+| 2. Compositional | dominant or top-3 contributing group(s) by share |
+| 3. Anomaly | values > 2σ from segment mean — surface inline |
+| 4. Temporal | period-over-period delta + trend strength (only if x is temporal) |
+
+Same chart + same Glyph version always yields the same explanation — useful for audit trails and snapshot-style eval pipelines. The `questions` array is the secret weapon for agent graphs: each entry is a ready-to-execute follow-up prompt for a diagnostician agent.
+
+Optional `hints` override the heuristic role inference (`{ xField, yField, groupField }`). Without hints, Glyph picks `y` = first quantitative column, `x` = first temporal-or-categorical column, `group` = the next categorical column.
 
 ## Spec format (the wire format)
 
