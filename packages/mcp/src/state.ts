@@ -23,6 +23,7 @@ import {
   type PreviewServerOptions,
   createPreviewServer,
 } from "@glyph/preview-server";
+import { LinkGroupStore } from "./linked.js";
 import { MemoryStore, defaultMemoryPath } from "./memory.js";
 import { StoryStore } from "./story.js";
 
@@ -45,6 +46,8 @@ export class ServerState {
   readonly memory: MemoryStore;
   /** PR41 Story Agent: in-process registry of plans + checkpoint queues. */
   readonly stories = new StoryStore();
+  /** PR46 linked-view filter bus. */
+  readonly links = new LinkGroupStore();
 
   constructor(
     options: {

@@ -76,7 +76,7 @@ describe("Glyph MCP server", () => {
     rmSync(tempMemoryDir, { recursive: true, force: true });
   });
 
-  it("lists the thirty-two tools", async () => {
+  it("lists the thirty-five tools", async () => {
     const r = await client.listTools();
     const names = r.tools.map((t) => t.name).sort();
     expect(names).toEqual([
@@ -95,6 +95,9 @@ describe("Glyph MCP server", () => {
       "glyph_handles",
       "glyph_import",
       "glyph_lineage",
+      "glyph_linked_await",
+      "glyph_linked_handles",
+      "glyph_linked_publish",
       "glyph_memory_forget",
       "glyph_memory_list",
       "glyph_memory_recall",
@@ -139,6 +142,9 @@ describe("Glyph MCP server", () => {
       "glyph_handles",
       "glyph_import",
       "glyph_lineage",
+      "glyph_linked_await",
+      "glyph_linked_handles",
+      "glyph_linked_publish",
       "glyph_memory_forget",
       "glyph_memory_list",
       "glyph_memory_recall",
@@ -1373,6 +1379,79 @@ describe("Glyph MCP server", () => {
       const r2 = await callText(client, "glyph_story_get", { plan_id: "nope" });
       expect(r2.isError).toBe(true);
       expect(r2.text).toContain("Unknown plan_id");
+    });
+  });
+
+  // ---- PR46 Linked-view filters (Innovation #4) -------------------------
+  describe("linked-view filters (PR46)", () => {
+    async function renderInGroup(group: string, transform: string): Promise<string> {
+      const r = await callText(client, "glyph_render", {
+        spec: {
+          data: { source: fixture, format: "csv", transform },
+          layers: [{ mark: "bar", encoding: { x: "pickup_hour", y: "rides" } }],
+          link_group: group,
+        },
+      });
+      return JSON.parse(r.text).handle_id as string;
+    }
+
+    it("registers handles into their link_group at glyph_render time", async () => {
+      const h1 = await renderInGroup("dash-q1", "SELECT pickup_hour, rides FROM glyph_src_main");
+      const h2 = await renderInGroup(
+        "dash-q1",
+        "SELECT pickup_hour, rides FROM glyph_src_main WHERE rides > 100",
+      );
+      const r = await callText(client, "glyph_linked_handles", { group: "dash-q1" });
+      const out = JSON.parse(r.text);
+      expect(out.count).toBe(2);
+      expect(out.handles).toContain(h1);
+      expect(out.handles).toContain(h2);
+    });
+
+    it("broadcasts a predicate via publish, consumed via await", async () => {
+      await renderInGroup("dash-q2", "SELECT pickup_hour, rides FROM glyph_src_main");
+
+      const [pub, awaited] = await Promise.all([
+        callText(client, "glyph_linked_publish", {
+          group: "dash-q2",
+          predicate: "pickup_hour = 8",
+          summary: "Hour 8 selected",
+        }),
+        callText(client, "glyph_linked_await", {
+          group: "dash-q2",
+          since: 0,
+          timeout_ms: 3000,
+        }),
+      ]);
+      expect(pub.isError).toBe(false);
+      const event = JSON.parse(pub.text);
+      expect(event.predicate).toBe("pickup_hour = 8");
+      expect(event.summary).toBe("Hour 8 selected");
+
+      expect(awaited.isError).toBe(false);
+      const recv = JSON.parse(awaited.text);
+      expect(recv.event.predicate).toBe("pickup_hour = 8");
+    });
+
+    it("await returns null on timeout when no events are published", async () => {
+      const r = await callText(client, "glyph_linked_await", {
+        group: "dash-empty",
+        timeout_ms: 50,
+      });
+      expect(r.isError).toBe(false);
+      expect(JSON.parse(r.text).event).toBeNull();
+    });
+
+    it("recent events appear in glyph_linked_handles output", async () => {
+      await renderInGroup("dash-q3", "SELECT pickup_hour, rides FROM glyph_src_main");
+      await callText(client, "glyph_linked_publish", {
+        group: "dash-q3",
+        predicate: "rides > 200",
+      });
+      const r = await callText(client, "glyph_linked_handles", { group: "dash-q3" });
+      const out = JSON.parse(r.text);
+      expect(out.recent_events.length).toBeGreaterThanOrEqual(1);
+      expect(out.recent_events[0].predicate).toBe("rides > 200");
     });
   });
 

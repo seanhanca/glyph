@@ -351,6 +351,13 @@ export const GlyphSpecSchema = z
       ])
       .optional(),
     /**
+     * Innovation #4 (PR46) — linked-view filter context. Charts that share
+     * a `link_group` participate in the same selection bus: a click in one
+     * chart broadcasts a SQL predicate to the others via
+     * `glyph_linked_publish`. Subscribers consume via `glyph_linked_await`.
+     */
+    link_group: z.string().min(1).optional(),
+    /**
      * Data-driven animation (PR43 + PR45). Four kinds:
      *   - "stage"          — chart-wide entrance fade (PR43)
      *   - "stage-stagger"  — per-mark entrance with row-index delay (PR45)

@@ -125,6 +125,10 @@ const MCP_TOOLS = [
   { name: "glyph_story_get", since: "0.0.9" },
   { name: "glyph_story_list", since: "0.0.9" },
   { name: "glyph_story_await_checkpoint", since: "0.0.9" },
+  // ---- Linked-view filters (PR46, Innovation #4) -----------------------
+  { name: "glyph_linked_publish", since: "0.0.10" },
+  { name: "glyph_linked_await", since: "0.0.10" },
+  { name: "glyph_linked_handles", since: "0.0.10" },
 ] as const;
 
 /** Best-effort browser launcher. Returns true on success. */
@@ -309,6 +313,10 @@ export function createServer(state: ServerState = new ServerState()): {
         // Record the spec's declarative actions so glyph_act can resolve them.
         if (parsed.spec.actions && parsed.spec.actions.length > 0) {
           state.setActionsForHandle(m.handle.id, parsed.spec.actions);
+        }
+        // PR46: register the handle in its link_group if set.
+        if (parsed.spec.link_group) {
+          state.links.registerHandle(parsed.spec.link_group, m.handle.id);
         }
         const scene = compileSpec({
           // Use the materializer's effectiveSpec — for metric channels this
@@ -2127,6 +2135,109 @@ export function createServer(state: ServerState = new ServerState()): {
             type: "text" as const,
             text: JSON.stringify(
               cp ? { checkpoint: cp, index: sinceIdx } : { checkpoint: null, index: sinceIdx },
+              null,
+              2,
+            ),
+          },
+        ],
+      };
+    },
+  );
+
+  // ====== Linked-view filters (PR46, Innovation #4) =======================
+  //
+  // Charts that share `spec.link_group` participate in the same selection
+  // bus. A click in chart A broadcasts a SQL predicate via
+  // `glyph_linked_publish`; chart B picks it up via `glyph_linked_await`
+  // and applies it to its own glyph_query / glyph_drill.
+
+  server.registerTool(
+    "glyph_linked_publish",
+    {
+      title: "Broadcast a SQL predicate to a linked-view group",
+      description:
+        "Append a filter event to the named link_group's bus. All charts in the same group can consume it via glyph_linked_await. Use this when a user click in chart A should narrow chart B (e.g. clicking a region filters every other chart on the page).",
+      inputSchema: {
+        group: z.string().min(1).describe("The shared link_group name from spec.link_group."),
+        predicate: z
+          .string()
+          .min(1)
+          .describe("SQL predicate (e.g. 'region = \\'us\\''). Consumed verbatim by glyph_query."),
+        source_handle: z
+          .string()
+          .optional()
+          .describe("Handle that originated the event (lets consumers skip echo)."),
+        summary: z
+          .string()
+          .optional()
+          .describe("Human-readable summary, e.g. 'Region: us' — for the narrator."),
+      },
+    },
+    async ({ group, predicate, source_handle, summary }) => {
+      const event = state.links.publish({
+        group,
+        predicate,
+        ...(source_handle !== undefined ? { source_handle } : {}),
+        ...(summary !== undefined ? { summary } : {}),
+      });
+      return {
+        content: [{ type: "text" as const, text: JSON.stringify(event, null, 2) }],
+      };
+    },
+  );
+
+  server.registerTool(
+    "glyph_linked_await",
+    {
+      title: "Long-poll the next linked-view filter event",
+      description:
+        "Wait for the next event after index `since` (default 0) on a link_group. Returns { event, index } on arrival or { event: null } on timeout. Loop on the returned index to stream events.",
+      inputSchema: {
+        group: z.string().min(1),
+        since: z.number().int().min(0).optional(),
+        timeout_ms: z.number().int().min(0).max(60_000).optional(),
+      },
+    },
+    async ({ group, since, timeout_ms }) => {
+      const r = await state.links.awaitNext({
+        group,
+        sinceIndex: since ?? 0,
+        timeoutMs: timeout_ms ?? 5000,
+      });
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: JSON.stringify(r ? r : { event: null, index: since ?? 0 }, null, 2),
+          },
+        ],
+      };
+    },
+  );
+
+  server.registerTool(
+    "glyph_linked_handles",
+    {
+      title: "List handles registered in a link_group",
+      description:
+        "Return every handle_id that mounted into this link_group via spec.link_group at glyph_render time. Useful for inspecting which charts in the storyboard share a selection context.",
+      inputSchema: {
+        group: z.string().min(1),
+      },
+    },
+    async ({ group }) => {
+      const handles = state.links.handles(group);
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: JSON.stringify(
+              {
+                group,
+                count: handles.length,
+                handles,
+                recent_events: state.links.recent(group, 8),
+              },
               null,
               2,
             ),
