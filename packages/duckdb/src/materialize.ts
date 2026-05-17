@@ -18,6 +18,7 @@ import {
   buildMetricViewSql,
   collectGroupByFields,
   collectMetricNames,
+  isGeoMark,
   isStatError,
   rewriteMetricChannels,
 } from "@glyph/core";
@@ -27,9 +28,11 @@ import type {
   DataHandle,
   DataSource,
   GlyphSpec,
+  Layer,
   LineageRelation,
   MetricDefinition,
   MetricResolver,
+  Projection,
   QueryHandle,
   QueryResult,
 } from "@glyph/core";
@@ -144,6 +147,84 @@ async function registerOrResolve(
   return { parentUri: undefined };
 }
 
+// ---------------------------------------------------------------------------
+// Geo viz — PR42 (v0)
+// ---------------------------------------------------------------------------
+
+const DEFAULT_CHART_WIDTH = 640;
+const DEFAULT_CHART_HEIGHT = 400;
+const GEO_X = "_geo_x";
+const GEO_Y = "_geo_y";
+
+/** Extract a field name from a Channel value (bare string or object form). */
+function fieldOfChannel(c: unknown): string | undefined {
+  if (typeof c === "string") return c;
+  if (c && typeof c === "object" && "field" in c) {
+    const f = (c as { field?: unknown }).field;
+    return typeof f === "string" ? f : undefined;
+  }
+  return undefined;
+}
+
+/**
+ * Build the SQL that wraps a base query with two computed columns —
+ * `_geo_x` and `_geo_y` — by applying the projection's pixel-space math
+ * directly in DuckDB. After this, the compiler sees plain x/y in pixel
+ * space; we lock the spec's scale.domain so the linear scale is identity.
+ */
+function buildGeoProjectionSql(args: {
+  readonly baseSql: string;
+  readonly latField: string;
+  readonly lonField: string;
+  readonly projection: Projection | undefined;
+  readonly width: number;
+  readonly height: number;
+}): string {
+  const proj = args.projection ?? { type: "equirectangular" as const };
+  const [cLon, cLat] = proj.center ?? [0, 0];
+  const lat = `"${args.latField.replace(/"/g, '""')}"`;
+  const lon = `"${args.lonField.replace(/"/g, '""')}"`;
+  if (proj.type === "equirectangular") {
+    const scale = proj.scale ?? args.width / 360;
+    const cx = args.width / 2 - cLon * scale;
+    const cy = args.height / 2 + cLat * scale;
+    return `SELECT *, (${cx} + ${lon} * ${scale}) AS ${GEO_X}, (${cy} - ${lat} * ${scale}) AS ${GEO_Y} FROM (${args.baseSql})`;
+  }
+  // Mercator.
+  const scale = proj.scale ?? args.width / (2 * Math.PI);
+  const DEG2RAD = Math.PI / 180;
+  const cxBase = args.width / 2 - cLon * DEG2RAD * scale;
+  const cyBase = args.height / 2 + Math.log(Math.tan(Math.PI / 4 + (cLat * DEG2RAD) / 2)) * scale;
+  return `SELECT *, (${cxBase} + ${lon} * ${DEG2RAD} * ${scale}) AS ${GEO_X}, (${cyBase} - LN(TAN(PI()/4 + GREATEST(-85, LEAST(85, ${lat})) * ${DEG2RAD} / 2)) * ${scale}) AS ${GEO_Y} FROM (${args.baseSql})`;
+}
+
+/**
+ * Rewrite a geo-point layer so the compiler sees a plain `point` mark
+ * with x/y pointing at the pre-projected columns and explicit
+ * scale.domain locking the linear scale to identity in pixel space.
+ */
+function rewriteGeoLayer(layer: Layer, width: number, height: number): Layer {
+  if (layer.mark !== "geo-point") return layer;
+  return {
+    ...layer,
+    mark: "point" as const,
+    encoding: {
+      ...layer.encoding,
+      x: {
+        field: GEO_X,
+        type: "quantitative" as const,
+        scale: { domain: [0, width] as [number, number] },
+      },
+      y: {
+        field: GEO_Y,
+        type: "quantitative" as const,
+        // y is inverted: domain [height, 0] so smaller y = higher on screen.
+        scale: { domain: [0, height] as [number, number] },
+      },
+    },
+  };
+}
+
 /**
  * For a single layer, build the SQL that produces its rows. For Phase 0 we
  * support: top-level data source + optional transform; per-layer data
@@ -255,6 +336,31 @@ export async function materializeSpec(
       groupFields,
       metrics: resolvedMetrics,
     });
+  }
+
+  // Geo viz — PR42. Detect a geo-point layer; project lat/lon → pixel space
+  // at the engine level + rewrite the layer to a plain `point` with
+  // identity-locked scales. The compiler then needs no awareness of geo.
+  if (isGeoMark(firstLayer.mark)) {
+    const latField = fieldOfChannel(firstLayer.encoding.lat);
+    const lonField = fieldOfChannel(firstLayer.encoding.lon);
+    if (!latField || !lonField) {
+      throw new Error("geo-point requires encoding.lat and encoding.lon as field references");
+    }
+    const width = workingSpec.width ?? DEFAULT_CHART_WIDTH;
+    const height = workingSpec.height ?? DEFAULT_CHART_HEIGHT;
+    viewSql = buildGeoProjectionSql({
+      baseSql: viewSql,
+      latField,
+      lonField,
+      projection: workingSpec.projection,
+      width,
+      height,
+    });
+    workingSpec = {
+      ...workingSpec,
+      layers: workingSpec.layers.map((l) => rewriteGeoLayer(l, width, height)),
+    };
   }
 
   // Apply the first layer's stat (count / sum / mean) by SQL rewrite before

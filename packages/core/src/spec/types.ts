@@ -23,10 +23,14 @@ import type {
   InteractiveSchema,
   LayerSchema,
   MarkSchema,
+  ProjectionSchema,
   ScaleSchema,
   StatSchema,
   ThemeConfigSchema,
 } from "./schemas.js";
+
+/** Map projection config — Phase 3 PR42. See ProjectionSchema. */
+export type Projection = z.infer<typeof ProjectionSchema>;
 
 /** A declarative action — Phase 3 §4. See ActionSchema for the shape. */
 export type SpecAction = z.infer<typeof ActionSchema>;

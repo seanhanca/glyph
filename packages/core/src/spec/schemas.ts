@@ -36,7 +36,34 @@ export const DataSourceSchema = z
 // Marks — what gets drawn per row
 // ---------------------------------------------------------------------------
 
-export const MarkSchema = z.enum(["bar", "line", "point", "area", "rect", "rule"]);
+export const MarkSchema = z.enum([
+  "bar",
+  "line",
+  "point",
+  "area",
+  "rect",
+  "rule",
+  // PR42 — geo viz primitives. `geo-point` plots lat/lon points through a
+  // projection; the compiler translates to plain points after projection.
+  "geo-point",
+]);
+
+/**
+ * Projection for `geo-*` marks. v0 supports the two simplest projections —
+ * equirectangular (rectangular lat/lon → screen mapping) and Mercator
+ * (conformal, web-map style). Both are pure-math; no external GIS dep.
+ * Other projections (albers, naturalEarth, ortho) land once a real GIS
+ * library is bundled.
+ */
+export const ProjectionSchema = z
+  .object({
+    type: z.enum(["equirectangular", "mercator"]),
+    /** [lon, lat] center of the projection. Defaults to [0, 0]. */
+    center: z.tuple([z.number(), z.number()]).optional(),
+    /** Pixel scale per radian. Defaults to (chart width / (2π)) for equirectangular. */
+    scale: z.number().positive().optional(),
+  })
+  .strict();
 
 // ---------------------------------------------------------------------------
 // Channels & encoding
@@ -112,6 +139,10 @@ export const EncodingSchema = z
     size: ChannelSchema.optional(),
     opacity: ChannelSchema.optional(),
     tooltip: z.union([ChannelSchema, z.array(ChannelSchema)]).optional(),
+    /** Latitude column for `geo-*` marks (PR42). */
+    lat: ChannelSchema.optional(),
+    /** Longitude column for `geo-*` marks (PR42). */
+    lon: ChannelSchema.optional(),
   })
   .strict();
 
@@ -283,6 +314,8 @@ export const GlyphSpecSchema = z
     interactive: InteractiveSchema.optional(),
     /** Declarative actions for `glyph_act` — Phase 3 §4. */
     actions: z.array(ActionSchema).optional(),
+    /** Map projection — required when any layer uses a `geo-*` mark. */
+    projection: ProjectionSchema.optional(),
   })
   .strict()
   .refine((spec) => spec.data !== undefined || spec.layers.every((l) => l.data !== undefined), {

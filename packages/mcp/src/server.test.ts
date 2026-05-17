@@ -1375,4 +1375,65 @@ describe("Glyph MCP server", () => {
       expect(r2.text).toContain("Unknown plan_id");
     });
   });
+
+  // ---- PR42 Geo viz primitives -------------------------------------------
+  describe("geo viz (PR42)", () => {
+    it("renders a geo-point chart with the default equirectangular projection", async () => {
+      const csv =
+        "city,lat,lon\nNYC,40.7,-74\nSF,37.7,-122.4\nLondon,51.5,-0.1\nTokyo,35.7,139.7\nSydney,-33.9,151.2\n";
+      const imp = await callText(client, "glyph_import", {
+        payload: { kind: "csv", data: csv },
+      });
+      const imported = JSON.parse(imp.text);
+      const r = await callText(client, "glyph_render", {
+        spec: {
+          data: { source: imported.resolvedSource, format: "csv" },
+          layers: [{ mark: "geo-point", encoding: { lat: "lat", lon: "lon", color: "city" } }],
+          width: 640,
+          height: 400,
+          projection: { type: "equirectangular" },
+        },
+      });
+      expect(r.isError).toBe(false);
+      const out = JSON.parse(r.text);
+      expect(out.row_count).toBe(5);
+      // The materializer injected _geo_x / _geo_y columns.
+      expect(out.schema.map((c: { name: string }) => c.name)).toContain("_geo_x");
+      expect(out.schema.map((c: { name: string }) => c.name)).toContain("_geo_y");
+      expect(out.svg).toContain("<svg");
+    });
+
+    it("rejects a geo-point layer with missing lat / lon", async () => {
+      const csv = "city,lat,lon\nNYC,40.7,-74\n";
+      const imp = await callText(client, "glyph_import", {
+        payload: { kind: "csv", data: csv },
+      });
+      const imported = JSON.parse(imp.text);
+      const r = await callText(client, "glyph_render", {
+        spec: {
+          data: { source: imported.resolvedSource, format: "csv" },
+          layers: [{ mark: "geo-point", encoding: { color: "city" } }],
+        },
+      });
+      expect(r.isError).toBe(true);
+      expect(r.text).toMatch(/geo-point requires/);
+    });
+
+    it("supports mercator projection without throwing on extreme latitudes", async () => {
+      const csv = "lat,lon\n-89,0\n89,0\n0,0\n";
+      const imp = await callText(client, "glyph_import", {
+        payload: { kind: "csv", data: csv },
+      });
+      const imported = JSON.parse(imp.text);
+      const r = await callText(client, "glyph_render", {
+        spec: {
+          data: { source: imported.resolvedSource, format: "csv" },
+          layers: [{ mark: "geo-point", encoding: { lat: "lat", lon: "lon" } }],
+          projection: { type: "mercator" },
+        },
+      });
+      expect(r.isError).toBe(false);
+      expect(JSON.parse(r.text).row_count).toBe(3);
+    });
+  });
 });

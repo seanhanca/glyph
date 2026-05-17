@@ -21,3 +21,4 @@ export * from "./vegalite/index.js";
 export * from "./explain/index.js";
 export * from "./diagnostics/index.js";
 export * from "./metrics/index.js";
+export * from "./geo/index.js";
