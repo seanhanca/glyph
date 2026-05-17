@@ -50,6 +50,10 @@ export const MarkSchema = z.enum([
   // collection; each region's fill is taken from the encoding (typically
   // `color: { metric: ... }` or `color: "<value-field>"`).
   "geo-region",
+  // PR49 — 2D categorical × categorical grid with color from a
+  // quantitative field. Both axes use band scales; color interpolated
+  // between two stops.
+  "heatmap",
 ]);
 
 /**

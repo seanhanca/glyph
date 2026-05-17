@@ -320,7 +320,7 @@ export function compileSpec(input: CompileInput): Scene {
   for (let i = 0; i < spec.layers.length; i++) {
     const l = spec.layers[i];
     if (!l) continue;
-    const allowedMarks = ["bar", "point", "line", "area", "rule", "geo-region"];
+    const allowedMarks = ["bar", "point", "line", "area", "rule", "geo-region", "heatmap"];
     if (!allowedMarks.includes(l.mark)) {
       throw new Error(`Phase 1 supports marks ${allowedMarks.join("|")}; layer ${i} has ${l.mark}`);
     }
@@ -340,6 +340,17 @@ export function compileSpec(input: CompileInput): Scene {
       }
       if (!spec.geojson || !Array.isArray((spec.geojson as { features?: unknown }).features)) {
         throw new Error(`Layer ${i} (geo-region) requires spec.geojson.features`);
+      }
+      continue;
+    }
+    // PR49 heatmap: requires x, y, and color (the value to encode). x and y
+    // are both treated as band scales; color is quantitative.
+    if (l.mark === "heatmap") {
+      if (fieldOf(l.encoding.x) === undefined || fieldOf(l.encoding.y) === undefined) {
+        throw new Error(`Layer ${i} (heatmap) requires both x and y encodings`);
+      }
+      if (fieldOf(l.encoding.color) === undefined) {
+        throw new Error(`Layer ${i} (heatmap) requires color encoding (the cell value)`);
       }
       continue;
     }
@@ -449,6 +460,13 @@ export function compileSpec(input: CompileInput): Scene {
     if (layer.mark === "geo-region") {
       // PR44: project each GeoJSON feature, fill by color encoding.
       buildGeoRegions(marks, spec, rows, schema, enc, theme);
+      continue;
+    }
+    if (layer.mark === "heatmap") {
+      // PR49: 2D categorical x × categorical y; color from a quantitative
+      // field interpolated between two stops. Bypasses the y-quantitative
+      // requirement of the regular path.
+      buildHeatmap(marks, rows, schema, enc, plotArea, theme);
       continue;
     }
     if (!yScale || !xField || !yField) continue;
@@ -951,6 +969,101 @@ function buildRules(
       });
     }
   }
+}
+
+/**
+ * buildHeatmap — 2D categorical grid (PR49).
+ *
+ * Each row in the data becomes a rect at (x-cell, y-cell). Cell color is
+ * interpolated between two stops based on the row's color-encoded value.
+ * Both axes use band scales independently computed from the distinct
+ * values in the rows; the y-cell ordering is top-to-bottom in
+ * first-seen order (canonical heatmap convention).
+ *
+ * v0 limitations
+ *   - One row per cell; duplicate (x, y) pairs overwrite (last wins).
+ *     Aggregation lives in `data.transform` SQL.
+ *   - Color stops are theme's grid (low) → first palette color (high).
+ *     A configurable diverging / sequential ramp lands in a follow-up.
+ */
+function buildHeatmap(
+  out: SceneMark[],
+  rows: ReadonlyArray<ReadonlyArray<unknown>>,
+  schema: ReadonlyArray<CompileFieldInfo>,
+  encoding: Encoding,
+  plotArea: { x: number; y: number; width: number; height: number },
+  theme: Theme,
+): void {
+  const xField = fieldOf(encoding.x);
+  const yField = fieldOf(encoding.y);
+  const colorField = fieldOf(encoding.color);
+  if (!xField || !yField || !colorField) return;
+
+  const xVals = distinctOrdered(rows, schema, xField);
+  const yVals = distinctOrdered(rows, schema, yField);
+  if (xVals.length === 0 || yVals.length === 0) return;
+
+  const xScale = bandScale(xVals, [plotArea.x, plotArea.x + plotArea.width]);
+  const yScale = bandScale(yVals, [plotArea.y, plotArea.y + plotArea.height]);
+  const cellW = xScale.bandwidth;
+  const cellH = yScale.bandwidth;
+
+  // Quantitative color: find numeric min + max across the rows.
+  const xIdx = schema.findIndex((c) => c.name === xField);
+  const yIdx = schema.findIndex((c) => c.name === yField);
+  const cIdx = schema.findIndex((c) => c.name === colorField);
+  if (xIdx < 0 || yIdx < 0 || cIdx < 0) return;
+  let lo = Number.POSITIVE_INFINITY;
+  let hi = Number.NEGATIVE_INFINITY;
+  for (const r of rows) {
+    const v = r[cIdx];
+    const n = typeof v === "number" ? v : typeof v === "bigint" ? Number(v) : Number(v);
+    if (Number.isFinite(n)) {
+      if (n < lo) lo = n;
+      if (n > hi) hi = n;
+    }
+  }
+  if (!Number.isFinite(lo) || !Number.isFinite(hi)) return;
+  const range = hi - lo === 0 ? 1 : hi - lo;
+
+  const lowColor = theme.grid;
+  const highColor = theme.marks[0] ?? "#1a1a1a";
+
+  for (const row of rows) {
+    const xPos = xScale.apply(String(row[xIdx] ?? ""));
+    const yPos = yScale.apply(String(row[yIdx] ?? ""));
+    const v = row[cIdx];
+    const n = typeof v === "number" ? v : typeof v === "bigint" ? Number(v) : Number(v);
+    const t = Number.isFinite(n) ? (n - lo) / range : 0;
+    const fill = interpolateRgb(lowColor, highColor, t);
+    out.push({
+      type: "rect",
+      x: roundPx(xPos),
+      y: roundPx(yPos),
+      width: roundPx(cellW),
+      height: roundPx(cellH),
+      fill,
+      stroke: theme.background,
+      strokeWidth: 0.5,
+    });
+  }
+}
+
+/** Linear interpolate two #RRGGBB colors at parameter t ∈ [0,1]. */
+function interpolateRgb(a: string, b: string, t: number): string {
+  const ra = parseHex(a);
+  const rb = parseHex(b);
+  if (!ra || !rb) return a;
+  const clamped = Math.max(0, Math.min(1, t));
+  const out = ra.map((c, i) => Math.round(c + ((rb[i] ?? c) - c) * clamped));
+  return `#${out.map((v) => v.toString(16).padStart(2, "0")).join("")}`;
+}
+
+function parseHex(c: string): [number, number, number] | undefined {
+  const m = /^#([0-9a-f]{6})$/i.exec(c.trim());
+  if (!m || !m[1]) return undefined;
+  const n = Number.parseInt(m[1], 16);
+  return [(n >> 16) & 0xff, (n >> 8) & 0xff, n & 0xff];
 }
 
 /**
