@@ -10,7 +10,14 @@
  * agent burns minimal context on the API surface itself.
  */
 
-import { compileSpec, getCapabilities, renderSvg, safeParseSpec } from "@glyph/core";
+import {
+  compileSpec,
+  getCapabilities,
+  isTranslateError,
+  renderSvg,
+  safeParseSpec,
+  vegaLiteToGlyph,
+} from "@glyph/core";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { Resvg } from "@resvg/resvg-js";
 import { z } from "zod";
@@ -136,18 +143,61 @@ export function createServer(state: ServerState = new ServerState()): {
     {
       title: "Render a Glyph chart",
       description:
-        "Compile and render a Glyph spec. Returns the SVG plus a handle_id you can pass to glyph_query for follow-up SQL against the chart's underlying view. Phase 0 supports marks: bar, point.",
+        "Compile and render a Glyph spec. Pass `spec` (Glyph) OR `vegaLite` (a Vega-Lite spec to translate first). Returns SVG + PNG + handle_id you can pass to glyph_query / glyph_drill. Marks: bar, point, line, area, rule.",
       inputSchema: {
         spec: z
           .unknown()
+          .optional()
           .describe(
-            "A Glyph spec (JSON object). See https://github.com/seanhanca/glyph/blob/main/mvp.md for the schema.",
+            "A Glyph spec (JSON object). See https://github.com/seanhanca/glyph/blob/main/mvp.md for the schema. Mutually exclusive with `vegaLite`.",
+          ),
+        vegaLite: z
+          .unknown()
+          .optional()
+          .describe(
+            "A Vega-Lite spec — the server translates it to Glyph and renders. Use this when you already know VL.",
           ),
       },
     },
-    async ({ spec }) =>
+    async ({ spec, vegaLite }) =>
       state.serial(async () => {
-        const parsed = safeParseSpec(spec);
+        // Either spec OR vegaLite, not both.
+        if (spec === undefined && vegaLite === undefined) {
+          return {
+            isError: true,
+            content: [
+              { type: "text" as const, text: "glyph_render: provide `spec` or `vegaLite`." },
+            ],
+          };
+        }
+        if (spec !== undefined && vegaLite !== undefined) {
+          return {
+            isError: true,
+            content: [
+              {
+                type: "text" as const,
+                text: "glyph_render: pass `spec` or `vegaLite`, not both.",
+              },
+            ],
+          };
+        }
+        let inputSpec: unknown = spec;
+        if (vegaLite !== undefined) {
+          const translated = vegaLiteToGlyph(vegaLite);
+          if (isTranslateError(translated)) {
+            return {
+              isError: true,
+              content: [
+                {
+                  type: "text" as const,
+                  text: `Vega-Lite translation failed: ${translated.error} (path: ${translated.path.join(".") || "<root>"})`,
+                },
+              ],
+            };
+          }
+          inputSpec = translated.spec;
+        }
+        const parsed = safeParseSpec(inputSpec);
         if (!parsed.ok) {
           return {
             isError: true,

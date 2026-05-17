@@ -314,6 +314,53 @@ describe("Glyph MCP server", () => {
     });
   });
 
+  describe("glyph_render — Vega-Lite shim (PR30)", () => {
+    it("renders from a Vega-Lite spec via the vegaLite argument", async () => {
+      const r = await callText(client, "glyph_render", {
+        vegaLite: {
+          data: { url: fixture, format: { type: "csv" } },
+          mark: "bar",
+          encoding: {
+            x: { field: "pickup_hour", type: "ordinal" },
+            y: { field: "rides", type: "quantitative" },
+          },
+          title: "VL-driven render",
+        },
+      });
+      expect(r.isError).toBe(false);
+      const out = JSON.parse(r.text);
+      expect(out.svg).toContain("VL-driven render");
+      expect(out.row_count).toBe(12);
+    });
+
+    it("returns a clear error for unsupported VL marks", async () => {
+      const r = await callText(client, "glyph_render", {
+        vegaLite: {
+          data: { url: fixture, format: { type: "csv" } },
+          mark: "boxplot",
+          encoding: { x: { field: "x" }, y: { field: "y" } },
+        },
+      });
+      expect(r.isError).toBe(true);
+      expect(r.text).toMatch(/boxplot/);
+    });
+
+    it("rejects passing both spec and vegaLite", async () => {
+      const r = await callText(client, "glyph_render", {
+        spec: { data: { source: fixture, format: "csv" }, layers: [] },
+        vegaLite: { mark: "bar" },
+      });
+      expect(r.isError).toBe(true);
+      expect(r.text).toMatch(/not both/);
+    });
+
+    it("rejects passing neither spec nor vegaLite", async () => {
+      const r = await callText(client, "glyph_render", {});
+      expect(r.isError).toBe(true);
+      expect(r.text).toMatch(/provide/);
+    });
+  });
+
   describe("preview server (B9e/f/g)", () => {
     async function renderOne(): Promise<string> {
       const r = await callText(client, "glyph_render", {
