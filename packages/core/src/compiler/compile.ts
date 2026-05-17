@@ -275,6 +275,7 @@ export function compileSpec(input: CompileInput): Scene {
   const width = spec.width ?? DEFAULT_WIDTH;
   const height = spec.height ?? DEFAULT_HEIGHT;
   const theme = resolveTheme(spec.theme);
+  const formatTick = makeTickFormatter(spec.locale);
 
   // Adjust right padding when we'll need a right-side axis.
   const anyRight = spec.layers.some((l) => ySideOfLayer(l.encoding) === "right");
@@ -448,7 +449,7 @@ export function compileSpec(input: CompileInput): Scene {
   if (xScale.type === "band") {
     axes.push(makeBottomAxis(xScale, plotArea, xLabel));
   } else if (xTicksLinear) {
-    axes.push(makeBottomAxisLinear(xTicksLinear, xScale, plotArea, xLabel));
+    axes.push(makeBottomAxisLinear(xTicksLinear, xScale, plotArea, xLabel, formatTick));
   }
   if (leftY) {
     const leftLabel = fieldOf(
@@ -456,7 +457,7 @@ export function compileSpec(input: CompileInput): Scene {
     );
     // Grid: one tick per axis tick, rendered behind the marks.
     axes.push({
-      ...makeLeftAxis(leftY.ticks, leftY.scale, plotArea, leftLabel ?? "y"),
+      ...makeLeftAxis(leftY.ticks, leftY.scale, plotArea, leftLabel ?? "y", formatTick),
       gridTicks: leftY.ticks.map((t) => ({
         position: leftY.scale.apply(t),
         label: formatTick(t),
@@ -467,7 +468,7 @@ export function compileSpec(input: CompileInput): Scene {
     const rightLabel = fieldOf(
       spec.layers.find((l) => ySideOfLayer(l.encoding) === "right")?.encoding.y,
     );
-    axes.push(makeRightAxis(rightY.ticks, rightY.scale, plotArea, rightLabel ?? "y"));
+    axes.push(makeRightAxis(rightY.ticks, rightY.scale, plotArea, rightLabel ?? "y", formatTick));
   }
 
   // ---- Legends ---------------------------------------------------------
@@ -877,10 +878,11 @@ function makeBottomAxisLinear(
   scale: ReturnType<typeof linearScale>,
   plotArea: Scene["plotArea"],
   label: string,
+  format: (n: number) => string = formatTickDefault,
 ): SceneAxis {
   const ticks: AxisTick[] = tickValues.map((t) => ({
     position: scale.apply(t),
-    label: formatTick(t),
+    label: format(t),
   }));
   return {
     orientation: "bottom",
@@ -896,10 +898,11 @@ function makeLeftAxis(
   scale: ReturnType<typeof linearScale>,
   plotArea: Scene["plotArea"],
   label: string,
+  format: (n: number) => string = formatTickDefault,
 ): SceneAxis {
   const ticks: AxisTick[] = tickValues.map((t) => ({
     position: scale.apply(t),
-    label: formatTick(t),
+    label: format(t),
   }));
   return {
     orientation: "left",
@@ -915,10 +918,11 @@ function makeRightAxis(
   scale: ReturnType<typeof linearScale>,
   plotArea: Scene["plotArea"],
   label: string,
+  format: (n: number) => string = formatTickDefault,
 ): SceneAxis {
   const ticks: AxisTick[] = tickValues.map((t) => ({
     position: scale.apply(t),
-    label: formatTick(t),
+    label: format(t),
   }));
   return {
     orientation: "right",
@@ -929,7 +933,28 @@ function makeRightAxis(
   };
 }
 
-function formatTick(n: number): string {
+/**
+ * Default locale-agnostic tick formatter. Used when spec.locale is unset.
+ * Stable across Node versions; integer → "n", float → trimmed 2-decimal.
+ */
+function formatTickDefault(n: number): string {
   if (Number.isInteger(n)) return String(n);
   return n.toFixed(2).replace(/\.?0+$/, "");
+}
+
+/**
+ * Locale-aware tick formatter (PR26). When the spec sets `locale`, format
+ * via Intl.NumberFormat with sensible defaults (max 3 fraction digits,
+ * grouping separator). When unset, falls back to the locale-agnostic
+ * formatter so existing snapshots stay byte-identical.
+ */
+function makeTickFormatter(locale: string | undefined): (n: number) => string {
+  if (!locale) return formatTickDefault;
+  // Intl is environment-driven (ICU on Node ≥18); pin maximumFractionDigits
+  // so output is stable for the same inputs at the same locale + ICU version.
+  const fmt = new Intl.NumberFormat(locale, {
+    maximumFractionDigits: 3,
+    useGrouping: true,
+  });
+  return (n: number): string => fmt.format(n);
 }

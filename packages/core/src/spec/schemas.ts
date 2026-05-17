@@ -219,6 +219,12 @@ export const GlyphSpecSchema = z
      * with brand colors. Defaults to "light".
      */
     theme: z.union([z.enum(["light", "dark"]), ThemeConfigSchema]).optional(),
+    /**
+     * BCP-47 locale used for number / date tick formatting. Defaults to
+     * "en-US" so snapshot tests stay byte-identical across machines. Set
+     * to e.g. "de-DE" to render 1234.5 as "1.234,5".
+     */
+    locale: z.string().min(2).optional(),
     /** Opt into data-bound, hydratable SVG output. */
     interactive: InteractiveSchema.optional(),
   })
