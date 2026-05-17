@@ -66,7 +66,7 @@ describe("Glyph MCP server", () => {
     await state.close();
   });
 
-  it("lists the eighteen tools", async () => {
+  it("lists the twenty tools", async () => {
     const r = await client.listTools();
     const names = r.tools.map((t) => t.name).sort();
     expect(names).toEqual([
@@ -83,6 +83,8 @@ describe("Glyph MCP server", () => {
       "glyph_handles",
       "glyph_import",
       "glyph_lineage",
+      "glyph_metrics",
+      "glyph_metrics_register",
       "glyph_preview",
       "glyph_publish",
       "glyph_query",
@@ -113,6 +115,8 @@ describe("Glyph MCP server", () => {
       "glyph_handles",
       "glyph_import",
       "glyph_lineage",
+      "glyph_metrics",
+      "glyph_metrics_register",
       "glyph_preview",
       "glyph_publish",
       "glyph_query",
@@ -892,6 +896,131 @@ describe("Glyph MCP server", () => {
         expect(r.isError).toBe(true);
         expect(r.text).toContain("Unknown handle_id");
       }
+    });
+  });
+
+  // ---- Phase 3 §1: semantic / metric layer (PR37) ------------------------
+  describe("metric layer (PR37 — Phase 3 §1)", () => {
+    it("registers metrics and lists them via glyph_metrics", async () => {
+      const reg = await callText(client, "glyph_metrics_register", {
+        metrics: [
+          {
+            name: "mrr",
+            sql: "SUM(amount) FILTER (WHERE type = 'subscription')",
+            description: "Monthly recurring revenue.",
+          },
+          { name: "total_rev", sql: "SUM(amount)" },
+        ],
+      });
+      expect(reg.isError).toBe(false);
+      expect(JSON.parse(reg.text).registered).toEqual(["mrr", "total_rev"]);
+
+      const list = await callText(client, "glyph_metrics", {});
+      expect(list.isError).toBe(false);
+      const out = JSON.parse(list.text);
+      expect(out.count).toBe(2);
+      expect(out.metrics.map((m: { name: string }) => m.name)).toEqual(["mrr", "total_rev"]);
+
+      // Prefix filter.
+      const filtered = await callText(client, "glyph_metrics", { prefix: "mr" });
+      expect(JSON.parse(filtered.text).count).toBe(1);
+    });
+
+    it("re-registering an existing metric records it under `replaced`", async () => {
+      await callText(client, "glyph_metrics_register", {
+        metrics: [{ name: "mrr", sql: "SUM(amount)" }],
+      });
+      const r = await callText(client, "glyph_metrics_register", {
+        metrics: [{ name: "mrr", sql: "SUM(amount) FILTER (WHERE type = 'subscription')" }],
+      });
+      const out = JSON.parse(r.text);
+      expect(out.registered).toEqual([]);
+      expect(out.replaced).toEqual(["mrr"]);
+    });
+
+    it("rejects an invalid metric SQL with a clear error", async () => {
+      const r = await callText(client, "glyph_metrics_register", {
+        metrics: [{ name: "bad", sql: "SELECT SUM(x) FROM t" }],
+      });
+      expect(r.isError).toBe(true);
+      expect(r.text).toMatch(/aggregate expression/);
+    });
+
+    it("glyph_render resolves `{ metric: <name> }` channels to the registered aggregate", async () => {
+      // Import a tiny payments CSV.
+      const csv =
+        "month,type,amount\n" +
+        "2024-01,subscription,100\n2024-01,subscription,150\n2024-01,one-time,50\n" +
+        "2024-02,subscription,120\n2024-02,subscription,180\n2024-02,one-time,40\n" +
+        "2024-03,subscription,200\n2024-03,subscription,250\n2024-03,one-time,30\n";
+      const imp = await callText(client, "glyph_import", {
+        payload: { kind: "csv", data: csv },
+      });
+      const imported = JSON.parse(imp.text);
+
+      await callText(client, "glyph_metrics_register", {
+        metrics: [
+          {
+            name: "mrr",
+            sql: "SUM(amount) FILTER (WHERE type = 'subscription')",
+            description: "Monthly recurring revenue.",
+          },
+        ],
+      });
+
+      const r = await callText(client, "glyph_render", {
+        spec: {
+          data: { source: imported.resolvedSource, format: "csv" },
+          layers: [
+            {
+              mark: "line",
+              encoding: { x: "month", y: { metric: "mrr" } },
+            },
+          ],
+        },
+      });
+      expect(r.isError).toBe(false);
+      const out = JSON.parse(r.text);
+      // We should have 3 rows (one per month) with the SUM-FILTER aggregate.
+      expect(out.row_count).toBe(3);
+      // The materialized view's schema should expose _metric_mrr.
+      expect(out.schema.map((c: { name: string }) => c.name)).toContain("_metric_mrr");
+      // The aggregate is correct: e.g. 2024-01 → 100 + 150 = 250.
+      const q = await callText(client, "glyph_query", {
+        handle_id: out.handle_id,
+        where: "WHERE month = '2024-01'",
+      });
+      const queried = JSON.parse(q.text);
+      const cols = queried.columns;
+      const mrrIdx = cols.indexOf("_metric_mrr");
+      expect(queried.rows[0][mrrIdx]).toBe(250);
+    });
+
+    it("returns an error when a spec references an unknown metric", async () => {
+      const csv = "month,amount\n2024-01,100\n2024-02,200\n";
+      const imp = await callText(client, "glyph_import", {
+        payload: { kind: "csv", data: csv },
+      });
+      const imported = JSON.parse(imp.text);
+      const r = await callText(client, "glyph_render", {
+        spec: {
+          data: { source: imported.resolvedSource, format: "csv" },
+          layers: [{ mark: "line", encoding: { x: "month", y: { metric: "phantom" } } }],
+        },
+      });
+      expect(r.isError).toBe(true);
+      expect(r.text).toMatch(/Unknown metric: "phantom"/);
+    });
+
+    it("rejects a channel that has neither field nor metric", async () => {
+      const r = await callText(client, "glyph_render", {
+        spec: {
+          data: { source: "x.csv" },
+          layers: [{ mark: "bar", encoding: { x: "a", y: { type: "quantitative" } } }],
+        },
+      });
+      expect(r.isError).toBe(true);
+      expect(r.text).toMatch(/exactly one of `field` or `metric`/);
     });
   });
 });

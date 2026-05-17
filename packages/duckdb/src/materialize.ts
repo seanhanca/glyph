@@ -13,7 +13,14 @@
  * handle published by an upstream agent.
  */
 
-import { applyStat, isStatError } from "@glyph/core";
+import {
+  applyStat,
+  buildMetricViewSql,
+  collectGroupByFields,
+  collectMetricNames,
+  isStatError,
+  rewriteMetricChannels,
+} from "@glyph/core";
 import type {
   ColumnInfo,
   ComputeEngine,
@@ -21,6 +28,8 @@ import type {
   DataSource,
   GlyphSpec,
   LineageRelation,
+  MetricDefinition,
+  MetricResolver,
   QueryHandle,
   QueryResult,
 } from "@glyph/core";
@@ -45,6 +54,13 @@ export interface MaterializedSpec {
    */
   readonly handle: DataHandle;
   readonly result: QueryResult;
+  /**
+   * The spec the compiler should consume. Equal to the input spec when no
+   * metric channels were present; otherwise a deep clone with each
+   * `metric: <name>` rewritten to `field: _metric_<name>` so the
+   * compiler can resolve plain field references.
+   */
+  readonly effectiveSpec: GlyphSpec;
 }
 
 /**
@@ -165,6 +181,12 @@ export async function materializeSpec(
     registerAs?: string;
     sessionId?: string;
     resolveHandleByUri?: HandleResolver;
+    /**
+     * Resolve a `{ metric: <name> }` channel to a registered MetricDefinition.
+     * The materializer rewrites such channels to `_metric_<name>` field
+     * references and pre-aggregates the metric's SQL into the view.
+     */
+    metricResolver?: MetricResolver;
   } = {},
 ): Promise<MaterializedSpec> {
   const sourceName = options.registerAs ?? `${SOURCE_REGISTRY_PREFIX}main`;
@@ -173,6 +195,7 @@ export async function materializeSpec(
   // handle resolution.
   const sessionId = options.sessionId ?? "local";
   const resolveHandleByUri = options.resolveHandleByUri;
+  const metricResolver = options.metricResolver;
 
   // Track parent gdf:// URIs that fed this materialization so the produced
   // handle's lineage records the upstream sources. We dedupe in case the
@@ -184,10 +207,35 @@ export async function materializeSpec(
     if (r.parentUri) parentUris.add(r.parentUri);
   }
 
+  // Resolve metric channels up-front. A spec like
+  //   encoding: { x: "month", y: { metric: "mrr" } }
+  // gets two transformations applied here:
+  //   1. The view SQL is wrapped so `_metric_mrr` is a column.
+  //   2. The spec is deep-cloned with `metric:` rewritten to `field:`.
+  // After both, the compiler sees plain field references — no special case.
+  const metricNames = collectMetricNames(spec);
+  let workingSpec: GlyphSpec = spec;
+  let resolvedMetrics: ReadonlyArray<MetricDefinition> = [];
+  if (metricNames.length > 0) {
+    if (!metricResolver) {
+      throw new Error(
+        `Spec references metric(s) [${metricNames.join(", ")}] but no metricResolver was supplied to materializeSpec`,
+      );
+    }
+    const resolved: MetricDefinition[] = [];
+    for (const n of metricNames) {
+      const m = metricResolver(n);
+      if (!m) throw new Error(`Unknown metric: "${n}"`);
+      resolved.push(m);
+    }
+    resolvedMetrics = resolved;
+    workingSpec = rewriteMetricChannels(spec);
+  }
+
   // Phase 0 limitation: use the first layer's data source / transform.
   // Multi-layer specs with heterogeneous data per layer materialize one view
   // each in a later PR.
-  const firstLayer = spec.layers[0];
+  const firstLayer = workingSpec.layers[0];
   if (!firstLayer) {
     throw new Error("Spec has no layers");
   }
@@ -197,7 +245,17 @@ export async function materializeSpec(
     if (r.parentUri) parentUris.add(r.parentUri);
   }
 
-  let viewSql = buildLayerSql(spec.data, firstLayer.data, sourceName);
+  let viewSql = buildLayerSql(workingSpec.data, firstLayer.data, sourceName);
+
+  // Wrap with the metric pre-aggregation if any metric was referenced.
+  if (resolvedMetrics.length > 0) {
+    const groupFields = collectGroupByFields(workingSpec).filter((f) => !f.startsWith("_metric_"));
+    viewSql = buildMetricViewSql({
+      baseSql: viewSql,
+      groupFields,
+      metrics: resolvedMetrics,
+    });
+  }
 
   // Apply the first layer's stat (count / sum / mean) by SQL rewrite before
   // we materialize. Multi-layer specs with mixed stats are deferred — same
@@ -224,7 +282,7 @@ export async function materializeSpec(
     sampleRows: result.rowCount,
     filteredOut: 0,
   });
-  return { handle, result };
+  return { handle, result, effectiveSpec: workingSpec };
 }
 
 // ---------------------------------------------------------------------------

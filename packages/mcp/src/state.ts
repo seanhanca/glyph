@@ -10,7 +10,7 @@
  */
 
 import { randomUUID } from "node:crypto";
-import type { ComputeEngine, DataHandle, QueryHandle } from "@glyph/core";
+import type { ComputeEngine, DataHandle, MetricDefinition, QueryHandle } from "@glyph/core";
 import { createDuckDBEngine, materializeRowsAsHandle, materializeSpec } from "@glyph/duckdb";
 import {
   type PreviewServer,
@@ -26,6 +26,8 @@ export class ServerState {
   /** Per-session id for minted URIs. Random per ServerState instance. */
   readonly sessionId: string;
   private readonly svgsByHandle = new Map<string, string>();
+  /** Phase 3 §1: session-scoped registry of named metrics. */
+  private readonly metrics = new Map<string, MetricDefinition>();
   private chain: Promise<unknown> = Promise.resolve();
   private preview: PreviewServer | undefined;
   private readonly previewOptions: PreviewServerOptions;
@@ -64,6 +66,26 @@ export class ServerState {
   /** All handles in this session (insertion order). */
   allHandles(): ReadonlyArray<DataHandle> {
     return Array.from(this.handles.values());
+  }
+
+  // ---- Metric registry (Phase 3 §1) ----------------------------------------
+
+  /** Register (or replace) a metric. Returns true if it was new. */
+  registerMetric(metric: MetricDefinition): boolean {
+    const isNew = !this.metrics.has(metric.name);
+    this.metrics.set(metric.name, metric);
+    return isNew;
+  }
+
+  /** Lookup a metric by name. */
+  getMetric(name: string): MetricDefinition | undefined {
+    return this.metrics.get(name);
+  }
+
+  /** All metrics, optionally filtered by name prefix (insertion order). */
+  allMetrics(prefix?: string): ReadonlyArray<MetricDefinition> {
+    const all = Array.from(this.metrics.values());
+    return prefix === undefined ? all : all.filter((m) => m.name.startsWith(prefix));
   }
 
   /** Cache the rendered SVG for a handle so the preview server can serve it. */

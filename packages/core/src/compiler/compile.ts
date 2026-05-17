@@ -73,8 +73,12 @@ function buildTooltipText(
       const v = attrValue(valueAt(row, schema, ch));
       return `${ch}: ${v}`;
     }
-    const label = ch.title ?? ch.field;
-    const v = attrValue(valueAt(row, schema, ch.field));
+    // Metric channels (PR37 §1) are rewritten to `_metric_<name>` field
+    // references in the materializer before compile sees them — but be
+    // defensive in case a caller compiles without that pass.
+    const fieldName = ch.field ?? (ch.metric ? `_metric_${ch.metric}` : "");
+    const label = ch.title ?? fieldName;
+    const v = attrValue(valueAt(row, schema, fieldName));
     return `${label}: ${v}`;
   };
 

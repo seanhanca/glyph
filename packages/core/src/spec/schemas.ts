@@ -73,20 +73,34 @@ export const ScaleSchema = z
  * A channel value. Either:
  *   - a string shorthand: the field name; type/scale inferred from data
  *   - an object: { field, type?, scale?, aggregate? }
+ *   - an object: { metric, type?, scale?, ... } — Phase 3 §1 (PR37); the
+ *     materializer resolves `metric` against a session-scoped registry and
+ *     emits a `_metric_<name>` column the encoding then resolves to.
  *
  * The shorthand form is what agents reach for first; the object form is the
  * escape hatch when defaults need to be overridden.
+ *
+ * Constraint: a channel must carry exactly one of `field` or `metric`.
  */
 export const ChannelObjectSchema = z
   .object({
-    field: z.string().min(1),
+    field: z.string().min(1).optional(),
+    /**
+     * Reference to a named metric registered via `glyph_metrics_register`
+     * (or a yaml registry, in a later PR). The materializer rewrites this
+     * to a SQL aggregate at compile time.
+     */
+    metric: z.string().min(1).optional(),
     type: FieldTypeSchema.optional(),
     scale: ScaleSchema.optional(),
     aggregate: z.enum(["count", "sum", "mean", "median", "min", "max"]).optional(),
     /** Override the axis/legend title. */
     title: z.string().optional(),
   })
-  .strict();
+  .strict()
+  .refine((c) => (c.field === undefined) !== (c.metric === undefined), {
+    message: "Channel must have exactly one of `field` or `metric`.",
+  });
 
 export const ChannelSchema = z.union([z.string().min(1), ChannelObjectSchema]);
 

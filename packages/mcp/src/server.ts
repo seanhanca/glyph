@@ -1,7 +1,7 @@
 /**
  * Glyph MCP server.
  *
- * Eighteen tools — the library surface:
+ * Twenty tools — the library surface:
  *   Phase 0/1 (9):
  *     - glyph_capabilities()              → feature detection
  *     - glyph_describe(source)            → schema + suggested encodings
@@ -24,6 +24,9 @@
  *     - glyph_drift(handle_id, A, B)      → per-group contribution to delta
  *     - glyph_decompose(handle_id, …)     → per-factor variance explained
  *     - glyph_forecast(handle_id, h?)     → seasonal-naive baseline + bands
+ *   Phase 3 §1 (2, PR37):
+ *     - glyph_metrics_register(metrics[]) → register named aggregates
+ *     - glyph_metrics(prefix?)            → list registered metrics
  *
  * Each diagnostic verb returns { handle_id, rows, explanation } — the new
  * handle_id is a derived DataHandle with chained lineage so the result is
@@ -44,8 +47,10 @@ import {
   renderSvg,
   safeParseSpec,
   seasonalNaiveForecast,
+  validateMetric,
   vegaLiteToGlyph,
 } from "@glyph/core";
+import type { MetricDefinition } from "@glyph/core";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { Resvg } from "@resvg/resvg-js";
 import { z } from "zod";
@@ -78,6 +83,9 @@ const MCP_TOOLS = [
   { name: "glyph_drift", since: "0.0.5" },
   { name: "glyph_decompose", since: "0.0.5" },
   { name: "glyph_forecast", since: "0.0.5" },
+  // ---- Phase 3 §1: semantic / metric layer (PR37) ----------------------
+  { name: "glyph_metrics_register", since: "0.0.6" },
+  { name: "glyph_metrics", since: "0.0.6" },
 ] as const;
 
 /** Best-effort browser launcher. Returns true on success. */
@@ -250,6 +258,7 @@ export function createServer(state: ServerState = new ServerState()): {
           m = await materializeSpec(engine, parsed.spec, {
             sessionId: state.sessionId,
             resolveHandleByUri: (uri) => state.getHandleByUri(uri),
+            metricResolver: (name) => state.getMetric(name),
           });
         } catch (err) {
           return {
@@ -259,7 +268,11 @@ export function createServer(state: ServerState = new ServerState()): {
         }
         state.storeHandle(m.handle);
         const scene = compileSpec({
-          spec: parsed.spec,
+          // Use the materializer's effectiveSpec — for metric channels this
+          // has `{ metric: <name> }` rewritten to `{ field: _metric_<name> }`
+          // so the compiler resolves to the synthetic columns the engine
+          // actually produced.
+          spec: m.effectiveSpec,
           rows: m.result.rows,
           schema: m.handle.schema,
         });
@@ -1224,6 +1237,112 @@ export function createServer(state: ServerState = new ServerState()): {
           ],
         };
       }),
+  );
+
+  // ====== Phase 3 §1 metric layer (PR37) ==================================
+  //
+  // The "MRR" / "churn rate" / "active customer" registry. Once a metric is
+  // registered, any `glyph_render` spec can write `{ metric: "mrr" }` in an
+  // encoding channel and the materializer wraps the data SQL with the
+  // metric's aggregate. Same definitions across every chart + every agent
+  // turn = no metric drift.
+
+  // ----- glyph_metrics_register -------------------------------------------
+  server.registerTool(
+    "glyph_metrics_register",
+    {
+      title: "Register named metrics (semantic layer)",
+      description:
+        'Register one or more named metrics — aggregate SQL expressions reusable across every chart in this session. Subsequent `glyph_render` specs can write `{ metric: "mrr" }` in any encoding channel; the materializer wraps the data SQL with the registered aggregate (GROUP BY the other channel fields). Existing metrics with the same name are replaced.',
+      inputSchema: {
+        metrics: z
+          .array(
+            z
+              .object({
+                name: z
+                  .string()
+                  .min(1)
+                  .describe("SQL-safe identifier; the key used in spec encodings."),
+                description: z.string().optional(),
+                sql: z
+                  .string()
+                  .min(1)
+                  .describe(
+                    "Single aggregate expression — no SELECT / FROM / GROUP BY. E.g. \"SUM(amount) FILTER (WHERE type = 'subscription')\".",
+                  ),
+                grain: z
+                  .string()
+                  .optional()
+                  .describe("Coarse grain hint — 'daily', 'monthly', etc."),
+                dimensions: z.array(z.string()).optional(),
+                requires: z.array(z.string()).optional(),
+              })
+              .strict(),
+          )
+          .min(1)
+          .describe("Metric definitions to register."),
+      },
+    },
+    async ({ metrics }) => {
+      const registered: string[] = [];
+      const replaced: string[] = [];
+      for (const raw of metrics) {
+        const err = validateMetric(raw);
+        if (err) {
+          return {
+            isError: true,
+            content: [
+              {
+                type: "text" as const,
+                text: `Invalid metric "${raw.name ?? "<unknown>"}": ${err}`,
+              },
+            ],
+          };
+        }
+        const m = raw as MetricDefinition;
+        const isNew = state.registerMetric(m);
+        (isNew ? registered : replaced).push(m.name);
+      }
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: JSON.stringify(
+              { registered, replaced, total: state.allMetrics().length },
+              null,
+              2,
+            ),
+          },
+        ],
+      };
+    },
+  );
+
+  // ----- glyph_metrics ----------------------------------------------------
+  server.registerTool(
+    "glyph_metrics",
+    {
+      title: "List registered metrics",
+      description:
+        'Return the session\'s metric registry. Pass `prefix` to filter by name prefix. Use this to discover what metrics exist before writing `{ metric: "…" }` in a spec.',
+      inputSchema: {
+        prefix: z
+          .string()
+          .optional()
+          .describe("If set, only metrics whose name starts with this prefix are returned."),
+      },
+    },
+    async ({ prefix }) => {
+      const metrics = state.allMetrics(prefix);
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: JSON.stringify({ count: metrics.length, metrics }, null, 2),
+          },
+        ],
+      };
+    },
   );
 
   // ----- glyph_handles (PR33 / Phase 3 Tier A) ----------------------------

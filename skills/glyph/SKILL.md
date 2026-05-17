@@ -25,9 +25,9 @@ Do **not** use Glyph for:
 - Real-time streaming charts (use Perspective)
 - Bespoke / one-off visualizations that don't fit a grammar (use D3 directly)
 
-## The eighteen tools
+## The twenty tools
 
-Glyph's MCP surface (9 Phase 0/1 + 4 Phase 3 Tier A GDF verbs + 1 explain verb + 4 diagnostic verbs):
+Glyph's MCP surface (9 Phase 0/1 + 4 Phase 3 Tier A GDF verbs + 1 explain verb + 4 diagnostic verbs + 2 metric-layer verbs):
 
 1. `glyph_describe` — inspect a data file before writing a spec
 2. `glyph_render` — compile + render a spec; returns SVG + PNG + handle
@@ -46,6 +46,8 @@ Glyph's MCP surface (9 Phase 0/1 + 4 Phase 3 Tier A GDF verbs + 1 explain verb +
 15. `glyph_drift` — per-group contribution to a period-over-period delta
 16. `glyph_decompose` — rank factors by variance explained (one-way η²)
 17. `glyph_forecast` — seasonal-naive baseline + 2σ confidence bands
+18. `glyph_metrics_register` — register named aggregates (the metric layer)
+19. `glyph_metrics` — list registered metrics (optionally filtered)
 0. `glyph_capabilities` — feature detection
 
 ### 0. `glyph_capabilities()` *(call once at session start)*
@@ -194,6 +196,47 @@ For each candidate factor (a column name), compute the fraction of total varianc
 #### 17. `glyph_forecast(handle_id, xField, yField, season?, horizon?)`
 
 Seasonal-naive forecast: `y_hat[t] = y[t-season]`. When `season=1` it's a one-step-back random walk. The ±2σ band is derived from historical residuals. Returns one row per historical point + `horizon` (default 7) trailing forecast-only rows; `isHorizon=true` marks the future. The explanation surfaces actuals that fell outside the band — those are the points to dig into next.
+
+### Semantic / metric layer (verbs 18–19) — Phase 3 §1
+
+A **registry of named aggregates** — MRR, churn rate, active customer, etc. — that every chart in the session shares. Define a metric once with `glyph_metrics_register`; reference it from any spec encoding via `{ metric: "<name>" }`; the materializer wraps the data SQL with the registered aggregate and `GROUP BY`s the other channel fields. Same definitions across every agent turn = **no metric drift**.
+
+Mirrors the dbt / Cube / LookML semantic-layer pattern, but bound to chart specs instead of a separate config product.
+
+#### 18. `glyph_metrics_register(metrics[])`
+
+Register (or replace) one or more named metrics. Each metric is `{ name, sql, description?, grain?, dimensions?, requires? }`. The `sql` field must be a **single aggregate expression** — no `SELECT` / `FROM` / `GROUP BY`. Examples:
+
+```jsonc
+[
+  { "name": "mrr",
+    "sql": "SUM(amount) FILTER (WHERE type = 'subscription')",
+    "description": "Monthly recurring revenue, excluding one-time charges.",
+    "grain": "monthly" },
+  { "name": "churn_rate",
+    "sql": "COUNT(*) FILTER (WHERE status = 'cancelled') / NULLIF(COUNT(*), 0)" }
+]
+```
+
+Returns `{ registered, replaced, total }`. Re-registering an existing name swaps the definition in place and surfaces it under `replaced`.
+
+#### 19. `glyph_metrics(prefix?)`
+
+Returns `{ count, metrics }` — every metric registered in this session, optionally filtered by name prefix. Call this before writing `{ metric: "..." }` in a spec so you don't reference a phantom.
+
+#### Using metrics in a spec
+
+```jsonc
+{
+  "data": { "source": "warehouse.payments" },
+  "layers": [{
+    "mark": "line",
+    "encoding": { "x": "month", "y": { "metric": "mrr" } }
+  }]
+}
+```
+
+The materializer wraps the source SQL with `SELECT month, (SUM(amount) FILTER (...)) AS _metric_mrr FROM (<source>) GROUP BY month`. The rendered chart's view exposes `_metric_mrr` as a real column — so `glyph_query` / `glyph_drill` work normally against it.
 
 ## Spec format (the wire format)
 
