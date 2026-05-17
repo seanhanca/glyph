@@ -79,6 +79,7 @@ import { importPayload } from "./import.js";
 import { ServerState, materializeRowsAsHandle, materializeSpec } from "./state.js";
 import { executeStoryPlan, planStoryHeuristic } from "./story.js";
 import type { ColumnSummaryLike, StoryPlan } from "./story.js";
+import { buildWhyboard } from "./whyboard.js";
 
 export const SERVER_NAME = "glyph-mcp";
 export const SERVER_VERSION = "0.0.0";
@@ -129,6 +130,8 @@ const MCP_TOOLS = [
   { name: "glyph_linked_publish", since: "0.0.10" },
   { name: "glyph_linked_await", since: "0.0.10" },
   { name: "glyph_linked_handles", since: "0.0.10" },
+  // ---- Whyboard (PR48, Innovation #5) ----------------------------------
+  { name: "glyph_whyboard", since: "0.0.11" },
 ] as const;
 
 /** Best-effort browser launcher. Returns true on success. */
@@ -2245,6 +2248,89 @@ export function createServer(state: ServerState = new ServerState()): {
         ],
       };
     },
+  );
+
+  // ====== Whyboard (PR48, Innovation #5) ==================================
+  //
+  // Returns a tree of diagnostics rooted at a chart handle. v0 emits
+  // depth-1 (root + anomaly + decompose + forecast + drift children); the
+  // consumer renders the tree as clickable cards. Each diagnostic
+  // materializes a derived handle so `glyph_lineage(uri)` walks every
+  // branch back to the source — full audit.
+
+  server.registerTool(
+    "glyph_whyboard",
+    {
+      title: "Build an interactive 'why' tree from a rendered chart",
+      description:
+        "Given a starting handle_id, runs explain + anomaly + decompose + forecast + drift (where applicable) and returns a tree rooted at the handle. Each branch is a derived DataHandle so the consumer can drill into the rows behind any node. Pair with `link_group` to wire cross-branch filters via the linked-view bus.",
+      inputSchema: {
+        handle_id: z.string().describe("The handle the user is asking 'why' about."),
+        question: z
+          .string()
+          .optional()
+          .describe("Optional natural-language question — stored on the result for narrators."),
+        depth: z
+          .number()
+          .int()
+          .min(1)
+          .max(3)
+          .optional()
+          .describe(
+            "Branch depth. v0 honors 1 (root + direct children); deeper recursion lands in a follow-up.",
+          ),
+        factors: z
+          .array(z.string().min(1))
+          .optional()
+          .describe(
+            "Override the auto-detected categorical fields for the decompose branch (e.g. ['region','plan_tier']).",
+          ),
+        link_group: z
+          .string()
+          .optional()
+          .describe(
+            "Optional link_group name; recorded on the result so the consumer can wire cross-branch filters.",
+          ),
+        sample_rows: z
+          .number()
+          .int()
+          .min(0)
+          .max(64)
+          .optional()
+          .describe("Rows to preview per node (default 8)."),
+      },
+    },
+    async ({ handle_id, question, depth, factors, link_group, sample_rows }) =>
+      state.serial(async () => {
+        const handle = state.getHandle(handle_id);
+        if (!handle) {
+          return {
+            isError: true,
+            content: [{ type: "text" as const, text: `Unknown handle_id: ${handle_id}` }],
+          };
+        }
+        try {
+          const engine = await state.getEngine();
+          const board = await buildWhyboard({
+            state,
+            engine,
+            handle_id,
+            ...(question !== undefined ? { question } : {}),
+            ...(depth !== undefined ? { depth } : {}),
+            ...(factors !== undefined ? { factors } : {}),
+            ...(link_group !== undefined ? { link_group } : {}),
+            ...(sample_rows !== undefined ? { sample_rows } : {}),
+          });
+          return {
+            content: [{ type: "text" as const, text: JSON.stringify(jsonSafe(board), null, 2) }],
+          };
+        } catch (err) {
+          return {
+            isError: true,
+            content: [{ type: "text" as const, text: (err as Error).message ?? String(err) }],
+          };
+        }
+      }),
   );
 
   // ----- glyph_handles (PR33 / Phase 3 Tier A) ----------------------------

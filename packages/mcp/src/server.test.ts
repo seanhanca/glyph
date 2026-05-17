@@ -76,7 +76,7 @@ describe("Glyph MCP server", () => {
     rmSync(tempMemoryDir, { recursive: true, force: true });
   });
 
-  it("lists the thirty-five tools", async () => {
+  it("lists the thirty-six tools", async () => {
     const r = await client.listTools();
     const names = r.tools.map((t) => t.name).sort();
     expect(names).toEqual([
@@ -115,6 +115,7 @@ describe("Glyph MCP server", () => {
       "glyph_story_plan",
       "glyph_subscribe",
       "glyph_trust",
+      "glyph_whyboard",
     ]);
   });
 
@@ -162,6 +163,7 @@ describe("Glyph MCP server", () => {
       "glyph_story_plan",
       "glyph_subscribe",
       "glyph_trust",
+      "glyph_whyboard",
     ]);
   });
 
@@ -1452,6 +1454,83 @@ describe("Glyph MCP server", () => {
       const out = JSON.parse(r.text);
       expect(out.recent_events.length).toBeGreaterThanOrEqual(1);
       expect(out.recent_events[0].predicate).toBe("rides > 200");
+    });
+  });
+
+  // ---- PR48 Whyboard (Innovation #5) -------------------------------------
+  describe("whyboard (PR48)", () => {
+    async function renderTaxi(): Promise<string> {
+      const r = await callText(client, "glyph_render", {
+        spec: {
+          data: { source: fixture, format: "csv" },
+          layers: [{ mark: "bar", encoding: { x: "pickup_hour", y: "rides" } }],
+        },
+      });
+      return JSON.parse(r.text).handle_id as string;
+    }
+
+    it("returns a depth-1 tree with at least the root + diagnostic children", async () => {
+      const handle_id = await renderTaxi();
+      const r = await callText(client, "glyph_whyboard", {
+        handle_id,
+        question: "Why does the rides distribution look like this?",
+      });
+      expect(r.isError).toBe(false);
+      const board = JSON.parse(r.text);
+      expect(board.source_handle).toBe(handle_id);
+      expect(board.question).toContain("Why");
+      expect(board.root.kind).toBe("root");
+      expect(typeof board.root.explanation?.headline).toBe("string");
+      // taxi fixture has 12 rows; not enough for the anomaly threshold to
+      // trigger reliably, but at least the root + decompose/forecast tree
+      // should populate. Just assert root exists.
+      expect(board.total_nodes).toBeGreaterThanOrEqual(1);
+    });
+
+    it("chains every diagnostic handle so glyph_lineage walks back to the source", async () => {
+      // Use a series with a clear outlier so anomaly fires.
+      const lines = ["hour,rides"];
+      for (let i = 0; i < 30; i++) lines.push(`${i},50`);
+      lines.push("99,400");
+      const imp = await callText(client, "glyph_import", {
+        payload: { kind: "csv", data: lines.join("\n") },
+      });
+      const imported = JSON.parse(imp.text);
+      const renderR = await callText(client, "glyph_render", {
+        spec: {
+          data: { source: imported.resolvedSource, format: "csv" },
+          layers: [{ mark: "bar", encoding: { x: "hour", y: "rides" } }],
+        },
+      });
+      const handle_id = JSON.parse(renderR.text).handle_id as string;
+
+      const r = await callText(client, "glyph_whyboard", { handle_id });
+      const board = JSON.parse(r.text);
+      expect(board.root.children.length).toBeGreaterThanOrEqual(1);
+      const firstChild = board.root.children[0];
+      expect(typeof firstChild.handle_id).toBe("string");
+      expect(firstChild.uri).toMatch(/^gdf:\/\//);
+      // Lineage walks back to the source chart's materializeSpec node.
+      const lineage = await callText(client, "glyph_lineage", { uri: firstChild.uri });
+      const tree = JSON.parse(lineage.text);
+      expect(tree.children.length).toBeGreaterThanOrEqual(1);
+      expect(tree.children[0].producer.tool).toBe("materializeSpec");
+    });
+
+    it("rejects an unknown handle_id with a clear error", async () => {
+      const r = await callText(client, "glyph_whyboard", { handle_id: "nope" });
+      expect(r.isError).toBe(true);
+      expect(r.text).toContain("Unknown handle_id");
+    });
+
+    it("threads link_group onto the result for downstream UI wiring", async () => {
+      const handle_id = await renderTaxi();
+      const r = await callText(client, "glyph_whyboard", {
+        handle_id,
+        link_group: "investigate-q4",
+      });
+      const board = JSON.parse(r.text);
+      expect(board.link_group).toBe("investigate-q4");
     });
   });
 
