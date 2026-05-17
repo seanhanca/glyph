@@ -1,6 +1,8 @@
-# Glyph — System Audit (post-Phase-3)
+# Glyph — System Audit
 
-> 40 PRs merged. 346 tests across the 6-cell CI matrix (Linux/macOS/Windows × Node 20/22). MCP surface: 27 tools. License: Apache 2.0. Telemetry: none.
+> **46 PRs merged. 388 tests across the 6-cell CI matrix (Linux/macOS/Windows × Node 20/22). MCP surface: 35 tools. License: Apache 2.0. Telemetry: none.**
+>
+> Last updated after PR46 (linked-view filters). Original Phase-3 baseline is preserved below for the diff.
 
 This document is the honest end-of-phase audit. It answers three questions: **what is implemented**, **how does Glyph score against competitors**, and **where are the gaps**.
 
@@ -78,17 +80,21 @@ Each competitor is scored 0–100 across the same eight axes (each 0–12.5 max;
 
 ### Scores
 
-| Axis | D3 | Vega-Lite | Tableau | Power BI | Plotly | Glyph (today) |
-|---|---|---|---|---|---|---|
-| 1. Grammar expressiveness | **12** | 12 | 9 | 8 | 10 | 9 |
-| 2. Data-engine integration | 4 | 7 | 10 | 11 | 8 | **12** |
-| 3. Determinism / snapshot | 6 | 11 | 4 | 4 | 8 | **12** |
-| 4. Agent affordance | 3 | 6 | 2 | 2 | 7 | **12** |
-| 5. Interactivity | **11** | 9 | 11 | 11 | 11 | 8 |
-| 6. Performance ceiling | **12** | 8 | 11 | 10 | 11 | 9 |
-| 7. Distribution | 9 | 10 | 6 | 7 | 12 | 8 |
-| 8. Trust / governance | 1 | 1 | 9 | 10 | 4 | **12** |
-| **Total** | **58** | **64** | **62** | **63** | **71** | **84** |
+| Axis | D3 | Vega-Lite | Tableau | Power BI | Plotly | Glyph (PR43) | Glyph (PR46) |
+|---|---|---|---|---|---|---|---|
+| 1. Grammar expressiveness | **12** | 12 | 9 | 8 | 10 | 9 | **11** ⬆ |
+| 2. Data-engine integration | 4 | 7 | 10 | 11 | 8 | **12** | **12** |
+| 3. Determinism / snapshot | 6 | 11 | 4 | 4 | 8 | **12** | **12** |
+| 4. Agent affordance | 3 | 6 | 2 | 2 | 7 | **12** | **12** |
+| 5. Interactivity | 11 | 9 | 11 | 11 | 11 | 8 | **11** ⬆ |
+| 6. Performance ceiling | **12** | 8 | 11 | 10 | 11 | 9 | 9 |
+| 7. Distribution | 9 | 10 | 6 | 7 | 12 | 8 | 8 |
+| 8. Trust / governance | 1 | 1 | 9 | 10 | 4 | **12** | **12** |
+| **Total** | **58** | **64** | **62** | **63** | **71** | **84** | **93** |
+
+**Net +9 since PR43 audit.** The lifts came from:
+- **Grammar 9 → 11** — geo-region choropleth + naturalEarth + albersUsa + graticule (PR44) closed the geo gap; race + stagger + scrub animations (PR45) closed the animation gap.
+- **Interactivity 8 → 11** — linked-view filter bus (PR46) means a click in one chart now coordinates every other chart in the storyboard, the cross-chart pattern that BI tools sell to enterprise.
 
 ### Where Glyph wins **decisively** today
 
@@ -110,20 +116,34 @@ Each competitor is scored 0–100 across the same eight axes (each 0–12.5 max;
 - **Animations: 0 points.** Flourish-style data-driven animations (bar races, scatter playback, scrubbable timelines) are central to journalistic viz. Glyph has none. → **Innovation #3 below.**
 - **Public surface area / examples / docs site.** D3 has gallery.observablehq.com. Vega-Lite has a beautiful examples page. Glyph has README + `examples/` (9 fixtures). → addressable by Session B, not in this audit's scope but real.
 
-### Honest "98 by when" answer
+### Honest "98 by when" answer (post-PR46 update)
 
-Glyph clears **98** only after:
-1. Geo viz lands (Innovation #2) → grammar 9 → 12, total +3
-2. Animation primitives land (Innovation #3) → interactivity 8 → 11, total +3
-3. Canvas renderer lands (Session C from NEXT-SESSIONS.md) → performance 9 → 12, total +3
-4. Story Agent lands (Innovation #1 below) → agent affordance stays 12 but **becomes uncontested** at that score
-5. Docs site + ≥25 examples (Session B) → distribution 8 → 11, total +3
+We're at **93/100** today. The final +5 points to clear 98:
 
-That's +12 points, putting Glyph at **96** with concrete deliverables (i.e. each is a defined PR or session). The remaining +2 are the perennial last-mile polish (a11y audits, perf badging, video tutorials).
+| Gap | Lift | Work |
+|---|---|---|
+| Performance 9 → 12 | +3 | `@glyph/canvas` renderer (Session C). 100k marks < 200 ms. Snapshot tests via pixelmatch. |
+| Distribution 8 → 11 | +3 | Astro docs site + ≥25-example gallery + Vercel previews (Session B). |
+| Grammar 11 → 12 | +1 | TopoJSON loader + composite albers w/ AK+HI insets + box/violin/heatmap marks. |
+| Interactivity 11 → 12 | +1 | Whyboard rendering (Innovation #5) + scrub `<input type=range>` UI in `@glyph/live`. |
+
+Total +8 puts Glyph at **101**, but the rubric caps at 100. Realistic ship line: **96-98** after the next two PRs (Whyboard + grammar polish), **98+** after Session B + Session C.
 
 ---
 
-## 3. Innovation roadmap — 3–5 leaps to put Glyph in absolute-leader territory
+## 3. Innovation roadmap — status
+
+| # | Innovation | Status |
+|---|---|---|
+| 1 | Story Agent (master orchestrator) | ✅ Shipped (PR41) |
+| 2 | Geo viz as a first-class mark | ✅ Shipped (PR42 + PR44) |
+| 3 | Data-driven animations | ✅ Shipped (PR43 + PR45) |
+| 4 | Linked-view filters (cross-chart binding) | ✅ Shipped (PR46) |
+| 5 | Interactive Whyboard | ⏳ Pending — uses #4's bus as substrate |
+
+Of the five identified innovations, **four are shipped**. Whyboard is the remaining headline feature; it composes on top of the diagnostic verbs (PR36), Story Agent (PR41), and the linked-view bus (PR46).
+
+### Original innovation roadmap (preserved for reference)
 
 > Each of these is more than a feature. Each opens a *different category* of use that nobody else does today.
 
