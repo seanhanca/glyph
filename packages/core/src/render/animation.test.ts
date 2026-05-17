@@ -30,7 +30,7 @@ describe("renderSvg — stage animation (PR43)", () => {
     const scene = compileSpec({ spec: parsed.spec, rows: baseRows, schema: baseSchema });
     const svg = renderSvg(scene);
     expect(svg).toContain("@keyframes glyph-stage");
-    expect(svg).toContain("class=\"glyph-marks glyph-stage\"");
+    expect(svg).toContain('class="glyph-marks glyph-stage"');
     expect(svg).toContain("500ms");
   });
 

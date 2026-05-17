@@ -339,9 +339,7 @@ export function renderSvg(scene: Scene): string {
   // glyph-marks wrapper.
   const animClass = scene.animation?.kind === "stage" ? " glyph-stage" : "";
   const marks =
-    interactive || animClass
-      ? `<g class="glyph-marks${animClass}">${markStrs}</g>`
-      : markStrs;
+    interactive || animClass ? `<g class="glyph-marks${animClass}">${markStrs}</g>` : markStrs;
   const axes = scene.axes.map(renderAxis).join("");
   return `${head}${desc}${hoverStyle}${animationStyle}${bg}${title}${grid}${marks}${axes}${legends}</svg>\n`;
 }
