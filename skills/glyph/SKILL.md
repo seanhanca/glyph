@@ -25,9 +25,19 @@ Do **not** use Glyph for:
 - Real-time streaming charts (use Perspective)
 - Bespoke / one-off visualizations that don't fit a grammar (use D3 directly)
 
-## The five tools (six including `glyph_capabilities`)
+## The eight tools (nine including `glyph_capabilities`)
 
-Glyph's MCP surface is five tools. Call the first three in order; `glyph_drill` closes the chart → click → SQL loop; `glyph_import` brings in data from another MCP tool.
+Glyph's MCP surface:
+
+1. `glyph_describe` — inspect a data file before writing a spec
+2. `glyph_render` — compile + render a spec; returns SVG + PNG + handle
+3. `glyph_query` — follow-up SQL against a chart's view
+4. `glyph_import` — bring data in from another MCP tool (CSV / JSON-rows / URL)
+5. `glyph_preview` — open an interactive chart in the user's browser
+6. `glyph_await_interaction` — long-poll the click → agent loop
+7. `glyph_close_preview` — stop the preview server
+8. `glyph_drill` — predicate-driven drill-in (selection → rows)
+0. `glyph_capabilities` — feature detection
 
 ### 0. `glyph_capabilities()` *(call once at session start)*
 
@@ -72,7 +82,27 @@ Any MCP tool returning tabular data can voluntarily include a `data_handle` bloc
 
 When you (the agent) see a `data_handle` in a tool result, forward it to `glyph_import` directly — no copy, no token-expensive stringification of the full row set. This is opt-in for upstream tools; Glyph reads it if present and ignores it otherwise.
 
-### 5. `glyph_drill(handle_id, field, equals | between | in)`
+### 5. `glyph_preview(handle_id?, open?)` *(opens an interactive chart in a browser)*
+
+Starts an opt-in, **localhost-only** HTTP server inside the MCP process that hosts a single-page app rendering the chart with `@glyph/live` click/hover/brush handlers. Returns `{ url, token, port }`. Pass `open: true` to also launch the user's default browser.
+
+When the user interacts (clicks a bar, drags a brush), the page POSTs the event to the server. The agent picks it up via `glyph_await_interaction`.
+
+### 6. `glyph_await_interaction(handle_id, timeout_ms?)` *(long-poll the click → agent loop)*
+
+Long-polls (default 30 s, max 60 s) for the next user interaction on the preview chart. Returns:
+
+```json
+{ "kind": "click", "binding": { "row": 7, "attrs": { "x": "2024-03-12" } }, "whereSql": "WHERE \"day\" = '2024-03-12'" }
+```
+
+or `{}` on timeout. Typically called immediately after `glyph_preview`. The `whereSql` field is ready to hand to `glyph_query` or `glyph_drill` for the next step.
+
+### 7. `glyph_close_preview()` *(stop the server)*
+
+Idempotent shutdown. Any parked `glyph_await_interaction` calls resolve to `{}`. The server also stops automatically on MCP exit.
+
+### 8. `glyph_drill(handle_id, field, equals | between | in)`
 
 The chart → click/brush/zoom → SQL loop. Use this when the user (or their IDE preview) reports a selection from a rendered chart. Pass exactly one of:
 
@@ -147,6 +177,21 @@ Then re-render with that filter in the spec's data.transform.
 ### Recipe — aggregate at the SQL layer
 
 Glyph's data.transform is a full SQL escape hatch. Do GROUP BY, JOIN, window functions there — don't try to express them in the encoding.
+
+### Recipe — interactive preview + click → next-step
+
+```
+1. glyph_render(spec) → { handle_id, svg, png }
+2. glyph_preview(handle_id, open: true) → opens browser at http://127.0.0.1:NNNN/?t=…
+3. (user clicks a bar)
+4. glyph_await_interaction(handle_id, timeout_ms: 30000)
+     → { kind: "click", binding: { row: 7, attrs: { x: "2024-03-12" } },
+         whereSql: "WHERE \"day\" = '2024-03-12'" }
+5. glyph_query(handle_id, whereSql) → rows for the selected slice
+6. (optional) glyph_close_preview()
+```
+
+Use this whenever the user wants to **drive the analysis with the chart** instead of with words. The `whereSql` field is ready to pass to `glyph_query` or `glyph_drill` for the follow-up.
 
 ## Error recovery
 

@@ -28,7 +28,25 @@ const MCP_TOOLS = [
   { name: "glyph_drill", since: "0.0.0" },
   { name: "glyph_capabilities", since: "0.0.0" },
   { name: "glyph_import", since: "0.0.1" },
+  { name: "glyph_preview", since: "0.0.2" },
+  { name: "glyph_await_interaction", since: "0.0.2" },
+  { name: "glyph_close_preview", since: "0.0.2" },
 ] as const;
+
+/** Best-effort browser launcher. Returns true on success. */
+async function launchBrowser(url: string): Promise<boolean> {
+  try {
+    const { spawn } = await import("node:child_process");
+    const cmd =
+      process.platform === "darwin" ? "open" : process.platform === "win32" ? "cmd" : "xdg-open";
+    const args = process.platform === "win32" ? ["/c", "start", "", url] : [url];
+    const child = spawn(cmd, args, { detached: true, stdio: "ignore" });
+    child.unref();
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 /** Rasterize SVG → base64 PNG. Used by `glyph_render` so hosts that render
  *  images inline (Claude Code, Cursor, etc.) can show the chart directly.
@@ -145,6 +163,8 @@ export function createServer(state: ServerState = new ServerState()): {
           schema: m.handle.schema,
         });
         const svg = renderSvg(scene);
+        // Cache the SVG so a later `glyph_preview` deep-link can serve it.
+        state.storeSvg(m.handle.id, svg);
         // Rasterize once so hosts that render `image/*` content inline can
         // display the chart directly (Claude Code, Cursor, IDE previews).
         const pngB64 = svgToPngBase64(svg);
@@ -398,6 +418,133 @@ export function createServer(state: ServerState = new ServerState()): {
           };
         }
       }),
+  );
+
+  // ----- glyph_preview (B9f) ----------------------------------------------
+  // Lazily starts the embedded preview server and returns a deep-link URL
+  // the user can open in a browser. The page hydrates the rendered SVG and
+  // routes click/brush/hover events back to `glyph_await_interaction`.
+  server.registerTool(
+    "glyph_preview",
+    {
+      title: "Open an interactive preview of a rendered chart",
+      description:
+        "Lazily starts a 127.0.0.1-only HTTP server that hosts an interactive Glyph chart preview. Returns { url, token, port }. Pass `open: true` to also launch the user's default browser. The page hydrates the rendered SVG with click + hover + brush handlers and POSTs interactions back; use glyph_await_interaction to receive them.",
+      inputSchema: {
+        handle_id: z
+          .string()
+          .optional()
+          .describe("Optional handle to deep-link to. Without it, the page asks for one."),
+        open: z
+          .boolean()
+          .optional()
+          .describe(
+            "If true, try to launch the user's default browser at the returned URL. Best-effort; never throws.",
+          ),
+      },
+    },
+    async ({ handle_id, open }) =>
+      state.serial(async () => {
+        try {
+          const preview = await state.getPreview();
+          const url = preview.urlFor(handle_id);
+          let opened = false;
+          if (open) {
+            opened = await launchBrowser(url.url);
+          }
+          return {
+            content: [
+              {
+                type: "text" as const,
+                text: JSON.stringify(
+                  {
+                    url: url.url,
+                    port: url.port,
+                    token: url.token,
+                    opened,
+                  },
+                  null,
+                  2,
+                ),
+              },
+            ],
+          };
+        } catch (err) {
+          return {
+            isError: true,
+            content: [{ type: "text" as const, text: (err as Error).message ?? String(err) }],
+          };
+        }
+      }),
+  );
+
+  // ----- glyph_await_interaction (B9g) ------------------------------------
+  // Long-poll for the next user interaction on a chart preview. Returns
+  // immediately if an interaction is queued; otherwise waits up to
+  // `timeout_ms` (default 30 s, max 60 s).
+  server.registerTool(
+    "glyph_await_interaction",
+    {
+      title: "Wait for the user to interact with a preview",
+      description:
+        "Long-poll for the next user interaction (click / hover / brush / zoom) on the preview chart for the given handle. Returns the event or {} on timeout. Default timeout 30 000 ms, max 60 000 ms.",
+      inputSchema: {
+        handle_id: z.string().describe("The handle returned by glyph_render."),
+        timeout_ms: z
+          .number()
+          .int()
+          .min(0)
+          .max(60_000)
+          .optional()
+          .describe("Max wait in milliseconds. Default 30 000."),
+      },
+    },
+    async ({ handle_id, timeout_ms }) => {
+      const preview = state.getPreviewIfRunning();
+      if (!preview) {
+        return {
+          isError: true,
+          content: [
+            {
+              type: "text" as const,
+              text: "Preview server is not running. Call glyph_preview first.",
+            },
+          ],
+        };
+      }
+      const event = await preview.awaitInteraction(handle_id, timeout_ms ?? 30_000);
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: JSON.stringify(event ?? {}, null, 2),
+          },
+        ],
+      };
+    },
+  );
+
+  // ----- glyph_close_preview (B9f cont'd) ---------------------------------
+  server.registerTool(
+    "glyph_close_preview",
+    {
+      title: "Stop the interactive preview server",
+      description:
+        "Idempotently stop the preview HTTP server. Any parked glyph_await_interaction calls resolve to {}. The server also stops automatically on MCP exit.",
+      inputSchema: {},
+    },
+    async () => {
+      const preview = state.getPreviewIfRunning();
+      if (!preview) {
+        return {
+          content: [{ type: "text" as const, text: JSON.stringify({ stopped: false }) }],
+        };
+      }
+      await preview.stop();
+      return {
+        content: [{ type: "text" as const, text: JSON.stringify({ stopped: true }) }],
+      };
+    },
   );
 
   return { server, state };

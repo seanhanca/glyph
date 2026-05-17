@@ -17,6 +17,7 @@
   "dependencies": {
     "@glyph/core": "workspace:*",
     "@glyph/duckdb": "workspace:*",
+    "@glyph/preview-server": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.0.4",
     "@resvg/resvg-js": "^2.6.2",
     "zod": "^3.23.8"

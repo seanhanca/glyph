@@ -1,0 +1,25 @@
+{
+  "name": "@glyph/preview-server",
+  "version": "0.0.0",
+  "description": "Opt-in, localhost-only HTTP server that hosts an interactive Glyph chart preview. Used by @glyph/mcp to close the click → agent loop.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": ["dist", "README.md"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.3"
+  }
+}

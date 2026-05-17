@@ -66,14 +66,17 @@ describe("Glyph MCP server", () => {
     await state.close();
   });
 
-  it("lists the six tools", async () => {
+  it("lists the nine tools", async () => {
     const r = await client.listTools();
     const names = r.tools.map((t) => t.name).sort();
     expect(names).toEqual([
+      "glyph_await_interaction",
       "glyph_capabilities",
+      "glyph_close_preview",
       "glyph_describe",
       "glyph_drill",
       "glyph_import",
+      "glyph_preview",
       "glyph_query",
       "glyph_render",
     ]);
@@ -88,10 +91,13 @@ describe("Glyph MCP server", () => {
     expect(caps.defaultSpecVersion).toBe("glyph/0.1");
     expect(caps.marks).toEqual(["bar", "point"]);
     expect(caps.mcpTools.map((t: { name: string }) => t.name).sort()).toEqual([
+      "glyph_await_interaction",
       "glyph_capabilities",
+      "glyph_close_preview",
       "glyph_describe",
       "glyph_drill",
       "glyph_import",
+      "glyph_preview",
       "glyph_query",
       "glyph_render",
     ]);
@@ -305,6 +311,103 @@ describe("Glyph MCP server", () => {
       expect(r.isError).toBe(false);
       const imp = JSON.parse(r.text);
       expect(imp.rowCount).toBe(2);
+    });
+  });
+
+  describe("preview server (B9e/f/g)", () => {
+    async function renderOne(): Promise<string> {
+      const r = await callText(client, "glyph_render", {
+        spec: {
+          data: { source: fixture, format: "csv" },
+          layers: [{ mark: "bar", encoding: { x: "pickup_hour", y: "rides" } }],
+        },
+      });
+      return JSON.parse(r.text).handle_id as string;
+    }
+
+    it("glyph_preview returns a 127.0.0.1 URL + token", async () => {
+      const handle_id = await renderOne();
+      const r = await callText(client, "glyph_preview", { handle_id });
+      expect(r.isError).toBe(false);
+      const out = JSON.parse(r.text);
+      expect(out.url).toMatch(/^http:\/\/127\.0\.0\.1:\d+\//);
+      expect(out.token).toMatch(/^[0-9a-f]{32}$/);
+      expect(out.port).toBeGreaterThan(0);
+      // Cleanup.
+      await callText(client, "glyph_close_preview", {});
+    });
+
+    it("the preview server serves the registered SVG with the right token", async () => {
+      const handle_id = await renderOne();
+      const r = await callText(client, "glyph_preview", { handle_id });
+      const out = JSON.parse(r.text);
+      const svgUrl = new URL(`/api/charts/${handle_id}.svg`, out.url).toString();
+      const fetched = await fetch(svgUrl, {
+        headers: { "X-Glyph-Token": out.token },
+      });
+      expect(fetched.status).toBe(200);
+      expect(await fetched.text()).toMatch(/^<svg /);
+      await callText(client, "glyph_close_preview", {});
+    });
+
+    it("await_interaction round-trips a posted click", async () => {
+      const handle_id = await renderOne();
+      const prev = await callText(client, "glyph_preview", { handle_id });
+      const out = JSON.parse(prev.text);
+      const postUrl = new URL(`/api/interactions/${handle_id}`, out.url).toString();
+      // Post + await in parallel so the long-poller picks up the event.
+      const [postRes, awaitRes] = await Promise.all([
+        fetch(postUrl, {
+          method: "POST",
+          headers: {
+            "X-Glyph-Token": out.token,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            kind: "click",
+            binding: { row: 7, attrs: { x: "7" } },
+            whereSql: 'WHERE "pickup_hour" = 7',
+          }),
+        }),
+        callText(client, "glyph_await_interaction", {
+          handle_id,
+          timeout_ms: 2000,
+        }),
+      ]);
+      expect(postRes.status).toBe(202);
+      expect(awaitRes.isError).toBe(false);
+      const event = JSON.parse(awaitRes.text);
+      expect(event.kind).toBe("click");
+      expect(event.whereSql).toBe('WHERE "pickup_hour" = 7');
+      await callText(client, "glyph_close_preview", {});
+    });
+
+    it("await_interaction returns {} on timeout", async () => {
+      const handle_id = await renderOne();
+      await callText(client, "glyph_preview", { handle_id });
+      const r = await callText(client, "glyph_await_interaction", {
+        handle_id,
+        timeout_ms: 50,
+      });
+      expect(r.isError).toBe(false);
+      expect(JSON.parse(r.text)).toEqual({});
+      await callText(client, "glyph_close_preview", {});
+    });
+
+    it("await_interaction errors when preview is not running", async () => {
+      const r = await callText(client, "glyph_await_interaction", {
+        handle_id: "anything",
+      });
+      expect(r.isError).toBe(true);
+      expect(r.text).toMatch(/Preview server is not running/);
+    });
+
+    it("close_preview is idempotent", async () => {
+      const a = await callText(client, "glyph_close_preview", {});
+      expect(JSON.parse(a.text).stopped).toBe(false);
+      await callText(client, "glyph_preview", {});
+      const b = await callText(client, "glyph_close_preview", {});
+      expect(JSON.parse(b.text).stopped).toBe(true);
     });
   });
 });
