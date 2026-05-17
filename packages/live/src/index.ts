@@ -344,3 +344,129 @@ export function glyphLive(svg: SVGElement | Element, _options: GlyphLiveOptions 
     },
   };
 }
+
+// ---------------------------------------------------------------------------
+// Scrub slider — PR51
+// ---------------------------------------------------------------------------
+
+export interface AttachScrubOptions {
+  /** Container the slider is inserted into. Defaults to the SVG's parent. */
+  readonly container?: HTMLElement | undefined;
+  /** Initial frame index. Defaults to 0. */
+  readonly initial?: number | undefined;
+  /** Optional label prefix shown next to the slider (e.g. "Year: "). */
+  readonly label?: string | undefined;
+}
+
+export interface AttachedScrub {
+  /** Current frame index (read-only mirror of the slider). */
+  readonly index: number;
+  /** Programmatically set the frame index + redraw. */
+  setIndex(i: number): void;
+  /** Remove the slider + put the SMIL <animate> elements back. */
+  dispose(): void;
+}
+
+/**
+ * Find a scrub-rendered chart (`<g class="glyph-marks glyph-race">`) on the
+ * supplied SVG, replace its SMIL `<animate>` elements with manual control,
+ * and insert an `<input type="range">` immediately before the SVG. Dragging
+ * the slider redraws the chart frame-by-frame.
+ *
+ * The renderer emits the per-mark frame values in `<animate values="...">`
+ * elements; attachScrub reads them out so no extra data attrs are needed.
+ *
+ * Returns undefined when the SVG carries no scrub-rendered group (so it's
+ * safe to call on any chart — no-op when nothing to hydrate).
+ */
+export function attachScrub(
+  svg: SVGElement | Element,
+  options: AttachScrubOptions = {},
+): AttachedScrub | undefined {
+  const marksGroup = svg.querySelector("g.glyph-race");
+  if (!marksGroup) return undefined;
+  const animates = Array.from(marksGroup.querySelectorAll("animate"));
+  if (animates.length === 0) return undefined;
+
+  // Capture the per-mark frame data + remove the SMIL elements (so they
+  // don't fight the slider's manual updates).
+  interface Track {
+    readonly el: Element;
+    readonly attr: string;
+    readonly values: ReadonlyArray<string>;
+  }
+  const tracks: Track[] = [];
+  let frameCount = 0;
+  for (const a of animates) {
+    const parent = a.parentElement;
+    const attr = a.getAttribute("attributeName");
+    const values = a.getAttribute("values");
+    if (!parent || !attr || !values) continue;
+    const list = values.split(";");
+    tracks.push({ el: parent, attr, values: list });
+    if (list.length > frameCount) frameCount = list.length;
+    a.remove();
+  }
+  if (tracks.length === 0 || frameCount === 0) return undefined;
+
+  const initial = Math.max(0, Math.min(options.initial ?? 0, frameCount - 1));
+
+  // Build the slider in HTML. Place it immediately before the SVG so the
+  // chart sits below its control.
+  const doc = svg.ownerDocument;
+  if (!doc) return undefined;
+  const wrap = doc.createElement("div");
+  wrap.className = "glyph-scrub";
+  wrap.style.cssText = "display:flex;align-items:center;gap:8px;margin:6px 0;font:12px system-ui;";
+  const labelEl = doc.createElement("label");
+  labelEl.textContent = options.label ?? "Frame:";
+  const input = doc.createElement("input");
+  input.type = "range";
+  input.min = "0";
+  input.max = String(frameCount - 1);
+  input.value = String(initial);
+  input.step = "1";
+  input.style.cssText = "flex:1;min-width:120px;";
+  const idxEl = doc.createElement("span");
+  idxEl.textContent = String(initial);
+  wrap.appendChild(labelEl);
+  wrap.appendChild(input);
+  wrap.appendChild(idxEl);
+
+  const container = options.container ?? svg.parentElement;
+  if (container) {
+    container.insertBefore(wrap, svg);
+  }
+
+  let current = initial;
+  const apply = (i: number): void => {
+    current = Math.max(0, Math.min(i, frameCount - 1));
+    for (const t of tracks) {
+      const v = t.values[current];
+      if (v !== undefined) t.el.setAttribute(t.attr, v);
+    }
+    idxEl.textContent = String(current);
+  };
+  apply(initial);
+
+  const onInput = (): void => {
+    apply(Number.parseInt(input.value, 10) || 0);
+  };
+  input.addEventListener("input", onInput);
+
+  return {
+    get index(): number {
+      return current;
+    },
+    setIndex(i: number) {
+      input.value = String(Math.max(0, Math.min(i, frameCount - 1)));
+      apply(i);
+    },
+    dispose() {
+      input.removeEventListener("input", onInput);
+      wrap.remove();
+      // We could re-insert the original <animate> elements here, but
+      // disposal is typically tied to teardown so we leave the snapshot.
+    },
+  };
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { type MarkBinding, glyphLive } from "./index.js";
+import { type MarkBinding, attachScrub, glyphLive } from "./index.js";
 
 function mountSvg(html: string): SVGElement {
   document.body.innerHTML = html;
@@ -228,5 +228,52 @@ describe("@glyph/live — whereForZoom (zoom transform → SQL)", () => {
   it("rejects non-finite bounds", () => {
     const live = glyphLive(mountSvg(SAMPLE_SVG));
     expect(live.whereForZoom("x", Number.NaN, 1)).toBe("");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// attachScrub — PR51
+// ---------------------------------------------------------------------------
+
+const SCRUB_SVG = `
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 400' width='600' height='400'>
+  <g class='glyph-marks glyph-race'>
+    <rect x='10' y='200' width='40' height='100' fill='#4c78a8'>
+      <animate attributeName='width' values='40;80;120' dur='8000ms' repeatCount='indefinite'/>
+    </rect>
+    <rect x='60' y='180' width='40' height='120' fill='#4c78a8'>
+      <animate attributeName='width' values='60;30;90' dur='8000ms' repeatCount='indefinite'/>
+    </rect>
+  </g>
+</svg>
+`;
+
+describe("attachScrub", () => {
+  it("inserts a slider + drives mark attribute updates per frame", () => {
+    const svg = mountSvg(SCRUB_SVG);
+    const scrub = attachScrub(svg, { label: "Year:" });
+    expect(scrub).toBeDefined();
+    if (!scrub) return;
+
+    const slider = document.querySelector("input[type=range]") as HTMLInputElement;
+    expect(slider).toBeTruthy();
+    expect(slider.max).toBe("2"); // 3 frames → max index 2.
+    // Initial frame applied.
+    const rects = svg.querySelectorAll("rect");
+    expect(rects[0]?.getAttribute("width")).toBe("40");
+    expect(rects[1]?.getAttribute("width")).toBe("60");
+
+    // Scrub to frame 2 (last).
+    scrub.setIndex(2);
+    expect(rects[0]?.getAttribute("width")).toBe("120");
+    expect(rects[1]?.getAttribute("width")).toBe("90");
+
+    // SMIL <animate> elements have been removed (no fighting).
+    expect(svg.querySelector("animate")).toBeNull();
+  });
+
+  it("no-ops on a static SVG (no .glyph-race)", () => {
+    const svg = mountSvg(SAMPLE_SVG);
+    expect(attachScrub(svg)).toBeUndefined();
   });
 });
