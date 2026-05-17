@@ -24,6 +24,7 @@ import type {
   MarkSchema,
   ScaleSchema,
   StatSchema,
+  ThemeConfigSchema,
 } from "./schemas.js";
 
 /** Top-level Glyph spec. */
@@ -52,6 +53,24 @@ export type Stat = z.infer<typeof StatSchema>;
 
 /** Opt-in interactivity config (see InteractiveSchema for details). */
 export type InteractiveConfig = z.infer<typeof InteractiveSchema>;
+
+/** Full theme tokens. Spec.theme accepts this or the built-in 'light'/'dark'. */
+export type ThemeConfig = z.infer<typeof ThemeConfigSchema>;
+
+/**
+ * Helper to build a ThemeConfig with brand colors. Pure identity at runtime;
+ * exists so consumers get TS type inference and a discoverable API.
+ *
+ *   const myBrand = defineTheme({
+ *     background: '#0d1b2a', fg: '#e0e1dd',
+ *     axis: '#778da9', grid: '#1b263b',
+ *     palette: ['#e0aaff', '#c77dff', '#9d4edd', '#7b2cbf'],
+ *   });
+ *   render(myBrand) // pass to glyph_render in spec.theme
+ */
+export function defineTheme(config: ThemeConfig): ThemeConfig {
+  return config;
+}
 
 /**
  * A QueryHandle is returned alongside the rendered chart. It identifies the

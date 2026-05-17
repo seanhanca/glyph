@@ -170,6 +170,30 @@ export const SUPPORTED_SPEC_VERSIONS = ["glyph/0.1"] as const;
 export type SpecVersion = (typeof SUPPORTED_SPEC_VERSIONS)[number];
 export const DEFAULT_SPEC_VERSION: SpecVersion = "glyph/0.1";
 
+/**
+ * Theme — color tokens for backgrounds, axes, grids, and the categorical
+ * palette. Brand colors are non-negotiable for SaaS deployments; two
+ * built-in themes ("light" / "dark") were a Phase-0 stand-in.
+ */
+export const ThemeConfigSchema = z
+  .object({
+    /** SVG/HTML color string for the chart background. */
+    background: z.string().min(1),
+    /** Foreground (titles, axis labels, rules' default stroke). */
+    fg: z.string().min(1),
+    /** Axis line color. */
+    axis: z.string().min(1),
+    /** Grid line color. */
+    grid: z.string().min(1),
+    /**
+     * Categorical palette. Used by buildBars/buildPoints/buildLines/buildAreas
+     * when color encoding is set; the i-th palette entry maps to the i-th
+     * first-seen color domain value.
+     */
+    palette: z.array(z.string().min(1)).min(1),
+  })
+  .strict();
+
 export const GlyphSpecSchema = z
   .object({
     /**
@@ -190,8 +214,11 @@ export const GlyphSpecSchema = z
     /** Pixel dimensions of the rendered chart. Defaults: 640 x 400. */
     width: z.number().int().positive().optional(),
     height: z.number().int().positive().optional(),
-    /** Color theme; defaults to "light". */
-    theme: z.enum(["light", "dark"]).optional(),
+    /**
+     * Color theme. Two built-ins ("light" / "dark") or a full ThemeConfig
+     * with brand colors. Defaults to "light".
+     */
+    theme: z.union([z.enum(["light", "dark"]), ThemeConfigSchema]).optional(),
     /** Opt into data-bound, hydratable SVG output. */
     interactive: InteractiveSchema.optional(),
   })

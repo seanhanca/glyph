@@ -168,6 +168,72 @@ describe("Glyph spec — JSON parsing", () => {
   });
 });
 
+describe("Glyph spec — theme (PR25)", () => {
+  it("accepts theme: 'light'", () => {
+    const r = safeParseSpec({
+      data: { source: "x" },
+      layers: [{ mark: "bar", encoding: { x: "a", y: "b" } }],
+      theme: "light",
+    });
+    expect(r.ok).toBe(true);
+  });
+
+  it("accepts theme: 'dark'", () => {
+    const r = safeParseSpec({
+      data: { source: "x" },
+      layers: [{ mark: "bar", encoding: { x: "a", y: "b" } }],
+      theme: "dark",
+    });
+    expect(r.ok).toBe(true);
+  });
+
+  it("accepts a full ThemeConfig", () => {
+    const r = safeParseSpec({
+      data: { source: "x" },
+      layers: [{ mark: "bar", encoding: { x: "a", y: "b" } }],
+      theme: {
+        background: "#000",
+        fg: "#fff",
+        axis: "#888",
+        grid: "#222",
+        palette: ["#f00", "#0f0", "#00f"],
+      },
+    });
+    expect(r.ok).toBe(true);
+  });
+
+  it("rejects a ThemeConfig with empty palette", () => {
+    const r = safeParseSpec({
+      data: { source: "x" },
+      layers: [{ mark: "bar", encoding: { x: "a", y: "b" } }],
+      theme: {
+        background: "#000",
+        fg: "#fff",
+        axis: "#888",
+        grid: "#222",
+        palette: [],
+      },
+    });
+    expect(r.ok).toBe(false);
+  });
+
+  it("rejects unknown theme keys (strict mode)", () => {
+    const r = safeParseSpec({
+      data: { source: "x" },
+      layers: [{ mark: "bar", encoding: { x: "a", y: "b" } }],
+      theme: {
+        background: "#000",
+        fg: "#fff",
+        axis: "#888",
+        grid: "#222",
+        palette: ["#f00"],
+        font: "Inter", // not a ThemeConfig field
+      },
+    });
+    expect(r.ok).toBe(false);
+  });
+});
+
 describe("Glyph spec — round-trip stability", () => {
   it("parses, re-serializes, and parses again without information loss", () => {
     const original = {

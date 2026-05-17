@@ -151,6 +151,25 @@ const DARK_THEME: Theme = {
   marks: ["#6ea8fe", "#ffb066", "#7cd281", "#ff8284", "#9adddd", "#ffe07a"],
 };
 
+/**
+ * Resolve spec.theme to an internal Theme.
+ * - undefined / "light" → LIGHT_THEME
+ * - "dark"               → DARK_THEME
+ * - ThemeConfig          → user palette + tokens, normalized to internal shape
+ */
+function resolveTheme(specTheme: GlyphSpec["theme"]): Theme {
+  if (specTheme === undefined || specTheme === "light") return LIGHT_THEME;
+  if (specTheme === "dark") return DARK_THEME;
+  // Custom ThemeConfig — Zod has already validated structure + non-empty palette.
+  return {
+    background: specTheme.background,
+    fg: specTheme.fg,
+    axis: specTheme.axis,
+    grid: specTheme.grid,
+    marks: specTheme.palette,
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Channel helpers
 // ---------------------------------------------------------------------------
@@ -255,7 +274,7 @@ export function compileSpec(input: CompileInput): Scene {
   const { spec, rows, schema } = input;
   const width = spec.width ?? DEFAULT_WIDTH;
   const height = spec.height ?? DEFAULT_HEIGHT;
-  const theme = spec.theme === "dark" ? DARK_THEME : LIGHT_THEME;
+  const theme = resolveTheme(spec.theme);
 
   // Adjust right padding when we'll need a right-side axis.
   const anyRight = spec.layers.some((l) => ySideOfLayer(l.encoding) === "right");
