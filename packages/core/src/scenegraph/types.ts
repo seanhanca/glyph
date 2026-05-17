@@ -101,6 +101,12 @@ export interface SceneAxis {
   readonly length: number;
   readonly ticks: ReadonlyArray<AxisTick>;
   readonly label?: string;
+  /**
+   * Optional grid tick positions; renderers draw a thin grid line at each
+   * one across the plot area. Currently only emitted for the left (primary)
+   * y axis. When undefined, no grid is drawn.
+   */
+  readonly gridTicks?: ReadonlyArray<AxisTick>;
 }
 
 /** Schema metadata emitted at the SVG root level for interactive scenes. */
@@ -109,6 +115,22 @@ export interface SceneSchema {
   readonly fields: Readonly<Record<string, string>>;
   /** When set, the SVG carries `data-handle="<id>"` for `@glyph/live` to find. */
   readonly handleId?: string;
+}
+
+/** A single legend entry — one row of color/label. */
+export interface LegendEntry {
+  readonly label: string;
+  readonly color: string;
+}
+
+/** A legend rendered on the right of the plot area. */
+export interface SceneLegend {
+  readonly kind: "color";
+  /** Source-field name (used as the legend title). */
+  readonly title: string;
+  /** Pixel coordinate of the top-left of the legend block. */
+  readonly origin: { readonly x: number; readonly y: number };
+  readonly entries: ReadonlyArray<LegendEntry>;
 }
 
 /** The complete scene a renderer consumes. */
@@ -127,4 +149,6 @@ export interface Scene {
   readonly title?: string;
   /** When set, the renderer emits data-* attributes for interactivity. */
   readonly schema?: SceneSchema;
+  /** Optional legends (color/size/opacity). Renderer places them on the right. */
+  readonly legends?: ReadonlyArray<SceneLegend>;
 }

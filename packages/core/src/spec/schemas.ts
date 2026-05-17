@@ -36,7 +36,7 @@ export const DataSourceSchema = z
 // Marks — what gets drawn per row
 // ---------------------------------------------------------------------------
 
-export const MarkSchema = z.enum(["bar", "line", "point", "area", "rect"]);
+export const MarkSchema = z.enum(["bar", "line", "point", "area", "rect", "rule"]);
 
 // ---------------------------------------------------------------------------
 // Channels & encoding

@@ -104,13 +104,12 @@ describe("compileSpec — point", () => {
 
 describe("compileSpec — error cases", () => {
   it("rejects an unsupported mark", () => {
+    // `rect` is not in Phase 1's mark set yet. (Spec accepts it; compiler doesn't.)
     const spec: GlyphSpec = {
       data: { source: "x" },
       layers: [{ mark: "rect", encoding: { x: "hour", y: "rides" } }],
     };
-    expect(() => compileSpec({ spec, rows, schema })).toThrow(
-      /supports marks bar\|point\|line\|area/,
-    );
+    expect(() => compileSpec({ spec, rows, schema })).toThrow(/Phase 1 supports marks/);
   });
 
   it("rejects when x or y is missing", () => {

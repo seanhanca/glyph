@@ -16,10 +16,11 @@
  *     non-interactive path so existing snapshots stay green.
  */
 
-import type { MarkData, Scene, SceneAxis, SceneMark } from "../scenegraph/types.js";
+import type { MarkData, Scene, SceneAxis, SceneLegend, SceneMark } from "../scenegraph/types.js";
 
 const AXIS_COLOR = "#999999";
 const AXIS_LABEL_COLOR = "#333333";
+const GRID_COLOR = "#e6e6e6";
 const FONT_FAMILY = "system-ui, -apple-system, sans-serif";
 
 const HOVER_STYLE =
@@ -199,6 +200,56 @@ function renderAxis(axis: SceneAxis): string {
   return parts.join("");
 }
 
+/**
+ * Render grid lines for an axis's `gridTicks` across the plot area.
+ *
+ * For a left axis (`gridTicks` y positions): emit horizontal lines that span
+ * the full plot width. Drawn at low contrast (#e6e6e6) and *before* marks so
+ * they sit behind the data. Right-side gridTicks aren't drawn — they would
+ * duplicate the left-side grid.
+ */
+function renderGrid(scene: Scene): string {
+  const left = scene.axes.find((a) => a.orientation === "left");
+  if (!left || !left.gridTicks || left.gridTicks.length === 0) return "";
+  const pa = scene.plotArea;
+  const lines: string[] = [];
+  for (const t of left.gridTicks) {
+    lines.push(
+      `<line x1="${pa.x}" y1="${t.position}" x2="${pa.x + pa.width}" y2="${
+        t.position
+      }" stroke="${GRID_COLOR}" stroke-width="1"/>`,
+    );
+  }
+  return lines.join("");
+}
+
+/** Render a color legend. */
+function renderLegend(legend: SceneLegend): string {
+  const { origin, entries, title } = legend;
+  const rowH = 18;
+  const swatch = 10;
+  const parts: string[] = [];
+  parts.push(
+    `<text x="${origin.x}" y="${
+      origin.y
+    }" font-family="${FONT_FAMILY}" font-size="11" font-weight="600" fill="${AXIS_LABEL_COLOR}" text-anchor="start" dominant-baseline="hanging">${esc(title)}</text>`,
+  );
+  for (let i = 0; i < entries.length; i++) {
+    const e = entries[i];
+    if (!e) continue;
+    const y = origin.y + 16 + i * rowH;
+    parts.push(
+      `<rect x="${origin.x}" y="${y}" width="${swatch}" height="${swatch}" fill="${esc(
+        e.color,
+      )}"/>`,
+    );
+    parts.push(
+      `<text x="${origin.x + swatch + 6}" y="${y + swatch / 2}" font-family="${FONT_FAMILY}" font-size="11" fill="${AXIS_LABEL_COLOR}" text-anchor="start" dominant-baseline="middle">${esc(e.label)}</text>`,
+    );
+  }
+  return parts.join("");
+}
+
 /** Render scene-level data-* attributes (channel→field map + handle). */
 function renderSceneAttrs(scene: Scene): string {
   const s = scene.schema;
@@ -226,9 +277,12 @@ export function renderSvg(scene: Scene): string {
         scene.title,
       )}</text>`
     : "";
+  // Grid sits behind marks; axes + legends in front.
+  const grid = renderGrid(scene);
   const markStrs = scene.marks.map((m) => renderMark(m, interactive)).join("");
   const marks = interactive ? `<g class="glyph-marks">${markStrs}</g>` : markStrs;
   const hoverStyle = interactive ? HOVER_STYLE : "";
   const axes = scene.axes.map(renderAxis).join("");
-  return `${head}${hoverStyle}${bg}${title}${marks}${axes}</svg>\n`;
+  const legends = (scene.legends ?? []).map(renderLegend).join("");
+  return `${head}${hoverStyle}${bg}${title}${grid}${marks}${axes}${legends}</svg>\n`;
 }

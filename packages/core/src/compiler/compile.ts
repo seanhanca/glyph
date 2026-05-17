@@ -13,9 +13,11 @@
 
 import type {
   AxisTick,
+  LegendEntry,
   MarkData,
   Scene,
   SceneAxis,
+  SceneLegend,
   SceneMark,
   SceneSchema,
 } from "../scenegraph/types.js";
@@ -239,8 +241,19 @@ export function compileSpec(input: CompileInput): Scene {
   for (let i = 0; i < spec.layers.length; i++) {
     const l = spec.layers[i];
     if (!l) continue;
-    if (l.mark !== "bar" && l.mark !== "point" && l.mark !== "line" && l.mark !== "area") {
-      throw new Error(`Phase 1 supports marks bar|point|line|area; layer ${i} has ${l.mark}`);
+    const allowedMarks = ["bar", "point", "line", "area", "rule"];
+    if (!allowedMarks.includes(l.mark)) {
+      throw new Error(`Phase 1 supports marks ${allowedMarks.join("|")}; layer ${i} has ${l.mark}`);
+    }
+    // Rule mark is special: requires *either* x or y, not both, since
+    // it draws a perpendicular reference line at a single scale value.
+    if (l.mark === "rule") {
+      const hasX = fieldOf(l.encoding.x) !== undefined;
+      const hasY = fieldOf(l.encoding.y) !== undefined;
+      if (!hasX && !hasY) {
+        throw new Error(`Layer ${i} (rule) requires either x or y encoding`);
+      }
+      continue;
     }
     if (fieldOf(l.encoding.x) === undefined || fieldOf(l.encoding.y) === undefined) {
       throw new Error(`Layer ${i} requires both x and y encodings`);
@@ -301,7 +314,13 @@ export function compileSpec(input: CompileInput): Scene {
   function buildYScaleFor(
     side: YSide,
   ): { scale: ReturnType<typeof linearScale>; ticks: number[] } | null {
-    const layersOnSide = spec.layers.filter((l) => ySideOfLayer(l.encoding) === side);
+    const layersOnSide = spec.layers.filter(
+      (l) =>
+        ySideOfLayer(l.encoding) === side &&
+        // Skip rule layers that don't encode y (vertical rules don't
+        // contribute to the y domain).
+        !(l.mark === "rule" && fieldOf(l.encoding.y) === undefined),
+    );
     if (layersOnSide.length === 0) return null;
     let yMin = Number.POSITIVE_INFINITY;
     let yMax = Number.NEGATIVE_INFINITY;
@@ -329,10 +348,17 @@ export function compileSpec(input: CompileInput): Scene {
 
   for (const layer of spec.layers) {
     const enc = layer.encoding;
-    const xField = fieldOf(enc.x) as string;
-    const yField = fieldOf(enc.y) as string;
-    const yScale = (ySideOfLayer(enc) === "right" ? rightY : leftY)?.scale;
-    if (!yScale) continue; // unreachable: validated above
+    const xField = fieldOf(enc.x);
+    const yField = fieldOf(enc.y);
+    const ySide = ySideOfLayer(enc);
+    const yScale = (ySide === "right" ? rightY : leftY)?.scale ?? leftY?.scale;
+    if (layer.mark === "rule") {
+      // Rule needs only one side; its y/x encoding may be missing.
+      const ruleYScale = yField ? yScale : undefined;
+      buildRules(marks, rows, schema, enc, xScale, ruleYScale, theme);
+      continue;
+    }
+    if (!yScale || !xField || !yField) continue;
     const ctx: MarkCtx = {
       interactive: spec.interactive,
       xField,
@@ -366,13 +392,42 @@ export function compileSpec(input: CompileInput): Scene {
     const leftLabel = fieldOf(
       spec.layers.find((l) => ySideOfLayer(l.encoding) === "left")?.encoding.y,
     );
-    axes.push(makeLeftAxis(leftY.ticks, leftY.scale, plotArea, leftLabel ?? "y"));
+    // Grid: one tick per axis tick, rendered behind the marks.
+    axes.push({
+      ...makeLeftAxis(leftY.ticks, leftY.scale, plotArea, leftLabel ?? "y"),
+      gridTicks: leftY.ticks.map((t) => ({
+        position: leftY.scale.apply(t),
+        label: formatTick(t),
+      })),
+    });
   }
   if (rightY) {
     const rightLabel = fieldOf(
       spec.layers.find((l) => ySideOfLayer(l.encoding) === "right")?.encoding.y,
     );
     axes.push(makeRightAxis(rightY.ticks, rightY.scale, plotArea, rightLabel ?? "y"));
+  }
+
+  // ---- Legends ---------------------------------------------------------
+  // One legend per unique color field across all encoded layers.
+  const legends: SceneLegend[] = [];
+  const seenColorFields = new Set<string>();
+  for (const layer of spec.layers) {
+    const cf = fieldOf(layer.encoding.color);
+    if (!cf || seenColorFields.has(cf)) continue;
+    seenColorFields.add(cf);
+    const domain = distinctOrdered(rows, schema, cf);
+    if (domain.length === 0) continue;
+    const entries: LegendEntry[] = domain.map((label, idx) => ({
+      label,
+      color: theme.marks[idx % theme.marks.length] ?? "#000",
+    }));
+    legends.push({
+      kind: "color",
+      title: cf,
+      origin: { x: plotArea.x + plotArea.width + 12, y: plotArea.y },
+      entries,
+    });
   }
 
   // ---- Scene-level schema (interactivity metadata) ---------------------
@@ -396,6 +451,7 @@ export function compileSpec(input: CompileInput): Scene {
     marks,
     ...(spec.title ? { title: spec.title } : {}),
     ...(sceneSchema ? { schema: sceneSchema } : {}),
+    ...(legends.length > 0 ? { legends } : {}),
   };
 }
 
@@ -656,6 +712,79 @@ function buildAreas(
       fill: color,
       opacity: 0.55,
     });
+  }
+}
+
+/**
+ * buildRules — annotation mark (PR22).
+ *
+ * Draws one perpendicular reference line per row:
+ *   - encoding.y set, no x  → horizontal line across the plot area at y
+ *   - encoding.x set, no y  → vertical line across the plot area at x
+ *   - both set              → not supported in PR22 (a "segment" mark
+ *                              would handle that; defer)
+ *
+ * Color encoding picks a palette stroke; otherwise a dim foreground gray.
+ */
+function buildRules(
+  out: SceneMark[],
+  rows: ReadonlyArray<ReadonlyArray<unknown>>,
+  schema: ReadonlyArray<CompileFieldInfo>,
+  encoding: Encoding,
+  xScale: ReturnType<typeof bandScale> | ReturnType<typeof linearScale>,
+  yScale: ReturnType<typeof linearScale> | undefined,
+  theme: Theme,
+): void {
+  const xField = fieldOf(encoding.x);
+  const yField = fieldOf(encoding.y);
+  const colorField = fieldOf(encoding.color);
+  const colorDomain = colorField ? distinctOrdered(rows, schema, colorField) : [];
+  // Use the theme's mid-tone foreground for the default rule color.
+  const defaultStroke = theme.fg;
+
+  for (const r of rows) {
+    let stroke = defaultStroke;
+    if (colorField) {
+      const cv = valueAt(r, schema, colorField);
+      const idx = Math.max(0, colorDomain.indexOf(cv == null ? "" : String(cv)));
+      stroke = theme.marks[idx % theme.marks.length] ?? defaultStroke;
+    }
+    if (yField && !xField && yScale) {
+      // Horizontal rule at y value.
+      const yv = Number(valueAt(r, schema, yField));
+      if (!Number.isFinite(yv)) continue;
+      const ypx = yScale.apply(yv);
+      const xMin = xScale.type === "band" ? xScale.range[0] : xScale.range[0];
+      const xMax = xScale.type === "band" ? xScale.range[1] : xScale.range[1];
+      out.push({
+        type: "line",
+        x1: xMin,
+        y1: ypx,
+        x2: xMax,
+        y2: ypx,
+        stroke,
+        strokeWidth: 1.5,
+      });
+    } else if (xField && !yField) {
+      // Vertical rule at x value.
+      const xv = valueAt(r, schema, xField);
+      const xpx =
+        xScale.type === "linear"
+          ? xScale.apply(Number(xv))
+          : xScale.apply(xv == null ? "" : String(xv)) + xScale.bandwidth / 2;
+      if (!Number.isFinite(xpx)) continue;
+      const yMin = yScale ? yScale.range[1] : 0;
+      const yMax = yScale ? yScale.range[0] : 0;
+      out.push({
+        type: "line",
+        x1: roundPx(xpx),
+        y1: yMin,
+        x2: roundPx(xpx),
+        y2: yMax,
+        stroke,
+        strokeWidth: 1.5,
+      });
+    }
   }
 }
 
