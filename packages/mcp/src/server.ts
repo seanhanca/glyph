@@ -1,7 +1,7 @@
 /**
  * Glyph MCP server.
  *
- * Twenty-seven tools — the library surface:
+ * Thirty-two tools — the library surface:
  *   Phase 0/1 (9):
  *     - glyph_capabilities()              → feature detection
  *     - glyph_describe(source)            → schema + suggested encodings
@@ -37,6 +37,12 @@
  *     - glyph_audit_log(handle?, limit?)  → read the action audit log
  *   Phase 3 §7 (1, PR40):
  *     - glyph_trust(handle)               → freshness + confidence summary
+ *   Story Agent (5, PR41):
+ *     - glyph_story_plan(intent, source)        → DAG plan
+ *     - glyph_story_execute(plan_id)            → walk DAG + assemble storyboard
+ *     - glyph_story_get(plan_id)                → plan + state + storyboard
+ *     - glyph_story_list()                      → list plans in this session
+ *     - glyph_story_await_checkpoint(plan, …)   → long-poll progress
  *
  * Each diagnostic verb returns { handle_id, rows, explanation } — the new
  * handle_id is a derived DataHandle with chained lineage so the result is
@@ -71,6 +77,8 @@ import { Resvg } from "@resvg/resvg-js";
 import { z } from "zod";
 import { importPayload } from "./import.js";
 import { ServerState, materializeRowsAsHandle, materializeSpec } from "./state.js";
+import { executeStoryPlan, planStoryHeuristic } from "./story.js";
+import type { ColumnSummaryLike, StoryPlan } from "./story.js";
 
 export const SERVER_NAME = "glyph-mcp";
 export const SERVER_VERSION = "0.0.0";
@@ -111,6 +119,12 @@ const MCP_TOOLS = [
   { name: "glyph_audit_log", since: "0.0.8" },
   // ---- Phase 3 §7: trust signals (PR40) --------------------------------
   { name: "glyph_trust", since: "0.0.8" },
+  // ---- Story Agent (PR41) ----------------------------------------------
+  { name: "glyph_story_plan", since: "0.0.9" },
+  { name: "glyph_story_execute", since: "0.0.9" },
+  { name: "glyph_story_get", since: "0.0.9" },
+  { name: "glyph_story_list", since: "0.0.9" },
+  { name: "glyph_story_await_checkpoint", since: "0.0.9" },
 ] as const;
 
 /** Best-effort browser launcher. Returns true on success. */
@@ -1739,6 +1753,387 @@ export function createServer(state: ServerState = new ServerState()): {
           ],
         };
       }),
+  );
+
+  // ====== Story Agent (PR41) ===============================================
+  //
+  // glyph_story_plan + _execute + _await_checkpoint + _get + _list. The
+  // planner is heuristic v0 (no LLM); the executor is a DAG walker that
+  // calls the existing render/explain/anomaly/forecast logic via the
+  // internal helpers below. Plans live in `state.stories` (in-process).
+  //
+  // The five verbs split intent like this:
+  //   _plan(intent, source) → returns plan_id + an unexecuted DAG
+  //   _execute(plan_id)     → runs the DAG end-to-end (sync)
+  //   _await_checkpoint(plan_id, since?, timeout_ms?) → long-poll updates
+  //   _get(plan_id)         → fetch the plan + storyboard
+  //   _list()               → list all plans in this session
+
+  /** Internal: run a render spec via the same path glyph_render uses. */
+  async function runRenderInternal(spec: unknown): Promise<Record<string, unknown>> {
+    const parsed = safeParseSpec(spec);
+    if (!parsed.ok) throw new Error(parsed.error.message);
+    const engine = await state.getEngine();
+    const m = await materializeSpec(engine, parsed.spec, {
+      sessionId: state.sessionId,
+      resolveHandleByUri: (uri) => state.getHandleByUri(uri),
+      metricResolver: (name) => state.getMetric(name),
+    });
+    state.storeHandle(m.handle);
+    if (parsed.spec.actions && parsed.spec.actions.length > 0) {
+      state.setActionsForHandle(m.handle.id, parsed.spec.actions);
+    }
+    const scene = compileSpec({
+      spec: m.effectiveSpec,
+      rows: m.result.rows,
+      schema: m.handle.schema,
+    });
+    const svg = renderSvg(scene);
+    state.storeSvg(m.handle.id, svg);
+    return {
+      handle_id: m.handle.id,
+      uri: m.handle.uri,
+      view_name: m.handle.viewName,
+      row_count: m.result.rowCount,
+      title: scene.title,
+    };
+  }
+
+  /** Internal: glyph_describe equivalent, returns DataSummary. */
+  async function runDescribeInternal(source: string): Promise<Record<string, unknown>> {
+    const engine = await state.getEngine();
+    const handle = `desc_story_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    await engine.register({ source }, handle);
+    const summary = await engine.describe(handle);
+    return jsonSafe(summary) as Record<string, unknown>;
+  }
+
+  server.registerTool(
+    "glyph_story_plan",
+    {
+      title: "Plan a multi-chart analytic storyboard from natural-language intent",
+      description:
+        "Inspect `source` and emit a DAG-shaped StoryPlan tailored to the schema: render → explain → anomaly (+ forecast when temporal) → annotate. The planner is heuristic v0 (no LLM); the LLM-driven planner is the v1 extension point. Returns { plan_id, intent, nodes[], status: 'planned' }.",
+      inputSchema: {
+        intent: z
+          .string()
+          .min(1)
+          .describe("Natural-language description of what the user wants to learn."),
+        source: z
+          .string()
+          .min(1)
+          .describe("Data file path / URL / glyph_import name / gdf:// URI."),
+        format: z
+          .enum(["csv", "parquet", "json"])
+          .optional()
+          .describe("File format hint passed through to glyph_render."),
+        domain: z
+          .string()
+          .optional()
+          .describe(
+            "Optional domain bias for the planner (e.g. 'saas-mrr', 'logistics'). Heuristic v0 records it; LLM-v1 would use it.",
+          ),
+      },
+    },
+    async ({ intent, source, format, domain }) =>
+      state.serial(async () => {
+        try {
+          // Inspect the source so the planner knows the schema.
+          const summary = (await runDescribeInternal(source)) as {
+            columns?: ReadonlyArray<ColumnSummaryLike>;
+          };
+          const plan = planStoryHeuristic({
+            intent,
+            source,
+            sourceFormat: format,
+            schema: summary.columns ?? [],
+            domain,
+          });
+          state.stories.set(plan);
+          return {
+            content: [
+              {
+                type: "text" as const,
+                text: JSON.stringify(
+                  {
+                    plan_id: plan.id,
+                    intent: plan.intent,
+                    domain: plan.domain ?? null,
+                    nodes: plan.nodes.map((n) => ({
+                      id: n.id,
+                      kind: n.kind,
+                      label: n.label,
+                      dependsOn: n.dependsOn,
+                      status: n.status,
+                    })),
+                    status: plan.status,
+                  },
+                  null,
+                  2,
+                ),
+              },
+            ],
+          };
+        } catch (err) {
+          return {
+            isError: true,
+            content: [{ type: "text" as const, text: (err as Error).message ?? String(err) }],
+          };
+        }
+      }),
+  );
+
+  server.registerTool(
+    "glyph_story_execute",
+    {
+      title: "Execute a previously-planned story DAG",
+      description:
+        "Walk the StoryPlan's DAG in topological order, dispatching to the underlying MCP verbs. Sibling nodes run in parallel. Pushes a checkpoint per node start/end; consume them via glyph_story_await_checkpoint. Returns the assembled storyboard on completion.",
+      inputSchema: {
+        plan_id: z.string().describe("Plan id from glyph_story_plan."),
+      },
+    },
+    async ({ plan_id }) => {
+      const plan = state.stories.get(plan_id);
+      if (!plan) {
+        return {
+          isError: true,
+          content: [{ type: "text" as const, text: `Unknown plan_id: ${plan_id}` }],
+        };
+      }
+      try {
+        await executeStoryPlan({
+          plan,
+          store: state.stories,
+          verbs: {
+            // Each verb is wrapped in state.serial so sibling DAG nodes
+            // don't race on the single-writer DuckDB connection.
+            describe: ({ source }) => state.serial(() => runDescribeInternal(source)),
+            render: ({ spec }) => state.serial(() => runRenderInternal(spec)),
+            explain: ({ handle_id }) =>
+              state.serial(async () => {
+                const h = state.getHandle(handle_id);
+                if (!h) throw new Error(`Unknown handle_id: ${handle_id}`);
+                const engine = await state.getEngine();
+                const result = await engine.queryHandle(h);
+                return jsonSafe(explainHandle({ schema: h.schema, rows: result.rows })) as Record<
+                  string,
+                  unknown
+                >;
+              }),
+            anomaly: ({ handle_id, valueField, groupField, labelField }) =>
+              state.serial(async () => {
+                const h = state.getHandle(handle_id);
+                if (!h) throw new Error(`Unknown handle_id: ${handle_id}`);
+                const engine = await state.getEngine();
+                const queried = await engine.queryHandle(h);
+                const result = detectAnomalies({
+                  schema: h.schema,
+                  rows: queried.rows,
+                  valueField,
+                  ...(groupField !== undefined ? { groupField } : {}),
+                  ...(labelField !== undefined ? { labelField } : {}),
+                });
+                const columns = result.schema.map((c) => c.name);
+                const rowsArr = result.rows.map((a) => [...a.row, a.z]);
+                const derived = await materializeRowsAsHandle(engine, {
+                  rows: rowsArr,
+                  columns,
+                  sessionId: state.sessionId,
+                  parent: h,
+                  relation: "filter",
+                  producerTool: "glyph_story_anomaly",
+                });
+                state.storeHandle(derived);
+                return jsonSafe({
+                  handle_id: derived.id,
+                  uri: derived.uri,
+                  rows: rowsArr,
+                  explanation: result.explanation,
+                }) as Record<string, unknown>;
+              }),
+            forecast: ({ handle_id, xField, yField }) =>
+              state.serial(async () => {
+                const h = state.getHandle(handle_id);
+                if (!h) throw new Error(`Unknown handle_id: ${handle_id}`);
+                const engine = await state.getEngine();
+                const queried = await engine.queryHandle(h);
+                const result = seasonalNaiveForecast({
+                  schema: h.schema,
+                  rows: queried.rows,
+                  xField,
+                  yField,
+                });
+                const columns = result.schema.map((c) => c.name);
+                const rowsArr = result.rows.map((fr) => [
+                  fr.x instanceof Date ? fr.x.toISOString() : fr.x,
+                  fr.actual,
+                  fr.forecast,
+                  fr.lo,
+                  fr.hi,
+                  fr.isHorizon,
+                ]);
+                const derived = await materializeRowsAsHandle(engine, {
+                  rows: rowsArr,
+                  columns,
+                  sessionId: state.sessionId,
+                  parent: h,
+                  relation: "transform",
+                  producerTool: "glyph_story_forecast",
+                });
+                state.storeHandle(derived);
+                return jsonSafe({
+                  handle_id: derived.id,
+                  uri: derived.uri,
+                  season: result.season,
+                  explanation: result.explanation,
+                }) as Record<string, unknown>;
+              }),
+          },
+        });
+      } catch (err) {
+        return {
+          isError: true,
+          content: [{ type: "text" as const, text: (err as Error).message ?? String(err) }],
+        };
+      }
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: JSON.stringify(
+              jsonSafe({
+                plan_id: plan.id,
+                status: plan.status,
+                storyboard: plan.storyboard ?? null,
+                failed_nodes: plan.nodes
+                  .filter((n) => n.status === "failed")
+                  .map((n) => ({ id: n.id, kind: n.kind, error: n.error })),
+              }),
+              null,
+              2,
+            ),
+          },
+        ],
+      };
+    },
+  );
+
+  server.registerTool(
+    "glyph_story_get",
+    {
+      title: "Fetch a story plan + its current state",
+      description:
+        "Return the plan's nodes (status / result summary / timing), the storyboard if execution is complete, and the latest checkpoint count.",
+      inputSchema: {
+        plan_id: z.string(),
+      },
+    },
+    async ({ plan_id }) => {
+      const plan = state.stories.get(plan_id);
+      if (!plan) {
+        return {
+          isError: true,
+          content: [{ type: "text" as const, text: `Unknown plan_id: ${plan_id}` }],
+        };
+      }
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: JSON.stringify(
+              jsonSafe({
+                plan_id: plan.id,
+                intent: plan.intent,
+                status: plan.status,
+                createdAt: plan.createdAt,
+                domain: plan.domain ?? null,
+                nodes: plan.nodes.map((n) => ({
+                  id: n.id,
+                  kind: n.kind,
+                  label: n.label,
+                  status: n.status,
+                  startedAt: n.startedAt ?? null,
+                  endedAt: n.endedAt ?? null,
+                  error: n.error ?? null,
+                  handle_id: typeof n.result?.handle_id === "string" ? n.result.handle_id : null,
+                })),
+                checkpointCount: plan.checkpoints.length,
+                storyboard: plan.storyboard ?? null,
+              }),
+              null,
+              2,
+            ),
+          },
+        ],
+      };
+    },
+  );
+
+  server.registerTool(
+    "glyph_story_list",
+    {
+      title: "List all story plans in this session",
+      description:
+        "Return a compact list of plans: id, intent (truncated), status, createdAt, panel count when complete.",
+      inputSchema: {},
+    },
+    async () => {
+      const plans = state.stories.all().map((p) => ({
+        plan_id: p.id,
+        intent: p.intent.length > 80 ? `${p.intent.slice(0, 80)}…` : p.intent,
+        status: p.status,
+        createdAt: p.createdAt,
+        nodeCount: p.nodes.length,
+        panels: p.storyboard?.panels.length ?? null,
+      }));
+      return {
+        content: [
+          { type: "text" as const, text: JSON.stringify({ count: plans.length, plans }, null, 2) },
+        ],
+      };
+    },
+  );
+
+  server.registerTool(
+    "glyph_story_await_checkpoint",
+    {
+      title: "Long-poll for the next story-plan checkpoint",
+      description:
+        "Wait for the next checkpoint after index `since` (default 0). Returns { checkpoint: {...}, index } on arrival, or { checkpoint: null } on timeout. Use in a loop while glyph_story_execute is running to stream intermediate updates to the user.",
+      inputSchema: {
+        plan_id: z.string(),
+        since: z
+          .number()
+          .int()
+          .min(0)
+          .optional()
+          .describe("Return only checkpoints whose index >= this value."),
+        timeout_ms: z
+          .number()
+          .int()
+          .min(0)
+          .max(60_000)
+          .optional()
+          .describe("Max wait. Default 5000."),
+      },
+    },
+    async ({ plan_id, since, timeout_ms }) => {
+      const sinceIdx = since ?? 0;
+      const cp = await state.stories.awaitCheckpoint(plan_id, sinceIdx, timeout_ms ?? 5000);
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: JSON.stringify(
+              cp ? { checkpoint: cp, index: sinceIdx } : { checkpoint: null, index: sinceIdx },
+              null,
+              2,
+            ),
+          },
+        ],
+      };
+    },
   );
 
   // ----- glyph_handles (PR33 / Phase 3 Tier A) ----------------------------

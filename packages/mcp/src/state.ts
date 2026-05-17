@@ -24,6 +24,7 @@ import {
   createPreviewServer,
 } from "@glyph/preview-server";
 import { MemoryStore, defaultMemoryPath } from "./memory.js";
+import { StoryStore } from "./story.js";
 
 export class ServerState {
   private engine: ComputeEngine | undefined;
@@ -42,6 +43,8 @@ export class ServerState {
   private readonly previewOptions: PreviewServerOptions;
   /** Phase 3 §6: lazy-initialized persistent memory store. */
   readonly memory: MemoryStore;
+  /** PR41 Story Agent: in-process registry of plans + checkpoint queues. */
+  readonly stories = new StoryStore();
 
   constructor(
     options: {

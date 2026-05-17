@@ -25,9 +25,9 @@ Do **not** use Glyph for:
 - Real-time streaming charts (use Perspective)
 - Bespoke / one-off visualizations that don't fit a grammar (use D3 directly)
 
-## The twenty-seven tools
+## The thirty-two tools
 
-Glyph's MCP surface (9 Phase 0/1 + 4 Phase 3 Tier A GDF verbs + 1 explain verb + 4 diagnostic verbs + 2 metric-layer verbs + 4 persistent-memory verbs + 2 action verbs + 1 trust verb):
+Glyph's MCP surface (Phase 0/1 + Phase 3 H gaps + the Story Agent):
 
 1. `glyph_describe` — inspect a data file before writing a spec
 2. `glyph_render` — compile + render a spec; returns SVG + PNG + handle
@@ -55,7 +55,27 @@ Glyph's MCP surface (9 Phase 0/1 + 4 Phase 3 Tier A GDF verbs + 1 explain verb +
 24. `glyph_act` — resolve + dry-run a declarative `spec.actions[]` entry
 25. `glyph_audit_log` — read recent `glyph_act` invocations
 26. `glyph_trust` — freshness + confidence summary for a handle
+27. `glyph_story_plan` — NL intent → DAG-shaped storyboard plan
+28. `glyph_story_execute` — run a plan; assemble the storyboard
+29. `glyph_story_get` — fetch a plan + storyboard
+30. `glyph_story_list` — list plans in this session
+31. `glyph_story_await_checkpoint` — long-poll plan progress
 0. `glyph_capabilities` — feature detection
+
+### Story Agent (verbs 27–31) — PR41
+
+The **master orchestrator**. Given a natural-language `intent` + a `source`, the planner emits a typed DAG of analytic tasks (`describe → render → explain → anomaly → forecast → annotate`) tailored to the schema. Execute walks the DAG, dispatches to the underlying verbs, and assembles a `storyboard` with linked panels + a composed markdown narrative.
+
+```
+plan_id = glyph_story_plan({ intent: "Why did rides spike at 8am?", source: "taxi.csv" })
+# while running, stream progress:
+loop { glyph_story_await_checkpoint(plan_id, since: i) → checkpoint }
+# when done:
+storyboard = glyph_story_execute(plan_id).storyboard
+# storyboard.panels are the rendered charts; storyboard.narrative is the markdown.
+```
+
+Heuristic v0 — no LLM. Swap `planStoryHeuristic` with an LLM-driven planner in v1; the executor + checkpoint stream stay unchanged.
 
 ### Actions + trust (verbs 24–26) — Phase 3 §4 + §7
 

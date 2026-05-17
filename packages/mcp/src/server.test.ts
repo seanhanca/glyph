@@ -76,7 +76,7 @@ describe("Glyph MCP server", () => {
     rmSync(tempMemoryDir, { recursive: true, force: true });
   });
 
-  it("lists the twenty-seven tools", async () => {
+  it("lists the thirty-two tools", async () => {
     const r = await client.listTools();
     const names = r.tools.map((t) => t.name).sort();
     expect(names).toEqual([
@@ -105,6 +105,11 @@ describe("Glyph MCP server", () => {
       "glyph_publish",
       "glyph_query",
       "glyph_render",
+      "glyph_story_await_checkpoint",
+      "glyph_story_execute",
+      "glyph_story_get",
+      "glyph_story_list",
+      "glyph_story_plan",
       "glyph_subscribe",
       "glyph_trust",
     ]);
@@ -144,6 +149,11 @@ describe("Glyph MCP server", () => {
       "glyph_publish",
       "glyph_query",
       "glyph_render",
+      "glyph_story_await_checkpoint",
+      "glyph_story_execute",
+      "glyph_story_get",
+      "glyph_story_list",
+      "glyph_story_plan",
       "glyph_subscribe",
       "glyph_trust",
     ]);
@@ -1267,6 +1277,102 @@ describe("Glyph MCP server", () => {
       const out = JSON.parse(r.text);
       expect(out.lowSample).toBe(true);
       expect(out.markdown).toContain("low");
+    });
+  });
+
+  // ---- PR41 Story Agent --------------------------------------------------
+  describe("Story Agent (PR41)", () => {
+    it("plan → execute → storyboard round-trips on the taxi fixture", async () => {
+      const planResp = await callText(client, "glyph_story_plan", {
+        intent: "Show me ride volume by hour and flag anything weird.",
+        source: fixture,
+        format: "csv",
+      });
+      expect(planResp.isError).toBe(false);
+      const plan = JSON.parse(planResp.text);
+      expect(plan.plan_id).toMatch(/^story_/);
+      // The heuristic planner produces describe + render + explain + anomaly + annotate
+      // (no forecast — pickup_hour is integer, not temporal).
+      const kinds = plan.nodes.map((n: { kind: string }) => n.kind).sort();
+      expect(kinds).toEqual(["annotate", "anomaly", "describe", "explain", "render"]);
+      // Every node starts pending.
+      expect(plan.nodes.every((n: { status: string }) => n.status === "pending")).toBe(true);
+
+      const exec = await callText(client, "glyph_story_execute", { plan_id: plan.plan_id });
+      expect(exec.isError).toBe(false);
+      const out = JSON.parse(exec.text);
+      expect(out.status).toBe("complete");
+      expect(out.failed_nodes).toEqual([]);
+      expect(out.storyboard).toBeTruthy();
+      expect(out.storyboard.panels.length).toBeGreaterThanOrEqual(1);
+      expect(out.storyboard.narrative).toContain("Intent:");
+      expect(out.storyboard.handles.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it("emits checkpoints that glyph_story_await_checkpoint can stream", async () => {
+      const planResp = await callText(client, "glyph_story_plan", {
+        intent: "Stream me the rendering of taxi rides.",
+        source: fixture,
+        format: "csv",
+      });
+      const plan_id = JSON.parse(planResp.text).plan_id as string;
+
+      // Kick execute + await first checkpoint in parallel.
+      const [_exec, cp0] = await Promise.all([
+        callText(client, "glyph_story_execute", { plan_id }),
+        callText(client, "glyph_story_await_checkpoint", { plan_id, since: 0, timeout_ms: 8000 }),
+      ]);
+      expect(cp0.isError).toBe(false);
+      const out0 = JSON.parse(cp0.text);
+      expect(out0.checkpoint).toBeTruthy();
+      expect(out0.checkpoint.plan_id).toBe(plan_id);
+      // After execute completes, checkpointCount > 0 in glyph_story_get.
+      const got = await callText(client, "glyph_story_get", { plan_id });
+      const gotPlan = JSON.parse(got.text);
+      expect(gotPlan.checkpointCount).toBeGreaterThanOrEqual(2);
+      expect(gotPlan.status).toBe("complete");
+    });
+
+    it("includes a forecast node when the data has a temporal x", async () => {
+      const csv = "day,rides\n2024-01-01,10\n2024-01-02,15\n2024-01-03,20\n2024-01-04,25\n";
+      const imp = await callText(client, "glyph_import", {
+        payload: { kind: "csv", data: csv },
+      });
+      const imported = JSON.parse(imp.text);
+      const planResp = await callText(client, "glyph_story_plan", {
+        intent: "Daily ride trend",
+        source: imported.resolvedSource,
+        format: "csv",
+      });
+      const plan = JSON.parse(planResp.text);
+      expect(plan.nodes.some((n: { kind: string }) => n.kind === "forecast")).toBe(true);
+    });
+
+    it("glyph_story_list shows every plan in the session", async () => {
+      await callText(client, "glyph_story_plan", {
+        intent: "story one",
+        source: fixture,
+        format: "csv",
+      });
+      await callText(client, "glyph_story_plan", {
+        intent: "story two",
+        source: fixture,
+        format: "csv",
+      });
+      const list = await callText(client, "glyph_story_list", {});
+      const out = JSON.parse(list.text);
+      expect(out.count).toBe(2);
+      expect(out.plans[0].intent).toContain("story one");
+      expect(out.plans[1].intent).toContain("story two");
+    });
+
+    it("rejects an unknown plan_id from execute / get", async () => {
+      const r1 = await callText(client, "glyph_story_execute", { plan_id: "nope" });
+      expect(r1.isError).toBe(true);
+      expect(r1.text).toContain("Unknown plan_id");
+      const r2 = await callText(client, "glyph_story_get", { plan_id: "nope" });
+      expect(r2.isError).toBe(true);
+      expect(r2.text).toContain("Unknown plan_id");
     });
   });
 });
