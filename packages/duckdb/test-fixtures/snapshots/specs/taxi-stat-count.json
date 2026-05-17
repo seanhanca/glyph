@@ -1,0 +1,14 @@
+{
+  "data": {
+    "source": "../../taxi.csv",
+    "format": "csv"
+  },
+  "layers": [
+    {
+      "mark": "bar",
+      "encoding": { "x": "pickup_hour", "y": "_count" },
+      "stat": { "type": "count" }
+    }
+  ],
+  "title": "Row count per hour (stat: count)"
+}

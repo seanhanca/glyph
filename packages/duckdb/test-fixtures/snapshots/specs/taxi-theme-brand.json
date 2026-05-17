@@ -1,0 +1,16 @@
+{
+  "data": {
+    "source": "../../taxi.csv",
+    "format": "csv",
+    "transform": "SELECT pickup_hour, rides FROM glyph_src_main ORDER BY pickup_hour"
+  },
+  "layers": [{ "mark": "bar", "encoding": { "x": "pickup_hour", "y": "rides" } }],
+  "theme": {
+    "background": "#fffaf3",
+    "fg": "#0d1b2a",
+    "axis": "#778da9",
+    "grid": "#e6dccd",
+    "palette": ["#9d4edd", "#c77dff", "#e0aaff", "#5a189a", "#7b2cbf"]
+  },
+  "title": "Brand-themed bar chart"
+}

@@ -1,0 +1,14 @@
+{
+  "data": {
+    "source": "../../taxi.csv",
+    "format": "csv"
+  },
+  "layers": [
+    {
+      "mark": "line",
+      "encoding": { "x": "pickup_hour", "y": "fare" },
+      "stat": { "type": "mean" }
+    }
+  ],
+  "title": "Mean fare per hour (stat: mean)"
+}

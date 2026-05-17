@@ -1,0 +1,10 @@
+{
+  "data": {
+    "source": "../../taxi.csv",
+    "format": "csv",
+    "transform": "SELECT pickup_hour, rides FROM glyph_src_main ORDER BY pickup_hour"
+  },
+  "layers": [{ "mark": "bar", "encoding": { "x": "pickup_hour", "y": "rides" } }],
+  "interactive": { "key": "pickup_hour" },
+  "title": "Rides by hour (interactive)"
+}

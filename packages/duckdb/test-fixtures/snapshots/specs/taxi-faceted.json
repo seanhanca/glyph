@@ -1,0 +1,12 @@
+{
+  "data": {
+    "source": "../../taxi.csv",
+    "format": "csv",
+    "transform": "SELECT pickup_hour, rides, CASE WHEN pickup_hour < 6 THEN 'night' WHEN pickup_hour < 12 THEN 'morning' WHEN pickup_hour < 18 THEN 'afternoon' ELSE 'evening' END AS daypart FROM glyph_src_main"
+  },
+  "layers": [{ "mark": "bar", "encoding": { "x": "pickup_hour", "y": "rides" } }],
+  "facet": { "col": "daypart" },
+  "title": "Rides by hour, faceted by daypart",
+  "width": 900,
+  "height": 360
+}
