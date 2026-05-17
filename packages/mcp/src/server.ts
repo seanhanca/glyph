@@ -1,7 +1,7 @@
 /**
  * Glyph MCP server.
  *
- * Fourteen tools — the library surface:
+ * Eighteen tools — the library surface:
  *   Phase 0/1 (9):
  *     - glyph_capabilities()              → feature detection
  *     - glyph_describe(source)            → schema + suggested encodings
@@ -19,25 +19,38 @@
  *     - glyph_handles()                   → list all session handles
  *   Phase 3 §2 (1, PR35):
  *     - glyph_explain(handle_id)          → deterministic chart explanation
+ *   Phase 3 §3 (4, PR36):
+ *     - glyph_anomaly(handle_id, …)       → rows > Nσ from segment mean
+ *     - glyph_drift(handle_id, A, B)      → per-group contribution to delta
+ *     - glyph_decompose(handle_id, …)     → per-factor variance explained
+ *     - glyph_forecast(handle_id, h?)     → seasonal-naive baseline + bands
  *
- * Total tool-definition payload is intentionally small (<1000 tokens) so an
+ * Each diagnostic verb returns { handle_id, rows, explanation } — the new
+ * handle_id is a derived DataHandle with chained lineage so the result is
+ * queryable via glyph_query / glyph_drill / glyph_render's gdf:// source.
+ *
+ * Total tool-definition payload is intentionally small (<1500 tokens) so an
  * agent burns minimal context on the API surface itself.
  */
 
 import {
+  attributeDrift,
   compileSpec,
+  decomposeVariance,
+  detectAnomalies,
   explainHandle,
   getCapabilities,
   isTranslateError,
   renderSvg,
   safeParseSpec,
+  seasonalNaiveForecast,
   vegaLiteToGlyph,
 } from "@glyph/core";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { Resvg } from "@resvg/resvg-js";
 import { z } from "zod";
 import { importPayload } from "./import.js";
-import { ServerState, materializeSpec } from "./state.js";
+import { ServerState, materializeRowsAsHandle, materializeSpec } from "./state.js";
 
 export const SERVER_NAME = "glyph-mcp";
 export const SERVER_VERSION = "0.0.0";
@@ -60,6 +73,11 @@ const MCP_TOOLS = [
   { name: "glyph_handles", since: "0.0.3" },
   // ---- Phase 3 §2: self-explaining charts (PR35) -----------------------
   { name: "glyph_explain", since: "0.0.4" },
+  // ---- Phase 3 §3: diagnostic primitives (PR36) ------------------------
+  { name: "glyph_anomaly", since: "0.0.5" },
+  { name: "glyph_drift", since: "0.0.5" },
+  { name: "glyph_decompose", since: "0.0.5" },
+  { name: "glyph_forecast", since: "0.0.5" },
 ] as const;
 
 /** Best-effort browser launcher. Returns true on success. */
@@ -843,6 +861,365 @@ export function createServer(state: ServerState = new ServerState()): {
             {
               type: "text" as const,
               text: JSON.stringify(jsonSafe(explanation), null, 2),
+            },
+          ],
+        };
+      }),
+  );
+
+  // ====== Phase 3 §3 diagnostic primitives (PR36) =========================
+  //
+  // Shared pattern for all four verbs:
+  //   1. Look up the parent handle by id.
+  //   2. Query its rows (the diagnostic operates in memory; bounded by the
+  //      pre-aggregated view that glyph_render materialized).
+  //   3. Call the pure core function from @glyph/core/diagnostics.
+  //   4. Materialize the result rows as a derived DataHandle with chained
+  //      lineage (relation = filter/agg/transform per the verb's nature).
+  //   5. Return { handle_id, uri, rows, explanation, …verb-specific stats }.
+  //
+  // The pure-fn return shape lives in @glyph/core; this layer adds only
+  // I/O and lineage chaining.
+
+  /** Serialize a typed array of objects to the on-wire row-of-arrays form. */
+  function rowsAsArrays<T extends Record<string, unknown>>(
+    objs: ReadonlyArray<T>,
+    columns: ReadonlyArray<string>,
+  ): ReadonlyArray<ReadonlyArray<unknown>> {
+    return objs.map((o) => columns.map((c) => o[c]));
+  }
+
+  // ----- glyph_anomaly ----------------------------------------------------
+  server.registerTool(
+    "glyph_anomaly",
+    {
+      title: "Find rows outside the segment's normal range",
+      description:
+        "Z-score anomaly detection. Returns rows where |z| > threshold (default 2σ) from their segment mean. Pass `groupField` to segment per-group (e.g. detect per-region outliers). The result is also published as a derived gdf:// handle so you can glyph_query / glyph_drill it.",
+      inputSchema: {
+        handle_id: z.string().describe("Handle from glyph_render."),
+        valueField: z.string().describe("Numeric column to test."),
+        groupField: z
+          .string()
+          .optional()
+          .describe("Categorical column to bucket by; without it, the global mean is used."),
+        labelField: z
+          .string()
+          .optional()
+          .describe("Column whose value identifies a row in the explanation."),
+        threshold: z
+          .number()
+          .positive()
+          .optional()
+          .describe("|z| threshold (default 2). 3 ≈ very strong outlier."),
+        limit: z.number().int().min(1).optional().describe("Max rows returned. Default 20."),
+      },
+    },
+    async ({ handle_id, valueField, groupField, labelField, threshold, limit }) =>
+      state.serial(async () => {
+        const parent = state.getHandle(handle_id);
+        if (!parent) {
+          return {
+            isError: true,
+            content: [{ type: "text" as const, text: `Unknown handle_id: ${handle_id}` }],
+          };
+        }
+        const engine = await state.getEngine();
+        const r = await engine.queryHandle(parent);
+        const result = detectAnomalies({
+          schema: parent.schema,
+          rows: r.rows,
+          valueField,
+          groupField,
+          labelField,
+          threshold,
+          limit,
+        });
+        // Project each AnomalyRow to a row-tuple aligned to the derived schema
+        // (original columns + _z).
+        const columns = result.schema.map((c) => c.name);
+        const rowsArr = result.rows.map((a) => [...a.row, a.z]);
+        const derived = await materializeRowsAsHandle(engine, {
+          rows: rowsArr,
+          columns,
+          sessionId: state.sessionId,
+          parent,
+          relation: "filter",
+          producerTool: "glyph_anomaly",
+          sqlPreview: `-- z-score filter, threshold=${result.threshold} on ${parent.viewName}`,
+        });
+        state.storeHandle(derived);
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: JSON.stringify(
+                jsonSafe({
+                  handle_id: derived.id,
+                  uri: derived.uri,
+                  threshold: result.threshold,
+                  rows: rowsArr,
+                  columns,
+                  segments: result.segments,
+                  explanation: result.explanation,
+                }),
+                null,
+                2,
+              ),
+            },
+          ],
+        };
+      }),
+  );
+
+  // ----- glyph_drift ------------------------------------------------------
+  server.registerTool(
+    "glyph_drift",
+    {
+      title: "Attribute period-over-period change to groups",
+      description:
+        "Compute per-group contribution to the delta between two periods. Pass `periodField` (the column whose value distinguishes the periods) and `periodA` / `periodB` (the literal values or a list). Returns rows {group, valueA, valueB, delta, share} sorted by |delta| descending, plus a derived gdf:// handle.",
+      inputSchema: {
+        handle_id: z.string().describe("Handle from glyph_render."),
+        valueField: z.string().describe("Numeric column summed per group."),
+        groupField: z.string().describe("Categorical column to group by."),
+        periodField: z.string().describe("Column whose value identifies the period."),
+        periodA: z
+          .union([z.string(), z.number(), z.array(z.union([z.string(), z.number()])).min(1)])
+          .describe("Period-A value(s)."),
+        periodB: z
+          .union([z.string(), z.number(), z.array(z.union([z.string(), z.number()])).min(1)])
+          .describe("Period-B value(s)."),
+        limit: z.number().int().min(1).optional().describe("Max rows returned. Default 20."),
+      },
+    },
+    async ({ handle_id, valueField, groupField, periodField, periodA, periodB, limit }) =>
+      state.serial(async () => {
+        const parent = state.getHandle(handle_id);
+        if (!parent) {
+          return {
+            isError: true,
+            content: [{ type: "text" as const, text: `Unknown handle_id: ${handle_id}` }],
+          };
+        }
+        const inSet = (
+          spec: string | number | ReadonlyArray<string | number>,
+        ): ((v: unknown) => boolean) => {
+          const set = new Set(Array.isArray(spec) ? spec.map(String) : [String(spec)]);
+          return (v: unknown) => set.has(String(v));
+        };
+        const engine = await state.getEngine();
+        const r = await engine.queryHandle(parent);
+        const result = attributeDrift({
+          schema: parent.schema,
+          rows: r.rows,
+          valueField,
+          groupField,
+          periodField,
+          periodA: inSet(periodA),
+          periodB: inSet(periodB),
+          limit,
+        });
+        const columns = result.schema.map((c) => c.name);
+        const rowsArr = rowsAsArrays(
+          result.rows.map((dr) => ({
+            [groupField]: dr.group,
+            valueA: dr.valueA,
+            valueB: dr.valueB,
+            delta: dr.delta,
+            share: dr.share,
+          })),
+          columns,
+        );
+        const derived = await materializeRowsAsHandle(engine, {
+          rows: rowsArr,
+          columns,
+          sessionId: state.sessionId,
+          parent,
+          relation: "agg",
+          producerTool: "glyph_drift",
+          sqlPreview: `-- per-group drift across ${periodField} on ${parent.viewName}`,
+        });
+        state.storeHandle(derived);
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: JSON.stringify(
+                jsonSafe({
+                  handle_id: derived.id,
+                  uri: derived.uri,
+                  totalA: result.totalA,
+                  totalB: result.totalB,
+                  totalDelta: result.totalDelta,
+                  rows: rowsArr,
+                  columns,
+                  explanation: result.explanation,
+                }),
+                null,
+                2,
+              ),
+            },
+          ],
+        };
+      }),
+  );
+
+  // ----- glyph_decompose --------------------------------------------------
+  server.registerTool(
+    "glyph_decompose",
+    {
+      title: "Rank factors by share of variance explained",
+      description:
+        "For each named factor, compute the fraction of the metric's total variance that's explained by between-group differences (one-way ANOVA's η²). Higher = that factor carries more of the spread. Returns rows {factor, varianceExplained, distinctGroups, topGroup, topGroupMean} ranked descending, plus a derived gdf:// handle.",
+      inputSchema: {
+        handle_id: z.string().describe("Handle from glyph_render."),
+        metricField: z.string().describe("Numeric column whose variance we decompose."),
+        factors: z
+          .array(z.string().min(1))
+          .min(1)
+          .describe("Candidate categorical columns to test, ranked in the result by signal."),
+      },
+    },
+    async ({ handle_id, metricField, factors }) =>
+      state.serial(async () => {
+        const parent = state.getHandle(handle_id);
+        if (!parent) {
+          return {
+            isError: true,
+            content: [{ type: "text" as const, text: `Unknown handle_id: ${handle_id}` }],
+          };
+        }
+        const engine = await state.getEngine();
+        const r = await engine.queryHandle(parent);
+        const result = decomposeVariance({
+          schema: parent.schema,
+          rows: r.rows,
+          metricField,
+          factors,
+        });
+        const columns = result.schema.map((c) => c.name);
+        const rowsArr = rowsAsArrays(
+          result.rows.map((dr) => ({
+            factor: dr.factor,
+            varianceExplained: dr.varianceExplained,
+            distinctGroups: dr.distinctGroups,
+            topGroup: dr.topGroup,
+            topGroupMean: dr.topGroupMean,
+          })),
+          columns,
+        );
+        const derived = await materializeRowsAsHandle(engine, {
+          rows: rowsArr,
+          columns,
+          sessionId: state.sessionId,
+          parent,
+          relation: "agg",
+          producerTool: "glyph_decompose",
+          sqlPreview: `-- variance attribution for ${metricField} across factors=${factors.join(",")}`,
+        });
+        state.storeHandle(derived);
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: JSON.stringify(
+                jsonSafe({
+                  handle_id: derived.id,
+                  uri: derived.uri,
+                  grandMean: result.grandMean,
+                  totalSSE: result.totalSSE,
+                  rows: rowsArr,
+                  columns,
+                  explanation: result.explanation,
+                }),
+                null,
+                2,
+              ),
+            },
+          ],
+        };
+      }),
+  );
+
+  // ----- glyph_forecast ---------------------------------------------------
+  server.registerTool(
+    "glyph_forecast",
+    {
+      title: "Seasonal-naive forecast with confidence bands",
+      description:
+        "Project the last `horizon` periods forward using a seasonal-naive baseline (y_hat[t] = y[t-season]; when season=1 it's one-step-back). The ±2σ band is derived from historical residuals. Flags rendered actuals that fall outside the band. Returns rows {x, actual, forecast, lo, hi, isHorizon} plus a derived gdf:// handle.",
+      inputSchema: {
+        handle_id: z.string().describe("Handle from glyph_render."),
+        xField: z.string().describe("Column to sort by (typically temporal)."),
+        yField: z.string().describe("Numeric column to forecast."),
+        season: z
+          .number()
+          .int()
+          .min(1)
+          .optional()
+          .describe("Season length in periods. Default = min(7, floor(n/2)). 1 = one-step-back."),
+        horizon: z.number().int().min(1).optional().describe("Periods to forecast. Default 7."),
+      },
+    },
+    async ({ handle_id, xField, yField, season, horizon }) =>
+      state.serial(async () => {
+        const parent = state.getHandle(handle_id);
+        if (!parent) {
+          return {
+            isError: true,
+            content: [{ type: "text" as const, text: `Unknown handle_id: ${handle_id}` }],
+          };
+        }
+        const engine = await state.getEngine();
+        const r = await engine.queryHandle(parent);
+        const result = seasonalNaiveForecast({
+          schema: parent.schema,
+          rows: r.rows,
+          xField,
+          yField,
+          season,
+          horizon,
+        });
+        const columns = result.schema.map((c) => c.name);
+        const rowsArr = rowsAsArrays(
+          result.rows.map((fr) => ({
+            [xField]: fr.x instanceof Date ? fr.x.toISOString() : fr.x,
+            actual: fr.actual,
+            forecast: fr.forecast,
+            lo: fr.lo,
+            hi: fr.hi,
+            isHorizon: fr.isHorizon,
+          })),
+          columns,
+        );
+        const derived = await materializeRowsAsHandle(engine, {
+          rows: rowsArr,
+          columns,
+          sessionId: state.sessionId,
+          parent,
+          relation: "transform",
+          producerTool: "glyph_forecast",
+          sqlPreview: `-- seasonal-naive forecast season=${result.season} horizon=${horizon ?? 7} on ${parent.viewName}`,
+        });
+        state.storeHandle(derived);
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: JSON.stringify(
+                jsonSafe({
+                  handle_id: derived.id,
+                  uri: derived.uri,
+                  season: result.season,
+                  residualStd: result.residualStd,
+                  rows: rowsArr,
+                  columns,
+                  explanation: result.explanation,
+                }),
+                null,
+                2,
+              ),
             },
           ],
         };

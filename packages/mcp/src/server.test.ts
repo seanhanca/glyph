@@ -66,16 +66,20 @@ describe("Glyph MCP server", () => {
     await state.close();
   });
 
-  it("lists the fourteen tools", async () => {
+  it("lists the eighteen tools", async () => {
     const r = await client.listTools();
     const names = r.tools.map((t) => t.name).sort();
     expect(names).toEqual([
+      "glyph_anomaly",
       "glyph_await_interaction",
       "glyph_capabilities",
       "glyph_close_preview",
+      "glyph_decompose",
       "glyph_describe",
+      "glyph_drift",
       "glyph_drill",
       "glyph_explain",
+      "glyph_forecast",
       "glyph_handles",
       "glyph_import",
       "glyph_lineage",
@@ -96,12 +100,16 @@ describe("Glyph MCP server", () => {
     expect(caps.defaultSpecVersion).toBe("glyph/0.1");
     expect(caps.marks).toEqual(["bar", "point", "line", "area"]);
     expect(caps.mcpTools.map((t: { name: string }) => t.name).sort()).toEqual([
+      "glyph_anomaly",
       "glyph_await_interaction",
       "glyph_capabilities",
       "glyph_close_preview",
+      "glyph_decompose",
       "glyph_describe",
+      "glyph_drift",
       "glyph_drill",
       "glyph_explain",
+      "glyph_forecast",
       "glyph_handles",
       "glyph_import",
       "glyph_lineage",
@@ -717,6 +725,173 @@ describe("Glyph MCP server", () => {
       const r = await callText(client, "glyph_explain", { handle_id: "nope" });
       expect(r.isError).toBe(true);
       expect(r.text).toContain("Unknown handle_id");
+    });
+  });
+
+  // ---- Phase 3 §3: diagnostic primitives (PR36) --------------------------
+  describe("diagnostic verbs (PR36 — Phase 3 §3)", () => {
+    /** Render a synthetic CSV via glyph_import so we can drive concrete tests. */
+    async function importAndRender(csv: string, x: string, y: string): Promise<string> {
+      const imp = await callText(client, "glyph_import", {
+        payload: { kind: "csv", data: csv },
+      });
+      const imported = JSON.parse(imp.text);
+      const r = await callText(client, "glyph_render", {
+        spec: {
+          data: { source: imported.resolvedSource, format: "csv" },
+          layers: [{ mark: "bar", encoding: { x, y } }],
+        },
+      });
+      return JSON.parse(r.text).handle_id as string;
+    }
+
+    it("glyph_anomaly flags rows beyond the z-threshold and chains a handle", async () => {
+      // 12 stable values + one wild outlier at hour=99.
+      const lines = ["hour,rides"];
+      for (let i = 0; i < 12; i++) lines.push(`${i},50`);
+      lines.push("99,400");
+      const handle_id = await importAndRender(lines.join("\n"), "hour", "rides");
+      const r = await callText(client, "glyph_anomaly", {
+        handle_id,
+        valueField: "rides",
+        labelField: "hour",
+        threshold: 2,
+      });
+      expect(r.isError).toBe(false);
+      const out = JSON.parse(r.text);
+      expect(out.handle_id).toBeTruthy();
+      expect(out.uri).toMatch(/^gdf:\/\//);
+      expect(out.rows.length).toBeGreaterThanOrEqual(1);
+      expect(out.columns).toContain("_z");
+      expect(out.explanation.headline).toMatch(/outlier/i);
+      // The chained handle should be queryable.
+      const q = await callText(client, "glyph_query", { handle_id: out.handle_id });
+      expect(q.isError).toBe(false);
+      const queried = JSON.parse(q.text);
+      expect(queried.rowCount).toBeGreaterThanOrEqual(1);
+    });
+
+    it("glyph_drift attributes per-group contribution between two periods", async () => {
+      const csv =
+        "region,period,revenue\n" +
+        "us,A,100\nus,B,80\n" +
+        "eu,A,60\neu,B,65\n" +
+        "asia,A,40\nasia,B,35\n";
+      const handle_id = await importAndRender(csv, "region", "revenue");
+      const r = await callText(client, "glyph_drift", {
+        handle_id,
+        valueField: "revenue",
+        groupField: "region",
+        periodField: "period",
+        periodA: "A",
+        periodB: "B",
+      });
+      expect(r.isError).toBe(false);
+      const out = JSON.parse(r.text);
+      expect(out.totalA).toBe(200);
+      expect(out.totalB).toBe(180);
+      expect(out.totalDelta).toBe(-20);
+      // First row should be "us" with delta=-20.
+      expect(out.rows[0][0]).toBe("us");
+      expect(out.rows[0][3]).toBe(-20);
+      expect(out.explanation.headline.toLowerCase()).toContain("us");
+    });
+
+    it("glyph_decompose ranks factors by variance explained", async () => {
+      // region drives all the signal; weekday is noise.
+      const rows: string[] = ["region,weekday,value"];
+      rows.push("us,mon,98", "us,tue,102", "us,mon,101", "us,tue,99", "us,mon,100", "us,tue,100");
+      rows.push("eu,mon,49", "eu,tue,51", "eu,mon,50", "eu,tue,52", "eu,mon,48", "eu,tue,50");
+      const csv = rows.join("\n");
+      const handle_id = await importAndRender(csv, "region", "value");
+      const r = await callText(client, "glyph_decompose", {
+        handle_id,
+        metricField: "value",
+        factors: ["region", "weekday"],
+      });
+      expect(r.isError).toBe(false);
+      const out = JSON.parse(r.text);
+      // First row = region with very high varianceExplained.
+      expect(out.rows[0][0]).toBe("region");
+      expect(out.rows[0][1]).toBeGreaterThan(0.9);
+      expect(out.rows[1][0]).toBe("weekday");
+      expect(out.rows[1][1]).toBeLessThan(0.05);
+    });
+
+    it("glyph_forecast emits the expected horizon rows + a band", async () => {
+      // 20 trending values; 7-step forecast.
+      const rows: string[] = ["t,y"];
+      for (let i = 0; i < 20; i++) rows.push(`${i},${100 + i * 2}`);
+      const csv = rows.join("\n");
+      const handle_id = await importAndRender(csv, "t", "y");
+      const r = await callText(client, "glyph_forecast", {
+        handle_id,
+        xField: "t",
+        yField: "y",
+        season: 1,
+        horizon: 7,
+      });
+      expect(r.isError).toBe(false);
+      const out = JSON.parse(r.text);
+      // We should get back 20 historical rows + 7 forecast-only rows.
+      expect(out.rows.length).toBe(27);
+      // The last 7 are horizon rows.
+      const horizonRows = out.rows.filter((row: unknown[]) => row[5] === true);
+      expect(horizonRows.length).toBe(7);
+    });
+
+    it("the chained handles all show up in glyph_handles + glyph_lineage walks back", async () => {
+      const lines = ["hour,rides"];
+      for (let i = 0; i < 12; i++) lines.push(`${i},50`);
+      lines.push("99,400");
+      const handle_id = await importAndRender(lines.join("\n"), "hour", "rides");
+      const r = await callText(client, "glyph_anomaly", {
+        handle_id,
+        valueField: "rides",
+        labelField: "hour",
+      });
+      const out = JSON.parse(r.text);
+      const handlesResp = await callText(client, "glyph_handles", {});
+      const handles = JSON.parse(handlesResp.text);
+      // Two handles: the rendered one + the derived anomaly handle.
+      const ids = handles.handles.map((h: { id: string }) => h.id);
+      expect(ids).toContain(handle_id);
+      expect(ids).toContain(out.handle_id);
+      // Lineage walks back from the derived handle to the parent uri.
+      const lineageResp = await callText(client, "glyph_lineage", { uri: out.uri });
+      const tree = JSON.parse(lineageResp.text);
+      expect(tree.children).toHaveLength(1);
+      expect(tree.children[0].producer.tool).toBe("materializeSpec");
+    });
+
+    it("all four verbs reject an unknown handle_id", async () => {
+      for (const tool of [
+        "glyph_anomaly",
+        "glyph_drift",
+        "glyph_decompose",
+        "glyph_forecast",
+      ] as const) {
+        const args: Record<string, unknown> = { handle_id: "nope" };
+        if (tool === "glyph_anomaly") args.valueField = "x";
+        if (tool === "glyph_drift") {
+          args.valueField = "x";
+          args.groupField = "g";
+          args.periodField = "p";
+          args.periodA = "A";
+          args.periodB = "B";
+        }
+        if (tool === "glyph_decompose") {
+          args.metricField = "x";
+          args.factors = ["g"];
+        }
+        if (tool === "glyph_forecast") {
+          args.xField = "t";
+          args.yField = "y";
+        }
+        const r = await callText(client, tool, args);
+        expect(r.isError).toBe(true);
+        expect(r.text).toContain("Unknown handle_id");
+      }
     });
   });
 });

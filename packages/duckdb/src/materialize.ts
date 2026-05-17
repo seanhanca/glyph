@@ -20,6 +20,7 @@ import type {
   DataHandle,
   DataSource,
   GlyphSpec,
+  LineageRelation,
   QueryHandle,
   QueryResult,
 } from "@glyph/core";
@@ -50,6 +51,10 @@ export interface MaterializedSpec {
  * Compose GDF fields onto a Phase-0 QueryHandle. The base handle from the
  * engine has `id`, `viewName`, `schema`; this attaches `uri`, `version`,
  * `lineage`, `provenance`, and `binding` for Phase 3 consumers.
+ *
+ * The `parents` are stored verbatim — callers control the lineage relation
+ * (transform / filter / agg / join). For specs that came from a file, the
+ * caller passes an empty array.
  */
 function enrichHandle(
   base: QueryHandle,
@@ -57,7 +62,8 @@ function enrichHandle(
     readonly sessionId: string;
     readonly sql: string;
     readonly producerTool: string;
-    readonly parentUris: ReadonlyArray<string>;
+    /** Parents as {uri, relation} so diagnostic verbs can record filter/agg/etc. */
+    readonly parents: ReadonlyArray<{ uri: string; relation: LineageRelation }>;
     readonly sampleRows: number;
     readonly filteredOut: number;
   },
@@ -68,7 +74,7 @@ function enrichHandle(
     uri: `gdf://${args.sessionId}/${base.id}`,
     version: 1,
     lineage: {
-      parents: args.parentUris.map((uri) => ({ uri, relation: "transform" as const })),
+      parents: args.parents,
       sql: args.sql,
       producer: {
         agent: "glyph",
@@ -214,9 +220,98 @@ export async function materializeSpec(
     sessionId,
     sql: viewSql,
     producerTool: "materializeSpec",
-    parentUris: [...parentUris],
+    parents: [...parentUris].map((uri) => ({ uri, relation: "transform" as const })),
     sampleRows: result.rowCount,
     filteredOut: 0,
   });
   return { handle, result };
+}
+
+// ---------------------------------------------------------------------------
+// materializeRowsAsHandle — derived handles from in-memory rows
+// ---------------------------------------------------------------------------
+
+/**
+ * Quote a SQL identifier (double quotes; embedded quotes doubled).
+ */
+function quoteIdent(name: string): string {
+  return `"${name.replace(/"/g, '""')}"`;
+}
+
+/**
+ * Convert a JS value to a SQL literal safe for inclusion in a VALUES clause.
+ * Strings use single-quote escaping; Dates render as ISO TIMESTAMP literals;
+ * BigInt becomes a bare integer; null/undefined → NULL.
+ */
+function toSqlLiteral(v: unknown): string {
+  if (v === null || v === undefined) return "NULL";
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "NULL";
+  if (typeof v === "bigint") return v.toString();
+  if (typeof v === "boolean") return v ? "TRUE" : "FALSE";
+  if (v instanceof Date) return `CAST('${v.toISOString()}' AS TIMESTAMP)`;
+  return `'${String(v).replace(/'/g, "''")}'`;
+}
+
+/**
+ * Build a SQL view expression that reproduces an in-memory rows array as a
+ * SELECT statement. Used by diagnostic verbs (anomaly / drift / decompose /
+ * forecast) to materialize their result rows into a derived DataHandle that
+ * downstream verbs can `glyph_query` against. Bounded to small result sets;
+ * not a substitute for an engine-pushed transform.
+ */
+function buildValuesView(
+  rows: ReadonlyArray<ReadonlyArray<unknown>>,
+  columnNames: ReadonlyArray<string>,
+): string {
+  const cols = columnNames.map(quoteIdent).join(", ");
+  if (rows.length === 0) {
+    // Empty result: produce a typed-null SELECT that yields zero rows so
+    // the view's schema matches the requested columns.
+    const nulls = columnNames.map((n) => `NULL AS ${quoteIdent(n)}`).join(", ");
+    return `SELECT ${nulls} WHERE 1=0`;
+  }
+  const valuesClause = rows
+    .map((r) => `(${columnNames.map((_, i) => toSqlLiteral(r[i])).join(", ")})`)
+    .join(", ");
+  return `SELECT * FROM (VALUES ${valuesClause}) AS t(${cols})`;
+}
+
+/**
+ * Materialize an in-memory rows array as a derived DataHandle, chained to
+ * `parent` via the given `relation`. The MCP diagnostic verbs use this so
+ * their results become first-class queryable handles (with full lineage)
+ * just like a `glyph_render` output.
+ *
+ * The returned handle is identical in shape to one produced by
+ * `materializeSpec`: viewName is a fresh DuckDB temp table, the schema is
+ * probed from the engine, and the GDF metadata (uri, version, lineage,
+ * provenance, binding) is populated.
+ */
+export async function materializeRowsAsHandle(
+  engine: ComputeEngine,
+  args: {
+    readonly rows: ReadonlyArray<ReadonlyArray<unknown>>;
+    readonly columns: ReadonlyArray<string>;
+    readonly sessionId: string;
+    readonly parent: DataHandle;
+    readonly relation: LineageRelation;
+    readonly producerTool: string;
+    /** Human-readable sql summary stored in lineage.sql. */
+    readonly sqlPreview?: string | undefined;
+  },
+): Promise<DataHandle> {
+  const viewSql = buildValuesView(args.rows, args.columns);
+  // Probe DuckDB for the inferred column types — cheap (LIMIT 0).
+  const probe = await engine.query(`SELECT * FROM (${viewSql}) LIMIT 0`);
+  const schema: ReadonlyArray<ColumnInfo> = probe.columns;
+  const baseHandle = await engine.materialize(viewSql, schema);
+  const parentUri = args.parent.uri ?? `gdf://${args.sessionId}/${args.parent.id}`;
+  return enrichHandle(baseHandle, {
+    sessionId: args.sessionId,
+    sql: args.sqlPreview ?? viewSql,
+    producerTool: args.producerTool,
+    parents: [{ uri: parentUri, relation: args.relation }],
+    sampleRows: args.rows.length,
+    filteredOut: 0,
+  });
 }

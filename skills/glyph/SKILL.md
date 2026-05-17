@@ -25,9 +25,9 @@ Do **not** use Glyph for:
 - Real-time streaming charts (use Perspective)
 - Bespoke / one-off visualizations that don't fit a grammar (use D3 directly)
 
-## The fourteen tools
+## The eighteen tools
 
-Glyph's MCP surface (9 Phase 0/1 + 4 Phase 3 Tier A GDF verbs + 1 Phase 3 §2 explain verb):
+Glyph's MCP surface (9 Phase 0/1 + 4 Phase 3 Tier A GDF verbs + 1 explain verb + 4 diagnostic verbs):
 
 1. `glyph_describe` — inspect a data file before writing a spec
 2. `glyph_render` — compile + render a spec; returns SVG + PNG + handle
@@ -42,6 +42,10 @@ Glyph's MCP surface (9 Phase 0/1 + 4 Phase 3 Tier A GDF verbs + 1 Phase 3 §2 ex
 11. `glyph_lineage` — walk a handle's lineage tree
 12. `glyph_handles` — list every DataHandle in the session
 13. `glyph_explain` — deterministic plain-English chart explanation
+14. `glyph_anomaly` — rows beyond Nσ from segment mean (+ derived handle)
+15. `glyph_drift` — per-group contribution to a period-over-period delta
+16. `glyph_decompose` — rank factors by variance explained (one-way η²)
+17. `glyph_forecast` — seasonal-naive baseline + 2σ confidence bands
 0. `glyph_capabilities` — feature detection
 
 ### 0. `glyph_capabilities()` *(call once at session start)*
@@ -164,6 +168,32 @@ The four stages:
 Same chart + same Glyph version always yields the same explanation — useful for audit trails and snapshot-style eval pipelines. The `questions` array is the secret weapon for agent graphs: each entry is a ready-to-execute follow-up prompt for a diagnostician agent.
 
 Optional `hints` override the heuristic role inference (`{ xField, yField, groupField }`). Without hints, Glyph picks `y` = first quantitative column, `x` = first temporal-or-categorical column, `group` = the next categorical column.
+
+### Diagnostic primitives (verbs 14–17) — Phase 3 §3
+
+When the user asks **"why did this change?"** instead of **"what does this look like?"**, reach for these. Each diagnostic verb returns:
+
+- `rows` — the diagnostic rows (top-N or full)
+- `handle_id` + `uri` — a **derived DataHandle** with chained lineage. The result is queryable via `glyph_query` / `glyph_drill`, addressable via `gdf://`, and walkable via `glyph_lineage` back to the upstream chart.
+- `explanation` — the same `{ headline, highlights, questions }` shape as `glyph_explain`
+
+All four are deterministic: same rows + same Glyph version → same JSON.
+
+#### 14. `glyph_anomaly(handle_id, valueField, groupField?, threshold?, ...)`
+
+Z-score anomaly detection. Returns rows where `|z| > threshold` (default 2σ) from their segment mean. Pass `groupField` to bucket per-group (region/tier/etc.); without it, the global mean is used. The chained handle includes a `_z` column so downstream filters and renders see the score.
+
+#### 15. `glyph_drift(handle_id, valueField, groupField, periodField, periodA, periodB)`
+
+Per-group attribution of a period-over-period change. Periods are matched by string-comparing `periodField` values to `periodA` / `periodB` (single value or list). Each row carries `{ group, valueA, valueB, delta, share }` — shares sum to 1.0 when total delta ≠ 0.
+
+#### 16. `glyph_decompose(handle_id, metricField, factors[])`
+
+For each candidate factor (a column name), compute the fraction of total variance in `metricField` explained by between-group differences (one-way ANOVA's η²). Ranks factors by signal — a quick scan to point at "which dimension to look at first". Honest about scope: this is variance attribution, not full mix/rate/volume decomposition (that lands in a follow-up once we settle on the volume/rate input contract).
+
+#### 17. `glyph_forecast(handle_id, xField, yField, season?, horizon?)`
+
+Seasonal-naive forecast: `y_hat[t] = y[t-season]`. When `season=1` it's a one-step-back random walk. The ±2σ band is derived from historical residuals. Returns one row per historical point + `horizon` (default 7) trailing forecast-only rows; `isHorizon=true` marks the future. The explanation surfaces actuals that fell outside the band — those are the points to dig into next.
 
 ## Spec format (the wire format)
 

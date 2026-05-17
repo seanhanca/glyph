@@ -3,5 +3,5 @@
  */
 export { createDuckDBEngine } from "./engine.js";
 export type { DuckDBEngineOptions } from "./engine.js";
-export { materializeSpec } from "./materialize.js";
-export type { MaterializedSpec } from "./materialize.js";
+export { materializeSpec, materializeRowsAsHandle } from "./materialize.js";
+export type { MaterializedSpec, HandleResolver } from "./materialize.js";

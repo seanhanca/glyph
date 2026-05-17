@@ -11,7 +11,7 @@
 
 import { randomUUID } from "node:crypto";
 import type { ComputeEngine, DataHandle, QueryHandle } from "@glyph/core";
-import { createDuckDBEngine, materializeSpec } from "@glyph/duckdb";
+import { createDuckDBEngine, materializeRowsAsHandle, materializeSpec } from "@glyph/duckdb";
 import {
   type PreviewServer,
   type PreviewServerOptions,
@@ -115,4 +115,4 @@ export class ServerState {
   }
 }
 
-export { materializeSpec };
+export { materializeSpec, materializeRowsAsHandle };
