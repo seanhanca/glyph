@@ -531,6 +531,14 @@ export function compileSpec(input: CompileInput): Scene {
     ...(spec.title ? { title: spec.title } : {}),
     ...(sceneSchema ? { schema: sceneSchema } : {}),
     ...(legends.length > 0 ? { legends } : {}),
+    ...(spec.animation
+      ? {
+          animation: {
+            kind: spec.animation.kind,
+            duration_ms: spec.animation.duration_ms ?? 700,
+          },
+        }
+      : {}),
   };
 }
 

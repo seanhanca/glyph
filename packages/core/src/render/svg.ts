@@ -314,6 +314,14 @@ export function renderSvg(scene: Scene): string {
       )}</text>`
     : "";
   const hoverStyle = interactive ? HOVER_STYLE : "";
+  // PR43: opt-in entrance animation. Pure CSS @keyframes; the renderer
+  // tags the marks group with `glyph-stage` so the keyframe applies. Snapshot
+  // byte-identity is preserved when animation is unset (which is the
+  // default for every existing spec + every snapshot baseline).
+  const animationStyle =
+    scene.animation?.kind === "stage"
+      ? `<style>@keyframes glyph-stage{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}.glyph-stage{animation:glyph-stage ${scene.animation.duration_ms}ms ease-out both;transform-box:fill-box;transform-origin:center}</style>`
+      : "";
   const legends = (scene.legends ?? []).map(renderLegend).join("");
 
   // Faceted scene: render each panel; the top-level marks/axes/grid are
@@ -326,7 +334,14 @@ export function renderSvg(scene: Scene): string {
   // Grid sits behind marks; axes + legends in front.
   const grid = renderGrid(scene);
   const markStrs = scene.marks.map((m) => renderMark(m, interactive)).join("");
-  const marks = interactive ? `<g class="glyph-marks">${markStrs}</g>` : markStrs;
+  // PR43: when animation is set, wrap the marks group with the glyph-stage
+  // class so the @keyframes applies. Composes with the existing
+  // glyph-marks wrapper.
+  const animClass = scene.animation?.kind === "stage" ? " glyph-stage" : "";
+  const marks =
+    interactive || animClass
+      ? `<g class="glyph-marks${animClass}">${markStrs}</g>`
+      : markStrs;
   const axes = scene.axes.map(renderAxis).join("");
-  return `${head}${desc}${hoverStyle}${bg}${title}${grid}${marks}${axes}${legends}</svg>\n`;
+  return `${head}${desc}${hoverStyle}${animationStyle}${bg}${title}${grid}${marks}${axes}${legends}</svg>\n`;
 }

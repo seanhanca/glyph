@@ -176,4 +176,14 @@ export interface Scene {
    * its own absolute-coordinate marks + axes.
    */
   readonly panels?: ReadonlyArray<ScenePanel>;
+  /**
+   * Optional data-driven animation hint (PR43, v0). When set, the renderer
+   * emits a <style> block + applies the animation to the marks group.
+   *   - "stage": entrance fade-in for the whole chart.
+   * Future kinds (scrub, race) extend this union additively.
+   */
+  readonly animation?: {
+    readonly kind: "stage";
+    readonly duration_ms: number;
+  };
 }

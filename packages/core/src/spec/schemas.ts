@@ -316,6 +316,20 @@ export const GlyphSpecSchema = z
     actions: z.array(ActionSchema).optional(),
     /** Map projection — required when any layer uses a `geo-*` mark. */
     projection: ProjectionSchema.optional(),
+    /**
+     * Data-driven animation (PR43, v0). When set, the SVG carries a
+     * <style> block + keyframes that animate the marks. v0 supports
+     * "stage" (fade-in entrance) only. "scrub" (temporal slider) and
+     * "race" (rank animation) land in follow-ups.
+     */
+    animation: z
+      .object({
+        kind: z.literal("stage"),
+        /** Animation duration in ms. Default 700. */
+        duration_ms: z.number().int().min(0).max(60_000).optional(),
+      })
+      .strict()
+      .optional(),
   })
   .strict()
   .refine((spec) => spec.data !== undefined || spec.layers.every((l) => l.data !== undefined), {
