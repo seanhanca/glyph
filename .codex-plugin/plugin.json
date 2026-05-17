@@ -1,0 +1,20 @@
+{
+  "$schema": "https://openai.com/schemas/codex-plugin/v1.json",
+  "name": "glyph",
+  "version": "0.0.0",
+  "description": "A chart is a query is a chart. Grammar of graphics with DuckDB inside.",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/seanhanca/glyph",
+  "skills": [
+    {
+      "name": "glyph",
+      "path": "./skills/glyph/SKILL.md"
+    }
+  ],
+  "mcpServers": {
+    "glyph": {
+      "command": "npx",
+      "args": ["-y", "@glyph/mcp"]
+    }
+  }
+}
