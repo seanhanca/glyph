@@ -338,10 +338,12 @@ export async function materializeSpec(
     });
   }
 
-  // Geo viz — PR42. Detect a geo-point layer; project lat/lon → pixel space
-  // at the engine level + rewrite the layer to a plain `point` with
-  // identity-locked scales. The compiler then needs no awareness of geo.
-  if (isGeoMark(firstLayer.mark)) {
+  // Geo viz — PR42 / PR44. Two paths:
+  //   - geo-point: project lat/lon → pixel space at the engine level +
+  //     rewrite the layer to a plain `point` with identity-locked scales.
+  //   - geo-region: nothing to do here — the compiler builds path marks
+  //     directly from spec.geojson, no SQL transform needed.
+  if (firstLayer.mark === "geo-point") {
     const latField = fieldOfChannel(firstLayer.encoding.lat);
     const lonField = fieldOfChannel(firstLayer.encoding.lon);
     if (!latField || !lonField) {

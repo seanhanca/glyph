@@ -11,6 +11,7 @@
  *   - Default colors are picked deterministically from a small fixed palette.
  */
 
+import { type GeoFeature, buildGraticule, featureToPath, projector } from "../geo/index.js";
 import type {
   AxisTick,
   LegendEntry,
@@ -319,17 +320,26 @@ export function compileSpec(input: CompileInput): Scene {
   for (let i = 0; i < spec.layers.length; i++) {
     const l = spec.layers[i];
     if (!l) continue;
-    const allowedMarks = ["bar", "point", "line", "area", "rule"];
+    const allowedMarks = ["bar", "point", "line", "area", "rule", "geo-region"];
     if (!allowedMarks.includes(l.mark)) {
       throw new Error(`Phase 1 supports marks ${allowedMarks.join("|")}; layer ${i} has ${l.mark}`);
     }
-    // Rule mark is special: requires *either* x or y, not both, since
-    // it draws a perpendicular reference line at a single scale value.
     if (l.mark === "rule") {
       const hasX = fieldOf(l.encoding.x) !== undefined;
       const hasY = fieldOf(l.encoding.y) !== undefined;
       if (!hasX && !hasY) {
         throw new Error(`Layer ${i} (rule) requires either x or y encoding`);
+      }
+      continue;
+    }
+    // PR44: geo-region needs encoding.region (the join field) + spec.geojson.
+    // x/y are inferred from the projected polygons; no x/y encoding required.
+    if (l.mark === "geo-region") {
+      if (fieldOf(l.encoding.region) === undefined) {
+        throw new Error(`Layer ${i} (geo-region) requires encoding.region`);
+      }
+      if (!spec.geojson || !Array.isArray((spec.geojson as { features?: unknown }).features)) {
+        throw new Error(`Layer ${i} (geo-region) requires spec.geojson.features`);
       }
       continue;
     }
@@ -434,6 +444,11 @@ export function compileSpec(input: CompileInput): Scene {
       // Rule needs only one side; its y/x encoding may be missing.
       const ruleYScale = yField ? yScale : undefined;
       buildRules(marks, rows, schema, enc, xScale, ruleYScale, theme);
+      continue;
+    }
+    if (layer.mark === "geo-region") {
+      // PR44: project each GeoJSON feature, fill by color encoding.
+      buildGeoRegions(marks, spec, rows, schema, enc, theme);
       continue;
     }
     if (!yScale || !xField || !yField) continue;
@@ -872,6 +887,85 @@ function buildRules(
         strokeWidth: 1.5,
       });
     }
+  }
+}
+
+/**
+ * buildGeoRegions — choropleth mark (PR44).
+ *
+ * For each GeoJSON feature, finds the matching row (by joining
+ * feature.properties[idField] against the row's encoding.region field),
+ * projects the polygon to pixel-space SVG path d, and emits a path
+ * SceneMark with fill from encoding.color. Features with no matching row
+ * render with the theme's neutral grid color (the "no data" tone).
+ */
+function buildGeoRegions(
+  out: SceneMark[],
+  spec: GlyphSpec,
+  rows: ReadonlyArray<ReadonlyArray<unknown>>,
+  schema: ReadonlyArray<CompileFieldInfo>,
+  encoding: Encoding,
+  theme: Theme,
+): void {
+  const regionField = fieldOf(encoding.region);
+  if (!regionField) return;
+  const features = (spec.geojson?.features as ReadonlyArray<GeoFeature> | undefined) ?? [];
+  if (features.length === 0) return;
+  const idField =
+    typeof (spec.geojson as { idField?: unknown })?.idField === "string"
+      ? (spec.geojson as { idField: string }).idField
+      : "id";
+  const width = spec.width ?? DEFAULT_WIDTH;
+  const height = spec.height ?? DEFAULT_HEIGHT;
+  const project = projector(spec.projection, { width, height });
+
+  // Build row → value lookup keyed by the region field.
+  const regionIdx = schema.findIndex((c) => c.name === regionField);
+  if (regionIdx < 0) return;
+  const colorField = fieldOf(encoding.color);
+  const colorDomain = colorField ? distinctOrdered(rows, schema, colorField) : [];
+  const valueByRegion = new Map<string, ReadonlyArray<unknown>>();
+  for (const row of rows) {
+    const key = String(row[regionIdx] ?? "");
+    valueByRegion.set(key, row);
+  }
+
+  // Graticule is rendered first (so regions paint on top).
+  if (spec.graticule) {
+    const step =
+      typeof spec.graticule === "object" && spec.graticule !== null
+        ? ((spec.graticule as { step?: number }).step ?? 30)
+        : 30;
+    const grat = buildGraticule(project, { step });
+    for (const d of grat.paths) {
+      out.push({
+        type: "path",
+        d,
+        stroke: theme.grid,
+        strokeWidth: 0.5,
+        opacity: 0.6,
+      });
+    }
+  }
+
+  // Project each feature; fill by the matching row's color.
+  for (const feature of features) {
+    const featureId = String(
+      (feature.properties as Record<string, unknown> | undefined)?.[idField] ?? "",
+    );
+    const matchedRow = valueByRegion.get(featureId);
+    const fill = matchedRow
+      ? colorForRow(encoding, schema, matchedRow, colorDomain, theme)
+      : theme.grid;
+    const d = featureToPath(feature, project);
+    if (!d) continue;
+    out.push({
+      type: "path",
+      d,
+      fill,
+      stroke: theme.background,
+      strokeWidth: 0.75,
+    });
   }
 }
 

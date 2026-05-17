@@ -1,12 +1,20 @@
 /**
- * Tests for the geo projection helpers (PR42 — v0).
+ * Tests for the geo projection helpers (PR42 + PR44).
  */
 import { describe, expect, it } from "vitest";
-import { isGeoMark, projector } from "./index.js";
+import {
+  type GeoFeature,
+  buildGraticule,
+  featureToPath,
+  isGeoMark,
+  projector,
+  ringToPath,
+} from "./index.js";
 
 describe("isGeoMark", () => {
-  it("returns true for geo-point", () => {
+  it("returns true for geo-point and geo-region", () => {
     expect(isGeoMark("geo-point")).toBe(true);
+    expect(isGeoMark("geo-region")).toBe(true);
   });
   it("returns false for non-geo marks", () => {
     for (const m of ["bar", "line", "point", "area", "rule", "rect", "geo"]) {
@@ -71,5 +79,134 @@ describe("projector — defaults", () => {
     const [x, y] = project(0, 0);
     expect(x).toBe(180);
     expect(y).toBe(90);
+  });
+});
+
+describe("projector — naturalEarth (PR44)", () => {
+  it("maps (0,0) close to the frame center", () => {
+    const project = projector({ type: "naturalEarth" }, { width: 640, height: 400 });
+    const [x, y] = project(0, 0);
+    expect(x).toBeCloseTo(320, 1);
+    expect(y).toBeCloseTo(200, 1);
+  });
+  it("compresses near the poles (smaller |y-delta| than equirectangular)", () => {
+    const ne = projector({ type: "naturalEarth" }, { width: 640, height: 400 });
+    // |y(80°) - y(0°)| should be < |y(40°) - y(0°)| × 2 because of compression.
+    const [, y0] = ne(0, 0);
+    const [, y40] = ne(0, 40);
+    const [, y80] = ne(0, 80);
+    expect(Math.abs(y80 - y0)).toBeLessThan(2 * Math.abs(y40 - y0));
+  });
+});
+
+describe("projector — albersUsa (PR44)", () => {
+  it("maps the projection center (−98°, 38°) roughly to the frame center", () => {
+    const project = projector(
+      { type: "albersUsa", center: [-98, 38], scale: 100 },
+      { width: 640, height: 400 },
+    );
+    const [x, y] = project(-98, 38);
+    // Albers at the projection origin lands at (cx, cy + offset) — y can
+    // have a small offset due to rho0, but should be near center.
+    expect(x).toBeCloseTo(320, 0);
+    expect(y).toBeCloseTo(200, 0);
+  });
+  it("places NY (~-74, 40) to the right of LA (~-118, 34)", () => {
+    const project = projector({ type: "albersUsa", scale: 100 }, { width: 640, height: 400 });
+    const [xNY] = project(-74, 40);
+    const [xLA] = project(-118, 34);
+    expect(xNY).toBeGreaterThan(xLA);
+  });
+});
+
+describe("featureToPath (PR44)", () => {
+  const project = projector(undefined, { width: 360, height: 180 });
+
+  it("renders a single Polygon as a closed SVG path", () => {
+    const feature: GeoFeature = {
+      geometry: {
+        type: "Polygon",
+        coordinates: [
+          [
+            [0, 0],
+            [10, 0],
+            [10, 10],
+            [0, 10],
+            [0, 0],
+          ],
+        ],
+      },
+    };
+    const d = featureToPath(feature, project);
+    expect(d.startsWith("M")).toBe(true);
+    expect(d.endsWith("Z")).toBe(true);
+    // 5 vertices → 1 M + 4 L commands.
+    expect(d.match(/L/g)?.length).toBe(4);
+  });
+
+  it("renders a MultiPolygon as concatenated closed paths", () => {
+    const feature: GeoFeature = {
+      geometry: {
+        type: "MultiPolygon",
+        coordinates: [
+          [
+            [
+              [0, 0],
+              [5, 0],
+              [5, 5],
+              [0, 0],
+            ],
+          ],
+          [
+            [
+              [10, 10],
+              [15, 10],
+              [15, 15],
+              [10, 10],
+            ],
+          ],
+        ],
+      },
+    };
+    const d = featureToPath(feature, project);
+    // Two polygons → two M…Z subpaths.
+    expect(d.match(/M/g)?.length).toBe(2);
+    expect(d.match(/Z/g)?.length).toBe(2);
+  });
+
+  it("returns empty string for unknown geometry types (defensive)", () => {
+    const feature: GeoFeature = {
+      geometry: { type: "Point", coordinates: [0, 0] },
+    };
+    expect(featureToPath(feature, project)).toBe("");
+  });
+});
+
+describe("ringToPath (PR44)", () => {
+  it("emits the expected M + L sequence", () => {
+    const project = projector(undefined, { width: 360, height: 180 });
+    // identity in the equirectangular default at width=360
+    const ring: ReadonlyArray<readonly [number, number]> = [
+      [0, 0],
+      [10, 0],
+    ];
+    const d = ringToPath(ring, project);
+    expect(d).toMatch(/^M\d/);
+    expect(d).toContain("L");
+    expect(d.endsWith("Z")).toBe(true);
+  });
+});
+
+describe("buildGraticule (PR44)", () => {
+  it("emits 13 meridians + 5 parallels at step=30°", () => {
+    const project = projector(undefined, { width: 640, height: 400 });
+    const grat = buildGraticule(project, { step: 30 });
+    // Meridians: -180 to 180 step 30 = 13 lines.
+    // Parallels: -60 to 60 step 30 = 5 lines.
+    expect(grat.paths.length).toBe(18);
+    for (const p of grat.paths) {
+      expect(p.startsWith("M")).toBe(true);
+      expect(p.endsWith("Z")).toBe(false); // open paths
+    }
   });
 });

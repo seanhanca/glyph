@@ -46,6 +46,10 @@ export const MarkSchema = z.enum([
   // PR42 — geo viz primitives. `geo-point` plots lat/lon points through a
   // projection; the compiler translates to plain points after projection.
   "geo-point",
+  // PR44 — `geo-region` renders projected polygons from a GeoJSON feature
+  // collection; each region's fill is taken from the encoding (typically
+  // `color: { metric: ... }` or `color: "<value-field>"`).
+  "geo-region",
 ]);
 
 /**
@@ -57,7 +61,7 @@ export const MarkSchema = z.enum([
  */
 export const ProjectionSchema = z
   .object({
-    type: z.enum(["equirectangular", "mercator"]),
+    type: z.enum(["equirectangular", "mercator", "naturalEarth", "albersUsa"]),
     /** [lon, lat] center of the projection. Defaults to [0, 0]. */
     center: z.tuple([z.number(), z.number()]).optional(),
     /** Pixel scale per radian. Defaults to (chart width / (2π)) for equirectangular. */
@@ -143,6 +147,11 @@ export const EncodingSchema = z
     lat: ChannelSchema.optional(),
     /** Longitude column for `geo-*` marks (PR42). */
     lon: ChannelSchema.optional(),
+    /**
+     * Row field that joins to a GeoJSON feature's `properties[idField]`.
+     * Used by `geo-region` marks (PR44).
+     */
+    region: ChannelSchema.optional(),
   })
   .strict();
 
@@ -316,6 +325,31 @@ export const GlyphSpecSchema = z
     actions: z.array(ActionSchema).optional(),
     /** Map projection — required when any layer uses a `geo-*` mark. */
     projection: ProjectionSchema.optional(),
+    /**
+     * GeoJSON FeatureCollection used by `geo-region` marks. Each feature's
+     * `properties[idField]` (default: `id`) is matched against the layer's
+     * `encoding.region` field on the data rows.
+     *
+     * Stored as `unknown` because GeoJSON is recursively typed; the
+     * compiler validates shape lazily.
+     */
+    geojson: z
+      .object({
+        features: z.array(z.unknown()),
+        idField: z.string().optional(),
+      })
+      .passthrough()
+      .optional(),
+    /**
+     * When true, overlay a lat/lon graticule on geo charts. Optional grid
+     * step in degrees (default 30°).
+     */
+    graticule: z
+      .union([
+        z.boolean(),
+        z.object({ step: z.number().int().min(5).max(180).optional() }).strict(),
+      ])
+      .optional(),
     /**
      * Data-driven animation (PR43, v0). When set, the SVG carries a
      * <style> block + keyframes that animate the marks. v0 supports
