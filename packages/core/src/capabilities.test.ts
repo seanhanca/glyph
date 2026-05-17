@@ -21,7 +21,7 @@ describe("capabilities", () => {
   });
 
   it("reports the marks the Phase 1 compiler supports", () => {
-    expect(SUPPORTED_MARKS).toEqual(["bar", "point", "line"]);
+    expect(SUPPORTED_MARKS).toEqual(["bar", "point", "line", "area"]);
   });
 
   it("getCapabilities() returns a fully populated object", () => {

@@ -89,10 +89,10 @@ describe("compileSpec — multi-layer (PR14)", () => {
     expect(leftLabels).not.toBe(rightLabels);
   });
 
-  it("rejects a layer with a mark not yet supported in Phase 1 (area/rect)", () => {
+  it("rejects a layer with a mark not yet supported in Phase 1 (rect)", () => {
     const spec: GlyphSpec = {
       data: { source: "x" },
-      layers: [{ mark: "area", encoding: { x: "hour", y: "rides" } }],
+      layers: [{ mark: "rect", encoding: { x: "hour", y: "rides" } }],
     };
     expect(() => compileSpec({ spec, rows, schema })).toThrow(/Phase 1 supports marks/);
   });

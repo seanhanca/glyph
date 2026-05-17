@@ -106,9 +106,11 @@ describe("compileSpec — error cases", () => {
   it("rejects an unsupported mark", () => {
     const spec: GlyphSpec = {
       data: { source: "x" },
-      layers: [{ mark: "area", encoding: { x: "hour", y: "rides" } }],
+      layers: [{ mark: "rect", encoding: { x: "hour", y: "rides" } }],
     };
-    expect(() => compileSpec({ spec, rows, schema })).toThrow(/supports marks bar\|point\|line/);
+    expect(() => compileSpec({ spec, rows, schema })).toThrow(
+      /supports marks bar\|point\|line\|area/,
+    );
   });
 
   it("rejects when x or y is missing", () => {

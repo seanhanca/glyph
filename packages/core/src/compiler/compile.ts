@@ -239,8 +239,8 @@ export function compileSpec(input: CompileInput): Scene {
   for (let i = 0; i < spec.layers.length; i++) {
     const l = spec.layers[i];
     if (!l) continue;
-    if (l.mark !== "bar" && l.mark !== "point" && l.mark !== "line") {
-      throw new Error(`Phase 1 supports marks bar|point|line; layer ${i} has ${l.mark}`);
+    if (l.mark !== "bar" && l.mark !== "point" && l.mark !== "line" && l.mark !== "area") {
+      throw new Error(`Phase 1 supports marks bar|point|line|area; layer ${i} has ${l.mark}`);
     }
     if (fieldOf(l.encoding.x) === undefined || fieldOf(l.encoding.y) === undefined) {
       throw new Error(`Layer ${i} requires both x and y encodings`);
@@ -346,9 +346,11 @@ export function compileSpec(input: CompileInput): Scene {
       buildBars(marks, rows, schema, enc, xField, yField, xScale, yScale, theme, ctx);
     } else if (layer.mark === "point") {
       buildPoints(marks, rows, schema, enc, xField, yField, xScale, yScale, theme, ctx);
-    } else {
-      // line
+    } else if (layer.mark === "line") {
       buildLines(marks, rows, schema, enc, xField, yField, xScale, yScale, theme);
+    } else {
+      // area
+      buildAreas(marks, rows, schema, enc, xField, yField, xScale, yScale, theme);
     }
   }
 
@@ -574,6 +576,85 @@ function buildLines(
       stroke,
       strokeWidth: 1.5,
       fill: "none",
+    });
+  }
+}
+
+/**
+ * buildAreas — ported d3-shape `area()` math (PR20 in ROADMAP §C).
+ *
+ * Same point pipeline as `buildLines`, but each group's path is closed
+ * down to the y=0 baseline so the SVG fill encloses a shape:
+ *   "M x0 y0 L x1 y1 … L xN-1 yN-1 L xN-1 y0 L x0 y0 Z"
+ *
+ * Color groups + sorting follow `buildLines`. The fill uses the same
+ * positional palette as line strokes but at reduced opacity (0.55) so
+ * overlapping series remain readable. Stroke is drawn over the fill at
+ * full opacity for an explicit outline.
+ */
+function buildAreas(
+  out: SceneMark[],
+  rows: ReadonlyArray<ReadonlyArray<unknown>>,
+  schema: ReadonlyArray<CompileFieldInfo>,
+  encoding: Encoding,
+  xField: string,
+  yField: string,
+  xScale: ReturnType<typeof bandScale> | ReturnType<typeof linearScale>,
+  yScale: ReturnType<typeof linearScale>,
+  theme: Theme,
+): void {
+  const colorField = fieldOf(encoding.color);
+  const colorDomain = colorField ? distinctOrdered(rows, schema, colorField) : [""];
+  const baselinePx = yScale.apply(0);
+
+  const groups = new Map<string, Array<{ x: number; y: number }>>();
+  for (const r of rows) {
+    const xv = valueAt(r, schema, xField);
+    const yv = Number(valueAt(r, schema, yField));
+    if (!Number.isFinite(yv)) continue;
+    const xpx =
+      xScale.type === "linear"
+        ? xScale.apply(Number(xv))
+        : xScale.apply(xv == null ? "" : String(xv)) + xScale.bandwidth / 2;
+    if (!Number.isFinite(xpx)) continue;
+    const groupKey = colorField
+      ? (() => {
+          const cv = valueAt(r, schema, colorField);
+          return cv == null ? "" : String(cv);
+        })()
+      : "";
+    let pts = groups.get(groupKey);
+    if (!pts) {
+      pts = [];
+      groups.set(groupKey, pts);
+    }
+    pts.push({ x: roundPx(xpx), y: yScale.apply(yv) });
+  }
+
+  for (const [groupKey, pts] of groups) {
+    if (pts.length < 2) continue;
+    pts.sort((a, b) => a.x - b.x);
+    let d = `M ${pts[0]?.x} ${pts[0]?.y}`;
+    for (let i = 1; i < pts.length; i++) {
+      const p = pts[i];
+      if (!p) continue;
+      d += ` L ${p.x} ${p.y}`;
+    }
+    const last = pts[pts.length - 1];
+    const first = pts[0];
+    if (!last || !first) continue;
+    // Close down to baseline → back to start → Z.
+    d += ` L ${last.x} ${baselinePx} L ${first.x} ${baselinePx} Z`;
+
+    const idx = colorField ? Math.max(0, colorDomain.indexOf(groupKey)) : 0;
+    const color = theme.marks[idx % theme.marks.length] ?? "#000";
+    out.push({
+      type: "path",
+      d,
+      stroke: color,
+      strokeWidth: 1.5,
+      fill: color,
+      opacity: 0.55,
     });
   }
 }

@@ -89,7 +89,7 @@ describe("Glyph MCP server", () => {
     expect(caps.libraryVersion).toBeTypeOf("string");
     expect(caps.specVersions).toContain("glyph/0.1");
     expect(caps.defaultSpecVersion).toBe("glyph/0.1");
-    expect(caps.marks).toEqual(["bar", "point", "line"]);
+    expect(caps.marks).toEqual(["bar", "point", "line", "area"]);
     expect(caps.mcpTools.map((t: { name: string }) => t.name).sort()).toEqual([
       "glyph_await_interaction",
       "glyph_capabilities",
