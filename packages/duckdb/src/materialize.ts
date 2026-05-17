@@ -7,6 +7,7 @@
  * function produces.
  */
 
+import { applyStat, isStatError } from "@glyph/core";
 import type {
   ColumnInfo,
   ComputeEngine,
@@ -72,7 +73,18 @@ export async function materializeSpec(
     await engine.register(firstLayer.data, sourceName);
   }
 
-  const viewSql = buildLayerSql(spec.data, firstLayer.data, sourceName);
+  let viewSql = buildLayerSql(spec.data, firstLayer.data, sourceName);
+
+  // Apply the first layer's stat (count / sum / mean) by SQL rewrite before
+  // we materialize. Multi-layer specs with mixed stats are deferred — same
+  // limitation as per-layer data overrides.
+  if (firstLayer.stat) {
+    const stat = applyStat(firstLayer, viewSql);
+    if (isStatError(stat)) {
+      throw new Error(`Stat compilation failed: ${stat.message}`);
+    }
+    viewSql = stat.sql;
+  }
 
   // Run once to capture the schema for the handle. Cheap (LIMIT 0).
   const probeResult = await engine.query(`SELECT * FROM (${viewSql}) LIMIT 0`);

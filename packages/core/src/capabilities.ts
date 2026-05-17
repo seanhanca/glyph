@@ -19,7 +19,7 @@ export const SUPPORTED_MARKS = ["bar", "point", "line", "area"] as const;
 export type SupportedMark = (typeof SUPPORTED_MARKS)[number];
 
 /** Stats the current build can compile (SQL-rewritten before materialize). */
-export const SUPPORTED_STATS = [] as const;
+export const SUPPORTED_STATS = ["count", "sum", "mean"] as const;
 export type SupportedStat = (typeof SUPPORTED_STATS)[number];
 
 /** Renderers the current build provides. */

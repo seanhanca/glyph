@@ -6,6 +6,7 @@ import {
   SUPPORTED_MARKS,
   SUPPORTED_RENDERERS,
   SUPPORTED_SPEC_VERSIONS,
+  SUPPORTED_STATS,
   getCapabilities,
 } from "./index.js";
 
@@ -24,12 +25,17 @@ describe("capabilities", () => {
     expect(SUPPORTED_MARKS).toEqual(["bar", "point", "line", "area"]);
   });
 
+  it("reports the stats the Phase 1 compiler supports", () => {
+    expect(SUPPORTED_STATS).toEqual(["count", "sum", "mean"]);
+  });
+
   it("getCapabilities() returns a fully populated object", () => {
     const c = getCapabilities();
     expect(c.libraryVersion).toBe(LIBRARY_VERSION);
     expect(c.specVersions).toEqual(SUPPORTED_SPEC_VERSIONS);
     expect(c.defaultSpecVersion).toBe(DEFAULT_SPEC_VERSION);
     expect(c.marks).toEqual(SUPPORTED_MARKS);
+    expect(c.stats).toEqual(SUPPORTED_STATS);
     expect(c.renderers).toEqual(SUPPORTED_RENDERERS);
     expect(c.engines).toEqual(SUPPORTED_ENGINES);
     expect(c.mcpTools).toBeUndefined();
