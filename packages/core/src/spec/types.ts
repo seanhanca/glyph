@@ -73,12 +73,97 @@ export function defineTheme(config: ThemeConfig): ThemeConfig {
 }
 
 /**
- * A QueryHandle is returned alongside the rendered chart. It identifies the
- * materialized DuckDB view that backs the chart so the agent can issue
- * follow-up queries without re-uploading data.
+ * GDF protocol relation kinds — how one handle derives from another.
+ * See phase-3-agent-graph.md §8.2.
  */
-export interface QueryHandle {
-  readonly id: string;
-  readonly viewName: string;
-  readonly schema: ReadonlyArray<{ name: string; type: string }>;
+export type LineageRelation = "transform" | "filter" | "join" | "agg" | "source";
+
+/** Confidence tier for a handle's underlying data — Phase 3 §B4 trust signals. */
+export type DataConfidence = "high" | "medium" | "low";
+
+/** How the bytes are physically reached. The resolver picks the cheapest. */
+export type DataBindingKind = "duckdb-view" | "arrow-ipc" | "arrow-flight" | "parquet-uri";
+
+/** Lineage record on a DataHandle. */
+export interface DataLineage {
+  /** Direct parent handles + the relation that produced this child. */
+  readonly parents: ReadonlyArray<{ readonly uri: string; readonly relation: LineageRelation }>;
+  /** The SQL (or transform statement) that produced this handle. */
+  readonly sql: string;
+  /** Who produced this handle and when. */
+  readonly producer: {
+    readonly agent: string;
+    readonly tool: string;
+    readonly sessionId: string;
+    readonly at: string; // ISO timestamp
+  };
 }
+
+/** Trust signals attached to a DataHandle — Phase 3 §B4. */
+export interface DataProvenance {
+  /** ISO timestamp of the underlying read that backs this handle. */
+  readonly freshness: string;
+  /** How many rows were summarized into any aggregates (0 = unaggregated). */
+  readonly sampleRows: number;
+  /** Rows the transform dropped (e.g. via a filter / NULL exclusion). */
+  readonly filteredOut: number;
+  /** Coarse confidence tier — surfaced in glyph_explain. */
+  readonly confidence: DataConfidence;
+}
+
+/** Where the bytes are reachable from. */
+export interface DataBinding {
+  readonly kind: DataBindingKind;
+  readonly location: string;
+}
+
+/**
+ * A **DataHandle** — Phase 3 GDF protocol primitive. Identifies a queryable
+ * dataset by URI plus the metadata an agent (or another tool) needs to
+ * reason about, trust, and follow-up-query it.
+ *
+ * **Non-breaking promotion of `QueryHandle`.** Existing code that only
+ * reads `id` / `viewName` / `schema` continues to work — those three fields
+ * are still required. The GDF additions (`uri`, `version`, `lineage`,
+ * `provenance`, `binding`, `subscribable`) are present-when-known and
+ * unobserved by older callers.
+ *
+ * The same value is also exported as `QueryHandle` (type alias) so existing
+ * imports keep compiling.
+ */
+export interface DataHandle {
+  // ---- Phase 0 / Phase 1 fields (required, stable) -----------------------
+  /** Unique within a session. Used as the local handle key. */
+  readonly id: string;
+  /** Engine-side view name; the source of truth for `SELECT * FROM <view>`. */
+  readonly viewName: string;
+  /** Column schema; the `suggested` + `nullable` keys are added in Phase 3. */
+  readonly schema: ReadonlyArray<{
+    readonly name: string;
+    readonly type: string;
+    readonly nullable?: boolean;
+    readonly suggested?: "quantitative" | "ordinal" | "nominal" | "temporal";
+  }>;
+
+  // ---- Phase 3 GDF fields (optional during transition) -------------------
+  /** Globally addressable URI: gdf://<sessionId>/<id>. */
+  readonly uri?: string;
+  /** Monotonic version; bumps when the underlying data changes. */
+  readonly version?: number;
+  /** Lineage chain — where this handle came from. */
+  readonly lineage?: DataLineage;
+  /** Trust signals — freshness + sample size + confidence tier. */
+  readonly provenance?: DataProvenance;
+  /** Where the bytes are reachable. */
+  readonly binding?: DataBinding;
+  /** True if this handle supports push notifications via subscriptionUri. */
+  readonly subscribable?: boolean;
+  /** Optional URI for change subscriptions (Tier B+). */
+  readonly subscriptionUri?: string;
+}
+
+/**
+ * Back-compat alias. Pre-Phase-3 code that imports `QueryHandle` continues
+ * to compile — the type now permits the additional GDF metadata fields.
+ */
+export type QueryHandle = DataHandle;
