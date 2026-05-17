@@ -171,6 +171,52 @@ export function glyphLive(svg: SVGElement | Element, _options: GlyphLiveOptions 
     return off;
   }
 
+  /**
+   * Keyboard navigation (PR23 — accessibility).
+   *
+   * Enter / Space on a focused mark → fire the registered click handler.
+   * ArrowLeft / ArrowRight  → move focus to the previous / next mark in
+   * the marks group. Wraps at the boundaries.
+   *
+   * Marks must already carry `tabindex="0"`; the SVG renderer emits this
+   * for every interactive mark.
+   */
+  function bindKeyboard(clickHandler: (binding: MarkBinding) => void): () => void {
+    const onKey = (e: Event): void => {
+      const ke = e as KeyboardEvent;
+      const t = ke.target;
+      if (!(t instanceof Element)) return;
+      const m = t.closest(".glyph-marks > *");
+      if (!m || !marksGroup?.contains(m)) return;
+
+      if (ke.key === "Enter" || ke.key === " ") {
+        ke.preventDefault();
+        clickHandler(readBinding(m));
+        return;
+      }
+      if (ke.key === "ArrowRight" || ke.key === "ArrowLeft") {
+        ke.preventDefault();
+        const idx = markElements.indexOf(m);
+        if (idx === -1) return;
+        const step = ke.key === "ArrowRight" ? 1 : -1;
+        const nextIdx = (idx + step + markElements.length) % markElements.length;
+        const next = markElements[nextIdx];
+        if (next && next instanceof HTMLElement) next.focus();
+        else if (
+          next &&
+          "focus" in next &&
+          typeof (next as { focus?: unknown }).focus === "function"
+        ) {
+          (next as { focus: () => void }).focus();
+        }
+      }
+    };
+    svg.addEventListener("keydown", onKey);
+    const off = (): void => svg.removeEventListener("keydown", onKey);
+    disposers.push(off);
+    return off;
+  }
+
   // ---- Brush (1-D drag selection) ---------------------------------------
   function bindBrush(
     channel: "x" | "y",
@@ -275,7 +321,14 @@ export function glyphLive(svg: SVGElement | Element, _options: GlyphLiveOptions 
     fields,
     handleId,
     onClick(handler) {
-      return delegated("click", handler);
+      // Click via mouse + keyboard. Keyboard (Enter/Space) fires the same
+      // handler so screen-reader users get parity with mouse users.
+      const offMouse = delegated("click", handler);
+      const offKey = bindKeyboard(handler);
+      return () => {
+        offMouse();
+        offKey();
+      };
     },
     onHover(handler) {
       return delegated("mouseenter", handler);

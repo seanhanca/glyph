@@ -63,6 +63,12 @@ function renderDataAttrs(d: MarkData): string {
   return out;
 }
 
+/** ARIA attributes for an interactive mark (reuses tooltip text as the label). */
+function ariaForMark(m: { readonly tooltip?: string }): string {
+  if (!m.tooltip) return ` role="button" tabindex="0"`;
+  return ` role="button" tabindex="0" aria-label="${esc(m.tooltip)}"`;
+}
+
 function renderMark(m: SceneMark, interactive: boolean): string {
   switch (m.type) {
     case "rect": {
@@ -74,16 +80,16 @@ function renderMark(m: SceneMark, interactive: boolean): string {
         )}"${stroke}${sw}/>`;
       }
       const data = renderDataAttrs(m);
+      const aria = ariaForMark(m);
       const tooltip = m.tooltip ? `<title>${esc(m.tooltip)}</title>` : "";
       if (tooltip) {
-        // <rect> with a child <title> must use an opening + closing tag.
         return `<rect x="${m.x}" y="${m.y}" width="${m.width}" height="${m.height}" fill="${esc(
           m.fill,
-        )}"${stroke}${sw}${data}>${tooltip}</rect>`;
+        )}"${stroke}${sw}${data}${aria}>${tooltip}</rect>`;
       }
       return `<rect x="${m.x}" y="${m.y}" width="${m.width}" height="${m.height}" fill="${esc(
         m.fill,
-      )}"${stroke}${sw}${data}/>`;
+      )}"${stroke}${sw}${data}${aria}/>`;
     }
     case "circle": {
       const stroke = m.stroke ? ` stroke="${esc(m.stroke)}"` : "";
@@ -92,11 +98,12 @@ function renderMark(m: SceneMark, interactive: boolean): string {
         return `<circle cx="${m.cx}" cy="${m.cy}" r="${m.r}" fill="${esc(m.fill)}"${stroke}${sw}/>`;
       }
       const data = renderDataAttrs(m);
+      const aria = ariaForMark(m);
       const tooltip = m.tooltip ? `<title>${esc(m.tooltip)}</title>` : "";
       if (tooltip) {
-        return `<circle cx="${m.cx}" cy="${m.cy}" r="${m.r}" fill="${esc(m.fill)}"${stroke}${sw}${data}>${tooltip}</circle>`;
+        return `<circle cx="${m.cx}" cy="${m.cy}" r="${m.r}" fill="${esc(m.fill)}"${stroke}${sw}${data}${aria}>${tooltip}</circle>`;
       }
-      return `<circle cx="${m.cx}" cy="${m.cy}" r="${m.r}" fill="${esc(m.fill)}"${stroke}${sw}${data}/>`;
+      return `<circle cx="${m.cx}" cy="${m.cy}" r="${m.r}" fill="${esc(m.fill)}"${stroke}${sw}${data}${aria}/>`;
     }
     case "line":
       return `<line x1="${m.x1}" y1="${m.y1}" x2="${m.x2}" y2="${m.y2}" stroke="${esc(
@@ -270,7 +277,15 @@ function renderSceneAttrs(scene: Scene): string {
 export function renderSvg(scene: Scene): string {
   const interactive = scene.schema !== undefined;
   const rootAttrs = renderSceneAttrs(scene);
-  const head = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${scene.width} ${scene.height}" width="${scene.width}" height="${scene.height}"${rootAttrs}>`;
+  // ARIA — SVG is an image with a title + description. Screen readers
+  // announce these. Without an aria-label, NVDA / VoiceOver treat the
+  // whole SVG as anonymous.
+  const ariaLabel = scene.title ? ` aria-label="${esc(scene.title)}"` : ` aria-label="Glyph chart"`;
+  const ariaRole = ` role="img"`;
+  const ariaDesribedBy = ` aria-describedby="glyph-desc"`;
+  const head = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${scene.width} ${scene.height}" width="${scene.width}" height="${scene.height}"${ariaRole}${ariaLabel}${ariaDesribedBy}${rootAttrs}>`;
+  // Hidden <desc> for screen-reader-only description.
+  const desc = `<desc id="glyph-desc">${esc(scene.title ?? "Glyph chart")}</desc>`;
   const bg = `<rect x="0" y="0" width="${scene.width}" height="${scene.height}" fill="${esc(scene.background)}"/>`;
   const title = scene.title
     ? `<text x="${scene.width / 2}" y="16" font-family="${FONT_FAMILY}" font-size="14" fill="#1a1a1a" text-anchor="middle" dominant-baseline="middle">${esc(
@@ -284,5 +299,5 @@ export function renderSvg(scene: Scene): string {
   const hoverStyle = interactive ? HOVER_STYLE : "";
   const axes = scene.axes.map(renderAxis).join("");
   const legends = (scene.legends ?? []).map(renderLegend).join("");
-  return `${head}${hoverStyle}${bg}${title}${grid}${marks}${axes}${legends}</svg>\n`;
+  return `${head}${desc}${hoverStyle}${bg}${title}${grid}${marks}${axes}${legends}</svg>\n`;
 }

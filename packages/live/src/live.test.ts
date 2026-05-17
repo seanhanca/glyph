@@ -79,6 +79,66 @@ describe("@glyph/live — click handler", () => {
   });
 });
 
+describe("@glyph/live — keyboard navigation (PR23)", () => {
+  function svgWithTabindex(): string {
+    return `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" width="600" height="400"
+     data-x-field="pickup_hour" data-y-field="rides">
+  <g class="glyph-marks">
+    <rect tabindex="0" role="button" data-key="0" data-row="0" data-x="7" data-y="210"/>
+    <rect tabindex="0" role="button" data-key="1" data-row="1" data-x="8" data-y="260"/>
+    <rect tabindex="0" role="button" data-key="2" data-row="2" data-x="9" data-y="180"/>
+  </g>
+</svg>
+`;
+  }
+
+  it("Enter on a focused mark fires the click handler", () => {
+    const live = glyphLive(mountSvg(svgWithTabindex()));
+    const seen: MarkBinding[] = [];
+    live.onClick((b) => seen.push(b));
+
+    const firstBar = document.querySelector(".glyph-marks > rect:nth-child(1)");
+    firstBar?.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    expect(seen).toHaveLength(1);
+    expect(seen[0]?.row).toBe(0);
+  });
+
+  it("Space on a focused mark also fires the click handler", () => {
+    const live = glyphLive(mountSvg(svgWithTabindex()));
+    const seen: MarkBinding[] = [];
+    live.onClick((b) => seen.push(b));
+
+    const secondBar = document.querySelector(".glyph-marks > rect:nth-child(2)");
+    secondBar?.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
+    expect(seen).toHaveLength(1);
+    expect(seen[0]?.row).toBe(1);
+  });
+
+  it("ignores other keys (no spurious clicks)", () => {
+    const live = glyphLive(mountSvg(svgWithTabindex()));
+    const seen: MarkBinding[] = [];
+    live.onClick((b) => seen.push(b));
+
+    const bar = document.querySelector(".glyph-marks > rect:nth-child(1)");
+    bar?.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", bubbles: true }));
+    bar?.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    expect(seen).toHaveLength(0);
+  });
+
+  it("dispose() removes the keyboard listener too", () => {
+    const live = glyphLive(mountSvg(svgWithTabindex()));
+    const seen: MarkBinding[] = [];
+    live.onClick((b) => seen.push(b));
+    live.dispose();
+
+    document
+      .querySelector(".glyph-marks > rect")
+      ?.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    expect(seen).toHaveLength(0);
+  });
+});
+
 describe("@glyph/live — whereFor()", () => {
   it("builds a single-channel WHERE clause for x by default", () => {
     const live = glyphLive(mountSvg(SAMPLE_SVG));
