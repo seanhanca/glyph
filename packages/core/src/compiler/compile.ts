@@ -36,6 +36,8 @@ interface MarkCtx {
   readonly xField: string;
   readonly yField: string;
   readonly colorField: string | undefined;
+  /** Spec-driven tooltip override (encoding.tooltip), if set. */
+  readonly tooltip: Encoding["tooltip"];
 }
 
 /** Coerce any cell value to a stable string for data attributes. */
@@ -43,6 +45,51 @@ function attrValue(v: unknown): string {
   if (v === null || v === undefined) return "";
   if (typeof v === "bigint") return String(v);
   return String(v);
+}
+
+/** Build the tooltip text. Honors `encoding.tooltip` when set; otherwise
+ *  falls back to the default "x: <v> · y: <v> [· color: <v>]" form. */
+function buildTooltipText(
+  ctx: MarkCtx,
+  row: ReadonlyArray<unknown>,
+  schema: ReadonlyArray<CompileFieldInfo>,
+  xVal: string,
+  yVal: string,
+  colorVal: string | undefined,
+): string {
+  const tt = ctx.tooltip;
+  if (tt === undefined) {
+    const parts = [`${ctx.xField}: ${xVal}`, `${ctx.yField}: ${yVal}`];
+    if (ctx.colorField && colorVal !== undefined) {
+      parts.push(`${ctx.colorField}: ${colorVal}`);
+    }
+    return parts.join(" · ");
+  }
+
+  // Helper: render one channel as "<label>: <value>".
+  const oneChannel = (ch: Encoding["x"]): string => {
+    if (ch === undefined) return "";
+    if (typeof ch === "string") {
+      const v = attrValue(valueAt(row, schema, ch));
+      return `${ch}: ${v}`;
+    }
+    const label = ch.title ?? ch.field;
+    const v = attrValue(valueAt(row, schema, ch.field));
+    return `${label}: ${v}`;
+  };
+
+  if (typeof tt === "string") {
+    // Bare field-name string → just the value (no label prefix).
+    return attrValue(valueAt(row, schema, tt));
+  }
+  if (Array.isArray(tt)) {
+    return tt
+      .map(oneChannel)
+      .filter((s) => s.length > 0)
+      .join(" · ");
+  }
+  // Single channel object.
+  return oneChannel(tt);
 }
 
 /** Build optional MarkData for a row. Returns an empty object when off. */
@@ -60,20 +107,15 @@ function markDataFor(
     x: xVal,
     y: yVal,
   };
+  let colorVal: string | undefined;
   if (ctx.colorField) {
-    dataAttrs.color = attrValue(valueAt(row, schema, ctx.colorField));
+    colorVal = attrValue(valueAt(row, schema, ctx.colorField));
+    dataAttrs.color = colorVal;
   }
   const keyField = ctx.interactive.key;
   const key = keyField ? attrValue(valueAt(row, schema, keyField)) : String(rowIndex);
 
-  // Native SVG <title> tooltip — zero JS, deterministic. Stolen from D3.
-  // Example: "pickup_hour: 7 · rides: 210"
-  const tooltipParts = [`${ctx.xField}: ${xVal}`, `${ctx.yField}: ${yVal}`];
-  if (ctx.colorField) {
-    tooltipParts.push(`${ctx.colorField}: ${dataAttrs.color}`);
-  }
-  const tooltip = tooltipParts.join(" · ");
-
+  const tooltip = buildTooltipText(ctx, row, schema, xVal, yVal, colorVal);
   return { key, dataAttrs, tooltip };
 }
 
@@ -364,6 +406,7 @@ export function compileSpec(input: CompileInput): Scene {
       xField,
       yField,
       colorField: fieldOf(enc.color),
+      tooltip: enc.tooltip,
     };
     if (layer.mark === "bar") {
       if (xScale.type !== "band") {
