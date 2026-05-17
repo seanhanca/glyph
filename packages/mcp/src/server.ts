@@ -1,7 +1,7 @@
 /**
  * Glyph MCP server.
  *
- * Twenty-four tools — the library surface:
+ * Twenty-seven tools — the library surface:
  *   Phase 0/1 (9):
  *     - glyph_capabilities()              → feature detection
  *     - glyph_describe(source)            → schema + suggested encodings
@@ -32,6 +32,11 @@
  *     - glyph_memory_recall(name)         → restore as a fresh handle
  *     - glyph_memory_list(prefix?)        → list persisted names
  *     - glyph_memory_forget(name)         → drop a persisted entry
+ *   Phase 3 §4 (2, PR40):
+ *     - glyph_act(handle, name, sel?)     → resolve + dry-run a spec action
+ *     - glyph_audit_log(handle?, limit?)  → read the action audit log
+ *   Phase 3 §7 (1, PR40):
+ *     - glyph_trust(handle)               → freshness + confidence summary
  *
  * Each diagnostic verb returns { handle_id, rows, explanation } — the new
  * handle_id is a derived DataHandle with chained lineage so the result is
@@ -41,6 +46,7 @@
  * agent burns minimal context on the API surface itself.
  */
 
+import { randomUUID } from "node:crypto";
 import {
   attributeDrift,
   compileSpec,
@@ -55,7 +61,11 @@ import {
   validateMetric,
   vegaLiteToGlyph,
 } from "@glyph/core";
-import type { MetricDefinition } from "@glyph/core";
+import type { DataHandle, MetricDefinition } from "@glyph/core";
+
+function randomActionId(): string {
+  return randomUUID().replace(/-/g, "").slice(0, 16);
+}
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { Resvg } from "@resvg/resvg-js";
 import { z } from "zod";
@@ -96,6 +106,11 @@ const MCP_TOOLS = [
   { name: "glyph_memory_recall", since: "0.0.7" },
   { name: "glyph_memory_list", since: "0.0.7" },
   { name: "glyph_memory_forget", since: "0.0.7" },
+  // ---- Phase 3 §4: action surfaces (PR40) ------------------------------
+  { name: "glyph_act", since: "0.0.8" },
+  { name: "glyph_audit_log", since: "0.0.8" },
+  // ---- Phase 3 §7: trust signals (PR40) --------------------------------
+  { name: "glyph_trust", since: "0.0.8" },
 ] as const;
 
 /** Best-effort browser launcher. Returns true on success. */
@@ -277,6 +292,10 @@ export function createServer(state: ServerState = new ServerState()): {
           };
         }
         state.storeHandle(m.handle);
+        // Record the spec's declarative actions so glyph_act can resolve them.
+        if (parsed.spec.actions && parsed.spec.actions.length > 0) {
+          state.setActionsForHandle(m.handle.id, parsed.spec.actions);
+        }
         const scene = compileSpec({
           // Use the materializer's effectiveSpec — for metric channels this
           // has `{ metric: <name> }` rewritten to `{ field: _metric_<name> }`
@@ -1486,6 +1505,238 @@ export function createServer(state: ServerState = new ServerState()): {
         const ok = await state.memory.forget(engine, name);
         return {
           content: [{ type: "text" as const, text: JSON.stringify({ forgotten: ok }, null, 2) }],
+        };
+      }),
+  );
+
+  // ====== Phase 3 §4 action surfaces (PR40) ===============================
+  //
+  // Declarative actions are attached to a spec via `actions: [{name, label,
+  // tool?, argMap?}]`. glyph_act looks the action up by name, substitutes
+  // selection placeholders, and writes an audit row to
+  // `gmem.__glyph_audit`. v0 is dry-run-only — external tool dispatch is
+  // a later PR; agents currently consume the resolved plan and invoke
+  // tools themselves via the host MCP plane.
+
+  /** Resolve $selection.* placeholders in a value tree. */
+  function resolveSelectionPlaceholders(
+    value: unknown,
+    selection: {
+      readonly keys: ReadonlyArray<unknown>;
+      readonly count: number;
+      readonly summary: string;
+    },
+  ): unknown {
+    if (value === null || value === undefined) return value;
+    if (typeof value === "string") {
+      if (value === "$selection.keys") return selection.keys;
+      if (value === "$selection.count") return selection.count;
+      if (value === "$selection.summary") return selection.summary;
+      return value;
+    }
+    if (Array.isArray(value)) {
+      return value.map((v) => resolveSelectionPlaceholders(v, selection));
+    }
+    if (typeof value === "object") {
+      const out: Record<string, unknown> = {};
+      for (const [k, v] of Object.entries(value)) {
+        out[k] = resolveSelectionPlaceholders(v, selection);
+      }
+      return out;
+    }
+    return value;
+  }
+
+  server.registerTool(
+    "glyph_act",
+    {
+      title: "Dry-run a declarative spec action",
+      description:
+        "Resolve an action declared in the spec that produced `handle_id`. Substitutes `$selection.keys / .count / .summary` in the action's argMap from the supplied selection. v0 is dry-run-only — the resolved plan is written to ~/.glyph/memory.duckdb's audit table and returned. External MCP tool dispatch lands in a follow-up.",
+      inputSchema: {
+        handle_id: z.string().describe("Handle from glyph_render."),
+        action: z.string().min(1).describe("The action's `name`."),
+        selection: z
+          .object({
+            keys: z.array(z.union([z.string(), z.number()])).optional(),
+            summary: z.string().optional(),
+          })
+          .strict()
+          .optional()
+          .describe("Selection context for $selection.* substitution."),
+        dry_run: z
+          .boolean()
+          .optional()
+          .describe("Default true. v0 ignores `false` — external dispatch is a follow-up."),
+      },
+    },
+    async ({ handle_id, action, selection, dry_run }) =>
+      state.serial(async () => {
+        const handle = state.getHandle(handle_id);
+        if (!handle) {
+          return {
+            isError: true,
+            content: [{ type: "text" as const, text: `Unknown handle_id: ${handle_id}` }],
+          };
+        }
+        const def = state.getAction(handle_id, action);
+        if (!def) {
+          const known = state.actionsFor(handle_id).map((a) => a.name);
+          return {
+            isError: true,
+            content: [
+              {
+                type: "text" as const,
+                text: `Unknown action "${action}" on this handle. Known: [${known.join(", ") || "<none>"}]`,
+              },
+            ],
+          };
+        }
+        const sel = {
+          keys: selection?.keys ?? [],
+          count: selection?.keys?.length ?? 0,
+          summary: selection?.summary ?? "",
+        };
+        const resolvedArgs =
+          def.argMap !== undefined ? resolveSelectionPlaceholders(def.argMap, sel) : {};
+        const id = randomActionId();
+        const isDry = dry_run !== false; // v0: dry-run is the only mode
+        try {
+          const engine = await state.getEngine();
+          await state.memory.logAction(engine, {
+            id,
+            handleId: handle_id,
+            actionName: action,
+            tool: def.tool,
+            resolvedArgs,
+            dryRun: isDry,
+          });
+        } catch (err) {
+          return {
+            isError: true,
+            content: [{ type: "text" as const, text: (err as Error).message ?? String(err) }],
+          };
+        }
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: JSON.stringify(
+                {
+                  audit_id: id,
+                  action: def.name,
+                  label: def.label,
+                  tool: def.tool ?? null,
+                  resolvedArgs,
+                  dry_run: isDry,
+                  description: def.description ?? null,
+                },
+                null,
+                2,
+              ),
+            },
+          ],
+        };
+      }),
+  );
+
+  server.registerTool(
+    "glyph_audit_log",
+    {
+      title: "Read the glyph_act audit log",
+      description:
+        "Return recent rows from `gmem.__glyph_audit` — the persistent log of every glyph_act invocation. Filter by `handle_id` and cap at `limit` (default 50, newest first).",
+      inputSchema: {
+        handle_id: z.string().optional().describe("Filter to one handle's audit rows."),
+        limit: z.number().int().min(1).max(500).optional(),
+      },
+    },
+    async ({ handle_id, limit }) =>
+      state.serial(async () => {
+        const engine = await state.getEngine();
+        const rows = await state.memory.listAudit(engine, {
+          handleId: handle_id,
+          limit,
+        });
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: JSON.stringify({ count: rows.length, entries: rows }, null, 2),
+            },
+          ],
+        };
+      }),
+  );
+
+  // ====== Phase 3 §7 trust signals (PR40) =================================
+  //
+  // v0 is a metadata-only verb — returns the handle's provenance + a derived
+  // confidence flag + a small markdown summary the narrator agent can paste
+  // straight into a deliverable. The per-mark hatched fill + <glyph-trust>
+  // overlay lands once we ship the trust-aware renderer.
+
+  server.registerTool(
+    "glyph_trust",
+    {
+      title: "Read trust signals for a handle",
+      description:
+        "Return freshness, sample size, confidence tier, lineage depth, and a one-line markdown summary the narrator can embed. Use this before forwarding a chart to a non-analyst stakeholder — answers 'is this fresh?' and 'how was it computed?'.",
+      inputSchema: {
+        handle_id: z.string().describe("Handle from glyph_render."),
+      },
+    },
+    async ({ handle_id }) =>
+      state.serial(async () => {
+        const handle = state.getHandle(handle_id);
+        if (!handle) {
+          return {
+            isError: true,
+            content: [{ type: "text" as const, text: `Unknown handle_id: ${handle_id}` }],
+          };
+        }
+        const sampleRows = handle.provenance?.sampleRows ?? 0;
+        const confidence = handle.provenance?.confidence ?? "low";
+        const freshness = handle.provenance?.freshness ?? "unknown";
+        const filteredOut = handle.provenance?.filteredOut ?? 0;
+        const lowSample = sampleRows > 0 && sampleRows < 30;
+        // Walk lineage depth (1 = root). Bounded so we never loop on cycles.
+        let depth = 1;
+        let cur: DataHandle | undefined = handle;
+        const visited = new Set<string>();
+        while (cur?.lineage?.parents && cur.lineage.parents.length > 0 && depth < 16) {
+          const next = cur.lineage.parents[0]?.uri;
+          if (!next || visited.has(next)) break;
+          visited.add(next);
+          cur = state.getHandleByUri(next);
+          depth++;
+        }
+        const summaryParts = [
+          `**Sample size**: ${sampleRows}${lowSample ? " ⚠️ low" : ""}`,
+          `**Confidence**: ${confidence}`,
+          `**Freshness**: ${freshness}`,
+          `**Lineage depth**: ${depth} step(s)`,
+        ];
+        if (filteredOut > 0) summaryParts.push(`**Filtered out**: ${filteredOut} row(s)`);
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: JSON.stringify(
+                {
+                  sampleRows,
+                  confidence,
+                  freshness,
+                  filteredOut,
+                  lowSample,
+                  lineageDepth: depth,
+                  markdown: summaryParts.join(" · "),
+                },
+                null,
+                2,
+              ),
+            },
+          ],
         };
       }),
   );

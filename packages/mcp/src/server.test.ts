@@ -76,11 +76,13 @@ describe("Glyph MCP server", () => {
     rmSync(tempMemoryDir, { recursive: true, force: true });
   });
 
-  it("lists the twenty-four tools", async () => {
+  it("lists the twenty-seven tools", async () => {
     const r = await client.listTools();
     const names = r.tools.map((t) => t.name).sort();
     expect(names).toEqual([
+      "glyph_act",
       "glyph_anomaly",
+      "glyph_audit_log",
       "glyph_await_interaction",
       "glyph_capabilities",
       "glyph_close_preview",
@@ -104,6 +106,7 @@ describe("Glyph MCP server", () => {
       "glyph_query",
       "glyph_render",
       "glyph_subscribe",
+      "glyph_trust",
     ]);
   });
 
@@ -116,7 +119,9 @@ describe("Glyph MCP server", () => {
     expect(caps.defaultSpecVersion).toBe("glyph/0.1");
     expect(caps.marks).toEqual(["bar", "point", "line", "area"]);
     expect(caps.mcpTools.map((t: { name: string }) => t.name).sort()).toEqual([
+      "glyph_act",
       "glyph_anomaly",
+      "glyph_audit_log",
       "glyph_await_interaction",
       "glyph_capabilities",
       "glyph_close_preview",
@@ -140,6 +145,7 @@ describe("Glyph MCP server", () => {
       "glyph_query",
       "glyph_render",
       "glyph_subscribe",
+      "glyph_trust",
     ]);
   });
 
@@ -1158,6 +1164,109 @@ describe("Glyph MCP server", () => {
       });
       expect(r.isError).toBe(true);
       expect(r.text).toContain("Unknown handle_id");
+    });
+  });
+
+  // ---- Phase 3 §4 + §7: actions + trust (PR40) ---------------------------
+  describe("actions + trust (PR40 — Phase 3 §4 + §7)", () => {
+    async function renderWithActions(): Promise<string> {
+      const r = await callText(client, "glyph_render", {
+        spec: {
+          data: { source: fixture, format: "csv" },
+          layers: [{ mark: "bar", encoding: { x: "pickup_hour", y: "rides" } }],
+          actions: [
+            {
+              name: "email_team",
+              label: "Email risk team",
+              tool: "intercom_send_email",
+              argMap: {
+                template: "risk-alert",
+                customer_ids: "$selection.keys",
+                summary: "$selection.summary",
+              },
+            },
+          ],
+        },
+      });
+      return JSON.parse(r.text).handle_id as string;
+    }
+
+    it("glyph_act resolves $selection.* placeholders and writes an audit row", async () => {
+      const handle_id = await renderWithActions();
+      const r = await callText(client, "glyph_act", {
+        handle_id,
+        action: "email_team",
+        selection: { keys: ["c1", "c2", "c3"], summary: "3 customers flagged" },
+      });
+      expect(r.isError).toBe(false);
+      const out = JSON.parse(r.text);
+      expect(out.action).toBe("email_team");
+      expect(out.tool).toBe("intercom_send_email");
+      expect(out.resolvedArgs.customer_ids).toEqual(["c1", "c2", "c3"]);
+      expect(out.resolvedArgs.summary).toBe("3 customers flagged");
+      expect(out.dry_run).toBe(true);
+      expect(out.audit_id).toMatch(/^[0-9a-f]{16}$/);
+
+      // The action shows up in glyph_audit_log.
+      const log = await callText(client, "glyph_audit_log", { handle_id });
+      const logged = JSON.parse(log.text);
+      expect(logged.count).toBe(1);
+      expect(logged.entries[0].actionName).toBe("email_team");
+      expect(logged.entries[0].dryRun).toBe(true);
+    });
+
+    it("glyph_act rejects an unknown action with a helpful list", async () => {
+      const handle_id = await renderWithActions();
+      const r = await callText(client, "glyph_act", {
+        handle_id,
+        action: "phantom_action",
+      });
+      expect(r.isError).toBe(true);
+      expect(r.text).toMatch(/Unknown action/);
+      expect(r.text).toContain("email_team"); // lists known actions
+    });
+
+    it("glyph_act rejects an unknown handle_id", async () => {
+      const r = await callText(client, "glyph_act", {
+        handle_id: "nope",
+        action: "anything",
+      });
+      expect(r.isError).toBe(true);
+      expect(r.text).toContain("Unknown handle_id");
+    });
+
+    it("glyph_trust returns provenance + a markdown summary", async () => {
+      const r1 = await callText(client, "glyph_render", {
+        spec: {
+          data: { source: fixture, format: "csv" },
+          layers: [{ mark: "bar", encoding: { x: "pickup_hour", y: "rides" } }],
+        },
+      });
+      const handle_id = JSON.parse(r1.text).handle_id as string;
+      const r = await callText(client, "glyph_trust", { handle_id });
+      expect(r.isError).toBe(false);
+      const out = JSON.parse(r.text);
+      expect(out.confidence).toBe("high");
+      expect(typeof out.sampleRows).toBe("number");
+      expect(typeof out.freshness).toBe("string");
+      expect(out.lineageDepth).toBeGreaterThanOrEqual(1);
+      expect(out.markdown).toContain("Sample size");
+      expect(out.markdown).toContain("Confidence");
+    });
+
+    it("glyph_trust flags lowSample when the chart has < 30 rows", async () => {
+      // taxi fixture has 12 rows → lowSample = true.
+      const r1 = await callText(client, "glyph_render", {
+        spec: {
+          data: { source: fixture, format: "csv" },
+          layers: [{ mark: "bar", encoding: { x: "pickup_hour", y: "rides" } }],
+        },
+      });
+      const handle_id = JSON.parse(r1.text).handle_id as string;
+      const r = await callText(client, "glyph_trust", { handle_id });
+      const out = JSON.parse(r.text);
+      expect(out.lowSample).toBe(true);
+      expect(out.markdown).toContain("low");
     });
   });
 });

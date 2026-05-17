@@ -25,9 +25,9 @@ Do **not** use Glyph for:
 - Real-time streaming charts (use Perspective)
 - Bespoke / one-off visualizations that don't fit a grammar (use D3 directly)
 
-## The twenty-four tools
+## The twenty-seven tools
 
-Glyph's MCP surface (9 Phase 0/1 + 4 Phase 3 Tier A GDF verbs + 1 explain verb + 4 diagnostic verbs + 2 metric-layer verbs + 4 persistent-memory verbs):
+Glyph's MCP surface (9 Phase 0/1 + 4 Phase 3 Tier A GDF verbs + 1 explain verb + 4 diagnostic verbs + 2 metric-layer verbs + 4 persistent-memory verbs + 2 action verbs + 1 trust verb):
 
 1. `glyph_describe` — inspect a data file before writing a spec
 2. `glyph_render` — compile + render a spec; returns SVG + PNG + handle
@@ -52,7 +52,16 @@ Glyph's MCP surface (9 Phase 0/1 + 4 Phase 3 Tier A GDF verbs + 1 explain verb +
 21. `glyph_memory_recall` — restore a saved handle as a fresh DataHandle
 22. `glyph_memory_list` — list saved entries
 23. `glyph_memory_forget` — drop a saved entry
+24. `glyph_act` — resolve + dry-run a declarative `spec.actions[]` entry
+25. `glyph_audit_log` — read recent `glyph_act` invocations
+26. `glyph_trust` — freshness + confidence summary for a handle
 0. `glyph_capabilities` — feature detection
+
+### Actions + trust (verbs 24–26) — Phase 3 §4 + §7
+
+A spec can carry `actions: [{ name, label, tool?, argMap? }]`. `glyph_act(handle_id, action_name, selection?)` resolves placeholders (`$selection.keys`, `$selection.count`, `$selection.summary`), persists an audit row to `~/.glyph/memory.duckdb`, and returns the resolved plan. v0 is **dry-run only** — actual external-tool dispatch lands in a follow-up. Use `glyph_audit_log(handle_id?)` to inspect history.
+
+`glyph_trust(handle_id)` returns `{ sampleRows, confidence, freshness, lowSample, lineageDepth, markdown }`. Embed the markdown in any narrator output — answers "is this fresh?" and "how was it computed?" without rendering anything new.
 
 ### Persistent memory (verbs 20–23) — Phase 3 §6
 

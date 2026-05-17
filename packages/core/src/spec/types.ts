@@ -15,6 +15,7 @@
 
 import type { z } from "zod";
 import type {
+  ActionSchema,
   ChannelSchema,
   DataSourceSchema,
   EncodingSchema,
@@ -26,6 +27,9 @@ import type {
   StatSchema,
   ThemeConfigSchema,
 } from "./schemas.js";
+
+/** A declarative action — Phase 3 §4. See ActionSchema for the shape. */
+export type SpecAction = z.infer<typeof ActionSchema>;
 
 /** Top-level Glyph spec. */
 export type GlyphSpec = z.infer<typeof GlyphSpecSchema>;

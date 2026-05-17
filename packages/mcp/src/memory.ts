@@ -29,6 +29,7 @@ import { materializeViewAsHandle } from "@glyph/duckdb";
 
 const ATTACH_ALIAS = "gmem";
 const META_TABLE = `${ATTACH_ALIAS}.__glyph_meta`;
+const AUDIT_TABLE = `${ATTACH_ALIAS}.__glyph_audit`;
 const TABLE_PREFIX = "_table_";
 
 /** Default file path: `~/.glyph/memory.duckdb`. */
@@ -79,7 +80,77 @@ export class MemoryStore {
       sample_rows BIGINT,
       saved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )`);
+    // Phase 3 §4 audit log — one row per glyph_act invocation.
+    await engine.query(`CREATE TABLE IF NOT EXISTS ${AUDIT_TABLE} (
+      id VARCHAR PRIMARY KEY,
+      handle_id VARCHAR NOT NULL,
+      action_name VARCHAR NOT NULL,
+      tool VARCHAR,
+      resolved_args VARCHAR,
+      dry_run BOOLEAN NOT NULL,
+      at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )`);
     this.attached = true;
+  }
+
+  /**
+   * Append a row to the action audit log. Returns the new id (random hex).
+   * The audit table is created on-demand by `ensure()`.
+   */
+  async logAction(
+    engine: ComputeEngine,
+    args: {
+      readonly id: string;
+      readonly handleId: string;
+      readonly actionName: string;
+      readonly tool: string | undefined;
+      readonly resolvedArgs: unknown;
+      readonly dryRun: boolean;
+    },
+  ): Promise<void> {
+    await this.ensure(engine);
+    const resolvedJson = JSON.stringify(args.resolvedArgs);
+    await engine.query(
+      `INSERT INTO ${AUDIT_TABLE} (id, handle_id, action_name, tool, resolved_args, dry_run) VALUES (${q(args.id)}, ${q(args.handleId)}, ${q(args.actionName)}, ${args.tool !== undefined ? q(args.tool) : "NULL"}, ${q(resolvedJson)}, ${args.dryRun ? "TRUE" : "FALSE"})`,
+    );
+  }
+
+  /** Read recent audit rows, newest first. Cap at `limit` (default 50). */
+  async listAudit(
+    engine: ComputeEngine,
+    args: {
+      readonly limit?: number | undefined;
+      readonly handleId?: string | undefined;
+    } = {},
+  ): Promise<
+    ReadonlyArray<{
+      readonly id: string;
+      readonly handleId: string;
+      readonly actionName: string;
+      readonly tool: string | null;
+      readonly resolvedArgs: unknown;
+      readonly dryRun: boolean;
+      readonly at: string;
+    }>
+  > {
+    await this.ensure(engine);
+    const limit = args.limit ?? 50;
+    const where = args.handleId ? `WHERE handle_id = ${q(args.handleId)}` : "";
+    const r = await engine.query(
+      `SELECT id, handle_id, action_name, tool, resolved_args, dry_run, at FROM ${AUDIT_TABLE} ${where} ORDER BY at DESC LIMIT ${limit}`,
+    );
+    return r.rows.map((row) => {
+      const r = row as ReadonlyArray<unknown>;
+      return {
+        id: String(r[0]),
+        handleId: String(r[1]),
+        actionName: String(r[2]),
+        tool: r[3] === null || r[3] === undefined ? null : String(r[3]),
+        resolvedArgs: r[4] === null || r[4] === undefined ? null : JSON.parse(String(r[4])),
+        dryRun: Boolean(r[5]),
+        at: r[6] instanceof Date ? r[6].toISOString() : String(r[6] ?? ""),
+      };
+    });
   }
 
   /**

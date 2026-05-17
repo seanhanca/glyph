@@ -10,7 +10,13 @@
  */
 
 import { randomUUID } from "node:crypto";
-import type { ComputeEngine, DataHandle, MetricDefinition, QueryHandle } from "@glyph/core";
+import type {
+  ComputeEngine,
+  DataHandle,
+  MetricDefinition,
+  QueryHandle,
+  SpecAction,
+} from "@glyph/core";
 import { createDuckDBEngine, materializeRowsAsHandle, materializeSpec } from "@glyph/duckdb";
 import {
   type PreviewServer,
@@ -29,6 +35,8 @@ export class ServerState {
   private readonly svgsByHandle = new Map<string, string>();
   /** Phase 3 §1: session-scoped registry of named metrics. */
   private readonly metrics = new Map<string, MetricDefinition>();
+  /** Phase 3 §4: actions declared in the spec that produced each handle. */
+  private readonly actionsByHandle = new Map<string, ReadonlyArray<SpecAction>>();
   private chain: Promise<unknown> = Promise.resolve();
   private preview: PreviewServer | undefined;
   private readonly previewOptions: PreviewServerOptions;
@@ -97,6 +105,23 @@ export class ServerState {
   allMetrics(prefix?: string): ReadonlyArray<MetricDefinition> {
     const all = Array.from(this.metrics.values());
     return prefix === undefined ? all : all.filter((m) => m.name.startsWith(prefix));
+  }
+
+  // ---- Action registry (Phase 3 §4) ----------------------------------------
+
+  /** Record the actions declared in the spec that produced a handle. */
+  setActionsForHandle(handleId: string, actions: ReadonlyArray<SpecAction>): void {
+    if (actions.length > 0) this.actionsByHandle.set(handleId, actions);
+  }
+
+  /** Look up an action by name on a given handle. */
+  getAction(handleId: string, name: string): SpecAction | undefined {
+    return this.actionsByHandle.get(handleId)?.find((a) => a.name === name);
+  }
+
+  /** All actions registered for a handle (empty if none). */
+  actionsFor(handleId: string): ReadonlyArray<SpecAction> {
+    return this.actionsByHandle.get(handleId) ?? [];
   }
 
   /** Cache the rendered SVG for a handle so the preview server can serve it. */

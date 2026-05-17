@@ -187,6 +187,32 @@ export const FacetSchema = z
   .strict();
 
 /**
+ * A declarative action attached to a spec — Phase 3 §4 (PR40). The MCP
+ * `glyph_act` verb resolves the action's argMap (substituting
+ * `$selection.keys` / `$selection.count` / `$selection.summary` from the
+ * selection passed to the verb) and writes an audit row to
+ * `~/.glyph/memory.duckdb`. v0 is dry-run-only — the external tool dispatch
+ * happens via the host MCP plane in a follow-up.
+ */
+export const ActionSchema = z
+  .object({
+    /** SQL-safe identifier — the key used by glyph_act. */
+    name: z.string().min(1),
+    /** Human-readable button label. */
+    label: z.string().min(1),
+    /** Name of an external MCP tool to invoke. Optional in v0 (audit-only). */
+    tool: z.string().min(1).optional(),
+    /**
+     * Per-arg substitution map. Values can be plain JSON OR placeholder
+     * strings beginning with `$selection.` (resolved at glyph_act time).
+     */
+    argMap: z.record(z.unknown()).optional(),
+    /** Free-form description shown in audit / hover tooltips. */
+    description: z.string().optional(),
+  })
+  .strict();
+
+/**
  * Spec versions known to the compiler. The compiler dispatches by version so
  * old specs keep working when new features ship. Bumping the major component
  * (\`glyph/0\` → \`glyph/1\`) is the breaking-change signal; minor bumps
@@ -255,6 +281,8 @@ export const GlyphSpecSchema = z
     facet: FacetSchema.optional(),
     /** Opt into data-bound, hydratable SVG output. */
     interactive: InteractiveSchema.optional(),
+    /** Declarative actions for `glyph_act` — Phase 3 §4. */
+    actions: z.array(ActionSchema).optional(),
   })
   .strict()
   .refine((spec) => spec.data !== undefined || spec.layers.every((l) => l.data !== undefined), {
