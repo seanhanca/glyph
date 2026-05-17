@@ -149,8 +149,13 @@ List every `DataHandle` in the current MCP session. Returns `{ sessionId, count,
 
 ### Key fields
 
-- **`data.source`** — path, URL, or named registered table (required, unless every layer overrides)
-- **`data.transform`** — SQL applied before binding. The result is the materialized view backing the chart.
+- **`data.source`** — one of:
+  - a file path (CSV/Parquet/JSON)
+  - a URL (http/https/s3)
+  - a name from a prior `glyph_import` result
+  - **a `gdf://` URI** from `glyph_publish` (Phase 3) — the materializer resolves it against the session's handle registry and runs the transform (if any) against the upstream view. No re-registration. Use this to render a fresh chart from a handle another agent (or an earlier turn) produced.
+  - Required unless every layer overrides `data`.
+- **`data.transform`** — SQL applied before binding. The result is the materialized view backing the chart. Transforms reference the source as `glyph_src_main`.
 - **`layers[]`** — at least one; each is `{ data?, mark, encoding, stat?, position? }`
 - **`title`**, **`width`**, **`height`**, **`theme`** — optional (theme: `"light"` or `"dark"`)
 
@@ -197,6 +202,28 @@ Then re-render with that filter in the spec's data.transform.
 ### Recipe — aggregate at the SQL layer
 
 Glyph's data.transform is a full SQL escape hatch. Do GROUP BY, JOIN, window functions there — don't try to express them in the encoding.
+
+### Recipe — re-render against a published handle (Phase 3 GDF)
+
+```
+Agent A:
+  1. glyph_render(spec) → { handle_id }
+  2. glyph_publish(handle_id) → { uri, version }
+  3. (Pass `uri` to Agent B by any channel.)
+
+Agent B (same MCP session, different turn or different orchestrator):
+  4. glyph_subscribe(uri) → DataHandle  (optional — confirms it exists)
+  5. glyph_render({
+       data: { source: uri, transform: "SELECT ... FROM glyph_src_main WHERE ..." },
+       layers: [...]
+     })
+       → fresh chart whose lineage points back to `uri`
+  6. glyph_lineage(<new uri>) → walks back to the source
+```
+
+The downstream `glyph_render` resolves the URI against the session registry,
+aliases the upstream's materialized view as `glyph_src_main`, and runs the
+transform. No file re-read; no row duplication.
 
 ### Recipe — interactive preview + click → next-step
 

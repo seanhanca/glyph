@@ -222,7 +222,18 @@ export function createServer(state: ServerState = new ServerState()): {
           };
         }
         const engine = await state.getEngine();
-        const m = await materializeSpec(engine, parsed.spec, { sessionId: state.sessionId });
+        let m: Awaited<ReturnType<typeof materializeSpec>>;
+        try {
+          m = await materializeSpec(engine, parsed.spec, {
+            sessionId: state.sessionId,
+            resolveHandleByUri: (uri) => state.getHandleByUri(uri),
+          });
+        } catch (err) {
+          return {
+            isError: true,
+            content: [{ type: "text" as const, text: (err as Error).message ?? String(err) }],
+          };
+        }
         state.storeHandle(m.handle);
         const scene = compileSpec({
           spec: parsed.spec,

@@ -599,6 +599,49 @@ describe("Glyph MCP server", () => {
       expect(r.text).toContain("Unknown");
     });
 
+    it("glyph_render resolves a gdf:// data.source against a session handle (PR34)", async () => {
+      // Step 1: render once to mint + publish a handle.
+      const upstream = await renderOne();
+      const pub = await callText(client, "glyph_publish", { handle_id: upstream.handle_id });
+      const { uri } = JSON.parse(pub.text);
+
+      // Step 2: render a NEW spec whose data.source is the published gdf:// URI.
+      // The materializer should resolve the URI against the session registry,
+      // alias the upstream view as glyph_src_main, and run the transform.
+      const r = await callText(client, "glyph_render", {
+        spec: {
+          data: {
+            source: uri,
+            transform: "SELECT pickup_hour, rides FROM glyph_src_main WHERE rides > 250",
+          },
+          layers: [{ mark: "bar", encoding: { x: "pickup_hour", y: "rides" } }],
+        },
+      });
+      expect(r.isError).toBe(false);
+      const out = JSON.parse(r.text);
+      // 2 rows in the upstream's (already filtered rides > 100) view also satisfy rides > 250.
+      expect(out.row_count).toBe(2);
+
+      // Step 3: lineage on the new handle walks back to the upstream URI.
+      const lineage = await callText(client, "glyph_lineage", {
+        uri: `gdf://${state.sessionId}/${out.handle_id}`,
+      });
+      const tree = JSON.parse(lineage.text);
+      expect(tree.children).toHaveLength(1);
+      expect(tree.children[0].uri).toBe(uri);
+    });
+
+    it("glyph_render reports a clear error for an unknown gdf:// URI", async () => {
+      const r = await callText(client, "glyph_render", {
+        spec: {
+          data: { source: "gdf://nope/abc123" },
+          layers: [{ mark: "bar", encoding: { x: "pickup_hour", y: "rides" } }],
+        },
+      });
+      expect(r.isError).toBe(true);
+      expect(r.text).toMatch(/Unknown gdf:\/\/ URI/);
+    });
+
     it("glyph_handles lists every handle in the session", async () => {
       const empty = await callText(client, "glyph_handles", {});
       expect(empty.isError).toBe(false);

@@ -155,7 +155,14 @@ class DuckDBEngine implements ComputeEngine {
     this.assertOpen();
     const id = randomUUID().replace(/-/g, "");
     const viewName = `${VIEW_PREFIX}${id}`;
-    await this.conn.run(`CREATE TEMP VIEW ${viewName} AS ${viewSql}`);
+    // Snapshot the rows into a temp table. CTAS (rather than CREATE VIEW)
+    // makes the handle self-contained: a later redefinition of any source
+    // view it depended on (e.g. `glyph_src_main` getting re-pointed at a
+    // different gdf:// parent during a downstream render) can't reach back
+    // and mutate the rows behind this handle. This matches Phase 3's
+    // versioned-handle semantics — version 1 is a snapshot of the data
+    // that produced it.
+    await this.conn.run(`CREATE TEMP TABLE ${viewName} AS ${viewSql}`);
     return { id, viewName, schema };
   }
 

@@ -103,3 +103,111 @@ describe("materializeSpec — DataHandle promotion (PR32)", () => {
     expect(m.handle.subscriptionUri).toBeUndefined();
   });
 });
+
+describe("materializeSpec — gdf:// URI resolution (PR34)", () => {
+  let engine: ComputeEngine;
+
+  beforeEach(async () => {
+    engine = await createDuckDBEngine();
+  });
+
+  afterEach(async () => {
+    await engine.close();
+  });
+
+  it("resolves a gdf:// data.source via the supplied resolver and records parent lineage", async () => {
+    // First materialization: a "published" handle, scoped to the test session id.
+    const upstream = await materializeSpec(
+      engine,
+      {
+        data: { source: fixture, format: "csv" },
+        layers: [{ mark: "bar", encoding: { x: "pickup_hour", y: "rides" } }],
+      },
+      { sessionId: "agent-a" },
+    );
+    expect(upstream.handle.uri).toBeDefined();
+    const registry = new Map<string, typeof upstream.handle>();
+    // biome-ignore lint/style/noNonNullAssertion: just asserted above.
+    registry.set(upstream.handle.uri!, upstream.handle);
+
+    // Downstream materialization: references the published handle by URI.
+    const downstream = await materializeSpec(
+      engine,
+      {
+        data: {
+          // biome-ignore lint/style/noNonNullAssertion: just asserted above.
+          source: upstream.handle.uri!,
+          transform: "SELECT pickup_hour, rides FROM glyph_src_main WHERE rides > 200",
+        },
+        layers: [{ mark: "bar", encoding: { x: "pickup_hour", y: "rides" } }],
+      },
+      {
+        sessionId: "agent-b",
+        resolveHandleByUri: (uri) => registry.get(uri),
+      },
+    );
+
+    // Rows are the filter applied to the upstream view.
+    expect(downstream.result.rowCount).toBe(5);
+    // Lineage records the upstream URI as a parent.
+    expect(downstream.handle.lineage?.parents).toHaveLength(1);
+    expect(downstream.handle.lineage?.parents[0]?.uri).toBe(upstream.handle.uri);
+    expect(downstream.handle.lineage?.parents[0]?.relation).toBe("transform");
+    // The downstream URI is a fresh handle, distinct from the parent.
+    expect(downstream.handle.uri).not.toBe(upstream.handle.uri);
+    expect(downstream.handle.uri?.startsWith("gdf://agent-b/")).toBe(true);
+  });
+
+  it("works without a transform — gdf:// source alone yields a SELECT * passthrough", async () => {
+    const upstream = await materializeSpec(
+      engine,
+      {
+        data: { source: fixture, format: "csv" },
+        layers: [{ mark: "bar", encoding: { x: "pickup_hour", y: "rides" } }],
+      },
+      { sessionId: "agent-a" },
+    );
+    const registry = new Map<string, typeof upstream.handle>();
+    // biome-ignore lint/style/noNonNullAssertion: minted above.
+    registry.set(upstream.handle.uri!, upstream.handle);
+
+    const downstream = await materializeSpec(
+      engine,
+      {
+        // biome-ignore lint/style/noNonNullAssertion: minted above.
+        data: { source: upstream.handle.uri! },
+        layers: [{ mark: "bar", encoding: { x: "pickup_hour", y: "rides" } }],
+      },
+      {
+        sessionId: "agent-b",
+        resolveHandleByUri: (uri) => registry.get(uri),
+      },
+    );
+
+    // Row count matches the upstream — no transform, no filter.
+    expect(downstream.result.rowCount).toBe(upstream.result.rowCount);
+    expect(downstream.handle.lineage?.parents[0]?.uri).toBe(upstream.handle.uri);
+  });
+
+  it("throws when a gdf:// URI is given but no resolver was supplied", async () => {
+    await expect(
+      materializeSpec(engine, {
+        data: { source: "gdf://nope/abc123" },
+        layers: [{ mark: "bar", encoding: { x: "pickup_hour", y: "rides" } }],
+      }),
+    ).rejects.toThrow(/no handle resolver was supplied/);
+  });
+
+  it("throws when the resolver returns undefined", async () => {
+    await expect(
+      materializeSpec(
+        engine,
+        {
+          data: { source: "gdf://nope/abc123" },
+          layers: [{ mark: "bar", encoding: { x: "pickup_hour", y: "rides" } }],
+        },
+        { resolveHandleByUri: () => undefined },
+      ),
+    ).rejects.toThrow(/Unknown gdf:\/\/ URI/);
+  });
+});

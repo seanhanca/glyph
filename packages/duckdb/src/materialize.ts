@@ -5,6 +5,12 @@
  * This is the bridge between the spec module and the renderer. The renderer
  * never touches the engine directly — it consumes the rows + schema this
  * function produces.
+ *
+ * **Phase 3 (PR34):** when `data.source` (or a layer's `data.source`) is a
+ * `gdf://` URI, the materializer resolves it against the caller-supplied
+ * `resolveHandleByUri` and aliases the resolved view as the source name —
+ * no file is registered. This is how a downstream agent renders against a
+ * handle published by an upstream agent.
  */
 
 import { applyStat, isStatError } from "@glyph/core";
@@ -19,6 +25,16 @@ import type {
 } from "@glyph/core";
 
 const SOURCE_REGISTRY_PREFIX = "glyph_src_";
+const GDF_PREFIX = "gdf://";
+
+/**
+ * Lookup callback the materializer uses to resolve `gdf://` URIs in a spec's
+ * `data.source` field. The MCP server wires this to its session-scoped
+ * handle registry; CLI/library callers can pass undefined when no URI
+ * resolution is desired (the resolver returning undefined surfaces as a
+ * clear error rather than a silent file-system lookup).
+ */
+export type HandleResolver = (uri: string) => DataHandle | undefined;
 
 export interface MaterializedSpec {
   /**
@@ -41,7 +57,7 @@ function enrichHandle(
     readonly sessionId: string;
     readonly sql: string;
     readonly producerTool: string;
-    readonly parentUri?: string;
+    readonly parentUris: ReadonlyArray<string>;
     readonly sampleRows: number;
     readonly filteredOut: number;
   },
@@ -52,7 +68,7 @@ function enrichHandle(
     uri: `gdf://${args.sessionId}/${base.id}`,
     version: 1,
     lineage: {
-      parents: args.parentUri ? [{ uri: args.parentUri, relation: "transform" as const }] : [],
+      parents: args.parentUris.map((uri) => ({ uri, relation: "transform" as const })),
       sql: args.sql,
       producer: {
         agent: "glyph",
@@ -70,6 +86,40 @@ function enrichHandle(
     binding: { kind: "duckdb-view", location: base.viewName },
     subscribable: false,
   };
+}
+
+/**
+ * Register a data source under `sourceName`, transparently resolving any
+ * `gdf://` URI through the caller-supplied resolver. Returns the parent
+ * handle URI when the source was a gdf:// URI — the materializer threads
+ * that through to the produced handle's lineage.
+ */
+async function registerOrResolve(
+  engine: ComputeEngine,
+  source: DataSource,
+  sourceName: string,
+  resolveHandleByUri: HandleResolver | undefined,
+): Promise<{ parentUri: string | undefined }> {
+  if (source.source.startsWith(GDF_PREFIX)) {
+    if (!resolveHandleByUri) {
+      throw new Error(
+        `Cannot resolve ${source.source}: no handle resolver was supplied to materializeSpec`,
+      );
+    }
+    const parent = resolveHandleByUri(source.source);
+    if (!parent) {
+      throw new Error(`Unknown gdf:// URI: ${source.source}`);
+    }
+    const parentViewName = parent.binding?.location ?? parent.viewName;
+    // Alias the parent's view as the conventional source name so any
+    // user-supplied `data.transform` keeps working unchanged. CREATE OR
+    // REPLACE so successive renders against the same session don't trip
+    // over an existing alias.
+    await engine.query(`CREATE OR REPLACE VIEW ${sourceName} AS SELECT * FROM ${parentViewName}`);
+    return { parentUri: parent.uri ?? source.source };
+  }
+  await engine.register(source, sourceName);
+  return { parentUri: undefined };
 }
 
 /**
@@ -97,20 +147,35 @@ function buildLayerSql(
  * Materialize the first layer of a spec. Multi-layer materialization is a
  * follow-up — for Phase 0 we materialize one view per spec and accept that
  * layered specs with per-layer data overrides will land in a later PR.
+ *
+ * Pass `resolveHandleByUri` to enable `data.source: "gdf://..."` resolution
+ * against an external handle registry (the MCP server wires this to its
+ * session-scoped store).
  */
 export async function materializeSpec(
   engine: ComputeEngine,
   spec: GlyphSpec,
-  options: { registerAs?: string; sessionId?: string } = {},
+  options: {
+    registerAs?: string;
+    sessionId?: string;
+    resolveHandleByUri?: HandleResolver;
+  } = {},
 ): Promise<MaterializedSpec> {
   const sourceName = options.registerAs ?? `${SOURCE_REGISTRY_PREFIX}main`;
   // Default session id is "local" — fine for single-process MCP usage.
   // The Phase 3 MCP server passes its real session id for cross-agent
   // handle resolution.
   const sessionId = options.sessionId ?? "local";
+  const resolveHandleByUri = options.resolveHandleByUri;
+
+  // Track parent gdf:// URIs that fed this materialization so the produced
+  // handle's lineage records the upstream sources. We dedupe in case the
+  // top-level and a layer's data reference the same parent URI.
+  const parentUris = new Set<string>();
 
   if (spec.data) {
-    await engine.register(spec.data, sourceName);
+    const r = await registerOrResolve(engine, spec.data, sourceName, resolveHandleByUri);
+    if (r.parentUri) parentUris.add(r.parentUri);
   }
 
   // Phase 0 limitation: use the first layer's data source / transform.
@@ -122,7 +187,8 @@ export async function materializeSpec(
   }
 
   if (firstLayer.data) {
-    await engine.register(firstLayer.data, sourceName);
+    const r = await registerOrResolve(engine, firstLayer.data, sourceName, resolveHandleByUri);
+    if (r.parentUri) parentUris.add(r.parentUri);
   }
 
   let viewSql = buildLayerSql(spec.data, firstLayer.data, sourceName);
@@ -148,6 +214,7 @@ export async function materializeSpec(
     sessionId,
     sql: viewSql,
     producerTool: "materializeSpec",
+    parentUris: [...parentUris],
     sampleRows: result.rowCount,
     filteredOut: 0,
   });
