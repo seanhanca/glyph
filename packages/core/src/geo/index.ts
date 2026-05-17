@@ -192,6 +192,161 @@ export function featureToPath(feature: GeoFeature, project: Projector): string {
 }
 
 // ---------------------------------------------------------------------------
+// TopoJSON — PR57
+// ---------------------------------------------------------------------------
+
+/**
+ * TopoJSON topology — minimal type covering the subset used by the
+ * `topoToGeo` converter. Real TopoJSON has more fields (bbox, arcs nested
+ * deeper for LineString variants, etc); we accept those via index access
+ * but only operate on Polygon + MultiPolygon for choropleth use cases.
+ */
+export interface Topology {
+  readonly type: string;
+  readonly objects: Readonly<Record<string, unknown>>;
+  readonly arcs: ReadonlyArray<ReadonlyArray<readonly [number, number]>>;
+  readonly transform?: {
+    readonly scale: readonly [number, number];
+    readonly translate: readonly [number, number];
+  };
+}
+
+/**
+ * Convert a TopoJSON topology to a GeoFeatureCollection. Supports Polygon
+ * and MultiPolygon geometries; arc indexing follows the spec
+ * (positive = forward, ~i = reverse). Quantized topologies (with a
+ * `transform`) are decoded back to absolute coordinates.
+ *
+ * Returns features matching the GeoFeature interface, so the result drops
+ * straight into `spec.geojson.features` (or is consumed by `featureToPath`).
+ *
+ * @param topology the parsed TopoJSON object
+ * @param objectName the key under `topology.objects` to expand; defaults
+ *                   to the first object
+ */
+export function topoToGeo(topology: Topology, objectName?: string): GeoFeatureCollection {
+  const keys = Object.keys(topology.objects);
+  const key = objectName ?? keys[0];
+  if (!key || !(key in topology.objects)) {
+    throw new Error(`Topology has no object named "${objectName ?? "<first>"}"`);
+  }
+  const obj = topology.objects[key] as {
+    type?: string;
+    geometries?: ReadonlyArray<TopoGeometry>;
+  };
+  const transform = topology.transform;
+  // Pre-decode every arc to absolute coords. TopoJSON encodes each arc as
+  // deltas relative to the previous point, with a top-level transform
+  // applied per axis.
+  const arcs: ReadonlyArray<ReadonlyArray<LonLat>> = topology.arcs.map((arc) =>
+    decodeArc(arc, transform),
+  );
+  // Each top-level object is typically a GeometryCollection containing per-
+  // region geometries. We also tolerate a single geometry directly.
+  const geometries: ReadonlyArray<TopoGeometry> =
+    obj.type === "GeometryCollection" && Array.isArray(obj.geometries)
+      ? obj.geometries
+      : [obj as TopoGeometry];
+  const features: GeoFeature[] = [];
+  for (const g of geometries) {
+    const feat = topoGeometryToFeature(g, arcs);
+    if (feat) features.push(feat);
+  }
+  return { type: "FeatureCollection", features };
+}
+
+interface TopoGeometry {
+  readonly type: string;
+  readonly arcs?: ReadonlyArray<unknown>;
+  readonly id?: string | number;
+  readonly properties?: Readonly<Record<string, unknown>>;
+}
+
+/**
+ * Decode a single arc's delta-encoded coords back to absolute [lon, lat]
+ * pairs. With no transform, the arc is already absolute.
+ */
+function decodeArc(
+  arc: ReadonlyArray<readonly [number, number]>,
+  transform: Topology["transform"],
+): LonLat[] {
+  const out: LonLat[] = [];
+  // TopoJSON arcs are always delta-encoded; the optional `transform`
+  // adds a per-axis scale + translate to land the cumulative coords in
+  // geographic space. Without a transform, the deltas are already in
+  // their target coordinate space — but they're still cumulative.
+  let x = 0;
+  let y = 0;
+  for (const pair of arc) {
+    if (!pair) continue;
+    x += pair[0];
+    y += pair[1];
+    if (transform) {
+      out.push([
+        x * transform.scale[0] + transform.translate[0],
+        y * transform.scale[1] + transform.translate[1],
+      ]);
+    } else {
+      out.push([x, y]);
+    }
+  }
+  return out;
+}
+
+/**
+ * Expand a single TopoJSON geometry into a GeoFeature. Polygon + MultiPolygon
+ * only — Point/LineString are silently dropped (not used for choropleth).
+ */
+function topoGeometryToFeature(
+  g: TopoGeometry,
+  arcs: ReadonlyArray<ReadonlyArray<LonLat>>,
+): GeoFeature | undefined {
+  if (g.type === "Polygon") {
+    const rings = expandRings(g.arcs as ReadonlyArray<ReadonlyArray<number>>, arcs);
+    return {
+      ...(g.properties !== undefined ? { properties: g.properties } : {}),
+      geometry: { type: "Polygon", coordinates: rings },
+    };
+  }
+  if (g.type === "MultiPolygon") {
+    const polys = (g.arcs as ReadonlyArray<ReadonlyArray<ReadonlyArray<number>>>).map((poly) =>
+      expandRings(poly, arcs),
+    );
+    return {
+      ...(g.properties !== undefined ? { properties: g.properties } : {}),
+      geometry: { type: "MultiPolygon", coordinates: polys },
+    };
+  }
+  return undefined;
+}
+
+/** Walk a ring's arc indices and concatenate the underlying coord arrays. */
+function expandRings(
+  ringIndices: ReadonlyArray<ReadonlyArray<number>>,
+  arcs: ReadonlyArray<ReadonlyArray<LonLat>>,
+): LonLat[][] {
+  return ringIndices.map((ring) => {
+    const out: LonLat[] = [];
+    for (let i = 0; i < ring.length; i++) {
+      const idx = ring[i];
+      if (idx === undefined) continue;
+      // Negative index means the arc is traversed in reverse.
+      const arc = idx >= 0 ? arcs[idx] : arcs[~idx];
+      if (!arc) continue;
+      const points = idx >= 0 ? arc : [...arc].reverse();
+      // Skip the first point of all arcs after the first to avoid duplicates
+      // at arc junctions.
+      const startIdx = i === 0 ? 0 : 1;
+      for (let j = startIdx; j < points.length; j++) {
+        const p = points[j];
+        if (p) out.push(p);
+      }
+    }
+    return out;
+  });
+}
+
+// ---------------------------------------------------------------------------
 // Graticule — PR44
 // ---------------------------------------------------------------------------
 

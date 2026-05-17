@@ -210,3 +210,157 @@ describe("buildGraticule (PR44)", () => {
     }
   });
 });
+
+// ---------------------------------------------------------------------------
+// TopoJSON (PR57)
+// ---------------------------------------------------------------------------
+
+import { topoToGeo } from "./index.js";
+
+describe("topoToGeo (PR57)", () => {
+  it("decodes a quantized TopoJSON polygon back to GeoJSON Polygon", () => {
+    // Tiny synthetic topology: one square polygon decoded from quantized
+    // delta-coords with a top-level transform.
+    const topology = {
+      type: "Topology",
+      objects: {
+        states: {
+          type: "GeometryCollection",
+          geometries: [
+            {
+              type: "Polygon",
+              properties: { id: "us-1" },
+              arcs: [[0]],
+            },
+          ],
+        },
+      },
+      // Arc 0: starts at quantized (0,0), then deltas to (10,0), (0,10), (-10,0), (0,-10).
+      // After decode + transform (scale=1, translate=0) we get 5 corner points.
+      arcs: [
+        [
+          [0, 0],
+          [10, 0],
+          [0, 10],
+          [-10, 0],
+          [0, -10],
+        ],
+      ],
+      transform: { scale: [1, 1] as const, translate: [0, 0] as const },
+    };
+    const fc = topoToGeo(topology, "states");
+    expect(fc.features.length).toBe(1);
+    const f = fc.features[0];
+    expect(f?.geometry.type).toBe("Polygon");
+    // The polygon's outer ring has 5 points.
+    const ring = (f?.geometry.coordinates as ReadonlyArray<ReadonlyArray<[number, number]>>)[0];
+    expect(ring?.length).toBe(5);
+    // Bottom-left corner should be at (0, 0) after decode.
+    expect(ring?.[0]).toEqual([0, 0]);
+    // After 4 deltas (10, 0), (0, 10), (-10, 0), (0, -10), should return to origin.
+    expect(ring?.[4]).toEqual([0, 0]);
+  });
+
+  it("handles MultiPolygon via nested arc indices", () => {
+    const topology = {
+      type: "Topology",
+      objects: {
+        regions: {
+          type: "GeometryCollection",
+          geometries: [
+            {
+              type: "MultiPolygon",
+              properties: { id: "multi-1" },
+              arcs: [[[0]], [[1]]],
+            },
+          ],
+        },
+      },
+      arcs: [
+        [
+          [0, 0],
+          [5, 0],
+          [0, 5],
+          [-5, 0],
+          [0, -5],
+        ],
+        [
+          [10, 10],
+          [3, 0],
+          [0, 3],
+          [-3, 0],
+          [0, -3],
+        ],
+      ],
+    };
+    const fc = topoToGeo(topology, "regions");
+    expect(fc.features[0]?.geometry.type).toBe("MultiPolygon");
+    const polys = fc.features[0]?.geometry.coordinates as ReadonlyArray<
+      ReadonlyArray<ReadonlyArray<[number, number]>>
+    >;
+    expect(polys.length).toBe(2);
+  });
+
+  it("falls back to first object when objectName is omitted", () => {
+    const topology = {
+      type: "Topology",
+      objects: {
+        only: {
+          type: "GeometryCollection",
+          geometries: [
+            {
+              type: "Polygon",
+              arcs: [[0]],
+            },
+          ],
+        },
+      },
+      arcs: [
+        [
+          [0, 0],
+          [1, 0],
+          [0, 1],
+        ],
+      ],
+    };
+    expect(topoToGeo(topology).features.length).toBe(1);
+  });
+
+  it("throws when the named object doesn't exist", () => {
+    const topology = {
+      type: "Topology",
+      objects: { only: { type: "GeometryCollection", geometries: [] } },
+      arcs: [],
+    };
+    expect(() => topoToGeo(topology, "missing")).toThrow(/no object named/i);
+  });
+
+  it("supports reverse arcs (negative indices ~i)", () => {
+    const topology = {
+      type: "Topology",
+      objects: {
+        s: {
+          type: "GeometryCollection",
+          geometries: [
+            { type: "Polygon", arcs: [[~0]] }, // arc 0 reversed
+          ],
+        },
+      },
+      arcs: [
+        [
+          [0, 0],
+          [10, 0],
+          [0, 10],
+        ],
+      ],
+    };
+    const ring = (
+      topoToGeo(topology).features[0]?.geometry.coordinates as ReadonlyArray<
+        ReadonlyArray<[number, number]>
+      >
+    )[0];
+    // Reverse of decoded [(0,0),(10,0),(10,10)] = [(10,10),(10,0),(0,0)].
+    expect(ring?.[0]).toEqual([10, 10]);
+    expect(ring?.[ring.length - 1]).toEqual([0, 0]);
+  });
+});

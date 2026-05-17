@@ -11,7 +11,14 @@
  *   - Default colors are picked deterministically from a small fixed palette.
  */
 
-import { type GeoFeature, buildGraticule, featureToPath, projector } from "../geo/index.js";
+import {
+  type GeoFeature,
+  type Topology,
+  buildGraticule,
+  featureToPath,
+  projector,
+  topoToGeo,
+} from "../geo/index.js";
 import type {
   AxisTick,
   LegendEntry,
@@ -342,14 +349,19 @@ export function compileSpec(input: CompileInput): Scene {
       }
       continue;
     }
-    // PR44: geo-region needs encoding.region (the join field) + spec.geojson.
-    // x/y are inferred from the projected polygons; no x/y encoding required.
+    // PR44 / PR57: geo-region needs encoding.region + spec.geojson with
+    // either features[] OR topology (TopoJSON; converted at compile).
     if (l.mark === "geo-region") {
       if (fieldOf(l.encoding.region) === undefined) {
         throw new Error(`Layer ${i} (geo-region) requires encoding.region`);
       }
-      if (!spec.geojson || !Array.isArray((spec.geojson as { features?: unknown }).features)) {
-        throw new Error(`Layer ${i} (geo-region) requires spec.geojson.features`);
+      const g = spec.geojson;
+      const hasFeatures = g && Array.isArray((g as { features?: unknown }).features);
+      const hasTopology = g && (g as { topology?: unknown }).topology !== undefined;
+      if (!g || (!hasFeatures && !hasTopology)) {
+        throw new Error(
+          `Layer ${i} (geo-region) requires spec.geojson.features OR spec.geojson.topology`,
+        );
       }
       continue;
     }
@@ -1331,7 +1343,22 @@ function buildGeoRegions(
 ): void {
   const regionField = fieldOf(encoding.region);
   if (!regionField) return;
-  const features = (spec.geojson?.features as ReadonlyArray<GeoFeature> | undefined) ?? [];
+  // PR57: source can be GeoJSON features[] OR a TopoJSON topology that the
+  // compiler converts on the fly. The converted features feed the same
+  // projection + path-emit loop below.
+  let features: ReadonlyArray<GeoFeature> = [];
+  const g = spec.geojson;
+  if (g && Array.isArray((g as { features?: unknown }).features)) {
+    features = (g as { features?: unknown }).features as ReadonlyArray<GeoFeature>;
+  } else if (g && (g as { topology?: unknown }).topology !== undefined) {
+    const topo = (g as { topology: Topology }).topology;
+    const obj = (g as { object?: string }).object;
+    try {
+      features = topoToGeo(topo, obj).features;
+    } catch {
+      return;
+    }
+  }
   if (features.length === 0) return;
   const idField =
     typeof (spec.geojson as { idField?: unknown })?.idField === "string"

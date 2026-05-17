@@ -352,7 +352,14 @@ export const GlyphSpecSchema = z
      */
     geojson: z
       .object({
-        features: z.array(z.unknown()),
+        features: z.array(z.unknown()).optional(),
+        /**
+         * PR57 — alternative source: TopoJSON topology + object name. The
+         * compiler converts to GeoFeatures via `topoToGeo()`. Either
+         * `features` or (`topology` + optional `object`) must be set.
+         */
+        topology: z.unknown().optional(),
+        object: z.string().optional(),
         idField: z.string().optional(),
       })
       .passthrough()
