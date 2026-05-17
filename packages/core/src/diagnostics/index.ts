@@ -522,6 +522,17 @@ export interface ForecastInput {
   readonly season?: number | undefined;
   /** How many steps ahead. Default 7. */
   readonly horizon?: number | undefined;
+  /**
+   * PR56 — pick the forecasting model. "seasonal-naive" repeats the value
+   * from `season` periods ago (deterministic, no smoothing). "holt-winters"
+   * does additive triple exponential smoothing (level + trend + seasonal),
+   * which handles drifting series better.
+   */
+  readonly method?: "seasonal-naive" | "holt-winters" | undefined;
+  /** Holt-Winters smoothing parameters. Defaults: α=0.3, β=0.1, γ=0.1. */
+  readonly alpha?: number | undefined;
+  readonly beta?: number | undefined;
+  readonly gamma?: number | undefined;
 }
 
 /**
@@ -635,6 +646,189 @@ export function seasonalNaiveForecast(input: ForecastInput): ForecastResult {
   });
 
   return { rows, schema, season, residualStd, explanation };
+}
+
+/**
+ * Forecast dispatch (PR56). Picks the model from `input.method` and falls
+ * back to seasonal-naive when the input doesn't have enough history for
+ * Holt-Winters to be meaningful.
+ */
+export function forecast(input: ForecastInput): ForecastResult {
+  if (input.method === "holt-winters") return holtWintersForecast(input);
+  return seasonalNaiveForecast(input);
+}
+
+/**
+ * Holt-Winters additive triple exponential smoothing (PR56).
+ *
+ * The classic time-series forecaster: maintains separate exponentially
+ * smoothed estimates of level, trend, and seasonal components, then
+ * extrapolates `level_T + h × trend_T + season_{T+h-S}` for each horizon
+ * step. Deterministic (no fit; the smoothing parameters are explicit).
+ *
+ * When the input series is too short for the requested season (n < 2·S),
+ * we fall back to seasonal-naive — the safe default — and flag the choice
+ * in the produced explanation.
+ *
+ * Defaults: α=0.3 (level), β=0.1 (trend), γ=0.1 (seasonal). These are the
+ * standard "moderately reactive" choices used by most BI tools for
+ * monthly + weekly series. Override via `alpha` / `beta` / `gamma`.
+ */
+export function holtWintersForecast(input: ForecastInput): ForecastResult {
+  const horizon = input.horizon ?? 7;
+  const xIdx = fieldIndex(input.schema, input.xField);
+  const yIdx = fieldIndex(input.schema, input.yField);
+
+  const sorted = [...input.rows]
+    .map((row) => ({ row, x: row[xIdx], y: toNumber(row[yIdx]) }))
+    .filter((p): p is { row: ReadonlyArray<unknown>; x: unknown; y: number } => p.y !== undefined)
+    .sort((a, b) => {
+      const av = a.x instanceof Date ? a.x.getTime() : Number(a.x);
+      const bv = b.x instanceof Date ? b.x.getTime() : Number(b.x);
+      return av - bv;
+    });
+
+  const n = sorted.length;
+  // For Holt-Winters to be meaningful we need at least 2 full seasons. If
+  // the caller didn't pick a season, default to 7 (weekly) when n is
+  // plausible; otherwise back off.
+  const requestedSeason = input.season ?? Math.max(2, Math.min(7, Math.floor(n / 2)));
+  if (n < 2 * requestedSeason) {
+    // Not enough data — degrade to seasonal-naive with the explanation
+    // marking the fallback explicitly.
+    const fallback = seasonalNaiveForecast(input);
+    return {
+      ...fallback,
+      explanation: {
+        ...fallback.explanation,
+        headline: `${fallback.explanation.headline} (Holt-Winters fell back to seasonal-naive — need ≥ 2 full seasons; have n=${n}, season=${requestedSeason}.)`,
+      },
+    };
+  }
+
+  const S = requestedSeason;
+  const alpha = input.alpha ?? 0.3;
+  const beta = input.beta ?? 0.1;
+  const gamma = input.gamma ?? 0.1;
+
+  // Initialization — Hyndman's "average of first S observations" recipe.
+  let levelMean = 0;
+  for (let i = 0; i < S; i++) levelMean += sorted[i]?.y ?? 0;
+  levelMean /= S;
+  // Trend: average per-period slope across the first two seasons.
+  let trend = 0;
+  for (let i = 0; i < S; i++) {
+    trend += ((sorted[i + S]?.y ?? 0) - (sorted[i]?.y ?? 0)) / S;
+  }
+  trend /= S;
+  // Seasonal initialization: y_i - level0.
+  const season: number[] = new Array(n).fill(0);
+  for (let i = 0; i < S; i++) season[i] = (sorted[i]?.y ?? 0) - levelMean;
+
+  // Forward pass — compute level/trend/seasonal at each t.
+  const levels: number[] = new Array(n).fill(0);
+  const trends: number[] = new Array(n).fill(0);
+  levels[0] = levelMean;
+  trends[0] = trend;
+  const fittedForecast: Array<number | undefined> = new Array(n).fill(undefined);
+  for (let t = 1; t < n; t++) {
+    const y = sorted[t]?.y ?? 0;
+    const seasonIdx = t < S ? t : t - S;
+    const seasonAtIdx = season[seasonIdx] ?? 0;
+    const prevLevel = levels[t - 1] ?? levelMean;
+    const prevTrend = trends[t - 1] ?? trend;
+    const lvl = alpha * (y - seasonAtIdx) + (1 - alpha) * (prevLevel + prevTrend);
+    const trd = beta * (lvl - prevLevel) + (1 - beta) * prevTrend;
+    const sea = gamma * (y - lvl) + (1 - gamma) * seasonAtIdx;
+    levels[t] = lvl;
+    trends[t] = trd;
+    // Store the new seasonal at position t (overwriting any earlier value
+    // for the same phase; we just track the latest).
+    if (t >= S) season[t] = sea;
+    // Fitted (in-sample) forecast for residuals.
+    if (t >= S) {
+      const fittedSeason = season[t - S] ?? 0;
+      fittedForecast[t] = prevLevel + prevTrend + fittedSeason;
+    }
+  }
+
+  // Residual std for the ±2σ confidence band.
+  const residuals: number[] = [];
+  for (let t = 0; t < n; t++) {
+    const f = fittedForecast[t];
+    if (f !== undefined) residuals.push((sorted[t]?.y ?? 0) - f);
+  }
+  const { std: residualStd } = meanStd(residuals);
+
+  // Build the forecast rows (in-sample fitted + horizon).
+  const rows: ForecastRow[] = sorted.map((p, i) => {
+    const fc = fittedForecast[i];
+    return {
+      index: i,
+      x: p.x,
+      actual: p.y,
+      forecast: fc,
+      lo: fc !== undefined ? fc - 2 * residualStd : undefined,
+      hi: fc !== undefined ? fc + 2 * residualStd : undefined,
+      isHorizon: false,
+    };
+  });
+
+  // Project future horizon. Use the cadence between the last two points
+  // for x extrapolation (same as seasonal-naive).
+  const last = sorted[n - 1];
+  const prior = sorted[n - 2];
+  let stepMs = 0;
+  if (last?.x instanceof Date && prior?.x instanceof Date) {
+    stepMs = last.x.getTime() - prior.x.getTime();
+  }
+  const Ll = levels[n - 1] ?? levelMean;
+  const Tt = trends[n - 1] ?? trend;
+  for (let h = 1; h <= horizon; h++) {
+    const seasonAtIdx = (n - 1 + h) % S; // wrap by season length
+    const sIdx = n - 1 - (S - (h % S)); // last-period equivalent
+    const seasonComponent = season[Math.max(0, sIdx)] ?? season[seasonAtIdx] ?? 0;
+    const fc = Ll + h * Tt + seasonComponent;
+    let futureX: unknown = h;
+    if (last?.x instanceof Date && stepMs > 0) {
+      futureX = new Date(last.x.getTime() + stepMs * h);
+    } else if (typeof last?.x === "number") {
+      futureX = last.x + h;
+    }
+    rows.push({
+      index: n - 1 + h,
+      x: futureX,
+      actual: undefined,
+      forecast: fc,
+      lo: fc - 2 * residualStd,
+      hi: fc + 2 * residualStd,
+      isHorizon: true,
+    });
+  }
+
+  const schema: ExplainColumn[] = [
+    { name: input.xField, type: "VARCHAR", suggested: "ordinal" as const },
+    { name: "actual", type: "DOUBLE", suggested: "quantitative" as const },
+    { name: "forecast", type: "DOUBLE", suggested: "quantitative" as const },
+    { name: "lo", type: "DOUBLE", suggested: "quantitative" as const },
+    { name: "hi", type: "DOUBLE", suggested: "quantitative" as const },
+    { name: "isHorizon", type: "BOOLEAN", suggested: "nominal" as const },
+  ];
+
+  const explanation = buildForecastExplanation({
+    rows,
+    season: S,
+    residualStd,
+    yField: input.yField,
+    horizon,
+  });
+  // Note the model in the headline so consumers know what produced this.
+  const annotated = {
+    ...explanation,
+    headline: `${explanation.headline} (Holt-Winters α=${alpha} β=${beta} γ=${gamma}, season=${S}.)`,
+  };
+
+  return { rows, schema, season: S, residualStd, explanation: annotated };
 }
 
 function buildForecastExplanation(args: {

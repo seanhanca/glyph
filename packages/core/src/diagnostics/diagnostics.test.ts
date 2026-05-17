@@ -9,6 +9,8 @@ import {
   attributeDrift,
   decomposeVariance,
   detectAnomalies,
+  forecast,
+  holtWintersForecast,
   seasonalNaiveForecast,
 } from "./index.js";
 
@@ -298,5 +300,82 @@ describe("seasonalNaiveForecast", () => {
     const r = seasonalNaiveForecast({ schema, rows, xField: "t", yField: "y", season: 1 });
     expect(r.residualStd).toBeGreaterThan(0);
     expect(r.explanation.headline).toMatch(/outside|fell outside/i);
+  });
+});
+
+describe("holtWintersForecast", () => {
+  const schema = [
+    { name: "t", type: "INTEGER", suggested: "ordinal" as const },
+    { name: "y", type: "DOUBLE", suggested: "quantitative" as const },
+  ];
+
+  it("emits the requested horizon + annotates Holt-Winters in the headline", () => {
+    // Seasonal series with period 3, 4 full cycles (n=12) so Holt-Winters
+    // engages.
+    const seasonal = [10, 20, 30, 10, 20, 30, 10, 20, 30, 10, 20, 30];
+    const rows = seasonal.map((v, i) => [i, v]);
+    const r = holtWintersForecast({
+      schema,
+      rows,
+      xField: "t",
+      yField: "y",
+      season: 3,
+      horizon: 3,
+    });
+    const future = r.rows.filter((row) => row.isHorizon);
+    expect(future.length).toBe(3);
+    expect(r.explanation.headline).toMatch(/Holt-Winters/);
+    // For a pure seasonal series the forecasts should land near the cycle.
+    for (const f of future) {
+      expect(typeof f.forecast).toBe("number");
+      if (typeof f.forecast === "number") {
+        expect(f.forecast).toBeGreaterThan(5);
+        expect(f.forecast).toBeLessThan(40);
+      }
+    }
+  });
+
+  it("falls back to seasonal-naive when n < 2 × season", () => {
+    // Only 4 points with season=3 → 2*3=6 > 4 → fallback.
+    const rows: ReadonlyArray<ReadonlyArray<unknown>> = [
+      [0, 10],
+      [1, 20],
+      [2, 30],
+      [3, 40],
+    ];
+    const r = holtWintersForecast({
+      schema,
+      rows,
+      xField: "t",
+      yField: "y",
+      season: 3,
+      horizon: 2,
+    });
+    expect(r.explanation.headline).toMatch(/fell back to seasonal-naive/i);
+  });
+
+  it("`forecast(method: 'holt-winters')` dispatches correctly", () => {
+    const rows: ReadonlyArray<ReadonlyArray<unknown>> = Array.from({ length: 12 }, (_, i) => [
+      i,
+      [10, 20, 30][i % 3] ?? 0,
+    ]);
+    const r = forecast({
+      schema,
+      rows,
+      xField: "t",
+      yField: "y",
+      season: 3,
+      method: "holt-winters",
+    });
+    expect(r.explanation.headline).toMatch(/Holt-Winters/);
+  });
+
+  it("`forecast()` default is seasonal-naive (no smoothing-param hint)", () => {
+    const rows: ReadonlyArray<ReadonlyArray<unknown>> = Array.from({ length: 12 }, (_, i) => [
+      i,
+      [10, 20, 30][i % 3] ?? 0,
+    ]);
+    const r = forecast({ schema, rows, xField: "t", yField: "y", season: 3 });
+    expect(r.explanation.headline).not.toMatch(/Holt-Winters/);
   });
 });
