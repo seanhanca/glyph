@@ -11,20 +11,21 @@ This document captures the **review-and-improve pass** that closed gaps found in
 
 ---
 
-## Current state (post-PR11)
+## Current state (post-PR16)
 
 | Layer | What ships today |
 |---|---|
-| Spec | Zod-validated layered grammar; 9.2 KB JSON schema; 6 examples |
+| Spec | Zod-validated layered grammar; versioned (`glyph/0.1`); 9.2 KB JSON schema; 6 examples |
 | Marks | `bar`, `point` |
 | Scales | linear, band, niceTicks |
 | Themes | light, dark |
 | Compute | DuckDB Node engine + `materializeSpec` + `QueryHandle` |
-| Render | SVG (pure, deterministic); data-bound when `spec.interactive` is set; native `<title>` tooltips |
+| Render | SVG (pure, deterministic); data-bound when `spec.interactive` is set; native `<title>` tooltips; multi-layer composition with dual y-axis (PR14) |
 | Interactivity | `@glyph/live` — `onClick / onHover / onBrush` + `whereFor / whereForExtent / whereForZoom` |
-| Distribution | `@glyph/cli`, `@glyph/mcp` (4 tools), Claude Code skill, plugin manifest |
+| Distribution | `@glyph/cli`, `@glyph/mcp` (**six tools**: capabilities, describe, render, query, drill, import), Claude Code skill, plugin manifest, PNG content block on `glyph_render` |
+| Cross-MCP | `glyph_import(csv \| json-rows \| url)`, `data_handle` convention (PR16) |
 | Determinism | Snapshot byte-identity on Linux/macOS/Windows × Node 20/22 |
-| Tests | 100/100 passing |
+| Tests | 120/120 passing |
 
 ---
 
@@ -246,7 +247,66 @@ Today `glyph_render` returns SVG text in a `text` content block. Add a sibling `
 
 Once Claude Code exposes a hotspot-routing primitive for tool results (a feature ask, not currently shipped), a Glyph plugin can open a sidebar pane that hosts an interactive Glyph chart with native click → tool-call routing using `data-key`. Tracked here so we're ready the day the host supports it.
 
-**Net effect.** With B9a–c, the scenario *"ClickHouse + CSV + Publora → trend + outlier + distribution → click-driven next-step"* runs end-to-end without flow breaks and without expensive row stringification.
+#### B9e — `@glyph/preview-server` local interactive preview (the **inline-interactive answer**)
+
+**The problem B9c half-solves.** PNG + SVG inline give the user *something to look at*, but it's a flat picture. When the user wants to **click a bar and have the agent react** — the actual interactive workflow business users ask for — the MCP request-response surface doesn't carry it. B9d would solve it natively *if* the host shipped a hotspot primitive, but every host today does not.
+
+**What B9e does.** Glyph optionally spins up a tiny, opt-in, **localhost-only** HTTP server inside the MCP process. The server hosts a single-page app that hydrates the rendered SVG with `@glyph/live`. User clicks/brushes/zooms in their browser; the page POSTs interactions back to the same MCP process; a new MCP verb `glyph_await_interaction` long-polls the queue from the agent side. **No host feature required. No cloud. No data leaves the machine.**
+
+**Lifecycle.**
+- Off by default. Started lazily on the first `glyph_preview` call.
+- Binds to `127.0.0.1` only. Random ephemeral port. Per-session HMAC token gates `/api/*` access (URL-embedded, so the user can paste links).
+- Stopped on MCP process exit or explicit `glyph_close_preview`.
+
+**Three new MCP verbs.**
+
+| Verb | Inputs | Returns |
+|---|---|---|
+| `glyph_preview(handle_id?, open?)` | optional handle to deep-link to; `open: true` shells `open` / `xdg-open` / `start` to launch a browser tab | `{ url, token, port }` |
+| `glyph_await_interaction(handle_id, timeout_ms?)` | the chart's handle; default timeout 30 s | `{ kind: "click" \| "brush" \| "zoom" \| "hover", binding, where_sql, at }` on event; `{}` on timeout |
+| `glyph_close_preview()` | — | `{ stopped: bool }` |
+
+**The page itself.** One HTML file with `@glyph/live` bundled inline (~12 KB IIFE) plus minimal page chrome. Fetches `/api/charts/<handle_id>.svg` for the rendered SVG, hydrates, wires the existing `onClick / onBrush / onHover` handlers. On each event:
+
+```
+POST /api/interactions/<handle_id>
+  {
+    "kind": "click",
+    "binding": { "key": "...", "row": N, "attrs": { ... } },
+    "where_sql": 'WHERE "pickup_hour" = 7'
+  }
+```
+
+The server enqueues the event; `glyph_await_interaction` returns it.
+
+**Why long-poll, not WebSocket.** The MCP host runs tool calls serially anyway, so a 30-second long-poll matches the natural agent rhythm. Plain HTTP, no socket lifecycle, no extra dep. If pure-Node-stdlib stays a goal, this is the only way.
+
+**Security.**
+- `127.0.0.1` bind only — listens on `0.0.0.0` is a bug, not a feature.
+- Token in URL path (`/?t=<hex>`); `/api/*` requires header `X-Glyph-Token` matching.
+- CORS: deny all by default. Single-origin same-host page only.
+- No external network access from the page (CSP `default-src 'self'`).
+
+#### B9f — `glyph_preview` MCP verb
+
+Lazily starts `@glyph/preview-server`; returns `{ url, token, port }`. Idempotent. Optional `open: true` triggers the system browser launcher. Optional `handle_id` deep-links the URL to a specific chart so the browser opens straight to it.
+
+#### B9g — `glyph_await_interaction` MCP verb
+
+Long-poll for the chart → agent loop. Closes the feedback loop the request-response MCP surface couldn't otherwise close. Default timeout 30 s; max 60 s. Returns `{}` on timeout so the agent can decide whether to poll again or move on.
+
+#### B9h — `@glyph/live` IIFE bundle for the preview page
+
+Build the existing `@glyph/live` ESM package as an IIFE (~12 KB) so the preview page can include it via a single `<script>` tag with no module-loading dance. CI verifies the IIFE renders the same data-bound SVG the ESM build does (snapshot equivalence).
+
+**Net effect with B9e/f/g/h.** A Claude Code (or Cursor / Codex / Gemini-CLI) user can:
+1. Ask the agent for a chart.
+2. Click a bar in the auto-opened browser tab.
+3. Have the agent receive the click as a tool result and act on it — drill in, file a Linear issue, send an email — all without leaving the chat.
+
+No host vendor coordination. No hosted Glyph service. Same Apache-2.0 license. Same local-first bargain.
+
+**Net effect.** With B9a–c, the scenario *"ClickHouse + CSV + Publora → trend + outlier + distribution → click-driven next-step"* runs end-to-end without flow breaks and without expensive row stringification. With B9e–h on top, the *click* is no longer a text handoff — it's a real DOM event flowing back through the agent.
 
 ---
 
@@ -301,6 +361,10 @@ Reflecting both `post-mvp.md` + `phase-3-agent-graph.md` plus §A and §B above.
 | 41b | Cross-MCP `data_handle` convention; `data.source: { fromTool: "..." }` resolution | **B9b** |
 | 41c | Server-side PNG rasterization via `resvg-wasm` in `glyph_render` | **B9c** |
 | 41d | `@glyph/preview` Claude Code plugin *(host-gated)* | **B9d** |
+| 41e | `@glyph/preview-server` package — localhost-only HTTP + hydration | **B9e** |
+| 41f | `glyph_preview(handle_id?, open?)` MCP verb | **B9f** |
+| 41g | `glyph_await_interaction(handle_id, timeout_ms?)` MCP verb | **B9g** |
+| 41h | `@glyph/live` IIFE bundle for the preview page | **B9h** |
 | 42 | Handle GC + TTL + refcount | B2 |
 | 43 | Semantic / metric layer + `glyph_metrics` MCP verb | phase-3 §1 |
 | 44 | `glyph_explain` (deterministic SQL pipelines) | phase-3 §2, B3 |
@@ -380,9 +444,13 @@ CC    ▸ tool_use: glyph_render({
         })
         → { svg, png, handle_id, schema, ... }                             ○ B9c (PNG inline)
 
-USER  ▸ [clicks the 2024-03-12 bar]
-        (B9d would route this back natively;
-         until then, user types: "the 2024-03-12 bar")                     ○ B9d / ✓ via text
+CC    ▸ tool_use: glyph_preview(handle_id, open: true)                     ○ B9e-h
+        → opens browser at http://127.0.0.1:NNNN/?t=…
+USER  ▸ [clicks the 2024-03-12 bar in the browser]
+CC    ▸ tool_use: glyph_await_interaction(handle_id, timeout_ms: 30000)    ○ B9g
+        → { kind: "click",
+            binding: { x: "2024-03-12", y: "8412" },
+            where_sql: "WHERE \"day\" = '2024-03-12'" }
 
 CC    ▸ tool_use: glyph_drill(handle_id, field: "day", equals: "2024-03-12") ✓
         → rows: 1, predicate: "\"day\" = '2024-03-12'"
@@ -404,7 +472,10 @@ CC    ▸ tool_use: glyph_render({ overlays the original + forecast bands })
 USER  ▸ Final answer: chart + narrative + audit trail of action.
 ```
 
-**What's needed to make this real**: B9a–c (small, three PRs, ~200 LOC each + tests) and the rest of the existing Phase 1/3 plan. **B9d** is host-gated — not blocking; the text-based click handoff works in the interim.
+**What's needed to make this real**:
+- **B9a–c** (small, three PRs, ~200 LOC each + tests) — shipped in PR16.
+- **B9e–h** (one combined PR, ~600 LOC + tests) — the local preview server that turns the click into a real loop. **The piece that makes the scenario *interactive* rather than just *visible*.**
+- **B9d** is host-gated and tracked as a stub. Until a host vendor ships a hotspot primitive, B9e is how Glyph delivers inline interactivity — it works with every MCP host today.
 
 ---
 
