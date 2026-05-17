@@ -1,6 +1,21 @@
 # Glyph skills — day-one installs across four agent hosts
 
-The same `skills/glyph/SKILL.md` is referenced by four plugin manifests in this repo, one per host. Each manifest wires up the same MCP server (`@glyph/mcp`) so agents on every supported host see the same nine-tool surface.
+The same `skills/glyph/SKILL.md` is referenced by four plugin manifests in this repo, one per host. Each manifest wires up the same MCP server (`@glyph/mcp`) so agents on every supported host see the same twenty-tool surface.
+
+## Generalist + five role-aware skills
+
+The shipped skill set is:
+
+| Skill | Path | When to load |
+|---|---|---|
+| `glyph` | [`skills/glyph/SKILL.md`](./glyph/SKILL.md) | Generalist. Knows every tool. Default. |
+| `glyph-explorer` | [`skills/glyph-explorer/SKILL.md`](./glyph-explorer/SKILL.md) | First-pass exploration on a new file. |
+| `glyph-diagnostician` | [`skills/glyph-diagnostician/SKILL.md`](./glyph-diagnostician/SKILL.md) | "Why did this change?" — composes anomaly / drift / decompose / forecast. |
+| `glyph-narrator` | [`skills/glyph-narrator/SKILL.md`](./glyph-narrator/SKILL.md) | Plain-English chart write-ups for non-analyst stakeholders. |
+| `glyph-operator` | [`skills/glyph-operator/SKILL.md`](./glyph-operator/SKILL.md) | Interactive preview + click → agent loop. |
+| `glyph-orchestrator` | [`skills/glyph-orchestrator/SKILL.md`](./glyph-orchestrator/SKILL.md) | Multi-agent coordination across the four roles above. |
+
+Each role file is ≤200 tokens; combined they stay under the Phase 3 §13 Tier B token budget. Load the generalist by default; switch to a role file when the host supports per-task skill scoping.
 
 | Host | Manifest |
 |---|---|
