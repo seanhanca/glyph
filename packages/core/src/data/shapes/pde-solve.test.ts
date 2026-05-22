@@ -28,9 +28,9 @@ function buildSpec(overrides: Partial<PdeSolveDataSpec> = {}): PdeSolveDataSpec 
 describe("solvePde — validation", () => {
   it("rejects unknown PDE kind", () => {
     expect(() =>
-      // biome-ignore lint/suspicious/noExplicitAny: deliberately passing kind outside the enum to verify the guard.
-      solvePde(buildSpec({ kind: "wave" as any })),
-    ).toThrow(/only kind "heat"/);
+      // biome-ignore lint/suspicious/noExplicitAny: deliberately passing kind outside the enum to verify the runtime guard.
+      solvePde(buildSpec({ kind: "schrodinger" as any })),
+    ).toThrow(/kind must be "heat", "wave", or "reaction-diffusion"/);
   });
 
   it("rejects too-small or too-large grids", () => {
@@ -72,7 +72,7 @@ describe("solvePde — value correctness", () => {
       params: { D: 0.05 },
       boundary: "clamp",
       steps: 100,
-      dt: 0.005, // dx = 2/32 = 0.0625, CFL = 0.05·0.005/0.0625² = 0.064 ✓
+      dt: 0.002, // dx = 2/32 = 0.0625, CFL = 0.05·0.005/0.0625² = 0.064 ✓
     });
     const out = solvePde(spec);
     expect(out.length).toBe(1024);
@@ -105,6 +105,118 @@ describe("solvePde — determinism", () => {
   it("emits byte-identical rows for identical specs", () => {
     const a = solvePde(buildSpec());
     const b = solvePde(buildSpec());
+    expect(JSON.stringify(a)).toBe(JSON.stringify(b));
+  });
+});
+
+// --- v2 — wave equation -----------------------------------------
+
+describe("solvePde — kind: wave", () => {
+  function waveSpec(overrides: Partial<PdeSolveDataSpec> = {}): PdeSolveDataSpec {
+    return {
+      shape: "pde-solve",
+      kind: "wave",
+      domain: { x: [-1, 1], y: [-1, 1] },
+      grid: { rows: 16, cols: 16 },
+      initial: "exp(-30*(x*x + y*y))",
+      params: { c: 0.5, gamma: 0 },
+      boundary: "clamp",
+      steps: 30,
+      dt: 0.01, // c·dt/dx = 0.5·0.01/(2/16) = 0.04, CFL ✓
+      ...overrides,
+    };
+  }
+
+  it("integrates a Gaussian impulse forward (peak decays as wavefront spreads)", () => {
+    const out = solvePde(waveSpec({ steps: 50 }));
+    expect(out.length).toBe(256);
+    const center = out.reduce((b, r) => (Math.hypot(r.x, r.y) < Math.hypot(b.x, b.y) ? r : b));
+    // Center should have lost amplitude as the wavefront radiated
+    // outward (compared with the initial peak of 1).
+    expect(center.u).toBeLessThan(0.95);
+  });
+
+  it("rejects wave CFL violation (c·dt/dx > 1)", () => {
+    // dx = 2/16 = 0.125. CFL > 1 requires c·dt > 0.125. c=5,
+    // dt=0.05 → CFL = 5·0.05/0.125 = 2 → reject.
+    expect(() => solvePde(waveSpec({ params: { c: 5, gamma: 0 }, dt: 0.05 }))).toThrow(
+      /CFL stability violated/,
+    );
+  });
+
+  it("respects initial_velocity (still-water default vs nonzero)", () => {
+    const still = solvePde(waveSpec({ steps: 1, initial_velocity: "0" }));
+    const kicked = solvePde(
+      waveSpec({ steps: 1, initial_velocity: "0.5" }), // upward velocity everywhere
+    );
+    // After one step, the kicked field should be uniformly higher
+    // than the still field (the velocity adds dt·v to u at first
+    // step in the leapfrog approximation).
+    let stillSum = 0;
+    let kickedSum = 0;
+    for (let i = 0; i < still.length; i++) {
+      stillSum += still[i]?.u ?? 0;
+      kickedSum += kicked[i]?.u ?? 0;
+    }
+    expect(kickedSum).toBeGreaterThan(stillSum);
+  });
+
+  it("is byte-stable across two wave calls", () => {
+    const a = solvePde(waveSpec());
+    const b = solvePde(waveSpec());
+    expect(JSON.stringify(a)).toBe(JSON.stringify(b));
+  });
+});
+
+// --- v2 — reaction-diffusion ------------------------------------
+
+describe("solvePde — kind: reaction-diffusion", () => {
+  function rdSpec(overrides: Partial<PdeSolveDataSpec> = {}): PdeSolveDataSpec {
+    return {
+      shape: "pde-solve",
+      kind: "reaction-diffusion",
+      domain: { x: [-1, 1], y: [-1, 1] },
+      grid: { rows: 16, cols: 16 },
+      initial: "0", // ignored for RD but the schema requires non-empty
+      params: { Du: 1.0, Dv: 0.5, F: 0.055, k: 0.062 },
+      boundary: "periodic",
+      steps: 20,
+      dt: 0.1, // max(Du,Dv)·dt/dx² = 1·0.1/(2/16)² = 6.4 — way too big
+      ...overrides,
+    };
+  }
+
+  it("emits rows·cols rows (V species)", () => {
+    const out = solvePde(rdSpec({ dt: 0.002 })); // CFL ok
+    expect(out.length).toBe(256);
+  });
+
+  it("rejects RD CFL violation (max(Du,Dv)·dt/dx² > 0.25)", () => {
+    // dt = 0.1 → CFL = 6.4 (way above 0.25) → reject.
+    expect(() => solvePde(rdSpec())).toThrow(/CFL stability violated/);
+  });
+
+  it("produces nonzero V values when seeded", () => {
+    const out = solvePde(
+      rdSpec({
+        dt: 0.002,
+        steps: 100,
+        initial_V: "exp(-50*(x*x + y*y)) * 0.3",
+      }),
+    );
+    // After 100 steps, the V seed should still have detectable
+    // signal. The exact peak depends on F/k phase boundaries —
+    // bound generously to verify the simulation ran without
+    // asserting on a specific Turing-pattern outcome (those are
+    // covered in the rd-spots fixture).
+    const maxV = Math.max(...out.map((r) => r.u));
+    expect(maxV).toBeGreaterThan(0.005);
+  });
+
+  it("is byte-stable across two RD calls", () => {
+    const spec = rdSpec({ dt: 0.002 });
+    const a = solvePde(spec);
+    const b = solvePde(spec);
     expect(JSON.stringify(a)).toBe(JSON.stringify(b));
   });
 });

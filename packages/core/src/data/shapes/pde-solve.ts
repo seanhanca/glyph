@@ -77,23 +77,58 @@ export const PDE_CFL_LIMIT = 0.25;
 
 export interface PdeSolveDataSpec {
   shape: "pde-solve";
-  /** PDE family. v1 ships only `"heat"`. */
-  kind: "heat";
+  /**
+   * PDE family. v1 shipped `"heat"`; v2 adds `"wave"` (2nd-order in
+   * time, leapfrog scheme, CFL `c·dt/dx ≤ 1`) and
+   * `"reaction-diffusion"` (Gray-Scott two-species coupled system,
+   * `max(Du,Dv)·dt/dx² ≤ 0.25`).
+   */
+  kind: "heat" | "wave" | "reaction-diffusion";
   /** 2D rectangular domain. */
   domain: { readonly x: readonly [number, number]; readonly y: readonly [number, number] };
   /** Grid resolution. Both rows and cols in [4, MAX_PDE_GRID]. */
   grid: { readonly rows: number; readonly cols: number };
-  /** Initial condition u(x, y, 0). Expression evaluated against
-   *  free identifiers `x` and `y`; standard math fns available. */
+  /**
+   * Initial condition u(x, y, 0). Expression in `x`, `y`.
+   * For `kind: "heat"` and `kind: "wave"`: u at t=0.
+   * For `kind: "reaction-diffusion"`: ignored; use `initial_U` /
+   * `initial_V` instead. (Kept on the spec so heat / wave / RD
+   * share one parse path; an empty string is rejected by validation.)
+   */
   initial: string;
-  /** PDE-specific parameters. For `kind: "heat"`: `{ D: number }` (diffusion). */
+  /**
+   * Wave-only: initial ∂u/∂t(x, y, 0). Optional; defaults to "0" —
+   * "stone dropped into still water" mental model. Used to synthesize
+   * `u_prev = u_initial - dt · velocity` for the first leapfrog step.
+   */
+  initial_velocity?: string;
+  /**
+   * RD-only: initial U(x, y, 0). Optional; defaults to "1" — full
+   * fuel tank everywhere.
+   */
+  initial_U?: string;
+  /**
+   * RD-only: initial V(x, y, 0). Optional; defaults to a small
+   * Gaussian seed at the center: `exp(-30*(x*x + y*y)) * 0.25`.
+   * Pattern requires at least some V > 0 to bootstrap; an
+   * all-zero V stays uniformly empty.
+   */
+  initial_V?: string;
+  /**
+   * PDE-specific parameters.
+   *   - `kind: "heat"`: `{ D: number }` (diffusion).
+   *   - `kind: "wave"`: `{ c: number, gamma?: number }` (wave speed,
+   *     optional damping).
+   *   - `kind: "reaction-diffusion"`: `{ Du, Dv, F, k: number }`
+   *     (diffusion coefficients + feed + kill rates).
+   */
   params: Readonly<Record<string, number>>;
   /** Boundary condition. `"clamp"` fixes edge values to the initial
    *  condition; `"periodic"` wraps opposite edges. */
   boundary: "clamp" | "periodic";
   /** Number of integration steps. */
   steps: number;
-  /** Time step. Must satisfy `D·dt/dx² ≤ PDE_CFL_LIMIT`. */
+  /** Time step. CFL constraint depends on `kind` — see schema. */
   dt: number;
 }
 
@@ -106,15 +141,17 @@ export interface PdeRow {
 
 /**
  * Solve the PDE forward `spec.steps` time-steps and emit one row
- * per grid cell at the final time. Ping-pong `Float64Array` buffers
- * — zero allocation per step.
+ * per grid cell at the final time. Dispatches to a per-kind solver
+ * (heat / wave / reaction-diffusion). All variants share the grid
+ * setup, the 4-neighbor lookup helper, and the final row-emission
+ * code so the per-kind code is just the update math.
  */
 export function solvePde(
   spec: PdeSolveDataSpec,
   evaluator: Evaluator = defaultEvaluator,
 ): PdeRow[] {
   validateSpec(spec);
-  const { domain, grid, params, boundary, steps, dt, initial } = spec;
+  const { domain, grid, boundary } = spec;
   const { rows: R, cols: C } = grid;
   const [xMin, xMax] = domain.x;
   const [yMin, yMax] = domain.y;
@@ -123,61 +160,34 @@ export function solvePde(
   // We use dx for the Laplacian step; for a square cell (dx == dy)
   // this is exact. For non-square cells the user is expected to
   // pick a domain + grid that match the physics.
-  // (Schema doesn't enforce square; documented in JSDoc.)
 
-  // Initial condition. Cell centers at (xMin + (c + 0.5)·dx,
-  // yMin + (r + 0.5)·dy). Evaluator may throw on unparseable
-  // expressions; let that propagate to the caller as it's a spec
-  // bug, not a runtime data issue.
-  let u = new Float64Array(R * C);
-  let uNext = new Float64Array(R * C);
-  for (let r = 0; r < R; r++) {
-    const yMid = yMin + (r + 0.5) * dy;
-    for (let c = 0; c < C; c++) {
-      const xMid = xMin + (c + 0.5) * dx;
-      u[r * C + c] = clampSamplerPrecision(evaluator(initial, { x: xMid, y: yMid }));
-    }
-  }
-
-  // Heat-equation explicit-Euler step. Inner cells use the 5-point
-  // Laplacian; boundary cells follow the spec.boundary policy.
-  const D = (params.D ?? 0) as number;
-  const alpha = (D * dt) / (dx * dx);
-  for (let step = 0; step < steps; step++) {
+  // Evaluate a (x, y) → number expression over every cell center,
+  // returning a Float64Array indexed row-major.
+  function gridFromExpression(expr: string): Float64Array {
+    const buf = new Float64Array(R * C);
     for (let r = 0; r < R; r++) {
+      const yMid = yMin + (r + 0.5) * dy;
       for (let c = 0; c < C; c++) {
-        const idx = r * C + c;
-        // Look up 4 neighbors. Boundary handling per `boundary`:
-        let up: number;
-        let down: number;
-        let left: number;
-        let right: number;
-        if (boundary === "periodic") {
-          up = u[((r - 1 + R) % R) * C + c] as number;
-          down = u[((r + 1) % R) * C + c] as number;
-          left = u[r * C + ((c - 1 + C) % C)] as number;
-          right = u[r * C + ((c + 1) % C)] as number;
-        } else {
-          // clamp: edge cells read their own value as the "neighbor"
-          // outside the grid, which freezes the boundary at its
-          // current value (matches the metal-plate held-at-temp
-          // mental model when the initial condition has a constant
-          // edge value).
-          up = u[(r === 0 ? r : r - 1) * C + c] as number;
-          down = u[(r === R - 1 ? r : r + 1) * C + c] as number;
-          left = u[r * C + (c === 0 ? c : c - 1)] as number;
-          right = u[r * C + (c === C - 1 ? c : c + 1)] as number;
-        }
-        const center = u[idx] as number;
-        const lap = up + down + left + right - 4 * center;
-        uNext[idx] = clampSamplerPrecision(center + alpha * lap);
+        const xMid = xMin + (c + 0.5) * dx;
+        buf[r * C + c] = clampSamplerPrecision(evaluator(expr, { x: xMid, y: yMid }));
       }
     }
-    // Swap buffers (no allocation)
-    const tmp = u;
-    u = uNext;
-    uNext = tmp;
+    return buf;
   }
+
+  // Final grid for the row-emission pass. Set by whichever per-kind
+  // solver runs below. Wave + heat populate `final`; RD populates it
+  // from the V species (the visually-striking one).
+  let final: Float64Array;
+  if (spec.kind === "heat") {
+    final = solveHeat(spec, gridFromExpression, R, C, dx, boundary);
+  } else if (spec.kind === "wave") {
+    final = solveWave(spec, gridFromExpression, R, C, dx, boundary);
+  } else {
+    // reaction-diffusion
+    final = solveReactionDiffusion(spec, gridFromExpression, R, C, dx, boundary);
+  }
+  const u = final;
 
   // Emit rows in (r, c) order — row-major. Mark compilers (heatmap)
   // consume each row independently so order doesn't affect output,
@@ -198,9 +208,199 @@ export function solvePde(
   return out;
 }
 
+/**
+ * 5-point Laplacian neighbor lookup with periodic-or-clamp boundary
+ * handling. Pure helper shared by all three solvers; inlined manually
+ * in hot loops would be faster, but the V8 inliner handles this well
+ * enough and the deduplication helps reviewers.
+ *
+ * Returns the sum of the four neighbors (up + down + left + right);
+ * caller subtracts `4 * center` to complete the discrete Laplacian.
+ */
+function neighborSum(
+  u: Float64Array,
+  r: number,
+  c: number,
+  R: number,
+  C: number,
+  boundary: "clamp" | "periodic",
+): number {
+  let up: number;
+  let down: number;
+  let left: number;
+  let right: number;
+  if (boundary === "periodic") {
+    up = u[((r - 1 + R) % R) * C + c] as number;
+    down = u[((r + 1) % R) * C + c] as number;
+    left = u[r * C + ((c - 1 + C) % C)] as number;
+    right = u[r * C + ((c + 1) % C)] as number;
+  } else {
+    // clamp: edge cells read their own value as the "neighbor"
+    // outside the grid, freezing the boundary at its current value.
+    up = u[(r === 0 ? r : r - 1) * C + c] as number;
+    down = u[(r === R - 1 ? r : r + 1) * C + c] as number;
+    left = u[r * C + (c === 0 ? c : c - 1)] as number;
+    right = u[r * C + (c === C - 1 ? c : c + 1)] as number;
+  }
+  return up + down + left + right;
+}
+
+/**
+ * Heat-equation solver. Explicit forward Euler:
+ *     u_new = u + α·(∇²u),   α = D·dt/dx²
+ * where ∇²u uses the 5-point stencil. Stable when α ≤ 0.25 (the
+ * schema check; if it slips through, the integration diverges
+ * gracefully but the snapshot still emits).
+ */
+function solveHeat(
+  spec: PdeSolveDataSpec,
+  gridFromExpr: (expr: string) => Float64Array,
+  R: number,
+  C: number,
+  dx: number,
+  boundary: "clamp" | "periodic",
+): Float64Array {
+  // Bind both buffers with the same ArrayBufferLike type parameter
+  // so the ping-pong swap below typechecks. (TS 5.x parameterizes
+  // Float64Array by buffer kind; new Float64Array(n) gives
+  // ArrayBuffer, but gridFromExpr's return is ArrayBufferLike.
+  // Declaring both as the wider Float64Array<ArrayBufferLike>
+  // unifies them for the swap.)
+  let u: Float64Array<ArrayBufferLike> = gridFromExpr(spec.initial);
+  let uNext: Float64Array<ArrayBufferLike> = new Float64Array(R * C);
+  const D = (spec.params.D ?? 0) as number;
+  const alpha = (D * spec.dt) / (dx * dx);
+  for (let step = 0; step < spec.steps; step++) {
+    for (let r = 0; r < R; r++) {
+      for (let c = 0; c < C; c++) {
+        const idx = r * C + c;
+        const center = u[idx] as number;
+        const sum = neighborSum(u, r, c, R, C, boundary);
+        uNext[idx] = clampSamplerPrecision(center + alpha * (sum - 4 * center));
+      }
+    }
+    const tmp = u;
+    u = uNext;
+    uNext = tmp;
+  }
+  return u;
+}
+
+/**
+ * Wave-equation solver via leapfrog scheme.
+ *
+ *     u_new = 2·u − u_prev + β·∇²u − γ·dt·(u − u_prev)
+ *     β = (c·dt/dx)²    (CFL stable when β ≤ 1)
+ *
+ * Two state buffers (`u` current, `uPrev` previous step). Initial
+ * `u_prev` is synthesized from the optional `initial_velocity`
+ * expression — defaults to a still field (`u_prev = u`) so a
+ * standalone Gaussian initial condition just sits there until the
+ * Laplacian kicks it into motion.
+ */
+function solveWave(
+  spec: PdeSolveDataSpec,
+  gridFromExpr: (expr: string) => Float64Array,
+  R: number,
+  C: number,
+  dx: number,
+  boundary: "clamp" | "periodic",
+): Float64Array {
+  let u: Float64Array<ArrayBufferLike> = gridFromExpr(spec.initial);
+  const v0 = gridFromExpr(spec.initial_velocity ?? "0");
+  // u_prev = u - dt · velocity (backward-Euler-ish guess for the
+  // step before t=0). Synthesized so the leapfrog has both inputs
+  // it needs to take its first step.
+  let uPrev: Float64Array<ArrayBufferLike> = new Float64Array(R * C);
+  for (let i = 0; i < R * C; i++) {
+    uPrev[i] = (u[i] as number) - spec.dt * (v0[i] as number);
+  }
+  let uNext: Float64Array<ArrayBufferLike> = new Float64Array(R * C);
+  const c2 = ((spec.params.c ?? 1) as number) ** 2;
+  const beta = (c2 * spec.dt * spec.dt) / (dx * dx);
+  const gammaDt = ((spec.params.gamma ?? 0) as number) * spec.dt;
+  for (let step = 0; step < spec.steps; step++) {
+    for (let r = 0; r < R; r++) {
+      for (let c = 0; c < C; c++) {
+        const idx = r * C + c;
+        const center = u[idx] as number;
+        const prev = uPrev[idx] as number;
+        const sum = neighborSum(u, r, c, R, C, boundary);
+        const lap = sum - 4 * center;
+        uNext[idx] = clampSamplerPrecision(
+          2 * center - prev + beta * lap - gammaDt * (center - prev),
+        );
+      }
+    }
+    // Triple-swap: u_prev ← u, u ← u_next, u_next ← (recycled) u_prev
+    const tmp = uPrev;
+    uPrev = u;
+    u = uNext;
+    uNext = tmp;
+  }
+  return u;
+}
+
+/**
+ * Gray-Scott reaction-diffusion solver. Two coupled species U and
+ * V on the same grid:
+ *
+ *     ∂U/∂t = Dᵤ·∇²U − UV² + F·(1 − U)
+ *     ∂V/∂t = Dᵥ·∇²V + UV² − (F + k)·V
+ *
+ * `params.{Du, Dv, F, k}` parameterize the system. (`F, k)`
+ * combinations produce wildly different patterns: leopard spots,
+ * zebra stripes, coral worms. Returns the V grid — V is the
+ * species that produces the visually-striking pattern.
+ */
+function solveReactionDiffusion(
+  spec: PdeSolveDataSpec,
+  gridFromExpr: (expr: string) => Float64Array,
+  R: number,
+  C: number,
+  dx: number,
+  boundary: "clamp" | "periodic",
+): Float64Array {
+  let U: Float64Array<ArrayBufferLike> = gridFromExpr(spec.initial_U ?? "1");
+  let V: Float64Array<ArrayBufferLike> = gridFromExpr(
+    spec.initial_V ?? "exp(-30*(x*x + y*y)) * 0.25",
+  );
+  let Unext: Float64Array<ArrayBufferLike> = new Float64Array(R * C);
+  let Vnext: Float64Array<ArrayBufferLike> = new Float64Array(R * C);
+  const Du = (spec.params.Du ?? 1.0) as number;
+  const Dv = (spec.params.Dv ?? 0.5) as number;
+  const F = (spec.params.F ?? 0.055) as number;
+  const k = (spec.params.k ?? 0.062) as number;
+  const dt = spec.dt;
+  const dxSq = dx * dx;
+  for (let step = 0; step < spec.steps; step++) {
+    for (let r = 0; r < R; r++) {
+      for (let c = 0; c < C; c++) {
+        const idx = r * C + c;
+        const u = U[idx] as number;
+        const v = V[idx] as number;
+        const lapU = (neighborSum(U, r, c, R, C, boundary) - 4 * u) / dxSq;
+        const lapV = (neighborSum(V, r, c, R, C, boundary) - 4 * v) / dxSq;
+        const uvv = u * v * v;
+        Unext[idx] = clampSamplerPrecision(u + dt * (Du * lapU - uvv + F * (1 - u)));
+        Vnext[idx] = clampSamplerPrecision(v + dt * (Dv * lapV + uvv - (F + k) * v));
+      }
+    }
+    const tU = U;
+    U = Unext;
+    Unext = tU;
+    const tV = V;
+    V = Vnext;
+    Vnext = tV;
+  }
+  return V;
+}
+
 function validateSpec(spec: PdeSolveDataSpec): void {
-  if (spec.kind !== "heat") {
-    throw new Error(`pde-solve: only kind "heat" is supported in v1 (got "${spec.kind}")`);
+  if (spec.kind !== "heat" && spec.kind !== "wave" && spec.kind !== "reaction-diffusion") {
+    throw new Error(
+      `pde-solve: kind must be "heat", "wave", or "reaction-diffusion" (got "${spec.kind}")`,
+    );
   }
   if (
     !Number.isFinite(spec.domain.x[0]) ||
@@ -231,15 +431,62 @@ function validateSpec(spec: PdeSolveDataSpec): void {
   if (!Number.isFinite(spec.dt) || spec.dt <= 0) {
     throw new Error(`pde-solve: dt must be a positive finite number (got ${spec.dt})`);
   }
-  const D = (spec.params.D ?? 0) as number;
-  if (!Number.isFinite(D) || D < 0) {
-    throw new Error(`pde-solve: params.D must be a non-negative finite number (got ${D})`);
-  }
   const dx = (spec.domain.x[1] - spec.domain.x[0]) / spec.grid.cols;
-  const cfl = (D * spec.dt) / (dx * dx);
-  if (cfl > PDE_CFL_LIMIT) {
-    throw new Error(
-      `pde-solve: CFL stability violated. D·dt/dx² = ${cfl.toFixed(4)} > ${PDE_CFL_LIMIT}. Reduce dt or D, or increase grid resolution.`,
-    );
+
+  // Per-kind CFL stability. Heat is the explicit-Euler Laplacian:
+  // D·dt/dx² ≤ 0.25. Wave is the leapfrog: c·dt/dx ≤ 1. RD has two
+  // diffusion coefficients; bound by max(Du, Dv).
+  if (spec.kind === "heat") {
+    const D = (spec.params.D ?? 0) as number;
+    if (!Number.isFinite(D) || D < 0) {
+      throw new Error(`pde-solve: params.D must be a non-negative finite number (got ${D})`);
+    }
+    const cfl = (D * spec.dt) / (dx * dx);
+    if (cfl > PDE_CFL_LIMIT) {
+      throw new Error(
+        `pde-solve: CFL stability violated (heat). D·dt/dx² = ${cfl.toFixed(4)} > ${PDE_CFL_LIMIT}. Reduce dt or D, or increase grid resolution.`,
+      );
+    }
+  } else if (spec.kind === "wave") {
+    const c = (spec.params.c ?? 1) as number;
+    if (!Number.isFinite(c) || c <= 0) {
+      throw new Error(`pde-solve: params.c must be a positive finite number (got ${c})`);
+    }
+    const cfl = (c * spec.dt) / dx;
+    if (cfl > 1) {
+      throw new Error(
+        `pde-solve: CFL stability violated (wave). c·dt/dx = ${cfl.toFixed(4)} > 1. Reduce dt or c, or increase grid resolution.`,
+      );
+    }
+    const gamma = (spec.params.gamma ?? 0) as number;
+    if (!Number.isFinite(gamma) || gamma < 0) {
+      throw new Error(
+        `pde-solve: params.gamma must be a non-negative finite number (got ${gamma})`,
+      );
+    }
+  } else {
+    // reaction-diffusion
+    const Du = (spec.params.Du ?? 1.0) as number;
+    const Dv = (spec.params.Dv ?? 0.5) as number;
+    const F = (spec.params.F ?? 0.055) as number;
+    const k = (spec.params.k ?? 0.062) as number;
+    for (const [name, v] of [
+      ["Du", Du],
+      ["Dv", Dv],
+      ["F", F],
+      ["k", k],
+    ] as const) {
+      if (!Number.isFinite(v) || v < 0) {
+        throw new Error(
+          `pde-solve: params.${name} must be a non-negative finite number (got ${v})`,
+        );
+      }
+    }
+    const cfl = (Math.max(Du, Dv) * spec.dt) / (dx * dx);
+    if (cfl > PDE_CFL_LIMIT) {
+      throw new Error(
+        `pde-solve: CFL stability violated (RD). max(Du,Dv)·dt/dx² = ${cfl.toFixed(4)} > ${PDE_CFL_LIMIT}. Reduce dt or diffusion coefficients, or increase grid resolution.`,
+      );
+    }
   }
 }

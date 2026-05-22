@@ -244,7 +244,7 @@ export const TrajectoryDataSchema = z
 export const PdeSolveDataSchema = z
   .object({
     shape: z.literal("pde-solve"),
-    kind: z.literal("heat"),
+    kind: z.enum(["heat", "wave", "reaction-diffusion"]),
     domain: z
       .object({
         x: z.tuple([
@@ -267,6 +267,12 @@ export const PdeSolveDataSchema = z
       })
       .strict(),
     initial: z.string().min(1),
+    /** Wave-only optional: initial ∂u/∂t. Defaults to "0". */
+    initial_velocity: z.string().min(1).optional(),
+    /** RD-only optional: initial U. Defaults to "1". */
+    initial_U: z.string().min(1).optional(),
+    /** RD-only optional: initial V. Defaults to a small Gaussian seed. */
+    initial_V: z.string().min(1).optional(),
     params: z.record(z.number().refine(Number.isFinite, "params values must be finite")),
     boundary: z.enum(["clamp", "periodic"]),
     steps: z.number().int().min(1).max(1000),
@@ -275,15 +281,28 @@ export const PdeSolveDataSchema = z
   .strict()
   .refine(
     (s) => {
-      const D = s.params.D ?? 0;
-      if (!Number.isFinite(D) || D < 0) return false;
+      // Per-kind CFL stability. Heat: D·dt/dx² ≤ 0.25. Wave:
+      // c·dt/dx ≤ 1. RD: max(Du,Dv)·dt/dx² ≤ 0.25.
       const dx = (s.domain.x[1] - s.domain.x[0]) / s.grid.cols;
-      const cfl = (D * s.dt) / (dx * dx);
-      return cfl <= 0.25;
+      if (s.kind === "heat") {
+        const D = s.params.D ?? 0;
+        if (!Number.isFinite(D) || D < 0) return false;
+        return (D * s.dt) / (dx * dx) <= 0.25;
+      }
+      if (s.kind === "wave") {
+        const c = s.params.c ?? 1;
+        if (!Number.isFinite(c) || c <= 0) return false;
+        return (c * s.dt) / dx <= 1;
+      }
+      // reaction-diffusion
+      const Du = s.params.Du ?? 1.0;
+      const Dv = s.params.Dv ?? 0.5;
+      if (!Number.isFinite(Du) || !Number.isFinite(Dv) || Du < 0 || Dv < 0) return false;
+      return (Math.max(Du, Dv) * s.dt) / (dx * dx) <= 0.25;
     },
     {
       message:
-        "pde-solve: CFL stability violated — D · dt / dx² must be ≤ 0.25. Reduce dt or D, or increase grid.cols.",
+        "pde-solve: CFL stability violated. heat: D·dt/dx² ≤ 0.25; wave: c·dt/dx ≤ 1; reaction-diffusion: max(Du,Dv)·dt/dx² ≤ 0.25. Reduce dt or relevant coefficients, or increase grid.cols.",
     },
   );
 

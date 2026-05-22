@@ -284,7 +284,7 @@
         <label><span class="lbl"><span>damping γ</span><strong id="lbl-wave-g">0.003</strong></span><input id="wave-g" type="range" min="0" max="0.05" step="0.001" value="0.003"></label>
         <label><span class="lbl"><span>auto-drops / sec</span><strong id="lbl-wave-rate">0.5</strong></span><input id="wave-rate" type="range" min="0" max="3" step="0.1" value="0.5"></label>
       </div>
-      <p class="demo-note">Solved by an explicit finite-difference scheme on a 240×240 grid: each cell's next state is computed from its 4 neighbors. The same algorithm scaled to 1024³ runs on every modern supercomputer doing climate / seismology / ocean simulation. <strong>The static cousin of this is now a Glyph spec</strong> — RFC #4 shipped <code>data.shape: "pde-solve"</code> with <code>kind: "heat"</code> (waves + reaction-diffusion follow); see <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/math/heat-diffusion.json">__fixtures__/math/heat-diffusion.json</a>.</p>
+      <p class="demo-note">Solved by an explicit finite-difference scheme on a 240×240 grid: each cell's next state is computed from its 4 neighbors. The same algorithm scaled to 1024³ runs on every modern supercomputer doing climate / seismology / ocean simulation. <strong>This is now a Glyph spec</strong> — RFC #4 v2 shipped <code>kind: "wave"</code> on top of v1's heat solver; see <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/math/wave-ripples.json">__fixtures__/math/wave-ripples.json</a> (the leapfrog snapshot equivalent of this animated demo).</p>
     </div>
   </div>
 </section>
@@ -313,7 +313,7 @@
           <button data-preset="0.082,0.06">solitons</button>
         </div>
       </div>
-      <p class="demo-note">Same algorithm runs every animal-coat-pattern paper for the past 70 years. Vary F and k by 0.001 and you cross a phase boundary — leopard becomes zebra becomes labyrinth becomes self-replicating spots. Real morphogenesis is governed by ~50 such parameters; this 2-parameter toy already covers an astonishing range of biology.</p>
+      <p class="demo-note">Same algorithm runs every animal-coat-pattern paper for the past 70 years. Vary F and k by 0.001 and you cross a phase boundary — leopard becomes zebra becomes labyrinth becomes self-replicating spots. Real morphogenesis is governed by ~50 such parameters; this 2-parameter toy already covers an astonishing range of biology. <strong>This is now a Glyph spec</strong> — RFC #4 v2 added <code>kind: "reaction-diffusion"</code> to <code>pde-solve</code>; see <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/math/rd-spots.json">__fixtures__/math/rd-spots.json</a>.</p>
     </div>
   </div>
 </section>
