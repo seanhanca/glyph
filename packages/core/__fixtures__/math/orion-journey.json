@@ -1,0 +1,30 @@
+{
+  "version": "glyph/0.1",
+  "title": "Orion's Journey: Earth → Moon → Earth (Artemis I free-return path)",
+  "data": {
+    "function": {
+      "shape": "function",
+      "parameter": { "name": "t", "min": 0, "max": 1, "samples": 400 },
+      "xExpr": "(t < 0.3) ? (0.6 + 4.9*(t/0.3)) : ((t < 0.7) ? (8 + 2.5*cos(PI - 1.5*PI*((t-0.3)/0.4))) : (8 - 7.4*((t-0.7)/0.3)))",
+      "yExpr": "(t < 0.3) ? (sin((t/0.3)*PI)*1.5) : ((t < 0.7) ? (2.5*sin(PI - 1.5*PI*((t-0.3)/0.4))) : (-2.5*(1 - (t-0.7)/0.3) - sin(((t-0.7)/0.3)*PI)*0.5))"
+    }
+  },
+  "layers": [
+    {
+      "mark": "line",
+      "encoding": {
+        "x": {
+          "field": "x",
+          "type": "quantitative",
+          "scale": { "domain": [-2, 12] }
+        },
+        "y": {
+          "field": "y",
+          "type": "quantitative",
+          "scale": { "domain": [-4, 4] }
+        }
+      }
+    }
+  ],
+  "animation": { "kind": "draw-in", "duration_ms": 12000, "easing": "ease-in-out" }
+}

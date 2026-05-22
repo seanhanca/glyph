@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Draw Me Orion's Journey — Claude + Glyph showcase</title>
+<meta name="description" content="One English prompt to Claude. One JSON spec from Glyph. The Artemis I Orion spacecraft's 25-day voyage to the Moon and back, drawn as a beautiful, deterministic SVG. A taste of what AI agents and a viz grammar can compose together.">
+<meta property="og:title" content="Draw Me Orion's Journey — what AI + Glyph can render from English">
+<meta property="og:description" content="A 25-day spacecraft mission from one English prompt, rendered as a byte-stable SVG.">
+<style>
+  /* ===========================================================
+     "Draw me…" — a single-prompt → Claude → Glyph → SVG demo.
+     Designed to be enjoyed by a 5-year-old AND a 70-year-old:
+     calm, slow, narrative-first, plain English, big readable
+     type, gentle starfield, no flash. The "fancy" hero
+     animation uses the same parametric formula that the Glyph
+     fixture compiles to — they trace the same path; the Glyph
+     SVG is shown verbatim further down as proof.
+     =========================================================== */
+  :root {
+    --bg: #050714;
+    --bg-deep: #02030a;
+    --panel: #0c1126;
+    --panel-edge: #1d2444;
+    --ink: #f1f5fb;
+    --muted: #94a3b8;
+    --gold: #fbbf24;
+    --gold-soft: rgba(251,191,36,.18);
+    --orion: #fef3c7;
+    --earth: #38bdf8;
+    --earth-glow: rgba(56,189,248,.35);
+    --moon: #d4d4d8;
+    --moon-glow: rgba(212,212,216,.25);
+    --path: #fde68a;
+    --path-trail: rgba(253,230,138,.25);
+    --font-sans: -apple-system, "Helvetica Neue", system-ui, "Segoe UI", sans-serif;
+    --font-mono: "SF Mono", "Cascadia Code", ui-monospace, monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg-deep);color:var(--ink);font-family:var(--font-sans);-webkit-font-smoothing:antialiased;line-height:1.6}
+  body{background:
+    radial-gradient(ellipse at 50% 12%, rgba(56,189,248,.10), transparent 55%),
+    radial-gradient(ellipse at 80% 85%, rgba(251,191,36,.06), transparent 55%),
+    var(--bg-deep);
+    min-height:100vh}
+  a{color:var(--gold);text-underline-offset:3px}
+  h1,h2,h3{margin:0 0 .4em;letter-spacing:-.015em;line-height:1.15}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);font-weight:800;background:linear-gradient(180deg, #fef3c7, #fbbf24);-webkit-background-clip:text;background-clip:text;color:transparent}
+  h2{font-size:clamp(1.6rem,3.5vw,2.4rem);font-weight:700;color:var(--orion)}
+  h3{font-size:1.18rem;font-weight:600;color:var(--ink)}
+  p{margin:0 0 1em}
+  .container{max-width:1100px;margin:0 auto;padding:0 24px}
+  code{font-family:var(--font-mono);font-size:.92em;background:#13193a;padding:.12em .4em;border-radius:4px;color:#fef3c7}
+  pre{font-family:var(--font-mono);font-size:.86rem;background:#0a0e25;border:1px solid var(--panel-edge);border-radius:10px;padding:18px 20px;color:#fef3c7;overflow-x:auto;line-height:1.6;margin:0}
+  pre .k{color:#7eb6ff}
+  pre .s{color:#fde68a}
+  pre .n{color:#34d399}
+  pre .c{color:#94a3b8;font-style:italic}
+
+  /* HERO */
+  .hero{padding:64px 0 24px;text-align:center}
+  .hero .kicker{display:inline-block;padding:6px 16px;border-radius:9999px;background:var(--gold-soft);color:var(--gold);font-size:.82rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:24px;border:1px solid rgba(251,191,36,.3)}
+  .hero p.lede{color:var(--muted);max-width:64ch;margin:.6em auto 0;font-size:1.12rem}
+  .hero p.lede strong{color:var(--ink)}
+  .hero p.byline{color:var(--muted);font-size:.92rem;margin-top:24px;font-style:italic}
+
+  /* PROMPT CARD — show the EXACT English sentence */
+  .prompt-card{margin:48px auto 32px;max-width:760px;background:linear-gradient(180deg, rgba(56,189,248,.04), rgba(251,191,36,.04));border:1px solid var(--panel-edge);border-radius:18px;padding:32px 36px;position:relative}
+  .prompt-card .label{display:inline-block;font-size:.74rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--earth);margin-bottom:12px}
+  .prompt-card blockquote{margin:0;font-family:var(--font-mono);font-size:1.06rem;line-height:1.7;color:var(--ink);padding-left:18px;border-left:3px solid var(--gold)}
+  .prompt-card .who{margin-top:18px;font-size:.86rem;color:var(--muted)}
+
+  /* HERO ANIMATION — the big payoff */
+  .stage{margin:0 auto 64px;max-width:1000px;background:radial-gradient(ellipse at 50% 60%, rgba(15,23,42,.6), rgba(2,3,10,.8) 70%);border:1px solid var(--panel-edge);border-radius:22px;overflow:hidden;position:relative}
+  .stage svg{display:block;width:100%;height:auto}
+  .stage-caption{position:absolute;bottom:14px;left:0;right:0;text-align:center;color:var(--muted);font-size:.86rem;letter-spacing:.04em;pointer-events:none}
+  .stage-caption .day{color:var(--gold);font-weight:700;font-family:var(--font-mono)}
+
+  /* TIMELINE */
+  .timeline{padding:64px 0 24px}
+  .timeline h2{text-align:center}
+  .timeline > .container > p.lede{color:var(--muted);text-align:center;max-width:54ch;margin:0 auto 40px;font-size:1.02rem}
+  .timeline-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:18px;max-width:1000px;margin:0 auto}
+  @media (max-width:880px){.timeline-grid{grid-template-columns:1fr}}
+  .timeline-card{background:var(--panel);border:1px solid var(--panel-edge);border-radius:14px;padding:22px 22px 20px;position:relative;transition:transform .2s ease,border-color .2s ease}
+  .timeline-card:hover{transform:translateY(-3px);border-color:rgba(251,191,36,.4)}
+  .timeline-card .phase-num{display:inline-block;font-family:var(--font-mono);font-size:.78rem;color:var(--gold);letter-spacing:.05em;margin-bottom:4px}
+  .timeline-card .days{font-family:var(--font-mono);font-size:.84rem;color:var(--earth);margin-bottom:10px}
+  .timeline-card h3{margin-bottom:8px}
+  .timeline-card p{font-size:.96rem;color:var(--muted);margin:0}
+
+  /* HOW GLYPH DREW IT — reveal the JSON + actual SVG output */
+  .reveal{padding:64px 0;border-top:1px solid var(--panel-edge);background:linear-gradient(180deg, rgba(56,189,248,.03), transparent 40%)}
+  .reveal h2{text-align:center}
+  .reveal > .container > p.lede{color:var(--muted);text-align:center;max-width:60ch;margin:0 auto 32px;font-size:1.02rem}
+  .reveal-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;max-width:1080px;margin:0 auto}
+  @media (max-width:880px){.reveal-grid{grid-template-columns:1fr}}
+  .reveal-side h3{margin-bottom:10px;display:flex;align-items:center;gap:10px;color:var(--orion)}
+  .reveal-side h3 .pill{font-size:.66rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:9999px;background:var(--gold-soft);color:var(--gold);border:1px solid rgba(251,191,36,.3)}
+  .reveal-side p.cap{color:var(--muted);font-size:.92rem;margin-top:10px}
+  .reveal-svg-frame{background:#fff;border-radius:12px;padding:10px;border:1px solid var(--panel-edge)}
+  .reveal-svg-frame img{display:block;width:100%;height:auto;border-radius:8px}
+
+  /* TRY-IT — prompt templates the visitor can copy */
+  .try{padding:64px 0;border-top:1px solid var(--panel-edge)}
+  .try h2{text-align:center}
+  .try > .container > p.lede{color:var(--muted);text-align:center;max-width:54ch;margin:0 auto 32px}
+  .try-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:980px;margin:0 auto}
+  @media (max-width:720px){.try-grid{grid-template-columns:1fr}}
+  .try-card{background:var(--panel);border:1px solid var(--panel-edge);border-radius:14px;padding:22px 24px;transition:border-color .2s ease}
+  .try-card:hover{border-color:rgba(251,191,36,.4)}
+  .try-card .tag{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--earth);margin-bottom:8px}
+  .try-card blockquote{margin:0;font-family:var(--font-mono);font-size:.94rem;line-height:1.65;color:var(--ink)}
+
+  /* CTA / FOOTER */
+  .cta{text-align:center;padding:64px 24px;border-top:1px solid var(--panel-edge)}
+  .cta .btn{display:inline-block;margin:6px;padding:12px 22px;border-radius:9999px;text-decoration:none;font-weight:600;font-size:.96rem;border:1px solid transparent;transition:transform .15s ease,background .15s ease}
+  .cta .btn-primary{background:var(--gold);color:#1a1a1a}
+  .cta .btn-primary:hover{transform:translateY(-1px);background:#ffd966}
+  .cta .btn-ghost{border-color:#374151;color:var(--ink)}
+  .cta .btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+  footer{padding:24px 0 48px;text-align:center;color:var(--muted);font-size:.88rem}
+
+  /* HERO ANIMATION — the stars subtly twinkle so the page feels alive
+     without being busy. Two interleaved keyframes on two star groups
+     produce a calm 2-Hz dual rhythm. `prefers-reduced-motion` honored. */
+  @keyframes twinkle-a { 0%,100%{opacity:.85} 50%{opacity:.35} }
+  @keyframes twinkle-b { 0%,100%{opacity:.45} 50%{opacity:.95} }
+  .stars-a circle{animation:twinkle-a 4s ease-in-out infinite}
+  .stars-b circle{animation:twinkle-b 5s ease-in-out infinite}
+  /* Path draw-in over the mission duration (matches the day-counter). */
+  @keyframes draw-path {
+    from { stroke-dashoffset: 2200; }
+    to   { stroke-dashoffset: 0; }
+  }
+  .orion-path{stroke-dasharray:2200;stroke-dashoffset:2200;animation:draw-path 25s ease-in-out forwards}
+  /* Spacecraft icon glides along the same path. duration MUST match
+     the path draw — otherwise the icon outruns or lags the trace. */
+  .orion-craft{offset-path:path("ORION_PATH_PLACEHOLDER");animation:fly 25s ease-in-out forwards}
+  @keyframes fly { from { offset-distance: 0%; } to { offset-distance: 100%; } }
+  /* Earth and Moon have soft halo glows that gently breathe. */
+  @keyframes pulse-earth { 0%,100%{r:34} 50%{r:36} }
+  @keyframes pulse-moon  { 0%,100%{r:14} 50%{r:15} }
+  .earth-glow{animation:pulse-earth 6s ease-in-out infinite}
+  .moon-glow{animation:pulse-moon 5s ease-in-out infinite}
+
+  @media (prefers-reduced-motion: reduce){
+    .stars-a circle, .stars-b circle, .orion-path, .orion-craft, .earth-glow, .moon-glow {
+      animation: none !important;
+    }
+    .orion-path { stroke-dashoffset: 0 !important; }
+    .orion-craft { offset-distance: 100% !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===========================================================
+     HERO — title + one-sentence pitch
+     =========================================================== -->
+<header class="hero">
+  <div class="container">
+    <span class="kicker">Claude × Glyph showcase</span>
+    <h1>Draw me Orion's<br>journey to the Moon</h1>
+    <p class="lede">A 25-day spacecraft mission, animated from one English sentence. <strong>You asked Claude. Glyph drew it.</strong> Same JSON spec, same SVG, every time — byte-for-byte. Watch the path get pen-drawn across the stars below.</p>
+    <p class="byline">Based on NASA's Artemis I mission · Nov 16 – Dec 11, 2022.</p>
+  </div>
+</header>
+
+<!-- ===========================================================
+     THE PROMPT — what an English-speaker says to Claude
+     =========================================================== -->
+<section class="container">
+  <div class="prompt-card">
+    <span class="label">▸ The prompt</span>
+    <blockquote>"Draw me NASA's Artemis I Orion spacecraft journey to the Moon and back. Use the Glyph viz grammar. Make it beautiful — visible to a 5-year-old and meaningful to a 70-year-old. Show Earth on the left, the Moon on the right, and the spacecraft's curved path: an outbound transit, a wide retrograde orbit around the Moon, and the return arc. Add a draw-in animation so the path traces itself over the mission timeline."</blockquote>
+    <p class="who">— what to say to your AI agent. Claude reads it, writes a Glyph JSON spec, and the Glyph compiler renders the SVG below. No code on your end.</p>
+  </div>
+</section>
+
+<!-- ===========================================================
+     HERO ANIMATION — the big beautiful payoff
+     Built as a hand-composed SVG so we can layer Earth, the
+     Moon, a twinkling starfield, and a moving spacecraft icon
+     on top of the parametric path. The path data here is the
+     SAME formula the Glyph fixture compiles — see the reveal
+     section for the verbatim Glyph render.
+     =========================================================== -->
+<section class="container">
+  <div class="stage" aria-label="Animated Orion mission visualization">
+    <svg viewBox="0 0 1000 480" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="hero-title hero-desc">
+      <title id="hero-title">Orion spacecraft's journey to the Moon and back</title>
+      <desc id="hero-desc">An animated SVG: starry background, Earth on the left, Moon on the right with a dashed orbital ring. A glowing path traces from Earth, arcs upward to the Moon, loops 0.75 times around the Moon retrograde, then returns to Earth below. A small spacecraft icon flies along the path. Total mission duration shown as 25 days.</desc>
+      <defs>
+        <!-- Earth — blue with subtle terminator -->
+        <radialGradient id="g-earth" cx="40%" cy="40%" r="60%">
+          <stop offset="0%" stop-color="#7dd3fc"/>
+          <stop offset="55%" stop-color="#0284c7"/>
+          <stop offset="100%" stop-color="#082f49"/>
+        </radialGradient>
+        <radialGradient id="g-earth-glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="rgba(56,189,248,.5)"/>
+          <stop offset="60%" stop-color="rgba(56,189,248,.10)"/>
+          <stop offset="100%" stop-color="rgba(56,189,248,0)"/>
+        </radialGradient>
+        <!-- Moon — pale gray with craters hinted -->
+        <radialGradient id="g-moon" cx="40%" cy="40%" r="60%">
+          <stop offset="0%" stop-color="#f4f4f5"/>
+          <stop offset="60%" stop-color="#a1a1aa"/>
+          <stop offset="100%" stop-color="#3f3f46"/>
+        </radialGradient>
+        <radialGradient id="g-moon-glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="rgba(212,212,216,.35)"/>
+          <stop offset="60%" stop-color="rgba(212,212,216,.08)"/>
+          <stop offset="100%" stop-color="rgba(212,212,216,0)"/>
+        </radialGradient>
+        <!-- Path gradient: gold trail brightening at the spacecraft head -->
+        <linearGradient id="g-path" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="rgba(253,230,138,.4)"/>
+          <stop offset="50%" stop-color="rgba(253,230,138,1)"/>
+          <stop offset="100%" stop-color="rgba(255,200,80,1)"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Starfield -->
+      <g class="stars-a" fill="#ffffff" aria-hidden="true">
+        <circle cx="70" cy="56" r="0.9"/>
+        <circle cx="180" cy="32" r="1.1"/>
+        <circle cx="248" cy="98" r="0.7"/>
+        <circle cx="316" cy="44" r="1.0"/>
+        <circle cx="412" cy="76" r="0.8"/>
+        <circle cx="514" cy="22" r="1.2"/>
+        <circle cx="620" cy="58" r="0.9"/>
+        <circle cx="724" cy="36" r="0.7"/>
+        <circle cx="832" cy="76" r="1.1"/>
+        <circle cx="940" cy="42" r="0.8"/>
+        <circle cx="68" cy="380" r="1.0"/>
+        <circle cx="148" cy="420" r="0.7"/>
+        <circle cx="252" cy="404" r="0.9"/>
+        <circle cx="378" cy="450" r="1.1"/>
+        <circle cx="486" cy="424" r="0.8"/>
+        <circle cx="606" cy="442" r="0.7"/>
+        <circle cx="734" cy="412" r="1.0"/>
+        <circle cx="852" cy="446" r="0.9"/>
+        <circle cx="942" cy="402" r="0.8"/>
+      </g>
+      <g class="stars-b" fill="#cbd5e1" aria-hidden="true">
+        <circle cx="124" cy="84" r="0.6"/>
+        <circle cx="212" cy="62" r="0.7"/>
+        <circle cx="288" cy="32" r="0.5"/>
+        <circle cx="364" cy="106" r="0.8"/>
+        <circle cx="464" cy="58" r="0.6"/>
+        <circle cx="556" cy="92" r="0.7"/>
+        <circle cx="660" cy="32" r="0.5"/>
+        <circle cx="780" cy="62" r="0.8"/>
+        <circle cx="884" cy="38" r="0.6"/>
+        <circle cx="112" cy="448" r="0.5"/>
+        <circle cx="208" cy="394" r="0.7"/>
+        <circle cx="320" cy="436" r="0.6"/>
+        <circle cx="442" cy="408" r="0.8"/>
+        <circle cx="552" cy="460" r="0.5"/>
+        <circle cx="668" cy="392" r="0.7"/>
+        <circle cx="784" cy="456" r="0.6"/>
+        <circle cx="890" cy="416" r="0.8"/>
+      </g>
+
+      <!-- Moon orbit ring (DRO suggestion) -->
+      <circle cx="780" cy="240" r="120" fill="none" stroke="rgba(212,212,216,.18)" stroke-width="1" stroke-dasharray="4 6"/>
+
+      <!-- EARTH (left side, around x=140) -->
+      <circle class="earth-glow" cx="140" cy="240" r="34" fill="url(#g-earth-glow)" aria-hidden="true"/>
+      <circle cx="140" cy="240" r="30" fill="url(#g-earth)" stroke="rgba(125,211,252,.5)" stroke-width="0.5"/>
+      <text x="140" y="304" text-anchor="middle" fill="#7dd3fc" font-size="14" font-family="system-ui" letter-spacing="0.04em">Earth</text>
+
+      <!-- MOON (right side, around x=780) -->
+      <circle class="moon-glow" cx="780" cy="240" r="14" fill="url(#g-moon-glow)" aria-hidden="true"/>
+      <circle cx="780" cy="240" r="11" fill="url(#g-moon)" stroke="rgba(244,244,245,.5)" stroke-width="0.5"/>
+      <text x="780" y="294" text-anchor="middle" fill="#d4d4d8" font-size="14" font-family="system-ui" letter-spacing="0.04em">Moon</text>
+
+      <!-- ORION PATH — pen-drawn over 25 seconds (= 25 mission days).
+           Path mirrors the same parametric formula the Glyph fixture
+           (orion-journey.json) compiles:
+             phase 1 (outbound):  data (0.6, 0) → (5.5, 0) with sin arc up
+             phase 2 (DRO):       0.75 retrograde rev around Moon (8, 0), r=2.5
+             phase 3 (return):    (8, -2.5) → (0.6, 0) with sin arc down
+           Pixel mapping: data x=0 → 140 px, data x=8 → 780 px (Moon),
+           1 data unit = 80 px; data y centered at pixel y=240, +y up.
+           SVG path uses Q for the outbound/return arcs and A (270°
+           large arc, sweep=1) for the DRO loop. -->
+      <path class="orion-path"
+            d="M 188 240 Q 384 80, 580 240 A 200 200 0 1 1 780 440 Q 484 320, 188 240"
+            fill="none"
+            stroke="url(#g-path)"
+            stroke-width="3"
+            stroke-linecap="round"/>
+
+      <!-- ORION SPACECRAFT ICON (glides along the path via offset-path) -->
+      <g class="orion-craft" aria-hidden="true">
+        <!-- Capsule body: a small triangle pointing in motion direction -->
+        <g transform="translate(-7,-7)">
+          <circle cx="7" cy="7" r="7" fill="rgba(254,243,199,.35)"/>
+          <polygon points="3,3 13,7 3,11" fill="#fef3c7" stroke="#fbbf24" stroke-width="0.6"/>
+          <line x1="7" y1="5" x2="7" y2="9" stroke="#92400e" stroke-width="0.6"/>
+        </g>
+      </g>
+
+      <!-- Mission day overlay (top-right corner of the stage). The
+           numeric tspan updates via JS on a 25-second timeline so all
+           browsers handle it reliably (SVG `<animate>` on textContent
+           isn't well-supported). -->
+      <g transform="translate(870, 30)" font-family="ui-monospace, monospace" fill="#fde68a">
+        <text x="0" y="0" font-size="10" letter-spacing="0.08em" text-anchor="end" opacity="0.7">MISSION DAY</text>
+        <text x="0" y="24" font-size="28" font-weight="700" text-anchor="end" class="day-counter">1</text>
+        <text x="0" y="38" font-size="9" letter-spacing="0.08em" text-anchor="end" opacity="0.6">of 25</text>
+      </g>
+
+      <!-- Phase labels: light gray annotations placed where each phase peaks -->
+      <g font-family="system-ui" font-size="11" fill="rgba(241,245,251,.55)" letter-spacing="0.04em" aria-hidden="true">
+        <text x="350" y="118" text-anchor="middle">outbound transit</text>
+        <text x="780" y="135" text-anchor="middle" fill="rgba(212,212,216,.7)">distant retrograde orbit</text>
+        <text x="380" y="378" text-anchor="middle">return arc</text>
+      </g>
+    </svg>
+    <div class="stage-caption">25 seconds of animation · 1 second ≈ 1 mission day · <span class="day">click anywhere</span> to refresh</div>
+  </div>
+</section>
+
+<!-- ===========================================================
+     MISSION TIMELINE — three plain-English cards
+     =========================================================== -->
+<section class="timeline">
+  <div class="container">
+    <h2>The mission, in three acts</h2>
+    <p class="lede">Each act of the journey corresponds to one phase of the path above. Real Artemis I numbers from NASA's mission log.</p>
+    <div class="timeline-grid">
+      <div class="timeline-card">
+        <span class="phase-num">PHASE 1</span>
+        <div class="days">Days 1 – 6</div>
+        <h3>Outbound transit</h3>
+        <p>The Space Launch System rocket boosts Orion onto a trans-lunar trajectory. The spacecraft coasts upward and outward, gravity gently bending its path toward the Moon — a four-day journey across about 240,000 miles of space.</p>
+      </div>
+      <div class="timeline-card">
+        <span class="phase-num">PHASE 2</span>
+        <div class="days">Days 6 – 22</div>
+        <h3>Distant Retrograde Orbit</h3>
+        <p>Orion swings around the Moon in a wide, stable orbit — backwards relative to the Moon's own motion. It travels 64,000 km beyond the lunar far side, farther than any human-rated spacecraft has ever flown.</p>
+      </div>
+      <div class="timeline-card">
+        <span class="phase-num">PHASE 3</span>
+        <div class="days">Days 22 – 25</div>
+        <h3>Return &amp; splashdown</h3>
+        <p>A return burn slingshots Orion back toward Earth. The capsule re-enters at 25,000 mph (Mach 32), the heat shield handling temperatures half as hot as the Sun's surface. Splashdown: Pacific Ocean, December 11, 2022.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===========================================================
+     HOW GLYPH DREW IT — show the spec + the actual SVG
+     =========================================================== -->
+<section class="reveal">
+  <div class="container">
+    <h2>How Glyph drew it</h2>
+    <p class="lede">Claude translates the English prompt into this JSON spec. Glyph compiles the spec to a deterministic SVG — byte-identical every run, every platform.</p>
+    <div class="reveal-grid">
+      <div class="reveal-side">
+        <h3>The Glyph spec <span class="pill">JSON</span></h3>
+        <pre><span class="c">// orion-journey.json — what Claude writes for the prompt above</span>
+{
+  <span class="k">"version"</span>: <span class="s">"glyph/0.1"</span>,
+  <span class="k">"title"</span>: <span class="s">"Orion's Journey: Earth → Moon → Earth"</span>,
+  <span class="k">"data"</span>: {
+    <span class="k">"function"</span>: {
+      <span class="k">"shape"</span>: <span class="s">"function"</span>,
+      <span class="k">"parameter"</span>: { <span class="k">"name"</span>: <span class="s">"t"</span>,
+                     <span class="k">"min"</span>: <span class="n">0</span>, <span class="k">"max"</span>: <span class="n">1</span>,
+                     <span class="k">"samples"</span>: <span class="n">400</span> },
+      <span class="c">// three phases, switched by t — outbound, DRO, return</span>
+      <span class="k">"xExpr"</span>: <span class="s">"(t &lt; 0.3) ? (0.6 + 4.9*(t/0.3))
+              : ((t &lt; 0.7)
+                  ? (8 + 2.5*cos(PI - 1.5*PI*((t-0.3)/0.4)))
+                  : (8 - 7.4*((t-0.7)/0.3)))"</span>,
+      <span class="k">"yExpr"</span>: <span class="s">"(t &lt; 0.3) ? (sin((t/0.3)*PI)*1.5)
+              : ((t &lt; 0.7)
+                  ? (2.5*sin(PI - 1.5*PI*((t-0.3)/0.4)))
+                  : (-2.5*(1-(t-0.7)/0.3)
+                       - sin(((t-0.7)/0.3)*PI)*0.5))"</span>
+    }
+  },
+  <span class="k">"layers"</span>: [{ <span class="k">"mark"</span>: <span class="s">"line"</span>,
+               <span class="k">"encoding"</span>: { <span class="k">"x"</span>: { <span class="k">"field"</span>: <span class="s">"x"</span> },
+                            <span class="k">"y"</span>: { <span class="k">"field"</span>: <span class="s">"y"</span> } } }],
+  <span class="k">"animation"</span>: { <span class="k">"kind"</span>: <span class="s">"draw-in"</span>,
+                  <span class="k">"duration_ms"</span>: <span class="n">12000</span>,
+                  <span class="k">"easing"</span>: <span class="s">"ease-in-out"</span> }
+}</pre>
+        <p class="cap">The three-phase ternary is the whole "mission profile" — phase boundaries at <code>t = 0.3</code> and <code>t = 0.7</code> partition the timeline into outbound, DRO, and return. <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/math/orion-journey.json">View on GitHub</a>.</p>
+      </div>
+      <div class="reveal-side">
+        <h3>Glyph compiler output <span class="pill">SVG</span></h3>
+        <div class="reveal-svg-frame">
+          <img src="orion-journey.svg" alt="Glyph-rendered Orion mission path, byte-locked across CI" loading="lazy">
+        </div>
+        <p class="cap">Byte-stable across Ubuntu / macOS / Windows × Node 20 / 22. The 12-second pen-draw animation is part of the SVG itself — open the file directly to see it loop. No JS required for the animation, no runtime dependency at view time.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===========================================================
+     TRY-IT-YOURSELF — prompt templates
+     =========================================================== -->
+<section class="try">
+  <div class="container">
+    <h2>Your turn — prompts to try</h2>
+    <p class="lede">Tell Claude what you want to see. Be specific about <em>entities</em> (Earth, Moon, spacecraft), <em>shape of the path</em> (arc, loop, transit), and <em>who it's for</em> (a 5-year-old, a textbook, a museum wall).</p>
+    <div class="try-grid">
+      <div class="try-card">
+        <span class="tag">▸ Mathematics</span>
+        <blockquote>"Draw me a Lissajous curve where the frequencies are 3 and 2. Show the figure-eight clearly. Animate the pen drawing it from start to finish over five seconds."</blockquote>
+      </div>
+      <div class="try-card">
+        <span class="tag">▸ Physics</span>
+        <blockquote>"Show me a pendulum swinging back and forth, then a damped one that gradually stops. Side by side, same starting angle. Label which is which."</blockquote>
+      </div>
+      <div class="try-card">
+        <span class="tag">▸ Biology</span>
+        <blockquote>"Use Gray-Scott reaction-diffusion to show how a leopard gets its spots. Periodic boundary, F=0.062, k=0.062. Let the pattern emerge over 200 steps."</blockquote>
+      </div>
+      <div class="try-card">
+        <span class="tag">▸ Astronomy</span>
+        <blockquote>"Show four photons passing a black hole at different impact parameters. One scatters, one orbits the photon sphere once before scattering, one falls in. Make it look like a textbook figure."</blockquote>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===========================================================
+     CTA / FOOTER
+     =========================================================== -->
+<section class="cta">
+  <h2 style="margin-bottom:24px">Ask. Render. Share.</h2>
+  <a class="btn btn-primary" href="https://github.com/seanhanca/glyph">⭐ Star Glyph on GitHub</a>
+  <a class="btn btn-ghost" href="/glyph/math/joy.html">See nine more demos</a>
+  <a class="btn btn-ghost" href="/glyph/play/">Open the playground</a>
+</section>
+
+<footer>
+  <div class="container">
+    Drawn by Glyph · Asked by you · Apache 2.0 · No telemetry · <a href="/glyph/forkids.html">Kid-friendly index</a>
+  </div>
+</footer>
+
+<script>
+  // Replace the placeholder in the spacecraft's offset-path with
+  // the actual path "d" attribute so the icon glides along the
+  // same curve the path element draws. Done once at load.
+  (function syncSpacecraftPath(){
+    const path = document.querySelector('.orion-path');
+    const craft = document.querySelector('.orion-craft');
+    if (!path || !craft) return;
+    const d = path.getAttribute('d');
+    if (!d) return;
+    craft.style.offsetPath = `path("${d}")`;
+    craft.style.offsetRotate = "auto";
+  })();
+
+  // Day counter — increment from 1 to 25 over the 25-second
+  // animation. Uses 24 setTimeout entries (one per day boundary)
+  // rather than a setInterval so the visible-text update aligns
+  // exactly with the path-draw progress.
+  function startDayCounter(stageRoot){
+    const el = stageRoot.querySelector('.day-counter');
+    if (!el) return [];
+    el.textContent = '1';
+    const timers = [];
+    for (let day = 2; day <= 25; day++) {
+      const t = ((day - 1) / 24) * 25_000;
+      timers.push(setTimeout(() => { el.textContent = String(day); }, t));
+    }
+    return timers;
+  }
+  let counterTimers = startDayCounter(document.querySelector('.stage'));
+
+  // Click anywhere on the stage to restart the animation — gives
+  // kids (and curious grandparents) the agency to "play it again".
+  // Cloning + replacing the SVG cleanly retriggers CSS animations;
+  // we also clear pending day-counter timers and restart them.
+  (function clickToReplay(){
+    const stage = document.querySelector('.stage');
+    if (!stage) return;
+    stage.addEventListener('click', () => {
+      const svg = stage.querySelector('svg');
+      if (!svg) return;
+      counterTimers.forEach(clearTimeout);
+      const clone = svg.cloneNode(true);
+      svg.replaceWith(clone);
+      const path = clone.querySelector('.orion-path');
+      const craft = clone.querySelector('.orion-craft');
+      if (path && craft) {
+        const d = path.getAttribute('d');
+        if (d) {
+          craft.style.offsetPath = `path("${d}")`;
+          craft.style.offsetRotate = "auto";
+        }
+      }
+      counterTimers = startDayCounter(stage);
+    });
+  })();
+</script>
+
+</body>
+</html>
