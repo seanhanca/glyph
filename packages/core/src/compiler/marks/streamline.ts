@@ -149,13 +149,15 @@ interface StreamlineConfig {
    * RFC 2026-05-23 — per-polyline color mode. `undefined` (the
    * back-compat default) renders every streamline in `theme.fg`;
    * `"angle"` hues each polyline by velocity direction at the seed;
-   * `"speed"` varies lightness by velocity magnitude. See schema
-   * JSDoc for the full contract. Read defensively in `readConfig`
-   * so an unrecognized value (a schema migration that loosened the
-   * enum, or a deliberately malformed spec) silently falls back to
-   * the default rather than throwing.
+   * `"speed"` varies lightness by velocity magnitude; `"step"` (v2)
+   * emits a 0°→270° rainbow hue along each polyline by step index,
+   * one path per segment. See schema JSDoc for the full contract.
+   * Read defensively in `readConfig` so an unrecognized value (a
+   * schema migration that loosened the enum, or a deliberately
+   * malformed spec) silently falls back to the default rather than
+   * throwing.
    */
-  readonly colorBy: "angle" | "speed" | undefined;
+  readonly colorBy: "angle" | "speed" | "step" | undefined;
 }
 
 function readConfig(layer: unknown): StreamlineConfig | undefined {
@@ -201,13 +203,15 @@ function readConfig(layer: unknown): StreamlineConfig | undefined {
       }
     }
   }
-  // RFC 2026-05-23 — only the two recognized enum values pass through;
+  // RFC 2026-05-23 — only recognized enum values pass through;
   // everything else (including undefined, null, or any non-matching
   // string) falls back to the back-compat "no per-polyline coloring"
   // default. Mirrors the defensive readConfig pattern used elsewhere.
   const colorByRaw = r.colorBy;
   const colorBy: StreamlineConfig["colorBy"] =
-    colorByRaw === "angle" || colorByRaw === "speed" ? colorByRaw : undefined;
+    colorByRaw === "angle" || colorByRaw === "speed" || colorByRaw === "step"
+      ? colorByRaw
+      : undefined;
   return { dxdt: r.dxdt, dydt: r.dydt, seeds, step, maxSteps, domain, colorBy };
 }
 
@@ -428,6 +432,15 @@ export const streamlineMarkCompiler: MarkCompiler = {
       const polyline = [...back.reverse(), ...fwd.slice(1)];
       if (polyline.length < 2) continue;
 
+      // RFC 2026-05-23 v2 — `"step"` mode renders one path PER
+      // SEGMENT (consecutive point pair) so each segment can carry
+      // its own hue. The other modes (and the default) stay on the
+      // single-path-per-polyline emission path.
+      if (colorBy === "step") {
+        emitStepGradient(polyline, xScale, yScale, out);
+        continue;
+      }
+
       // Build the SVG path's `d` attribute. Each (x, y) maps through
       // the resolved scale then `roundPx` for byte stability.
       let d = "";
@@ -467,5 +480,66 @@ export const streamlineMarkCompiler: MarkCompiler = {
     }
   },
 };
+
+/**
+ * RFC 2026-05-23 v2 — emit one `<path>` per polyline segment, each
+ * with its own hue computed from the segment's index along the
+ * polyline. Produces a rainbow trail from 0° (red, start) to 270°
+ * (purple, end). Segments where both endpoints round to the same
+ * pixel are skipped so we don't bloat the SVG with zero-length
+ * paths. Adjacent segments share their endpoint (px, py) integer
+ * coordinates verbatim, so the default butt linecap closes the
+ * visual gap with no extra renderer work.
+ *
+ * Hue values are clamped via `.toFixed(1)` for the same cross-
+ * platform byte-stability reason the angle / speed modes use:
+ * pure-arithmetic hue (no transcendentals here, just `i / (N-1)`),
+ * but rounding to one decimal place makes the SVG bytes robust
+ * against any future precision drift in upstream computations.
+ */
+function emitStepGradient(
+  polyline: ReadonlyArray<{ readonly x: number; readonly y: number }>,
+  // Lightweight structural types here mirror the surrounding
+  // compiler's convention — we only need `.apply` on each scale and
+  // don't want to repeat the full ResolvedScale generic.
+  xScale: { apply: (v: number) => number },
+  yScale: { apply: (v: number) => number },
+  out: SceneMark[],
+): void {
+  const N = polyline.length;
+  if (N < 2) return;
+  // Precompute rounded pixel coordinates so each segment emit just
+  // looks them up — cheaper than computing twice per segment.
+  const px = new Array<number>(N);
+  const py = new Array<number>(N);
+  for (let i = 0; i < N; i++) {
+    const p = polyline[i];
+    if (!p) {
+      px[i] = Number.NaN;
+      py[i] = Number.NaN;
+      continue;
+    }
+    px[i] = roundPx(xScale.apply(p.x));
+    py[i] = roundPx(yScale.apply(p.y));
+  }
+  for (let i = 0; i < N - 1; i++) {
+    const x0 = px[i];
+    const y0 = py[i];
+    const x1 = px[i + 1];
+    const y1 = py[i + 1];
+    if (!Number.isFinite(x0) || !Number.isFinite(y0)) continue;
+    if (!Number.isFinite(x1) || !Number.isFinite(y1)) continue;
+    if (x0 === x1 && y0 === y1) continue; // collapses to a point under roundPx
+    const t = N > 1 ? i / (N - 1) : 0;
+    const hue = (t * 270).toFixed(1);
+    out.push({
+      type: "path",
+      d: `M ${x0} ${y0} L ${x1} ${y1}`,
+      stroke: `hsl(${hue},70%,55%)`,
+      strokeWidth: 1.2,
+      fill: "none",
+    });
+  }
+}
 
 registerMark(streamlineMarkCompiler);

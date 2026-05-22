@@ -992,6 +992,13 @@ export const LayerSchema = z
          *     darker = slower, lighter = faster. Useful for showing
          *     where a field accelerates (e.g. fluid through a nozzle).
          *
+         *   - `"step"` (RFC #2 v2): hue varies along each polyline by
+         *     step index — a 0°→270° rainbow trail from start (red)
+         *     to end (purple) showing arc-length progression. Emitted
+         *     as one `<path>` per segment instead of one per polyline,
+         *     so file size grows linearly with maxSteps × seed count;
+         *     stay below ~5000 segments per chart for fast renders.
+         *
          * When set, `colorBy` overrides any `encoding.color` for this
          * mark — the streamline mark doesn't bind row data the way
          * bar/line do, so a row-driven color channel doesn't apply.
@@ -1003,7 +1010,7 @@ export const LayerSchema = z
          * to gate AUDIT-06 against opt-in many-color marks is tracked
          * separately.
          */
-        colorBy: z.enum(["angle", "speed"]).optional(),
+        colorBy: z.enum(["angle", "speed", "step"]).optional(),
       })
       .strict()
       .optional(),

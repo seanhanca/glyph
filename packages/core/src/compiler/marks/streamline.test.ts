@@ -35,7 +35,7 @@ const SCHEMA: CompileFieldInfo[] = [
 /** Build a streamline spec on a rotation field, varying just the
  *  fields the test cares about. */
 function buildSpec(opts: {
-  colorBy?: "angle" | "speed";
+  colorBy?: "angle" | "speed" | "step";
   dxdt?: string;
   dydt?: string;
 }): GlyphSpec {
@@ -140,6 +140,46 @@ describe("streamline.colorBy", () => {
     });
     const b = compileSpec({
       spec: buildSpec({ colorBy: "angle" }),
+      rows: ROWS,
+      schema: SCHEMA,
+    });
+    expect(JSON.stringify(a.marks)).toBe(JSON.stringify(b.marks));
+  });
+
+  it("emits per-segment paths with a rainbow trail when colorBy is 'step'", () => {
+    const scene = compileSpec({
+      spec: buildSpec({ colorBy: "step" }),
+      rows: ROWS,
+      schema: SCHEMA,
+    });
+    const paths = scene.marks.filter((m) => m.type === "path");
+    // Step mode emits one path per segment, so total path count
+    // greatly exceeds the seed count (4×4 = 16).
+    expect(paths.length).toBeGreaterThan(100);
+    const strokes = new Set(paths.map((p) => (p as { stroke?: string }).stroke));
+    // Many distinct hues along the rainbow trail.
+    expect(strokes.size).toBeGreaterThan(20);
+    // Hue 0 (red, start) and hue 270 (purple, end) both appear.
+    const hueValues = [...strokes].map((s) => {
+      const match = (s ?? "").match(/^hsl\(([0-9.]+),/);
+      return match ? Number.parseFloat(match[1] ?? "0") : Number.NaN;
+    });
+    expect(Math.min(...hueValues)).toBe(0);
+    // The last emitted segment is at index N-2 of an N-point polyline,
+    // so t = (N-2)/(N-1) = 1 − 1/(N-1) ∈ [0.99, 1.0) for typical N.
+    // Hue ≈ 270·t lands just below 270.
+    expect(Math.max(...hueValues)).toBeGreaterThan(260);
+    expect(Math.max(...hueValues)).toBeLessThanOrEqual(270);
+  });
+
+  it("is byte-stable across two 'step'-mode compiles", () => {
+    const a = compileSpec({
+      spec: buildSpec({ colorBy: "step" }),
+      rows: ROWS,
+      schema: SCHEMA,
+    });
+    const b = compileSpec({
+      spec: buildSpec({ colorBy: "step" }),
       rows: ROWS,
       schema: SCHEMA,
     });

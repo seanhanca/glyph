@@ -1,0 +1,33 @@
+{
+  "version": "glyph/0.1",
+  "title": "Streamline rotation with colorBy: 'step' rainbow trail (RFC #2 v2)",
+  "data": {
+    "source": "<inline:streamline-colorby-step>"
+  },
+  "layers": [
+    {
+      "mark": "streamline",
+      "encoding": {
+        "x": {
+          "field": "x",
+          "type": "quantitative",
+          "scale": { "domain": [-2, 2] }
+        },
+        "y": {
+          "field": "y",
+          "type": "quantitative",
+          "scale": { "domain": [-2, 2] }
+        }
+      },
+      "streamline": {
+        "dxdt": "-y",
+        "dydt": "x",
+        "seeds": { "kind": "grid", "rows": 4, "cols": 4 },
+        "step": 0.05,
+        "maxSteps": 120,
+        "domain": { "x": [-2, 2], "y": [-2, 2] },
+        "colorBy": "step"
+      }
+    }
+  ]
+}
