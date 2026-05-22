@@ -24,6 +24,7 @@ import {
   type GeodesicRow,
   iterateGeodesic,
 } from "../data/shapes/geodesic.js";
+import { type PdeRow, type PdeSolveDataSpec, solvePde } from "../data/shapes/pde-solve.js";
 import {
   type RecurrenceDataSpec,
   type RecurrenceRow,
@@ -839,6 +840,41 @@ function materializeGeodesicInput(input: CompileInput): CompileInput {
   };
 }
 
+/**
+ * RFC 2026-05-22 — Materialize a `data.shape: "pde-solve"` spec
+ * into row + schema form. Solves the PDE forward `steps` time-steps
+ * on a rows·cols grid and emits one row per cell with `[x, y, u]`.
+ * Pairs with `mark: "heatmap"` for visual rendering — the same way
+ * a CSV-sourced heatmap spec would compose.
+ *
+ * Schema: `[x (DOUBLE), y (DOUBLE), u (DOUBLE)]`. Source sentinel
+ * left as `<inline:pde-solve>` so the tabular path treats rows as
+ * positional 3-arrays.
+ */
+function materializePdeSolveInput(input: CompileInput): CompileInput {
+  const { spec } = input;
+  const pde = spec.data?.pde_solve as PdeSolveDataSpec | undefined;
+  if (!pde) {
+    throw new Error("materializePdeSolveInput called without spec.data.pde_solve");
+  }
+  const sampledRows = solvePde(pde);
+  const schema: CompileFieldInfo[] = [
+    { name: "x", type: "DOUBLE" },
+    { name: "y", type: "DOUBLE" },
+    { name: "u", type: "DOUBLE" },
+  ];
+  const rows: ReadonlyArray<unknown>[] = sampledRows.map((r: PdeRow) => [r.x, r.y, r.u]);
+  return {
+    ...input,
+    spec: {
+      ...spec,
+      data: { source: "<inline:pde-solve>" },
+    },
+    rows,
+    schema,
+  };
+}
+
 export function compileSpec(input: CompileInput): Scene {
   const { spec, rows, schema } = input;
   // Faceted specs split into multiple panels; handle that upfront before
@@ -898,6 +934,12 @@ export function compileSpec(input: CompileInput): Scene {
   // `encoding.color: "seed_id"` gives one hue per ray.
   if (spec.data?.geodesic) {
     return compileSpec(materializeGeodesicInput(input));
+  }
+  // RFC 2026-05-22 — `data.shape: "pde-solve"`. Heat-equation solver
+  // on a 2D grid; emits `[x, y, u]` rows that pair with mark:
+  // "heatmap".
+  if (spec.data?.pde_solve) {
+    return compileSpec(materializePdeSolveInput(input));
   }
   const width = spec.width ?? DEFAULT_WIDTH;
   const height = spec.height ?? DEFAULT_HEIGHT;

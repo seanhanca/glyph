@@ -1,0 +1,38 @@
+{
+  "version": "glyph/0.1",
+  "title": "Heat equation: Gaussian pulse diffusing (RFC #4 v1)",
+  "data": {
+    "pde_solve": {
+      "shape": "pde-solve",
+      "kind": "heat",
+      "domain": { "x": [-1, 1], "y": [-1, 1] },
+      "grid": { "rows": 24, "cols": 24 },
+      "initial": "exp(-25*(x*x + y*y))",
+      "params": { "D": 0.05 },
+      "boundary": "clamp",
+      "steps": 80,
+      "dt": 0.005
+    }
+  },
+  "layers": [
+    {
+      "mark": "heatmap",
+      "encoding": {
+        "x": {
+          "field": "x",
+          "type": "quantitative",
+          "scale": { "domain": [-1, 1] }
+        },
+        "y": {
+          "field": "y",
+          "type": "quantitative",
+          "scale": { "domain": [-1, 1] }
+        },
+        "color": {
+          "field": "u",
+          "type": "quantitative"
+        }
+      }
+    }
+  ]
+}

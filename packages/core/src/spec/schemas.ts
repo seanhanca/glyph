@@ -230,6 +230,64 @@ export const TrajectoryDataSchema = z
   .strict();
 
 /**
+ * RFC 2026-05-22 — `data.shape: "pde-solve"` — 2D partial
+ * differential equation solver on a fixed grid. V1 ships only
+ * `kind: "heat"`; wave + reaction-diffusion follow as v2.
+ *
+ * Authors specify a domain, grid resolution, initial condition,
+ * boundary policy, and integration step. The schema validates the
+ * CFL stability condition (D·dt/dx² ≤ 0.25 for the heat scheme)
+ * and rejects unstable specs up front. Output is `rows × cols`
+ * rows of `{ x, y, u }`, paired with `mark: "heatmap"` for visual
+ * rendering.
+ */
+export const PdeSolveDataSchema = z
+  .object({
+    shape: z.literal("pde-solve"),
+    kind: z.literal("heat"),
+    domain: z
+      .object({
+        x: z.tuple([
+          z.number().refine(Number.isFinite, "domain.x[0] must be finite"),
+          z.number().refine(Number.isFinite, "domain.x[1] must be finite"),
+        ]),
+        y: z.tuple([
+          z.number().refine(Number.isFinite, "domain.y[0] must be finite"),
+          z.number().refine(Number.isFinite, "domain.y[1] must be finite"),
+        ]),
+      })
+      .strict()
+      .refine((d) => d.x[0] < d.x[1] && d.y[0] < d.y[1], {
+        message: "pde-solve: domain.x[0] < .x[1] and domain.y[0] < .y[1] required",
+      }),
+    grid: z
+      .object({
+        rows: z.number().int().min(4).max(256),
+        cols: z.number().int().min(4).max(256),
+      })
+      .strict(),
+    initial: z.string().min(1),
+    params: z.record(z.number().refine(Number.isFinite, "params values must be finite")),
+    boundary: z.enum(["clamp", "periodic"]),
+    steps: z.number().int().min(1).max(1000),
+    dt: z.number().positive().refine(Number.isFinite, "dt must be finite"),
+  })
+  .strict()
+  .refine(
+    (s) => {
+      const D = s.params.D ?? 0;
+      if (!Number.isFinite(D) || D < 0) return false;
+      const dx = (s.domain.x[1] - s.domain.x[0]) / s.grid.cols;
+      const cfl = (D * s.dt) / (dx * dx);
+      return cfl <= 0.25;
+    },
+    {
+      message:
+        "pde-solve: CFL stability violated — D · dt / dx² must be ≤ 0.25. Reduce dt or D, or increase grid.cols.",
+    },
+  );
+
+/**
  * RFC 2026-05-22 — `data.shape: "geodesic"` — relativistic photon
  * paths through the equatorial plane of a Schwarzschild black hole.
  *
@@ -397,6 +455,12 @@ export const DataSourceSchema = z
      */
     geodesic: GeodesicDataSchema.optional(),
     /**
+     * RFC 2026-05-22 — `data.shape: "pde-solve"`. 2D PDE solver on
+     * a fixed grid; v1 supports `kind: "heat"`. Outputs rows · cols
+     * rows of `{ x, y, u }` paired with `mark: "heatmap"`.
+     */
+    pde_solve: PdeSolveDataSchema.optional(),
+    /**
      * Moat PR3 — failure-aware rendering policy for rows whose
      * y-encoded value is null / undefined / NaN.
      *
@@ -429,8 +493,9 @@ export const DataSourceSchema = z
       d.function !== undefined ||
       d.trajectory !== undefined ||
       d.recurrence !== undefined ||
-      d.geodesic !== undefined,
-    "data needs a 'source', 'hierarchy', 'graph', 'grid', 'function', 'trajectory', 'recurrence', or 'geodesic'",
+      d.geodesic !== undefined ||
+      d.pde_solve !== undefined,
+    "data needs a 'source', 'hierarchy', 'graph', 'grid', 'function', 'trajectory', 'recurrence', 'geodesic', or 'pde_solve'",
   );
 
 // ---------------------------------------------------------------------------
