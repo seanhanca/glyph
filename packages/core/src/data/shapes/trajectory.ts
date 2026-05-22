@@ -36,7 +36,7 @@
 
 import { EvaluationError, type Evaluator } from "../../eval/evaluator.js";
 import { defaultEvaluator } from "../../eval/expr-eval-adapter.js";
-import { MAX_SAMPLES } from "./function.js";
+import { MAX_SAMPLES, clampSamplerPrecision } from "./function.js";
 
 /**
  * Inline ODE system. Expressions reference `x`, `y`, and `t`; the
@@ -145,8 +145,14 @@ export function integrateTrajectory(
     const k4x = evalDeriv(evaluator, spec.dxdt, { x: x4, y: y4, t: tNext });
     const k4y = evalDeriv(evaluator, spec.dydt, { x: x4, y: y4, t: tNext });
 
-    x = x + (step / 6) * (k1x + 2 * k2x + 2 * k3x + k4x);
-    y = y + (step / 6) * (k1y + 2 * k2y + 2 * k3y + k4y);
+    // Cross-platform precision clamp on each integration step. RK4
+    // accumulates libm drift in `sin`/`cos`/`exp`/etc. over thousands
+    // of evaluator calls; without this, a 1000-sample trajectory can
+    // diverge in the 10th decimal between macOS and Linux, which then
+    // crosses `roundPx`'s 8-decimal boundary and the SVG bytes differ.
+    // Same precision-clamp story as `function` and `recurrence`.
+    x = clampSamplerPrecision(x + (step / 6) * (k1x + 2 * k2x + 2 * k3x + k4x));
+    y = clampSamplerPrecision(y + (step / 6) * (k1y + 2 * k2y + 2 * k3y + k4y));
 
     rows[i] = { t: tNext, x, y };
   }

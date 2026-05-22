@@ -150,10 +150,12 @@ function sampleScalar(spec: FunctionDataSpec, evaluator: Evaluator): FunctionRow
     // against floating drift accumulating across the loop and shifting
     // snapshot bytes between platforms.
     const x = i === spec.x.samples - 1 ? spec.x.max : spec.x.min + step * i;
-    const y = safeEval(evaluator, spec.expr, { x });
+    const yRaw = safeEval(evaluator, spec.expr, { x });
+    const y = yRaw === null ? null : clampSamplerPrecision(yRaw);
     if (hasZ) {
       // biome-ignore lint/style/noNonNullAssertion: hasZ guards spec.zExpr presence.
-      const z = safeEval(evaluator, spec.zExpr!, { x });
+      const zRaw = safeEval(evaluator, spec.zExpr!, { x });
+      const z = zRaw === null ? null : clampSamplerPrecision(zRaw);
       rows.push({ x, y, z });
     } else {
       rows.push({ x, y });
@@ -191,11 +193,14 @@ function sampleParametric(spec: ParametricDataSpec, evaluator: Evaluator): Funct
   for (let i = 0; i < spec.parameter.samples; i++) {
     const t = i === spec.parameter.samples - 1 ? spec.parameter.max : spec.parameter.min + step * i;
     const scope = { [paramName]: t };
-    const x = safeEval(evaluator, spec.xExpr, scope);
-    const y = safeEval(evaluator, spec.yExpr, scope);
+    const xRaw = safeEval(evaluator, spec.xExpr, scope);
+    const yRaw = safeEval(evaluator, spec.yExpr, scope);
+    const x = xRaw === null ? null : clampSamplerPrecision(xRaw);
+    const y = yRaw === null ? null : clampSamplerPrecision(yRaw);
     if (hasZ) {
       // biome-ignore lint/style/noNonNullAssertion: hasZ guards spec.zExpr presence.
-      const z = safeEval(evaluator, spec.zExpr!, scope);
+      const zRaw = safeEval(evaluator, spec.zExpr!, scope);
+      const z = zRaw === null ? null : clampSamplerPrecision(zRaw);
       rows.push({ x, y, z, [paramName]: t });
     } else {
       rows.push({ x, y, [paramName]: t });
@@ -254,4 +259,27 @@ function safeEval(
     }
     throw e;
   }
+}
+
+/**
+ * Clamp a sampler-emitted floating-point value to 12 significant
+ * digits so cross-platform libm drift (the last 2–3 bits of `sin /
+ * cos / exp / atan2` differ between macOS libm and glibc) doesn't
+ * leak into downstream `roundPx` decisions. The `canonicalStringify`
+ * precision clamp shipped earlier protects the provenance hash; this
+ * clamp protects the rendered path coordinates the same way.
+ *
+ * 12 sig figs is well above the 8-decimal precision the SVG actually
+ * emits (`roundPx` rounds to 1e-8), so the rendered chart is
+ * indistinguishable from the un-clamped version — but the value
+ * `roundPx` sees is now identical on every platform.
+ *
+ * Anchored values (endpoints, integer constants) are untouched
+ * because `Number.isFinite(v) && Number.isInteger(v)` short-circuits;
+ * the clamp only runs on non-integer finites where drift can occur.
+ */
+export function clampSamplerPrecision(v: number): number {
+  if (!Number.isFinite(v)) return v;
+  if (Number.isInteger(v)) return v;
+  return Number(v.toPrecision(12));
 }

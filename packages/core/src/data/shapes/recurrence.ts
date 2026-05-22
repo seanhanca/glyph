@@ -54,7 +54,7 @@
 
 import { EvaluationError, type Evaluator } from "../../eval/evaluator.js";
 import { defaultEvaluator } from "../../eval/expr-eval-adapter.js";
-import { MAX_SAMPLES } from "./function.js";
+import { MAX_SAMPLES, clampSamplerPrecision } from "./function.js";
 
 /**
  * Maximum allowed `steps`. Higher than `MAX_SAMPLES` (the cap for
@@ -170,7 +170,11 @@ export function iterateRecurrence(
           `recurrence data: state "${name}" became non-finite at n=${n} (value: ${v}). The recurrence diverged.`,
         );
       }
-      next[name] = v;
+      // Cross-platform clamp so libm drift in step expressions
+      // (`sin`, `cos`, `exp`, …) doesn't accumulate over thousands
+      // of iterations into a different rendered curve on Linux vs
+      // macOS. Same precision-clamp story as the function shape.
+      next[name] = clampSamplerPrecision(v);
     }
     for (const name of stateNames) current[name] = next[name] as number;
     rows[n] = { n, ...current };
