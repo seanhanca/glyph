@@ -72,6 +72,46 @@
   .controls .preset-row button:hover{background:var(--primary);color:#0a0e1a;border-color:var(--primary)}
   .demo-note{color:var(--muted);font-size:.88rem;margin-top:18px;padding-top:14px;border-top:1px dashed var(--panel-edge)}
   .demo-note code{background:transparent;border:1px solid #334155}
+  /* Glyph spec output panel — shows the byte-locked SVG the
+     Glyph compiler produces for the same math. Sits beneath each
+     demo's info column. Image lazy-loads so the page is fast. */
+  .glyph-output{margin-top:18px;padding:14px;border:1px solid var(--panel-edge);background:linear-gradient(180deg, rgba(96,165,250,.04), rgba(96,165,250,.01));border-radius:10px}
+  .glyph-output-label{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;font-weight:600}
+  .glyph-output-label .badge{display:inline-block;padding:2px 8px;border-radius:9999px;font-size:.7rem;letter-spacing:.04em;border:1px solid var(--panel-edge);background:#1e293b;color:var(--emerald);text-transform:none}
+  .glyph-output-label .badge.v2{color:var(--accent);border-color:rgba(251,191,36,.35)}
+  .glyph-output a{display:block;background:#fff;border-radius:8px;overflow:hidden;line-height:0;transition:transform .15s ease,box-shadow .15s ease;border:1px solid var(--panel-edge)}
+  .glyph-output a:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(96,165,250,.18)}
+  .glyph-output img{display:block;width:100%;height:auto;max-height:240px;object-fit:contain;background:#fff}
+  .glyph-output .glyph-output-caption{margin:10px 0 0;font-size:.78rem;color:var(--muted);line-height:1.45}
+  .glyph-output .glyph-output-caption code{font-size:.86em}
+  /* v2 banner — slim ribbon under hero announcing the v2 grammar
+     that shipped between v0.3 and now. Three pills, each a link
+     to the relevant fixture. */
+  .v2-banner{background:linear-gradient(90deg, rgba(251,191,36,.07), rgba(244,114,182,.05), rgba(96,165,250,.07));border-top:1px solid var(--panel-edge);border-bottom:1px solid var(--panel-edge);padding:18px 0}
+  .v2-banner-inner{display:flex;flex-wrap:wrap;align-items:center;gap:14px;justify-content:center;text-align:center}
+  .v2-banner-label{font-size:.85rem;color:var(--ink);font-weight:600;letter-spacing:.01em}
+  .v2-banner-label em{color:var(--accent);font-style:normal;font-family:var(--font-mono);font-size:.92em}
+  .v2-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:9999px;background:rgba(15,23,42,.55);border:1px solid var(--panel-edge);color:var(--ink);text-decoration:none;font-size:.82rem;font-weight:500;transition:transform .15s ease,border-color .15s ease}
+  .v2-pill:hover{transform:translateY(-1px);border-color:var(--primary);color:var(--primary)}
+  .v2-pill code{font-size:.82em}
+  /* Grammar catalog — final showcase section listing each shipped
+     data.shape / mark with a JSON snippet and the rendered SVG. */
+  .grammar-catalog{padding:64px 0;border-top:1px solid var(--panel-edge);background:linear-gradient(180deg, rgba(96,165,250,.04), transparent 50%)}
+  .grammar-catalog h2{text-align:center;margin-bottom:8px}
+  .grammar-catalog > .container > p.lede{color:var(--muted);text-align:center;max-width:60ch;margin:0 auto 36px;font-size:1.02rem}
+  .grammar-card{display:grid;grid-template-columns:1fr 1fr;gap:20px;background:var(--panel);border:1px solid var(--panel-edge);border-radius:14px;padding:20px;margin-bottom:18px}
+  @media (max-width:880px){.grammar-card{grid-template-columns:1fr}}
+  .grammar-card-info h3{margin-bottom:4px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .grammar-card-info h3 .badge{font-size:.65rem;padding:2px 9px;border-radius:9999px;background:#1e293b;border:1px solid var(--panel-edge);color:var(--emerald);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+  .grammar-card-info h3 .badge.v2{color:var(--accent);border-color:rgba(251,191,36,.35)}
+  .grammar-card-info p{color:var(--muted);font-size:.93rem;margin:0 0 12px}
+  .grammar-card-info pre{font-family:var(--font-mono);font-size:.78rem;background:#0f1729;border:1px solid #334155;border-radius:8px;padding:12px 14px;color:#e0e7ff;overflow-x:auto;margin:0;line-height:1.5}
+  .grammar-card-info pre .k{color:#7eb6ff}
+  .grammar-card-info pre .s{color:#fbbf24}
+  .grammar-card-info pre .n{color:#34d399}
+  .grammar-card-info pre .c{color:#94a3b8;font-style:italic}
+  .grammar-card-svg{align-self:center;background:#fff;border-radius:10px;overflow:hidden;line-height:0;border:1px solid var(--panel-edge)}
+  .grammar-card-svg img{display:block;width:100%;height:auto;background:#fff}
   /* Footer */
   footer{padding:48px 0 64px;text-align:center;color:var(--muted);border-top:1px solid var(--panel-edge)}
   footer a{color:var(--primary)}
@@ -85,14 +125,29 @@
 <header class="hero">
   <div class="container">
     <h1>Joy of Math</h1>
-    <p>Nine interactive demos rendered live in your browser: six parametric curves, plus three fluid + PDE simulations (particle flow, wave ripples, reaction-diffusion). Drag the sliders, watch the equations come alive. A taste of what <a href="https://github.com/seanhanca/glyph">Glyph</a> can become as an agent-driven viz layer for formulas + algorithms + datasets.</p>
+    <p>Nine interactive demos rendered live in your browser — and <strong>every one of them is now backed by a Glyph spec</strong>. Drag the sliders, watch the equations come alive; then scroll to see the byte-stable SVG an AI agent can author from English. Six parametric curves, photon paths through curved spacetime, particle flow, propagating waves, Turing patterns — all on a single grammar.</p>
     <div class="hero-cta">
       <a class="btn btn-primary" href="#lissajous">Start with Lissajous ↓</a>
+      <a class="btn btn-ghost" href="#grammar-catalog">See the grammar ↓</a>
       <a class="btn btn-ghost" href="/glyph/play/">Try the playground</a>
       <a class="btn btn-ghost" href="https://github.com/seanhanca/glyph/blob/main/docs/LEARN.md">Learn the grammar</a>
     </div>
   </div>
 </header>
+
+<!-- ===========================================================
+     v2 BANNER — slim ribbon under hero announcing what shipped
+     across the four-RFC + three-v2 grammar expansion in v0.3.
+     =========================================================== -->
+<section class="v2-banner" aria-label="Grammar shipped in v2">
+  <div class="container v2-banner-inner">
+    <span class="v2-banner-label">New in <em>v0.3</em> grammar:</span>
+    <a class="v2-pill" href="#curlicue" title="RFC #4 — discrete iteration"><code>data.shape: "recurrence"</code></a>
+    <a class="v2-pill" href="#gravity-lens" title="RFC #3 + v2 — null geodesics, weak + strong Schwarzschild"><code>data.shape: "geodesic"</code></a>
+    <a class="v2-pill" href="#waves" title="RFC #4 + v2 — heat, wave, reaction-diffusion"><code>data.shape: "pde-solve"</code></a>
+    <a class="v2-pill" href="#flow-field" title="RFC #2 + v2 — angle / speed / step (rainbow trail)"><code>streamline.colorBy</code></a>
+  </div>
+</section>
 
 <!-- ===========================================================
      1. LISSAJOUS CURVES
@@ -117,7 +172,14 @@
           <button data-preset="1,1,0.7854">1:1 ellipse</button>
         </div>
       </div>
-      <p class="demo-note">The phase δ ticks forward continuously — at δ = 0 the figure-eight is "open", at δ = π/2 it pinches into a vertical line, then back. This is the underlying physics of any two harmonic oscillators sharing a screen. <strong>This curve is already a Glyph spec</strong> — see <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/math/lissajous.json">__fixtures__/math/lissajous.json</a>, byte-locked in CI.</p>
+      <p class="demo-note">The phase δ ticks forward continuously — at δ = 0 the figure-eight is "open", at δ = π/2 it pinches into a vertical line, then back. This is the underlying physics of any two harmonic oscillators sharing a screen.</p>
+      <div class="glyph-output">
+        <div class="glyph-output-label">Glyph spec output <span class="badge">v0.2</span></div>
+        <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/math/lissajous.json" title="View the lissajous.json spec on GitHub">
+          <img src="lissajous.svg" alt="Glyph-rendered Lissajous 3:2 figure-eight, byte-locked SVG" loading="lazy">
+        </a>
+        <p class="glyph-output-caption"><code>data.shape: "trajectory"</code> with <code>x = A·sin(a·t + δ)</code>, <code>y = B·sin(b·t)</code>. Byte-locked in CI across Ubuntu/macOS/Windows × Node 20/22.</p>
+      </div>
     </div>
   </div>
 </section>
@@ -146,7 +208,14 @@
           <button data-preset="5,1,3,1">5-cusp epi</button>
         </div>
       </div>
-      <p class="demo-note">Set <code>R = 1, r = 1, d = 1</code> in epitrochoid mode and you've drawn a perfect <strong>cardioid</strong> — the antenna-radiation pattern of every directional microphone on Earth. <strong>This is already a Glyph spec</strong> — the 5:3 rosette preset is locked at <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/math/hypotrochoid-rosette.json">__fixtures__/math/hypotrochoid-rosette.json</a>.</p>
+      <p class="demo-note">Set <code>R = 1, r = 1, d = 1</code> in epitrochoid mode and you've drawn a perfect <strong>cardioid</strong> — the antenna-radiation pattern of every directional microphone on Earth.</p>
+      <div class="glyph-output">
+        <div class="glyph-output-label">Glyph spec output <span class="badge">v0.2</span></div>
+        <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/math/hypotrochoid-rosette.json" title="View the hypotrochoid-rosette.json spec on GitHub">
+          <img src="hypotrochoid-rosette.svg" alt="Glyph-rendered 5:3 rosette hypotrochoid, byte-locked SVG" loading="lazy">
+        </a>
+        <p class="glyph-output-caption">Same <code>data.shape: "trajectory"</code> with the rolling-circle parametric formula. The 5:3 rosette preset is locked at <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/math/hypotrochoid-rosette.json">__fixtures__/math/hypotrochoid-rosette.json</a>.</p>
+      </div>
     </div>
   </div>
 </section>
@@ -175,6 +244,13 @@
         </div>
       </div>
       <p class="demo-note">The golden-angle θ ≈ 2.39996 rad (137.5°) is exactly the angle sunflower seeds use to pack densely. Try it — the resulting curlicue lattice <em>is</em> the seed pattern.</p>
+      <div class="glyph-output">
+        <div class="glyph-output-label">Glyph spec output <span class="badge">v0.3 new</span></div>
+        <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/math/curlicue-golden.json" title="View the curlicue-golden.json spec on GitHub">
+          <img src="curlicue-golden.svg" alt="Glyph-rendered golden-angle curlicue lattice, byte-locked SVG" loading="lazy">
+        </a>
+        <p class="glyph-output-caption"><code>data.shape: "recurrence"</code> shipped in RFC #4 — discrete iteration <code>z_{n+1} = f(z_n, n)</code>. Above: 8000 steps at θ = 137.5°. See <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/math/curlicue-golden.json">__fixtures__/math/curlicue-golden.json</a>.</p>
+      </div>
     </div>
   </div>
 </section>
@@ -196,7 +272,14 @@
         <label><span class="lbl"><span>b (growth rate)</span><strong id="lbl-arch-b">2.0</strong></span><input id="arch-b" type="range" min="0.2" max="6" step="0.05" value="2"></label>
         <label><span class="lbl"><span>turns</span><strong id="lbl-arch-t">8</strong></span><input id="arch-t" type="range" min="2" max="30" step="1" value="8"></label>
       </div>
-      <p class="demo-note">Glyph already supports this via <code>data.shape: "trajectory"</code> with <code>x = (a+b·t)·cos(t)</code>, <code>y = (a+b·t)·sin(t)</code>. The fixture at <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/math/draw-in-spiral.svg">__fixtures__/math/draw-in-spiral.svg</a> is the byte-stable version of this same spiral, with pen-draw animation.</p>
+      <p class="demo-note">Every spring, every nautilus shell, every vinyl record's groove. The straightest possible spiral.</p>
+      <div class="glyph-output">
+        <div class="glyph-output-label">Glyph spec output <span class="badge">v0.2</span></div>
+        <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/math/draw-in-spiral.json" title="View the draw-in-spiral.json spec on GitHub">
+          <img src="draw-in-spiral.svg" alt="Glyph-rendered Archimedean spiral with pen-draw animation, byte-locked SVG" loading="lazy">
+        </a>
+        <p class="glyph-output-caption"><code>data.shape: "trajectory"</code> with <code>x = (a+b·t)·cos(t)</code>, <code>y = (a+b·t)·sin(t)</code>, plus an <code>animation.kind: "draw-in"</code> overlay. Pen-drawing animation is part of the static SVG output.</p>
+      </div>
     </div>
   </div>
 </section>
@@ -217,7 +300,14 @@
         <label><span class="lbl"><span>animation speed</span><strong id="lbl-butter-spd">1.0×</strong></span><input id="butter-spd" type="range" min="0.1" max="3" step="0.1" value="1"></label>
         <label><span class="lbl"><span>trail persistence</span><strong id="lbl-butter-fade">98%</strong></span><input id="butter-fade" type="range" min="80" max="100" step="1" value="98"></label>
       </div>
-      <p class="demo-note">The butterfly emerges scene by scene — the pen draws six wings as t crosses the periodic structure of cos(4t). When the trace completes a full loop (t = 12π) the figure is whole. <strong>This is already a Glyph spec</strong> — locked byte-stable at <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/math/butterfly.json">__fixtures__/math/butterfly.json</a> (without the trail-fade animation; static SVG of the full curve).</p>
+      <p class="demo-note">The butterfly emerges scene by scene — the pen draws six wings as t crosses the periodic structure of cos(4t). When the trace completes a full loop (t = 12π) the figure is whole.</p>
+      <div class="glyph-output">
+        <div class="glyph-output-label">Glyph spec output <span class="badge">v0.2</span></div>
+        <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/math/butterfly.json" title="View the butterfly.json spec on GitHub">
+          <img src="butterfly.svg" alt="Glyph-rendered butterfly curve, byte-locked SVG" loading="lazy">
+        </a>
+        <p class="glyph-output-caption"><code>data.shape: "trajectory"</code> with the Fay parametric formula. Cross-platform precision-clamp on every <code>exp(cos(t))</code> sample keeps the SVG bytes identical across libm implementations.</p>
+      </div>
     </div>
   </div>
 </section>
@@ -239,7 +329,21 @@
         <label><span class="lbl"><span>impact parameter b</span><strong id="lbl-grav-b">0.3</strong></span><input id="grav-b" type="range" min="-1" max="1" step="0.02" value="0.3"></label>
         <label><span class="lbl"><span>ray count</span><strong id="lbl-grav-rays">5</strong></span><input id="grav-rays" type="range" min="1" max="11" step="1" value="5"></label>
       </div>
-      <p class="demo-note">When the deflection is large enough, you get <strong>gravitational lensing</strong> — a single distant galaxy appears as multiple arcs or a full <em>Einstein ring</em> around the foreground mass. This is how astronomers weigh dark matter without ever seeing it. <strong>This is now a Glyph spec</strong> — RFC #3 shipped <code>data.shape: "geodesic"</code> with weak-field Schwarzschild integration; see <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/math/gravity-lens.json">__fixtures__/math/gravity-lens.json</a>. RFC #3 v2 added <code>metric: "schwarzschild-strong"</code> for photon-sphere orbits and event-horizon capture; see <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/math/black-hole-orbits.json">__fixtures__/math/black-hole-orbits.json</a>.</p>
+      <p class="demo-note">When the deflection is large enough, you get <strong>gravitational lensing</strong> — a single distant galaxy appears as multiple arcs or a full <em>Einstein ring</em> around the foreground mass. This is how astronomers weigh dark matter without ever seeing it.</p>
+      <div class="glyph-output">
+        <div class="glyph-output-label">Glyph spec output <span class="badge">v0.3 new</span></div>
+        <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/math/gravity-lens.json" title="View the gravity-lens.json spec on GitHub">
+          <img src="gravity-lens.svg" alt="Glyph-rendered weak-field Schwarzschild photon deflection, byte-locked SVG" loading="lazy">
+        </a>
+        <p class="glyph-output-caption"><strong>RFC #3</strong> shipped <code>data.shape: "geodesic"</code> with weak-field Schwarzschild: four photons deflect by ≈ 4M/b around a unit-mass lens. See <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/math/gravity-lens.json">gravity-lens.json</a>.</p>
+      </div>
+      <div class="glyph-output">
+        <div class="glyph-output-label">Glyph spec output <span class="badge v2">v0.3 v2</span></div>
+        <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/math/black-hole-orbits.json" title="View the black-hole-orbits.json spec on GitHub">
+          <img src="black-hole-orbits.svg" alt="Glyph-rendered strong-field Schwarzschild: photon-sphere orbits and event-horizon capture" loading="lazy">
+        </a>
+        <p class="glyph-output-caption"><strong>RFC #3 v2</strong> added <code>metric: "schwarzschild-strong"</code> — full equatorial-plane null geodesics. Above: four photons illustrate scatter (b &gt; b_crit ≈ 5.196), photon-sphere loop (b just above b_crit), and event-horizon capture (b &lt; b_crit). See <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/math/black-hole-orbits.json">black-hole-orbits.json</a>.</p>
+      </div>
     </div>
   </div>
 </section>
@@ -262,7 +366,21 @@
         <label><span class="lbl"><span>flow speed ω</span><strong id="lbl-flow-w">0.5</strong></span><input id="flow-w" type="range" min="0" max="2" step="0.05" value="0.5"></label>
         <label><span class="lbl"><span>trail persistence</span><strong id="lbl-flow-fade">94%</strong></span><input id="flow-fade" type="range" min="70" max="99" step="1" value="94"></label>
       </div>
-      <p class="demo-note">This is the math behind every weather-map wind animation you've ever seen. NOAA / the Weather Channel / earth.nullschool.net all use the same Lagrangian-particles-on-Eulerian-field trick. <strong>The static snapshot of this is already a Glyph spec</strong> — <code>mark: "streamline"</code> with the new <code>colorBy: "angle"</code> option ships in v0.3 and lives at <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/math/streamline-colorby-angle.json">__fixtures__/math/streamline-colorby-angle.json</a>. RFC #2 v2 added <code>colorBy: "step"</code> — a 0°→270° rainbow trail along each polyline showing arc-length progression; see <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/math/streamline-colorby-step.json">__fixtures__/math/streamline-colorby-step.json</a>. The animated browser-side path is what a future <code>mark: "particle-flow"</code> would add.</p>
+      <p class="demo-note">This is the math behind every weather-map wind animation you've ever seen. NOAA / the Weather Channel / earth.nullschool.net all use the same Lagrangian-particles-on-Eulerian-field trick.</p>
+      <div class="glyph-output">
+        <div class="glyph-output-label">Glyph spec output <span class="badge">v0.3 new</span></div>
+        <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/math/streamline-colorby-angle.json" title="View the streamline-colorby-angle.json spec on GitHub">
+          <img src="streamline-colorby-angle.svg" alt="Glyph-rendered streamline rotation field with colorBy: 'angle' per-polyline hue" loading="lazy">
+        </a>
+        <p class="glyph-output-caption"><strong>RFC #2</strong> shipped <code>mark: "streamline"</code> with <code>colorBy: "angle"</code> — each streamline hued by velocity direction at the seed. See <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/math/streamline-colorby-angle.json">streamline-colorby-angle.json</a>.</p>
+      </div>
+      <div class="glyph-output">
+        <div class="glyph-output-label">Glyph spec output <span class="badge v2">v0.3 v2</span></div>
+        <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/math/streamline-colorby-step.json" title="View the streamline-colorby-step.json spec on GitHub">
+          <img src="streamline-colorby-step.svg" alt="Glyph-rendered streamline with colorBy: 'step' rainbow trail per polyline" loading="lazy">
+        </a>
+        <p class="glyph-output-caption"><strong>RFC #2 v2</strong> added <code>colorBy: "step"</code> — a 0°→270° rainbow trail along each polyline showing arc-length progression. One <code>&lt;path&gt;</code> per segment, byte-stable. See <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/math/streamline-colorby-step.json">streamline-colorby-step.json</a>.</p>
+      </div>
     </div>
   </div>
 </section>
@@ -284,7 +402,21 @@
         <label><span class="lbl"><span>damping γ</span><strong id="lbl-wave-g">0.003</strong></span><input id="wave-g" type="range" min="0" max="0.05" step="0.001" value="0.003"></label>
         <label><span class="lbl"><span>auto-drops / sec</span><strong id="lbl-wave-rate">0.5</strong></span><input id="wave-rate" type="range" min="0" max="3" step="0.1" value="0.5"></label>
       </div>
-      <p class="demo-note">Solved by an explicit finite-difference scheme on a 240×240 grid: each cell's next state is computed from its 4 neighbors. The same algorithm scaled to 1024³ runs on every modern supercomputer doing climate / seismology / ocean simulation. <strong>This is now a Glyph spec</strong> — RFC #4 v2 shipped <code>kind: "wave"</code> on top of v1's heat solver; see <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/math/wave-ripples.json">__fixtures__/math/wave-ripples.json</a> (the leapfrog snapshot equivalent of this animated demo).</p>
+      <p class="demo-note">Solved by an explicit finite-difference scheme on a 240×240 grid: each cell's next state is computed from its 4 neighbors. The same algorithm scaled to 1024³ runs on every modern supercomputer doing climate / seismology / ocean simulation.</p>
+      <div class="glyph-output">
+        <div class="glyph-output-label">Glyph spec output <span class="badge">v0.3 new</span></div>
+        <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/math/heat-diffusion.json" title="View the heat-diffusion.json spec on GitHub">
+          <img src="heat-diffusion.svg" alt="Glyph-rendered heat equation diffusion, byte-locked SVG" loading="lazy">
+        </a>
+        <p class="glyph-output-caption"><strong>RFC #4</strong> shipped <code>data.shape: "pde-solve"</code> with <code>kind: "heat"</code> — explicit Euler on a 5-point Laplacian. CFL stability checked at schema time. See <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/math/heat-diffusion.json">heat-diffusion.json</a>.</p>
+      </div>
+      <div class="glyph-output">
+        <div class="glyph-output-label">Glyph spec output <span class="badge v2">v0.3 v2</span></div>
+        <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/math/wave-ripples.json" title="View the wave-ripples.json spec on GitHub">
+          <img src="wave-ripples.svg" alt="Glyph-rendered wave equation Gaussian impulse leapfrog snapshot" loading="lazy">
+        </a>
+        <p class="glyph-output-caption"><strong>RFC #4 v2</strong> added <code>kind: "wave"</code> — 2D wave equation via leapfrog with optional damping γ and <code>initial_velocity</code>. CFL: <code>c·dt/dx ≤ 1</code>. See <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/math/wave-ripples.json">wave-ripples.json</a>.</p>
+      </div>
     </div>
   </div>
 </section>
@@ -313,7 +445,137 @@
           <button data-preset="0.082,0.06">solitons</button>
         </div>
       </div>
-      <p class="demo-note">Same algorithm runs every animal-coat-pattern paper for the past 70 years. Vary F and k by 0.001 and you cross a phase boundary — leopard becomes zebra becomes labyrinth becomes self-replicating spots. Real morphogenesis is governed by ~50 such parameters; this 2-parameter toy already covers an astonishing range of biology. <strong>This is now a Glyph spec</strong> — RFC #4 v2 added <code>kind: "reaction-diffusion"</code> to <code>pde-solve</code>; see <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/math/rd-spots.json">__fixtures__/math/rd-spots.json</a>.</p>
+      <p class="demo-note">Same algorithm runs every animal-coat-pattern paper for the past 70 years. Vary F and k by 0.001 and you cross a phase boundary — leopard becomes zebra becomes labyrinth becomes self-replicating spots. Real morphogenesis is governed by ~50 such parameters; this 2-parameter toy already covers an astonishing range of biology.</p>
+      <div class="glyph-output">
+        <div class="glyph-output-label">Glyph spec output <span class="badge v2">v0.3 v2</span></div>
+        <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/math/rd-spots.json" title="View the rd-spots.json spec on GitHub">
+          <img src="rd-spots.svg" alt="Glyph-rendered Gray-Scott reaction-diffusion seeded V species snapshot" loading="lazy">
+        </a>
+        <p class="glyph-output-caption"><strong>RFC #4 v2</strong> added <code>kind: "reaction-diffusion"</code> — Gray-Scott two-species system with independent <code>initial_U</code> / <code>initial_V</code> expressions. CFL: <code>max(Du,Dv)·dt/dx² ≤ 0.25</code>. See <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/math/rd-spots.json">rd-spots.json</a>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===========================================================
+     GRAMMAR CATALOG — each shipped data.shape / mark with a
+     code snippet and the rendered SVG, side-by-side.
+     =========================================================== -->
+<section class="grammar-catalog" id="grammar-catalog">
+  <div class="container">
+    <h2>Grammar Catalog</h2>
+    <p class="lede">Every visualization on this page is authored in this grammar. Each card below shows the JSON spec on the left and the byte-locked SVG output on the right. The compiler ships these as locked fixtures in CI across Ubuntu / macOS / Windows × Node 20 / 22 — same spec → same SVG, every platform, every run.</p>
+
+    <!-- trajectory -->
+    <div class="grammar-card">
+      <div class="grammar-card-info">
+        <h3><code>data.shape: "trajectory"</code> <span class="badge">v0.2</span></h3>
+        <p>Parametric curves <code>x(t), y(t)</code> and 2D ODE systems. Powers Lissajous, hypotrochoid, butterfly, Archimedean spiral, and the predator-prey + damped-oscillator demos.</p>
+        <pre><span class="c">// Lissajous figure-eight</span>
+{
+  <span class="k">"shape"</span>: <span class="s">"trajectory"</span>,
+  <span class="k">"params"</span>: { <span class="k">"a"</span>: <span class="n">3</span>, <span class="k">"b"</span>: <span class="n">2</span>, <span class="k">"d"</span>: <span class="n">0</span> },
+  <span class="k">"x"</span>: <span class="s">"sin(a*t + d)"</span>,
+  <span class="k">"y"</span>: <span class="s">"sin(b*t)"</span>,
+  <span class="k">"t"</span>: { <span class="k">"min"</span>: <span class="n">0</span>, <span class="k">"max"</span>: <span class="n">6.283</span>, <span class="k">"steps"</span>: <span class="n">800</span> }
+}</pre>
+      </div>
+      <div class="grammar-card-svg">
+        <img src="lissajous.svg" alt="Lissajous trajectory shape rendered to byte-locked SVG" loading="lazy">
+      </div>
+    </div>
+
+    <!-- recurrence -->
+    <div class="grammar-card">
+      <div class="grammar-card-info">
+        <h3><code>data.shape: "recurrence"</code> <span class="badge">v0.3 new</span></h3>
+        <p>Discrete iteration <code>state_{n+1} = f(state_n, n)</code>. Curlicue curves, logistic map, iterated function systems. Schema validates that <code>state</code>, <code>initial</code>, and <code>step</code> keys form the same set; <code>n</code> is reserved as the step index.</p>
+        <pre><span class="c">// Golden-angle curlicue</span>
+{
+  <span class="k">"shape"</span>: <span class="s">"recurrence"</span>,
+  <span class="k">"state"</span>: [<span class="s">"x"</span>, <span class="s">"y"</span>, <span class="s">"theta"</span>],
+  <span class="k">"initial"</span>: { <span class="k">"x"</span>: <span class="n">0</span>, <span class="k">"y"</span>: <span class="n">0</span>, <span class="k">"theta"</span>: <span class="n">0</span> },
+  <span class="k">"step"</span>: {
+    <span class="k">"x"</span>:     <span class="s">"x + cos(theta)"</span>,
+    <span class="k">"y"</span>:     <span class="s">"y + sin(theta)"</span>,
+    <span class="k">"theta"</span>: <span class="s">"theta + 2.39996 * n"</span>
+  },
+  <span class="k">"steps"</span>: <span class="n">8000</span>
+}</pre>
+      </div>
+      <div class="grammar-card-svg">
+        <img src="curlicue-golden.svg" alt="Golden-angle curlicue recurrence rendered to byte-locked SVG" loading="lazy">
+      </div>
+    </div>
+
+    <!-- geodesic -->
+    <div class="grammar-card">
+      <div class="grammar-card-info">
+        <h3><code>data.shape: "geodesic"</code> <span class="badge">v0.3 new</span> <span class="badge v2">v2</span></h3>
+        <p>Null geodesics through the equatorial plane of a Schwarzschild black hole. <strong>v1</strong> ships the weak-field post-Newtonian acceleration <code>a = −2M·r̂/r²</code> (reproduces Einstein's 4M/b deflection). <strong>v2</strong> adds the full strong-field integrator <code>d²r/dλ² = L²(r−3M)/r⁴</code> in (r, φ, ṙ) — photon-sphere orbits at r = 3M, event-horizon capture at r = 2M.</p>
+        <pre><span class="c">// Strong-field — photons near the photon sphere</span>
+{
+  <span class="k">"shape"</span>: <span class="s">"geodesic"</span>,
+  <span class="k">"metric"</span>: <span class="s">"schwarzschild-strong"</span>,
+  <span class="k">"mass"</span>: <span class="n">1</span>,
+  <span class="k">"seeds"</span>: [
+    { <span class="k">"x0"</span>: <span class="n">-30</span>, <span class="k">"y0"</span>:  <span class="n">5.4</span>, <span class="k">"vx0"</span>: <span class="n">1</span>, <span class="k">"vy0"</span>: <span class="n">0</span> },
+    { <span class="k">"x0"</span>: <span class="n">-30</span>, <span class="k">"y0"</span>:  <span class="n">4.0</span>, <span class="k">"vx0"</span>: <span class="n">1</span>, <span class="k">"vy0"</span>: <span class="n">0</span> }
+  ],
+  <span class="k">"step"</span>: <span class="n">0.05</span>, <span class="k">"max_lambda"</span>: <span class="n">200</span>
+}</pre>
+      </div>
+      <div class="grammar-card-svg">
+        <img src="black-hole-orbits.svg" alt="Strong-field Schwarzschild geodesic shape rendered to byte-locked SVG" loading="lazy">
+      </div>
+    </div>
+
+    <!-- pde-solve -->
+    <div class="grammar-card">
+      <div class="grammar-card-info">
+        <h3><code>data.shape: "pde-solve"</code> <span class="badge">v0.3 new</span> <span class="badge v2">v2</span></h3>
+        <p>2D PDE solvers on a structured grid. <strong>v1</strong>: <code>kind: "heat"</code> via explicit Euler. <strong>v2</strong>: <code>"wave"</code> via leapfrog (with damping + <code>initial_velocity</code>) and <code>"reaction-diffusion"</code> via Gray-Scott two-species coupling. Per-kind CFL stability checked at schema time.</p>
+        <pre><span class="c">// Gray-Scott leopard spots</span>
+{
+  <span class="k">"shape"</span>: <span class="s">"pde-solve"</span>,
+  <span class="k">"kind"</span>: <span class="s">"reaction-diffusion"</span>,
+  <span class="k">"domain"</span>: { <span class="k">"x"</span>: [<span class="n">-1</span>,<span class="n">1</span>], <span class="k">"y"</span>: [<span class="n">-1</span>,<span class="n">1</span>] },
+  <span class="k">"grid"</span>: { <span class="k">"rows"</span>: <span class="n">24</span>, <span class="k">"cols"</span>: <span class="n">24</span> },
+  <span class="k">"initial_U"</span>: <span class="s">"1"</span>,
+  <span class="k">"initial_V"</span>: <span class="s">"exp(-40*(x*x + y*y))*0.3"</span>,
+  <span class="k">"params"</span>: { <span class="k">"Du"</span>: <span class="n">1.0</span>, <span class="k">"Dv"</span>: <span class="n">0.5</span>,
+              <span class="k">"F"</span>: <span class="n">0.062</span>, <span class="k">"k"</span>: <span class="n">0.062</span> },
+  <span class="k">"boundary"</span>: <span class="s">"periodic"</span>,
+  <span class="k">"steps"</span>: <span class="n">200</span>, <span class="k">"dt"</span>: <span class="n">0.001</span>
+}</pre>
+      </div>
+      <div class="grammar-card-svg">
+        <img src="rd-spots.svg" alt="Gray-Scott reaction-diffusion rendered to byte-locked SVG" loading="lazy">
+      </div>
+    </div>
+
+    <!-- streamline -->
+    <div class="grammar-card">
+      <div class="grammar-card-info">
+        <h3><code>mark: "streamline"</code> + <code>colorBy</code> <span class="badge">v0.3 new</span> <span class="badge v2">v2</span></h3>
+        <p>Vector-field integrator emitting bidirectional RK4 flow lines from a grid of seeds. <strong>v1</strong>: <code>colorBy: "angle"</code> hues each polyline by velocity direction at the seed; <code>"speed"</code> varies lightness by velocity magnitude. <strong>v2</strong>: <code>colorBy: "step"</code> emits one <code>&lt;path&gt;</code> per polyline segment with a 0°→270° rainbow trail showing arc-length progression.</p>
+        <pre><span class="c">// Rotation field with rainbow step gradient</span>
+{
+  <span class="k">"mark"</span>: <span class="s">"streamline"</span>,
+  <span class="k">"streamline"</span>: {
+    <span class="k">"dxdt"</span>: <span class="s">"-y"</span>,
+    <span class="k">"dydt"</span>: <span class="s">"x"</span>,
+    <span class="k">"seeds"</span>: { <span class="k">"kind"</span>: <span class="s">"grid"</span>,
+                <span class="k">"rows"</span>: <span class="n">4</span>, <span class="k">"cols"</span>: <span class="n">4</span> },
+    <span class="k">"step"</span>: <span class="n">0.05</span>, <span class="k">"maxSteps"</span>: <span class="n">120</span>,
+    <span class="k">"domain"</span>: { <span class="k">"x"</span>: [<span class="n">-2</span>,<span class="n">2</span>], <span class="k">"y"</span>: [<span class="n">-2</span>,<span class="n">2</span>] },
+    <span class="k">"colorBy"</span>: <span class="s">"step"</span>
+  }
+}</pre>
+      </div>
+      <div class="grammar-card-svg">
+        <img src="streamline-colorby-step.svg" alt="Streamline mark with colorBy: 'step' rainbow trail rendered to byte-locked SVG" loading="lazy">
+      </div>
     </div>
   </div>
 </section>
@@ -324,9 +586,9 @@
 <section class="demo" id="about">
   <div class="container" style="max-width:780px">
     <h2>What this means for Glyph</h2>
-    <p>Most of the curves on this page are parametric formulas — Lissajous, hypotrochoid, Archimedean spiral, butterfly — and each compiles to a <a href="https://github.com/seanhanca/glyph/blob/main/docs/LEARN.md">Glyph spec</a> via <code>data.shape: "trajectory"</code> with the <code>x(t), y(t)</code> formulas plugged in. The result: byte-stable, deterministic SVG an AI agent can author from English.</p>
-    <p>The remaining demos live in a different regime — <strong>iterative recurrences</strong> (curlicue), <strong>field-driven advection</strong> (particle flow), <strong>PDE solvers</strong> (waves, reaction-diffusion), <strong>relativistic geodesics</strong> (gravity lens). Glyph's grammar doesn't model these <em>yet</em>. Each is a natural extension: a <code>data.shape: "recurrence"</code>, a <code>mark: "particle-flow"</code>, a <code>data.shape: "pde-solve"</code>. The page is a preview of what an agent-driven viz layer for math + physics + biology could compose, one feature request at a time.</p>
-    <p>The bigger vision: Glyph as the viz layer agents reach for to render <em>any</em> formula, dataset, or algorithm. Grammar of graphics over math, not just bar charts.</p>
+    <p>When this page first shipped, half the demos linked to existing Glyph specs (<code>data.shape: "trajectory"</code> handles every parametric curve) and the other half lived in a different regime — discrete iteration, vector-field advection, PDE solvers, relativistic geodesics — that the grammar didn't model yet.</p>
+    <p><strong>It models them now.</strong> Across v0.3, four RFCs shipped extensions that close the gap: <code>data.shape: "recurrence"</code> (curlicue, logistic map, iterated function systems), <code>data.shape: "geodesic"</code> (null geodesics through Schwarzschild spacetime, weak- and strong-field), <code>data.shape: "pde-solve"</code> (heat, wave, reaction-diffusion on a structured grid), and <code>mark: "streamline"</code> with per-polyline color modes including the v2 rainbow-trail "step" gradient. Every demo on this page is now backed by a byte-locked Glyph fixture in CI.</p>
+    <p>The bigger vision: Glyph as the viz layer agents reach for to render <em>any</em> formula, dataset, or algorithm. Grammar of graphics over math, not just bar charts. The recipe-idea form is the single fastest way to grow it — file what you want to render and the grammar follows.</p>
     <div class="hero-cta" style="margin-top:24px">
       <a class="btn btn-primary" href="https://github.com/seanhanca/glyph">⭐ Star on GitHub</a>
       <a class="btn btn-ghost" href="https://github.com/seanhanca/glyph/issues/new?template=recipe_idea.yml">Add a recipe</a>
