@@ -309,6 +309,246 @@
               ],
               "additionalProperties": false
             },
+            "recurrence": {
+              "type": "object",
+              "properties": {
+                "shape": {
+                  "type": "string",
+                  "const": "recurrence"
+                },
+                "state": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "minItems": 1
+                },
+                "initial": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "number"
+                  }
+                },
+                "step": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "params": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "number"
+                  }
+                },
+                "steps": {
+                  "type": "integer",
+                  "minimum": 2,
+                  "maximum": 200000
+                }
+              },
+              "required": [
+                "shape",
+                "state",
+                "initial",
+                "step",
+                "steps"
+              ],
+              "additionalProperties": false
+            },
+            "geodesic": {
+              "type": "object",
+              "properties": {
+                "shape": {
+                  "type": "string",
+                  "const": "geodesic"
+                },
+                "metric": {
+                  "type": "string",
+                  "enum": [
+                    "schwarzschild-weak",
+                    "schwarzschild-strong"
+                  ]
+                },
+                "mass": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "seeds": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "x0": {
+                        "type": "number"
+                      },
+                      "y0": {
+                        "type": "number"
+                      },
+                      "vx0": {
+                        "type": "number"
+                      },
+                      "vy0": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "x0",
+                      "y0",
+                      "vx0",
+                      "vy0"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 1,
+                  "maxItems": 200
+                },
+                "step": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "maximum": 10
+                },
+                "max_lambda": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "maximum": 1000
+                }
+              },
+              "required": [
+                "shape",
+                "metric",
+                "mass",
+                "seeds",
+                "step",
+                "max_lambda"
+              ],
+              "additionalProperties": false
+            },
+            "pde_solve": {
+              "type": "object",
+              "properties": {
+                "shape": {
+                  "type": "string",
+                  "const": "pde-solve"
+                },
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "heat",
+                    "wave",
+                    "reaction-diffusion"
+                  ]
+                },
+                "domain": {
+                  "type": "object",
+                  "properties": {
+                    "x": {
+                      "type": "array",
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "items": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "number"
+                        }
+                      ]
+                    },
+                    "y": {
+                      "type": "array",
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "items": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "number"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "x",
+                    "y"
+                  ],
+                  "additionalProperties": false
+                },
+                "grid": {
+                  "type": "object",
+                  "properties": {
+                    "rows": {
+                      "type": "integer",
+                      "minimum": 4,
+                      "maximum": 256
+                    },
+                    "cols": {
+                      "type": "integer",
+                      "minimum": 4,
+                      "maximum": 256
+                    }
+                  },
+                  "required": [
+                    "rows",
+                    "cols"
+                  ],
+                  "additionalProperties": false
+                },
+                "initial": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "initial_velocity": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "initial_U": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "initial_V": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "params": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "number"
+                  }
+                },
+                "boundary": {
+                  "type": "string",
+                  "enum": [
+                    "clamp",
+                    "periodic"
+                  ]
+                },
+                "steps": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000
+                },
+                "dt": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                }
+              },
+              "required": [
+                "shape",
+                "kind",
+                "domain",
+                "grid",
+                "initial",
+                "params",
+                "boundary",
+                "steps",
+                "dt"
+              ],
+              "additionalProperties": false
+            },
             "onMissing": {
               "type": "string",
               "enum": [
@@ -882,6 +1122,14 @@
                       "y"
                     ],
                     "additionalProperties": false
+                  },
+                  "colorBy": {
+                    "type": "string",
+                    "enum": [
+                      "angle",
+                      "speed",
+                      "step"
+                    ]
                   }
                 },
                 "required": [

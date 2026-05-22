@@ -4132,6 +4132,100 @@ var TrajectoryDataSchema = external_exports.object({
     message: "trajectory data: time.min must be < time.max"
   })
 }).strict();
+var PdeSolveDataSchema = external_exports.object({
+  shape: external_exports.literal("pde-solve"),
+  kind: external_exports.enum(["heat", "wave", "reaction-diffusion"]),
+  domain: external_exports.object({
+    x: external_exports.tuple([
+      external_exports.number().refine(Number.isFinite, "domain.x[0] must be finite"),
+      external_exports.number().refine(Number.isFinite, "domain.x[1] must be finite")
+    ]),
+    y: external_exports.tuple([
+      external_exports.number().refine(Number.isFinite, "domain.y[0] must be finite"),
+      external_exports.number().refine(Number.isFinite, "domain.y[1] must be finite")
+    ])
+  }).strict().refine((d) => d.x[0] < d.x[1] && d.y[0] < d.y[1], {
+    message: "pde-solve: domain.x[0] < .x[1] and domain.y[0] < .y[1] required"
+  }),
+  grid: external_exports.object({
+    rows: external_exports.number().int().min(4).max(256),
+    cols: external_exports.number().int().min(4).max(256)
+  }).strict(),
+  initial: external_exports.string().min(1),
+  /** Wave-only optional: initial ∂u/∂t. Defaults to "0". */
+  initial_velocity: external_exports.string().min(1).optional(),
+  /** RD-only optional: initial U. Defaults to "1". */
+  initial_U: external_exports.string().min(1).optional(),
+  /** RD-only optional: initial V. Defaults to a small Gaussian seed. */
+  initial_V: external_exports.string().min(1).optional(),
+  params: external_exports.record(external_exports.number().refine(Number.isFinite, "params values must be finite")),
+  boundary: external_exports.enum(["clamp", "periodic"]),
+  steps: external_exports.number().int().min(1).max(1e3),
+  dt: external_exports.number().positive().refine(Number.isFinite, "dt must be finite")
+}).strict().refine((s) => {
+  const dx = (s.domain.x[1] - s.domain.x[0]) / s.grid.cols;
+  if (s.kind === "heat") {
+    const D2 = s.params.D ?? 0;
+    if (!Number.isFinite(D2) || D2 < 0)
+      return false;
+    return D2 * s.dt / (dx * dx) <= 0.25;
+  }
+  if (s.kind === "wave") {
+    const c = s.params.c ?? 1;
+    if (!Number.isFinite(c) || c <= 0)
+      return false;
+    return c * s.dt / dx <= 1;
+  }
+  const Du = s.params.Du ?? 1;
+  const Dv = s.params.Dv ?? 0.5;
+  if (!Number.isFinite(Du) || !Number.isFinite(Dv) || Du < 0 || Dv < 0)
+    return false;
+  return Math.max(Du, Dv) * s.dt / (dx * dx) <= 0.25;
+}, {
+  message: "pde-solve: CFL stability violated. heat: D\xB7dt/dx\xB2 \u2264 0.25; wave: c\xB7dt/dx \u2264 1; reaction-diffusion: max(Du,Dv)\xB7dt/dx\xB2 \u2264 0.25. Reduce dt or relevant coefficients, or increase grid.cols."
+});
+var GeodesicDataSchema = external_exports.object({
+  shape: external_exports.literal("geodesic"),
+  metric: external_exports.enum(["schwarzschild-weak", "schwarzschild-strong"]),
+  mass: external_exports.number().positive().refine(Number.isFinite, "mass must be finite"),
+  seeds: external_exports.array(external_exports.object({
+    x0: external_exports.number().refine(Number.isFinite, "x0 must be finite"),
+    y0: external_exports.number().refine(Number.isFinite, "y0 must be finite"),
+    vx0: external_exports.number().refine(Number.isFinite, "vx0 must be finite"),
+    vy0: external_exports.number().refine(Number.isFinite, "vy0 must be finite")
+  }).strict().refine((s) => s.vx0 !== 0 || s.vy0 !== 0, {
+    message: "geodesic seed velocity must be nonzero"
+  })).min(1).max(200),
+  step: external_exports.number().positive().max(10).refine(Number.isFinite, "step must be finite"),
+  max_lambda: external_exports.number().positive().max(1e3).refine(Number.isFinite, "max_lambda must be finite")
+}).strict();
+var RecurrenceDataSchema = external_exports.object({
+  shape: external_exports.literal("recurrence"),
+  state: external_exports.array(external_exports.string().min(1)).min(1),
+  initial: external_exports.record(external_exports.number().refine(Number.isFinite, "initial values must be finite")),
+  step: external_exports.record(external_exports.string().min(1)),
+  params: external_exports.record(external_exports.number().refine(Number.isFinite, "params values must be finite")).optional(),
+  steps: external_exports.number().int().min(2).max(2e5)
+}).strict().refine((r) => {
+  const stateSet = new Set(r.state);
+  if (stateSet.size !== r.state.length)
+    return false;
+  if (stateSet.has("n"))
+    return false;
+  const initKeys = Object.keys(r.initial);
+  const stepKeys = Object.keys(r.step);
+  if (initKeys.length !== r.state.length || stepKeys.length !== r.state.length)
+    return false;
+  for (const name of r.state) {
+    if (!(name in r.initial))
+      return false;
+    if (!(name in r.step))
+      return false;
+  }
+  return true;
+}, {
+  message: "recurrence data: state, initial, and step must all reference the same variable names; `n` is reserved"
+});
 var DataSourceSchema = external_exports.object({
   /**
    * Path, URL, or named registered table for tabular data. Optional when
@@ -4184,6 +4278,30 @@ var DataSourceSchema = external_exports.object({
    */
   trajectory: TrajectoryDataSchema.optional(),
   /**
+   * RFC 2026-05-22 — `data.shape: "recurrence"`. Iterative
+   * difference equation walked for N integer steps. Different from
+   * `trajectory` (continuous ODE via RK4) and `function` (sampled
+   * scalar / parametric curve): emits exactly `steps` rows where
+   * row n holds the state after n iterations of the user-supplied
+   * step function. Use for curlicue curves, logistic-map orbits,
+   * IFS attractors — anything where the natural evolution is
+   * x_{n+1} = f(x_n, n).
+   */
+  recurrence: RecurrenceDataSchema.optional(),
+  /**
+   * RFC 2026-05-22 — `data.shape: "geodesic"`. Photon paths through
+   * the equatorial plane of a Schwarzschild black hole. V1 ships
+   * weak-field only; full strong-field Binet integration queued
+   * for a follow-up. See GeodesicDataSchema docstring for details.
+   */
+  geodesic: GeodesicDataSchema.optional(),
+  /**
+   * RFC 2026-05-22 — `data.shape: "pde-solve"`. 2D PDE solver on
+   * a fixed grid; v1 supports `kind: "heat"`. Outputs rows · cols
+   * rows of `{ x, y, u }` paired with `mark: "heatmap"`.
+   */
+  pde_solve: PdeSolveDataSchema.optional(),
+  /**
    * Moat PR3 — failure-aware rendering policy for rows whose
    * y-encoded value is null / undefined / NaN.
    *
@@ -4205,7 +4323,7 @@ var DataSourceSchema = external_exports.object({
    *                   to "skip" (no neighbor to interpolate against).
    */
   onMissing: external_exports.enum(["skip", "callout", "interpolate"]).optional()
-}).strict().refine((d) => d.source !== void 0 || d.hierarchy !== void 0 || d.graph !== void 0 || d.grid !== void 0 || d.function !== void 0 || d.trajectory !== void 0, "data needs a 'source', 'hierarchy', 'graph', 'grid', 'function', or 'trajectory'");
+}).strict().refine((d) => d.source !== void 0 || d.hierarchy !== void 0 || d.graph !== void 0 || d.grid !== void 0 || d.function !== void 0 || d.trajectory !== void 0 || d.recurrence !== void 0 || d.geodesic !== void 0 || d.pde_solve !== void 0, "data needs a 'source', 'hierarchy', 'graph', 'grid', 'function', 'trajectory', 'recurrence', 'geodesic', or 'pde_solve'");
 var MarkSchema = external_exports.enum([
   "bar",
   "line",
@@ -4555,7 +4673,41 @@ var LayerSchema = external_exports.object({
     domain: external_exports.object({
       x: external_exports.tuple([external_exports.number(), external_exports.number()]),
       y: external_exports.tuple([external_exports.number(), external_exports.number()])
-    }).strict().optional()
+    }).strict().optional(),
+    /**
+     * RFC 2026-05-23 — per-polyline color mode for the streamline
+     * mark. Unset (default): every streamline strokes in the
+     * theme's foreground color, preserving v0.2.0 byte snapshots.
+     *
+     *   - `"angle"`: stroke hue = atan2(vy, vx) at the seed point,
+     *     so streamlines tracking the same flow direction share a
+     *     color. The natural visualization for curl-dominated
+     *     fields — eddies in different rotational senses pop out
+     *     in different hues.
+     *
+     *   - `"speed"`: stroke lightness varies with |v| at the seed,
+     *     darker = slower, lighter = faster. Useful for showing
+     *     where a field accelerates (e.g. fluid through a nozzle).
+     *
+     *   - `"step"` (RFC #2 v2): hue varies along each polyline by
+     *     step index — a 0°→270° rainbow trail from start (red)
+     *     to end (purple) showing arc-length progression. Emitted
+     *     as one `<path>` per segment instead of one per polyline,
+     *     so file size grows linearly with maxSteps × seed count;
+     *     stay below ~5000 segments per chart for fast renders.
+     *
+     * When set, `colorBy` overrides any `encoding.color` for this
+     * mark — the streamline mark doesn't bind row data the way
+     * bar/line do, so a row-driven color channel doesn't apply.
+     *
+     * AUDIT note: charts with many distinct seeds + `colorBy` will
+     * legitimately have > 8 distinct colors, which trips AUDIT-06.
+     * That warning is correct in spirit (the chart is information-
+     * dense) but expected for this mark; an audit-rule refinement
+     * to gate AUDIT-06 against opt-in many-color marks is tracked
+     * separately.
+     */
+    colorBy: external_exports.enum(["angle", "speed", "step"]).optional()
   }).strict().optional(),
   // A5 — bezier mark
   /**
@@ -7147,9 +7299,11 @@ function sampleScalar(spec, evaluator) {
   const hasZ = spec.zExpr !== void 0;
   for (let i = 0; i < spec.x.samples; i++) {
     const x = i === spec.x.samples - 1 ? spec.x.max : spec.x.min + step * i;
-    const y = safeEval(evaluator, spec.expr, { x });
+    const yRaw = safeEval(evaluator, spec.expr, { x });
+    const y = yRaw === null ? null : clampSamplerPrecision(yRaw);
     if (hasZ) {
-      const z = safeEval(evaluator, spec.zExpr, { x });
+      const zRaw = safeEval(evaluator, spec.zExpr, { x });
+      const z = zRaw === null ? null : clampSamplerPrecision(zRaw);
       rows.push({ x, y, z });
     } else {
       rows.push({ x, y });
@@ -7169,10 +7323,13 @@ function sampleParametric(spec, evaluator) {
   for (let i = 0; i < spec.parameter.samples; i++) {
     const t = i === spec.parameter.samples - 1 ? spec.parameter.max : spec.parameter.min + step * i;
     const scope = { [paramName]: t };
-    const x = safeEval(evaluator, spec.xExpr, scope);
-    const y = safeEval(evaluator, spec.yExpr, scope);
+    const xRaw = safeEval(evaluator, spec.xExpr, scope);
+    const yRaw = safeEval(evaluator, spec.yExpr, scope);
+    const x = xRaw === null ? null : clampSamplerPrecision(xRaw);
+    const y = yRaw === null ? null : clampSamplerPrecision(yRaw);
     if (hasZ) {
-      const z = safeEval(evaluator, spec.zExpr, scope);
+      const zRaw = safeEval(evaluator, spec.zExpr, scope);
+      const z = zRaw === null ? null : clampSamplerPrecision(zRaw);
       rows.push({ x, y, z, [paramName]: t });
     } else {
       rows.push({ x, y, [paramName]: t });
@@ -7202,6 +7359,496 @@ function safeEval(evaluator, expr, scope) {
       return null;
     }
     throw e;
+  }
+}
+function clampSamplerPrecision(v) {
+  if (!Number.isFinite(v))
+    return v;
+  if (Number.isInteger(v))
+    return v;
+  return Number(v.toPrecision(12));
+}
+
+// packages/core/dist/data/shapes/geodesic.js
+var MAX_GEODESIC_SEEDS = 200;
+var MAX_GEODESIC_LAMBDA = 1e3;
+function iterateGeodesic(spec) {
+  validateSpec(spec);
+  if (spec.metric === "schwarzschild-strong")
+    return iterateStrongField(spec);
+  return iterateWeakField(spec);
+}
+function iterateWeakField(spec) {
+  const { mass: M, seeds, step: h, max_lambda } = spec;
+  const photonSphere = 1.5 * M;
+  const allRows = [];
+  for (let seedIdx = 0; seedIdx < seeds.length; seedIdx++) {
+    const seed = seeds[seedIdx];
+    if (!seed)
+      continue;
+    const v0mag = Math.sqrt(seed.vx0 * seed.vx0 + seed.vy0 * seed.vy0);
+    if (v0mag === 0) {
+      continue;
+    }
+    let x = seed.x0;
+    let y = seed.y0;
+    let vx = seed.vx0 / v0mag;
+    let vy = seed.vy0 / v0mag;
+    let lambda = 0;
+    allRows.push({
+      seed_id: seedIdx,
+      lambda: 0,
+      x: clampSamplerPrecision(x),
+      y: clampSamplerPrecision(y)
+    });
+    while (lambda < max_lambda) {
+      const r0 = Math.sqrt(x * x + y * y);
+      if (r0 < photonSphere)
+        break;
+      const k1 = weakDerivatives(x, y, vx, vy, M);
+      const k2 = weakDerivatives(x + 0.5 * h * k1.dx, y + 0.5 * h * k1.dy, vx + 0.5 * h * k1.dvx, vy + 0.5 * h * k1.dvy, M);
+      const k3 = weakDerivatives(x + 0.5 * h * k2.dx, y + 0.5 * h * k2.dy, vx + 0.5 * h * k2.dvx, vy + 0.5 * h * k2.dvy, M);
+      const k4 = weakDerivatives(x + h * k3.dx, y + h * k3.dy, vx + h * k3.dvx, vy + h * k3.dvy, M);
+      x = x + h / 6 * (k1.dx + 2 * k2.dx + 2 * k3.dx + k4.dx);
+      y = y + h / 6 * (k1.dy + 2 * k2.dy + 2 * k3.dy + k4.dy);
+      vx = vx + h / 6 * (k1.dvx + 2 * k2.dvx + 2 * k3.dvx + k4.dvx);
+      vy = vy + h / 6 * (k1.dvy + 2 * k2.dvy + 2 * k3.dvy + k4.dvy);
+      lambda += h;
+      if (!Number.isFinite(x) || !Number.isFinite(y))
+        break;
+      allRows.push({
+        seed_id: seedIdx,
+        lambda: clampSamplerPrecision(lambda),
+        x: clampSamplerPrecision(x),
+        y: clampSamplerPrecision(y)
+      });
+    }
+  }
+  return allRows;
+}
+function weakDerivatives(x, y, vx, vy, M) {
+  const r2 = x * x + y * y;
+  const r3 = r2 * Math.sqrt(r2);
+  if (r3 < 1e-12) {
+    return { dx: vx, dy: vy, dvx: 0, dvy: 0 };
+  }
+  const coeff = -2 * M / r3;
+  return {
+    dx: vx,
+    dy: vy,
+    dvx: coeff * x,
+    dvy: coeff * y
+  };
+}
+function iterateStrongField(spec) {
+  const { mass: M, seeds, step: h, max_lambda } = spec;
+  const eventHorizon = 2.01 * M;
+  const allRows = [];
+  for (let seedIdx = 0; seedIdx < seeds.length; seedIdx++) {
+    const seed = seeds[seedIdx];
+    if (!seed)
+      continue;
+    const v0mag = Math.sqrt(seed.vx0 * seed.vx0 + seed.vy0 * seed.vy0);
+    if (v0mag === 0)
+      continue;
+    const vx0 = seed.vx0 / v0mag;
+    const vy0 = seed.vy0 / v0mag;
+    let r = Math.sqrt(seed.x0 * seed.x0 + seed.y0 * seed.y0);
+    let phi = Math.atan2(seed.y0, seed.x0);
+    let rdot = (seed.x0 * vx0 + seed.y0 * vy0) / r;
+    const L = seed.x0 * vy0 - seed.y0 * vx0;
+    let lambda = 0;
+    allRows.push({
+      seed_id: seedIdx,
+      lambda: 0,
+      x: clampSamplerPrecision(seed.x0),
+      y: clampSamplerPrecision(seed.y0)
+    });
+    while (lambda < max_lambda) {
+      if (r <= eventHorizon)
+        break;
+      const k1 = strongDerivatives(r, rdot, L, M);
+      const k2 = strongDerivatives(r + 0.5 * h * k1.dr, rdot + 0.5 * h * k1.drdot, L, M);
+      const k3 = strongDerivatives(r + 0.5 * h * k2.dr, rdot + 0.5 * h * k2.drdot, L, M);
+      const k4 = strongDerivatives(r + h * k3.dr, rdot + h * k3.drdot, L, M);
+      r = r + h / 6 * (k1.dr + 2 * k2.dr + 2 * k3.dr + k4.dr);
+      phi = phi + h / 6 * (k1.dphi + 2 * k2.dphi + 2 * k3.dphi + k4.dphi);
+      rdot = rdot + h / 6 * (k1.drdot + 2 * k2.drdot + 2 * k3.drdot + k4.drdot);
+      lambda += h;
+      if (!Number.isFinite(r) || !Number.isFinite(phi) || !Number.isFinite(rdot))
+        break;
+      if (r <= eventHorizon)
+        break;
+      allRows.push({
+        seed_id: seedIdx,
+        lambda: clampSamplerPrecision(lambda),
+        x: clampSamplerPrecision(r * Math.cos(phi)),
+        y: clampSamplerPrecision(r * Math.sin(phi))
+      });
+    }
+  }
+  return allRows;
+}
+function strongDerivatives(r, rdot, L, M) {
+  if (r < 1e-9) {
+    return { dr: rdot, dphi: 0, drdot: 0 };
+  }
+  const r2 = r * r;
+  const r4 = r2 * r2;
+  return {
+    dr: rdot,
+    dphi: L / r2,
+    drdot: L * L * (r - 3 * M) / r4
+  };
+}
+function validateSpec(spec) {
+  if (spec.metric !== "schwarzschild-weak" && spec.metric !== "schwarzschild-strong") {
+    throw new Error(`geodesic data: metric must be "schwarzschild-weak" or "schwarzschild-strong" (got "${spec.metric}")`);
+  }
+  if (!Number.isFinite(spec.mass) || spec.mass <= 0) {
+    throw new Error(`geodesic data: mass must be a positive finite number (got ${spec.mass})`);
+  }
+  if (!Array.isArray(spec.seeds) || spec.seeds.length === 0) {
+    throw new Error("geodesic data: seeds must be a non-empty array");
+  }
+  if (spec.seeds.length > MAX_GEODESIC_SEEDS) {
+    throw new Error(`geodesic data: seeds.length (${spec.seeds.length}) exceeds MAX_GEODESIC_SEEDS (${MAX_GEODESIC_SEEDS})`);
+  }
+  for (let i = 0; i < spec.seeds.length; i++) {
+    const s = spec.seeds[i];
+    if (!s)
+      continue;
+    if (!Number.isFinite(s.x0) || !Number.isFinite(s.y0) || !Number.isFinite(s.vx0) || !Number.isFinite(s.vy0)) {
+      throw new Error(`geodesic data: seeds[${i}] must have finite x0, y0, vx0, vy0 (got ${JSON.stringify(s)})`);
+    }
+    if (s.vx0 === 0 && s.vy0 === 0) {
+      throw new Error(`geodesic data: seeds[${i}] velocity must be nonzero`);
+    }
+  }
+  if (!Number.isFinite(spec.step) || spec.step <= 0) {
+    throw new Error(`geodesic data: step must be a positive finite number (got ${spec.step})`);
+  }
+  if (!Number.isFinite(spec.max_lambda) || spec.max_lambda <= 0) {
+    throw new Error(`geodesic data: max_lambda must be a positive finite number (got ${spec.max_lambda})`);
+  }
+  if (spec.max_lambda > MAX_GEODESIC_LAMBDA) {
+    throw new Error(`geodesic data: max_lambda (${spec.max_lambda}) exceeds MAX_GEODESIC_LAMBDA (${MAX_GEODESIC_LAMBDA})`);
+  }
+}
+
+// packages/core/dist/data/shapes/pde-solve.js
+var MAX_PDE_GRID = 256;
+var MAX_PDE_STEPS = 1e3;
+var PDE_CFL_LIMIT = 0.25;
+function solvePde(spec, evaluator = defaultEvaluator) {
+  validateSpec2(spec);
+  const { domain, grid, boundary } = spec;
+  const { rows: R, cols: C } = grid;
+  const [xMin, xMax] = domain.x;
+  const [yMin, yMax] = domain.y;
+  const dx = (xMax - xMin) / C;
+  const dy = (yMax - yMin) / R;
+  function gridFromExpression(expr) {
+    const buf = new Float64Array(R * C);
+    for (let r = 0; r < R; r++) {
+      const yMid = yMin + (r + 0.5) * dy;
+      for (let c = 0; c < C; c++) {
+        const xMid = xMin + (c + 0.5) * dx;
+        buf[r * C + c] = clampSamplerPrecision(evaluator(expr, { x: xMid, y: yMid }));
+      }
+    }
+    return buf;
+  }
+  let final;
+  if (spec.kind === "heat") {
+    final = solveHeat(spec, gridFromExpression, R, C, dx, boundary);
+  } else if (spec.kind === "wave") {
+    final = solveWave(spec, gridFromExpression, R, C, dx, boundary);
+  } else {
+    final = solveReactionDiffusion(spec, gridFromExpression, R, C, dx, boundary);
+  }
+  const u = final;
+  const out = new Array(R * C);
+  for (let r = 0; r < R; r++) {
+    const yMid = yMin + (r + 0.5) * dy;
+    for (let c = 0; c < C; c++) {
+      const xMid = xMin + (c + 0.5) * dx;
+      out[r * C + c] = {
+        x: clampSamplerPrecision(xMid),
+        y: clampSamplerPrecision(yMid),
+        u: u[r * C + c]
+      };
+    }
+  }
+  return out;
+}
+function neighborSum(u, r, c, R, C, boundary) {
+  let up;
+  let down;
+  let left;
+  let right;
+  if (boundary === "periodic") {
+    up = u[(r - 1 + R) % R * C + c];
+    down = u[(r + 1) % R * C + c];
+    left = u[r * C + (c - 1 + C) % C];
+    right = u[r * C + (c + 1) % C];
+  } else {
+    up = u[(r === 0 ? r : r - 1) * C + c];
+    down = u[(r === R - 1 ? r : r + 1) * C + c];
+    left = u[r * C + (c === 0 ? c : c - 1)];
+    right = u[r * C + (c === C - 1 ? c : c + 1)];
+  }
+  return up + down + left + right;
+}
+function solveHeat(spec, gridFromExpr, R, C, dx, boundary) {
+  let u = gridFromExpr(spec.initial);
+  let uNext = new Float64Array(R * C);
+  const D2 = spec.params.D ?? 0;
+  const alpha = D2 * spec.dt / (dx * dx);
+  for (let step = 0; step < spec.steps; step++) {
+    for (let r = 0; r < R; r++) {
+      for (let c = 0; c < C; c++) {
+        const idx = r * C + c;
+        const center = u[idx];
+        const sum = neighborSum(u, r, c, R, C, boundary);
+        uNext[idx] = clampSamplerPrecision(center + alpha * (sum - 4 * center));
+      }
+    }
+    const tmp = u;
+    u = uNext;
+    uNext = tmp;
+  }
+  return u;
+}
+function solveWave(spec, gridFromExpr, R, C, dx, boundary) {
+  let u = gridFromExpr(spec.initial);
+  const v0 = gridFromExpr(spec.initial_velocity ?? "0");
+  let uPrev = new Float64Array(R * C);
+  for (let i = 0; i < R * C; i++) {
+    uPrev[i] = u[i] - spec.dt * v0[i];
+  }
+  let uNext = new Float64Array(R * C);
+  const c2 = (spec.params.c ?? 1) ** 2;
+  const beta = c2 * spec.dt * spec.dt / (dx * dx);
+  const gammaDt = (spec.params.gamma ?? 0) * spec.dt;
+  for (let step = 0; step < spec.steps; step++) {
+    for (let r = 0; r < R; r++) {
+      for (let c = 0; c < C; c++) {
+        const idx = r * C + c;
+        const center = u[idx];
+        const prev = uPrev[idx];
+        const sum = neighborSum(u, r, c, R, C, boundary);
+        const lap2 = sum - 4 * center;
+        uNext[idx] = clampSamplerPrecision(2 * center - prev + beta * lap2 - gammaDt * (center - prev));
+      }
+    }
+    const tmp = uPrev;
+    uPrev = u;
+    u = uNext;
+    uNext = tmp;
+  }
+  return u;
+}
+function solveReactionDiffusion(spec, gridFromExpr, R, C, dx, boundary) {
+  let U = gridFromExpr(spec.initial_U ?? "1");
+  let V = gridFromExpr(spec.initial_V ?? "exp(-30*(x*x + y*y)) * 0.25");
+  let Unext = new Float64Array(R * C);
+  let Vnext = new Float64Array(R * C);
+  const Du = spec.params.Du ?? 1;
+  const Dv = spec.params.Dv ?? 0.5;
+  const F = spec.params.F ?? 0.055;
+  const k = spec.params.k ?? 0.062;
+  const dt = spec.dt;
+  const dxSq = dx * dx;
+  for (let step = 0; step < spec.steps; step++) {
+    for (let r = 0; r < R; r++) {
+      for (let c = 0; c < C; c++) {
+        const idx = r * C + c;
+        const u = U[idx];
+        const v = V[idx];
+        const lapU = (neighborSum(U, r, c, R, C, boundary) - 4 * u) / dxSq;
+        const lapV = (neighborSum(V, r, c, R, C, boundary) - 4 * v) / dxSq;
+        const uvv = u * v * v;
+        Unext[idx] = clampSamplerPrecision(u + dt * (Du * lapU - uvv + F * (1 - u)));
+        Vnext[idx] = clampSamplerPrecision(v + dt * (Dv * lapV + uvv - (F + k) * v));
+      }
+    }
+    const tU = U;
+    U = Unext;
+    Unext = tU;
+    const tV = V;
+    V = Vnext;
+    Vnext = tV;
+  }
+  return V;
+}
+function validateSpec2(spec) {
+  if (spec.kind !== "heat" && spec.kind !== "wave" && spec.kind !== "reaction-diffusion") {
+    throw new Error(`pde-solve: kind must be "heat", "wave", or "reaction-diffusion" (got "${spec.kind}")`);
+  }
+  if (!Number.isFinite(spec.domain.x[0]) || !Number.isFinite(spec.domain.x[1]) || !Number.isFinite(spec.domain.y[0]) || !Number.isFinite(spec.domain.y[1])) {
+    throw new Error("pde-solve: domain endpoints must be finite");
+  }
+  if (spec.domain.x[0] >= spec.domain.x[1] || spec.domain.y[0] >= spec.domain.y[1]) {
+    throw new Error("pde-solve: domain.x.min < .max and domain.y.min < .max required");
+  }
+  if (!Number.isInteger(spec.grid.rows) || spec.grid.rows < 4 || spec.grid.rows > MAX_PDE_GRID) {
+    throw new Error(`pde-solve: grid.rows must be integer in [4, ${MAX_PDE_GRID}]`);
+  }
+  if (!Number.isInteger(spec.grid.cols) || spec.grid.cols < 4 || spec.grid.cols > MAX_PDE_GRID) {
+    throw new Error(`pde-solve: grid.cols must be integer in [4, ${MAX_PDE_GRID}]`);
+  }
+  if (typeof spec.initial !== "string" || spec.initial.length === 0) {
+    throw new Error("pde-solve: initial must be a non-empty expression string");
+  }
+  if (spec.boundary !== "clamp" && spec.boundary !== "periodic") {
+    throw new Error(`pde-solve: boundary must be "clamp" or "periodic" (got "${spec.boundary}")`);
+  }
+  if (!Number.isInteger(spec.steps) || spec.steps < 1 || spec.steps > MAX_PDE_STEPS) {
+    throw new Error(`pde-solve: steps must be integer in [1, ${MAX_PDE_STEPS}]`);
+  }
+  if (!Number.isFinite(spec.dt) || spec.dt <= 0) {
+    throw new Error(`pde-solve: dt must be a positive finite number (got ${spec.dt})`);
+  }
+  const dx = (spec.domain.x[1] - spec.domain.x[0]) / spec.grid.cols;
+  if (spec.kind === "heat") {
+    const D2 = spec.params.D ?? 0;
+    if (!Number.isFinite(D2) || D2 < 0) {
+      throw new Error(`pde-solve: params.D must be a non-negative finite number (got ${D2})`);
+    }
+    const cfl = D2 * spec.dt / (dx * dx);
+    if (cfl > PDE_CFL_LIMIT) {
+      throw new Error(`pde-solve: CFL stability violated (heat). D\xB7dt/dx\xB2 = ${cfl.toFixed(4)} > ${PDE_CFL_LIMIT}. Reduce dt or D, or increase grid resolution.`);
+    }
+  } else if (spec.kind === "wave") {
+    const c = spec.params.c ?? 1;
+    if (!Number.isFinite(c) || c <= 0) {
+      throw new Error(`pde-solve: params.c must be a positive finite number (got ${c})`);
+    }
+    const cfl = c * spec.dt / dx;
+    if (cfl > 1) {
+      throw new Error(`pde-solve: CFL stability violated (wave). c\xB7dt/dx = ${cfl.toFixed(4)} > 1. Reduce dt or c, or increase grid resolution.`);
+    }
+    const gamma2 = spec.params.gamma ?? 0;
+    if (!Number.isFinite(gamma2) || gamma2 < 0) {
+      throw new Error(`pde-solve: params.gamma must be a non-negative finite number (got ${gamma2})`);
+    }
+  } else {
+    const Du = spec.params.Du ?? 1;
+    const Dv = spec.params.Dv ?? 0.5;
+    const F = spec.params.F ?? 0.055;
+    const k = spec.params.k ?? 0.062;
+    for (const [name, v] of [
+      ["Du", Du],
+      ["Dv", Dv],
+      ["F", F],
+      ["k", k]
+    ]) {
+      if (!Number.isFinite(v) || v < 0) {
+        throw new Error(`pde-solve: params.${name} must be a non-negative finite number (got ${v})`);
+      }
+    }
+    const cfl = Math.max(Du, Dv) * spec.dt / (dx * dx);
+    if (cfl > PDE_CFL_LIMIT) {
+      throw new Error(`pde-solve: CFL stability violated (RD). max(Du,Dv)\xB7dt/dx\xB2 = ${cfl.toFixed(4)} > ${PDE_CFL_LIMIT}. Reduce dt or diffusion coefficients, or increase grid resolution.`);
+    }
+  }
+}
+
+// packages/core/dist/data/shapes/recurrence.js
+var MAX_RECURRENCE_STEPS = 2e5;
+function iterateRecurrence(spec, evaluator = defaultEvaluator) {
+  validateSpec3(spec);
+  const stateNames = spec.state;
+  const params = spec.params ?? {};
+  const steps = spec.steps;
+  const current = {};
+  for (const name of stateNames) {
+    const v = spec.initial[name];
+    if (v === void 0 || !Number.isFinite(v)) {
+      throw new Error(`recurrence data: initial.${name} must be a finite number (got ${v})`);
+    }
+    current[name] = v;
+  }
+  const rows = new Array(steps);
+  rows[0] = { n: 0, ...current };
+  for (let n = 1; n < steps; n++) {
+    const scope = { ...current, ...params, n };
+    const next = {};
+    for (const name of stateNames) {
+      const expr = spec.step[name];
+      if (expr === void 0) {
+        throw new Error(`recurrence data: missing step expression for state "${name}"`);
+      }
+      let v;
+      try {
+        v = evaluator(expr, scope);
+      } catch (e) {
+        if (e instanceof EvaluationError) {
+          throw new Error(`recurrence data: step.${name} failed at n=${n} \u2014 ${e.message}`);
+        }
+        throw e;
+      }
+      if (!Number.isFinite(v)) {
+        throw new Error(`recurrence data: state "${name}" became non-finite at n=${n} (value: ${v}). The recurrence diverged.`);
+      }
+      next[name] = clampSamplerPrecision(v);
+    }
+    for (const name of stateNames)
+      current[name] = next[name];
+    rows[n] = { n, ...current };
+  }
+  return rows;
+}
+function validateSpec3(spec) {
+  if (!Array.isArray(spec.state) || spec.state.length === 0) {
+    throw new Error("recurrence data: state must be a non-empty array of variable names");
+  }
+  const seen = /* @__PURE__ */ new Set();
+  for (const name of spec.state) {
+    if (typeof name !== "string" || name.length === 0) {
+      throw new Error("recurrence data: state names must be non-empty strings");
+    }
+    if (seen.has(name)) {
+      throw new Error(`recurrence data: duplicate state name "${name}"`);
+    }
+    seen.add(name);
+  }
+  if (seen.has("n")) {
+    throw new Error(`recurrence data: state name "n" is reserved for the step index`);
+  }
+  const initialKeys = Object.keys(spec.initial);
+  const stepKeys = Object.keys(spec.step);
+  for (const name of spec.state) {
+    if (!(name in spec.initial)) {
+      throw new Error(`recurrence data: initial.${name} is missing`);
+    }
+    if (!(name in spec.step)) {
+      throw new Error(`recurrence data: step.${name} is missing`);
+    }
+  }
+  for (const k of initialKeys) {
+    if (!seen.has(k)) {
+      throw new Error(`recurrence data: initial.${k} doesn't correspond to any state variable (state: ${Array.from(seen).join(", ")})`);
+    }
+  }
+  for (const k of stepKeys) {
+    if (!seen.has(k)) {
+      throw new Error(`recurrence data: step.${k} doesn't correspond to any state variable (state: ${Array.from(seen).join(", ")})`);
+    }
+  }
+  if (!Number.isInteger(spec.steps) || spec.steps < 2) {
+    throw new Error(`recurrence data: steps must be an integer >= 2 (got ${spec.steps})`);
+  }
+  if (spec.steps > MAX_RECURRENCE_STEPS) {
+    throw new Error(`recurrence data: steps (${spec.steps}) exceeds MAX_RECURRENCE_STEPS (${MAX_RECURRENCE_STEPS})`);
+  }
+  if (spec.params) {
+    for (const [k, v] of Object.entries(spec.params)) {
+      if (!Number.isFinite(v)) {
+        throw new Error(`recurrence data: params.${k} must be finite (got ${v})`);
+      }
+    }
   }
 }
 
@@ -7236,8 +7883,8 @@ function integrateTrajectory(spec, evaluator = defaultEvaluator) {
     const y4 = y + step * k3y;
     const k4x = evalDeriv(evaluator, spec.dxdt, { x: x4, y: y4, t: tNext });
     const k4y = evalDeriv(evaluator, spec.dydt, { x: x4, y: y4, t: tNext });
-    x = x + step / 6 * (k1x + 2 * k2x + 2 * k3x + k4x);
-    y = y + step / 6 * (k1y + 2 * k2y + 2 * k3y + k4y);
+    x = clampSamplerPrecision(x + step / 6 * (k1x + 2 * k2x + 2 * k3x + k4x));
+    y = clampSamplerPrecision(y + step / 6 * (k1y + 2 * k2y + 2 * k3y + k4y));
     rows[i] = { t: tNext, x, y };
   }
   return rows;
@@ -24145,7 +24792,9 @@ function readConfig(layer) {
       }
     }
   }
-  return { dxdt: r.dxdt, dydt: r.dydt, seeds, step, maxSteps, domain };
+  const colorByRaw = r.colorBy;
+  const colorBy = colorByRaw === "angle" || colorByRaw === "speed" || colorByRaw === "step" ? colorByRaw : void 0;
+  return { dxdt: r.dxdt, dydt: r.dydt, seeds, step, maxSteps, domain, colorBy };
 }
 function integrateDirection(evaluator, cfg, domain, seed, sign2) {
   const out = [seed];
@@ -24217,9 +24866,40 @@ var streamlineMarkCompiler = {
     if (!Number.isFinite(domain.x[0]) || !Number.isFinite(domain.x[1]) || !Number.isFinite(domain.y[0]) || !Number.isFinite(domain.y[1])) {
       return;
     }
-    const stroke = theme.fg;
+    const defaultStroke = theme.fg;
     const evaluator = defaultEvaluator;
     const seeds = generateSeeds(cfg, domain);
+    const colorBy = cfg.colorBy;
+    const dxdtExpr = cfg.dxdt;
+    const dydtExpr = cfg.dydt;
+    let maxSpeed = 1;
+    if (colorBy === "speed") {
+      let observed = 0;
+      for (const s of seeds) {
+        const vx = safeEval2(evaluator, dxdtExpr, { x: s.x, y: s.y });
+        const vy = safeEval2(evaluator, dydtExpr, { x: s.x, y: s.y });
+        const sp = Math.hypot(vx, vy);
+        if (Number.isFinite(sp) && sp > observed)
+          observed = sp;
+      }
+      if (observed > 0)
+        maxSpeed = observed;
+    }
+    function strokeFor(seed) {
+      if (!colorBy)
+        return defaultStroke;
+      const vx = safeEval2(evaluator, dxdtExpr, { x: seed.x, y: seed.y });
+      const vy = safeEval2(evaluator, dydtExpr, { x: seed.x, y: seed.y });
+      if (!Number.isFinite(vx) || !Number.isFinite(vy))
+        return defaultStroke;
+      if (colorBy === "angle") {
+        const deg = (Math.atan2(vy, vx) * 180 / Math.PI + 360) % 360;
+        return `hsl(${deg.toFixed(1)},70%,55%)`;
+      }
+      const sp = Math.min(1, Math.hypot(vx, vy) / maxSpeed);
+      const light = (30 + sp * 50).toFixed(1);
+      return `hsl(210,70%,${light}%)`;
+    }
     if (seeds.length > 0) {
       const probe = seeds[0];
       if (!probe)
@@ -24240,6 +24920,10 @@ var streamlineMarkCompiler = {
       const polyline = [...back.reverse(), ...fwd.slice(1)];
       if (polyline.length < 2)
         continue;
+      if (colorBy === "step") {
+        emitStepGradient(polyline, xScale, yScale, out);
+        continue;
+      }
       let d = "";
       const uniquePixels = /* @__PURE__ */ new Set();
       for (let i = 0; i < polyline.length; i++) {
@@ -24261,7 +24945,10 @@ var streamlineMarkCompiler = {
       const path2 = {
         type: "path",
         d: dTrim,
-        stroke,
+        // RFC 2026-05-23 — `strokeFor(seed)` returns either
+        // `theme.fg` (back-compat, single color) or an `hsl(...)`
+        // string computed from the velocity at the seed.
+        stroke: strokeFor(seed),
         strokeWidth: 1.2,
         fill: "none"
       };
@@ -24269,6 +24956,44 @@ var streamlineMarkCompiler = {
     }
   }
 };
+function emitStepGradient(polyline, xScale, yScale, out) {
+  const N = polyline.length;
+  if (N < 2)
+    return;
+  const px = new Array(N);
+  const py = new Array(N);
+  for (let i = 0; i < N; i++) {
+    const p = polyline[i];
+    if (!p) {
+      px[i] = Number.NaN;
+      py[i] = Number.NaN;
+      continue;
+    }
+    px[i] = roundPx(xScale.apply(p.x));
+    py[i] = roundPx(yScale.apply(p.y));
+  }
+  for (let i = 0; i < N - 1; i++) {
+    const x0 = px[i];
+    const y0 = py[i];
+    const x1 = px[i + 1];
+    const y1 = py[i + 1];
+    if (!Number.isFinite(x0) || !Number.isFinite(y0))
+      continue;
+    if (!Number.isFinite(x1) || !Number.isFinite(y1))
+      continue;
+    if (x0 === x1 && y0 === y1)
+      continue;
+    const t = N > 1 ? i / (N - 1) : 0;
+    const hue = (t * 270).toFixed(1);
+    out.push({
+      type: "path",
+      d: `M ${x0} ${y0} L ${x1} ${y1}`,
+      stroke: `hsl(${hue},70%,55%)`,
+      strokeWidth: 1.2,
+      fill: "none"
+    });
+  }
+}
 registerMark(streamlineMarkCompiler);
 
 // packages/core/dist/compiler/marks/bezier.js
@@ -24822,6 +25547,89 @@ function materializeTrajectoryInput(input) {
     schema
   };
 }
+function materializeRecurrenceInput(input) {
+  const { spec } = input;
+  const rec = spec.data?.recurrence;
+  if (!rec) {
+    throw new Error("materializeRecurrenceInput called without spec.data.recurrence");
+  }
+  const sampledRows = iterateRecurrence(rec);
+  const stateNames = rec.state;
+  const schema = [
+    { name: "n", type: "BIGINT" },
+    ...stateNames.map((name) => ({ name, type: "DOUBLE" }))
+  ];
+  const rows = sampledRows.map((r) => [
+    r.n,
+    ...stateNames.map((name) => r[name])
+  ]);
+  return {
+    ...input,
+    spec: {
+      ...spec,
+      // Drop spec.data.recurrence so the recursive compileSpec call
+      // falls through to the normal tabular path. The TRAJECTORY_SOURCE
+      // sentinel tells line / area marks to skip the x-sort — a
+      // curlicue (or any recurrence with a non-monotone state) would
+      // otherwise render as a zigzag.
+      data: { source: TRAJECTORY_SOURCE }
+    },
+    rows,
+    schema
+  };
+}
+function materializeGeodesicInput(input) {
+  const { spec } = input;
+  const geo = spec.data?.geodesic;
+  if (!geo) {
+    throw new Error("materializeGeodesicInput called without spec.data.geodesic");
+  }
+  const sampledRows = iterateGeodesic(geo);
+  const schema = [
+    { name: "seed_id", type: "BIGINT" },
+    { name: "lambda", type: "DOUBLE" },
+    { name: "x", type: "DOUBLE" },
+    { name: "y", type: "DOUBLE" }
+  ];
+  const rows = sampledRows.map((r) => [
+    r.seed_id,
+    r.lambda,
+    r.x,
+    r.y
+  ]);
+  return {
+    ...input,
+    spec: {
+      ...spec,
+      data: { source: TRAJECTORY_SOURCE }
+    },
+    rows,
+    schema
+  };
+}
+function materializePdeSolveInput(input) {
+  const { spec } = input;
+  const pde = spec.data?.pde_solve;
+  if (!pde) {
+    throw new Error("materializePdeSolveInput called without spec.data.pde_solve");
+  }
+  const sampledRows = solvePde(pde);
+  const schema = [
+    { name: "x", type: "DOUBLE" },
+    { name: "y", type: "DOUBLE" },
+    { name: "u", type: "DOUBLE" }
+  ];
+  const rows = sampledRows.map((r) => [r.x, r.y, r.u]);
+  return {
+    ...input,
+    spec: {
+      ...spec,
+      data: { source: "<inline:pde-solve>" }
+    },
+    rows,
+    schema
+  };
+}
 function compileSpec(input) {
   const { spec, rows, schema } = input;
   if (spec.facet) {
@@ -24844,6 +25652,15 @@ function compileSpec(input) {
   }
   if (spec.data?.trajectory) {
     return compileSpec(materializeTrajectoryInput(input));
+  }
+  if (spec.data?.recurrence) {
+    return compileSpec(materializeRecurrenceInput(input));
+  }
+  if (spec.data?.geodesic) {
+    return compileSpec(materializeGeodesicInput(input));
+  }
+  if (spec.data?.pde_solve) {
+    return compileSpec(materializePdeSolveInput(input));
   }
   const width = spec.width ?? DEFAULT_WIDTH;
   const height = spec.height ?? DEFAULT_HEIGHT;
@@ -30682,6 +31499,7 @@ export {
   FacetSchema,
   FieldTypeSchema,
   FunctionDataSchema,
+  GeodesicDataSchema,
   GlyphSpecSchema,
   GraphDataSchema,
   GridDataSchema,
@@ -30692,9 +31510,11 @@ export {
   MarkSchema,
   PROVENANCE_FORMAT,
   ParametricDataSchema,
+  PdeSolveDataSchema,
   PositionSchema,
   ProjectionSchema,
   ProvenanceConfigSchema,
+  RecurrenceDataSchema,
   SUPPORTED_ENGINES,
   SUPPORTED_MARKS,
   SUPPORTED_RENDERERS,
