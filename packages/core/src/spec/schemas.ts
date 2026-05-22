@@ -836,6 +836,33 @@ export const LayerSchema = z
           })
           .strict()
           .optional(),
+        /**
+         * RFC 2026-05-23 — per-polyline color mode for the streamline
+         * mark. Unset (default): every streamline strokes in the
+         * theme's foreground color, preserving v0.2.0 byte snapshots.
+         *
+         *   - `"angle"`: stroke hue = atan2(vy, vx) at the seed point,
+         *     so streamlines tracking the same flow direction share a
+         *     color. The natural visualization for curl-dominated
+         *     fields — eddies in different rotational senses pop out
+         *     in different hues.
+         *
+         *   - `"speed"`: stroke lightness varies with |v| at the seed,
+         *     darker = slower, lighter = faster. Useful for showing
+         *     where a field accelerates (e.g. fluid through a nozzle).
+         *
+         * When set, `colorBy` overrides any `encoding.color` for this
+         * mark — the streamline mark doesn't bind row data the way
+         * bar/line do, so a row-driven color channel doesn't apply.
+         *
+         * AUDIT note: charts with many distinct seeds + `colorBy` will
+         * legitimately have > 8 distinct colors, which trips AUDIT-06.
+         * That warning is correct in spirit (the chart is information-
+         * dense) but expected for this mark; an audit-rule refinement
+         * to gate AUDIT-06 against opt-in many-color marks is tracked
+         * separately.
+         */
+        colorBy: z.enum(["angle", "speed"]).optional(),
       })
       .strict()
       .optional(),

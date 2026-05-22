@@ -145,6 +145,17 @@ interface StreamlineConfig {
   readonly domain:
     | { readonly x: readonly [number, number]; readonly y: readonly [number, number] }
     | undefined;
+  /**
+   * RFC 2026-05-23 — per-polyline color mode. `undefined` (the
+   * back-compat default) renders every streamline in `theme.fg`;
+   * `"angle"` hues each polyline by velocity direction at the seed;
+   * `"speed"` varies lightness by velocity magnitude. See schema
+   * JSDoc for the full contract. Read defensively in `readConfig`
+   * so an unrecognized value (a schema migration that loosened the
+   * enum, or a deliberately malformed spec) silently falls back to
+   * the default rather than throwing.
+   */
+  readonly colorBy: "angle" | "speed" | undefined;
 }
 
 function readConfig(layer: unknown): StreamlineConfig | undefined {
@@ -190,7 +201,14 @@ function readConfig(layer: unknown): StreamlineConfig | undefined {
       }
     }
   }
-  return { dxdt: r.dxdt, dydt: r.dydt, seeds, step, maxSteps, domain };
+  // RFC 2026-05-23 — only the two recognized enum values pass through;
+  // everything else (including undefined, null, or any non-matching
+  // string) falls back to the back-compat "no per-polyline coloring"
+  // default. Mirrors the defensive readConfig pattern used elsewhere.
+  const colorByRaw = r.colorBy;
+  const colorBy: StreamlineConfig["colorBy"] =
+    colorByRaw === "angle" || colorByRaw === "speed" ? colorByRaw : undefined;
+  return { dxdt: r.dxdt, dydt: r.dydt, seeds, step, maxSteps, domain, colorBy };
 }
 
 /**
@@ -322,9 +340,59 @@ export const streamlineMarkCompiler: MarkCompiler = {
       return;
     }
 
-    const stroke = theme.fg;
+    const defaultStroke = theme.fg;
     const evaluator: Evaluator = defaultEvaluator;
     const seeds = generateSeeds(cfg, domain);
+
+    // RFC 2026-05-23 — bind narrowed locals so the closure below sees
+    // a typed value (TS widens captured outer-scope vars back to the
+    // declared type, so `cfg.colorBy` inside `strokeFor` would
+    // otherwise resolve as `string | undefined` even after the
+    // `if (!cfg) return;` guard up above).
+    const colorBy = cfg.colorBy;
+    const dxdtExpr = cfg.dxdt;
+    const dydtExpr = cfg.dydt;
+
+    // `colorBy: "speed"` normalizes each polyline's lightness against
+    // the max speed observed across ALL seeds. We pre-pass once so
+    // each seed's stroke is computable in isolation (no second pass).
+    // Cheap: one evaluator pair per seed at typical 5×5..6×6 grids.
+    let maxSpeed = 1; // sentinel — `1` avoids div-by-zero on a still field
+    if (colorBy === "speed") {
+      let observed = 0;
+      for (const s of seeds) {
+        const vx = safeEval(evaluator, dxdtExpr, { x: s.x, y: s.y });
+        const vy = safeEval(evaluator, dydtExpr, { x: s.x, y: s.y });
+        const sp = Math.hypot(vx, vy);
+        if (Number.isFinite(sp) && sp > observed) observed = sp;
+      }
+      if (observed > 0) maxSpeed = observed;
+    }
+
+    /**
+     * Per-seed stroke selector. `colorBy: undefined` → theme.fg
+     * (every polyline same color, back-compat). `"angle"` → hue from
+     * atan2(vy, vx) — direction-of-flow visualization. `"speed"` →
+     * fixed blue with lightness scaling from |v| / maxSpeed. Both
+     * round to one-decimal-place via `.toFixed(1)` so the SVG bytes
+     * stay platform-stable (atan2/hypot are libm-dependent past ~14
+     * sig figs and `canonicalStringify`'s 14-sig-fig clamp doesn't
+     * touch already-emitted SVG strings; the toFixed(1) does).
+     */
+    function strokeFor(seed: { readonly x: number; readonly y: number }): string {
+      if (!colorBy) return defaultStroke;
+      const vx = safeEval(evaluator, dxdtExpr, { x: seed.x, y: seed.y });
+      const vy = safeEval(evaluator, dydtExpr, { x: seed.x, y: seed.y });
+      if (!Number.isFinite(vx) || !Number.isFinite(vy)) return defaultStroke;
+      if (colorBy === "angle") {
+        const deg = ((Math.atan2(vy, vx) * 180) / Math.PI + 360) % 360;
+        return `hsl(${deg.toFixed(1)},70%,55%)`;
+      }
+      // "speed"
+      const sp = Math.min(1, Math.hypot(vx, vy) / maxSpeed);
+      const light = (30 + sp * 50).toFixed(1); // 30% .. 80% lightness
+      return `hsl(210,70%,${light}%)`;
+    }
 
     // A3 review IMPORTANT-1 — preflight the evaluator on the first
     // seed so an unparseable expression (e.g. dxdt: "xyz(") or an
@@ -388,7 +456,10 @@ export const streamlineMarkCompiler: MarkCompiler = {
       const path: SceneMark = {
         type: "path",
         d: dTrim,
-        stroke,
+        // RFC 2026-05-23 — `strokeFor(seed)` returns either
+        // `theme.fg` (back-compat, single color) or an `hsl(...)`
+        // string computed from the velocity at the seed.
+        stroke: strokeFor(seed),
         strokeWidth: 1.2,
         fill: "none",
       };
