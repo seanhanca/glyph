@@ -13,10 +13,7 @@
  *
  * ### V1 scope: weak-field Schwarzschild
  *
- * Strong-field Schwarzschild requires Christoffel-symbol bookkeeping
- * in 4D (t, r, θ, φ) coordinates with an equatorial-plane projection
- * step. That's a separate followup; v1 ships the weak-field
- * approximation, which is accurate to first order in M/r:
+ * Weak-field Schwarzschild = the post-Newtonian approximation:
  *
  *     a = -2·G·M · r̂ / r²
  *
@@ -24,9 +21,31 @@
  * Reproduces GR's famous 4M/b light deflection at the photon level —
  * Eddington's 1919 measurement, what every gravitational-lensing
  * survey calibrates against. Accurate to < 0.1% at impact parameters
- * > 5·rs (the regime of the joy.html demo). Strong-field fall-into-
- * the-event-horizon photon orbits are out of scope; we truncate at
- * the photon sphere (r ≤ 1.5·M) as a proxy.
+ * > 5·rs. Strong-field fall-into-the-event-horizon photon orbits are
+ * handled by v2 below; v1 truncates at r ≤ 1.5·M as a proxy.
+ *
+ * ### V2 scope: strong-field Schwarzschild
+ *
+ * The full equatorial-plane null-geodesic equations. Conservation of
+ * energy E and angular momentum L yields a clean 3-state ODE in
+ * (r, φ, ṙ):
+ *
+ *     dr/dλ  = ṙ
+ *     dφ/dλ  = L / r²
+ *     d²r/dλ² = L² · (r − 3M) / r⁴
+ *
+ * where L = x0·vy0 − y0·vx0 is conserved and the equation comes
+ * from differentiating the null constraint
+ *     (dr/dλ)² = E² − L²·(1 − 2M/r)/r²
+ * with respect to λ. No turning-point sign-flips, no sqrt
+ * singularities — autonomous in λ and RK4-stable.
+ *
+ * The radial restoring term `(r − 3M)/r⁴` flips sign at the
+ * photon sphere `r = 3M`. Photons with sufficient L scatter (with
+ * larger deflection than weak-field predicts); photons aimed too
+ * close are captured at the event horizon `r = 2M`. The simulation
+ * truncates at `r ≤ 2.01·M` to stay above the horizon coordinate
+ * singularity.
  *
  * ### Units
  *
@@ -42,7 +61,7 @@
  *   "data": {
  *     "geodesic": {
  *       "shape": "geodesic",
- *       "metric": "schwarzschild-weak",
+ *       "metric": "schwarzschild-weak",       // or "schwarzschild-strong"
  *       "mass": 1.0,
  *       "seeds": [
  *         // each entry: photon's initial 2D position + velocity (v=1)
@@ -68,12 +87,11 @@
  * ### Determinism
  *
  * Same precision-clamp story as the rest of the math shapes:
- * `clampSamplerPrecision` runs on every emitted (x, y) so the libm
- * drift in `Math.sqrt` and the arithmetic chain don't reach
- * `roundPx`. The only transcendental in the weak-field formulation
- * is `sqrt`, which IS bit-exact across libm (IEEE 754 specifies it).
- * But we run the clamp anyway for robustness against future
- * extensions that introduce `sin`/`cos`/`exp`.
+ * `clampSamplerPrecision` runs on every emitted (x, y) so libm
+ * drift in `Math.sqrt`, `Math.cos`, `Math.sin` (strong-field only)
+ * and the arithmetic chain don't reach `roundPx`. The weak-field
+ * branch uses only `sqrt` (IEEE-bit-exact); the strong-field branch
+ * uses `cos`/`sin` and so leans harder on the clamp.
  */
 
 import { clampSamplerPrecision } from "./function.js";
@@ -97,8 +115,10 @@ export interface GeodesicSeed {
 
 export interface GeodesicDataSpec {
   shape: "geodesic";
-  /** Spacetime metric. V1 only ships `"schwarzschild-weak"`. */
-  metric: "schwarzschild-weak";
+  /** Spacetime metric. v1 ships `"schwarzschild-weak"`; v2 adds
+   *  `"schwarzschild-strong"` with the full equatorial-plane
+   *  geodesic equations. */
+  metric: "schwarzschild-weak" | "schwarzschild-strong";
   /** Lens mass in geometrized units (G = c = 1). Must be positive. */
   mass: number;
   /** Per-photon initial conditions. */
@@ -118,20 +138,26 @@ export interface GeodesicRow {
 }
 
 /**
- * Integrate every seed via RK4 over the weak-field Schwarzschild
- * acceleration term. Emits rows in (seed_id ASC, lambda ASC) order
- * so downstream marks can group by seed_id for color and walk lambda
- * for ordered path emission.
- *
- * Per-seed truncation:
- *   - `r < 1.5·M` (photon sphere — light at this radius orbits the
- *     lens indefinitely; below, it's captured. We stop short rather
- *     than divide by a vanishing r in `r³`).
- *   - `lambda > spec.max_lambda` (DoS guard).
- *   - non-finite intermediate state (numerical blow-up).
+ * Integrate every seed in the spec. Dispatches on `spec.metric`:
+ * weak-field (v1) uses post-Newtonian Cartesian acceleration;
+ * strong-field (v2) uses the conserved-L formulation in (r, φ, ṙ).
+ * Emits rows in (seed_id ASC, lambda ASC) order so downstream marks
+ * can group by seed_id for color and walk lambda for ordered path
+ * emission.
  */
 export function iterateGeodesic(spec: GeodesicDataSpec): GeodesicRow[] {
   validateSpec(spec);
+  if (spec.metric === "schwarzschild-strong") return iterateStrongField(spec);
+  return iterateWeakField(spec);
+}
+
+/**
+ * Weak-field Schwarzschild (v1). RK4 over (x, y, vx, vy) with
+ *   a = -2M · (x, y) / r³
+ * Truncates at r < 1.5·M (proxy for the photon sphere; the weak-
+ * field formula breaks down well before the actual r = 3M sphere).
+ */
+function iterateWeakField(spec: GeodesicDataSpec): GeodesicRow[] {
   const { mass: M, seeds, step: h, max_lambda } = spec;
   const photonSphere = 1.5 * M;
   const allRows: GeodesicRow[] = [];
@@ -172,23 +198,23 @@ export function iterateGeodesic(spec: GeodesicDataSpec): GeodesicRow[] {
       //   dx/dλ  = vx        dvx/dλ = a(x, y).x
       //   dy/dλ  = vy        dvy/dλ = a(x, y).y
       // where a = -2·M · (x, y) / r³  (weak-field Schwarzschild).
-      const k1 = derivatives(x, y, vx, vy, M);
+      const k1 = weakDerivatives(x, y, vx, vy, M);
 
-      const k2 = derivatives(
+      const k2 = weakDerivatives(
         x + 0.5 * h * k1.dx,
         y + 0.5 * h * k1.dy,
         vx + 0.5 * h * k1.dvx,
         vy + 0.5 * h * k1.dvy,
         M,
       );
-      const k3 = derivatives(
+      const k3 = weakDerivatives(
         x + 0.5 * h * k2.dx,
         y + 0.5 * h * k2.dy,
         vx + 0.5 * h * k2.dvx,
         vy + 0.5 * h * k2.dvy,
         M,
       );
-      const k4 = derivatives(x + h * k3.dx, y + h * k3.dy, vx + h * k3.dvx, vy + h * k3.dvy, M);
+      const k4 = weakDerivatives(x + h * k3.dx, y + h * k3.dy, vx + h * k3.dvx, vy + h * k3.dvy, M);
 
       x = x + (h / 6) * (k1.dx + 2 * k2.dx + 2 * k3.dx + k4.dx);
       y = y + (h / 6) * (k1.dy + 2 * k2.dy + 2 * k3.dy + k4.dy);
@@ -214,7 +240,7 @@ export function iterateGeodesic(spec: GeodesicDataSpec): GeodesicRow[] {
 /** Weak-field Schwarzschild acceleration: a = -2·M · (x, y) / r³.
  *  The factor of 2 vs Newtonian's 1 is GR's contribution; reproduces
  *  the 4M/b photon deflection (vs Newton's 2M/b). */
-function derivatives(
+function weakDerivatives(
   x: number,
   y: number,
   vx: number,
@@ -238,10 +264,106 @@ function derivatives(
   };
 }
 
+/**
+ * Strong-field Schwarzschild (v2). RK4 over (r, φ, ṙ) with
+ *   dr/dλ  = ṙ
+ *   dφ/dλ  = L / r²
+ *   d²r/dλ² = L² · (r − 3M) / r⁴
+ * Truncates at r ≤ 2.01·M (event horizon + 0.01 slack to avoid
+ * the metric coordinate singularity).
+ */
+function iterateStrongField(spec: GeodesicDataSpec): GeodesicRow[] {
+  const { mass: M, seeds, step: h, max_lambda } = spec;
+  const eventHorizon = 2.01 * M;
+  const allRows: GeodesicRow[] = [];
+
+  for (let seedIdx = 0; seedIdx < seeds.length; seedIdx++) {
+    const seed = seeds[seedIdx];
+    if (!seed) continue;
+
+    // Normalize initial velocity to |v|=1 so lambda matches the
+    // weak-field branch's affine-parameter convention.
+    const v0mag = Math.sqrt(seed.vx0 * seed.vx0 + seed.vy0 * seed.vy0);
+    if (v0mag === 0) continue;
+    const vx0 = seed.vx0 / v0mag;
+    const vy0 = seed.vy0 / v0mag;
+
+    // Polar initial conditions from the Cartesian seed.
+    let r = Math.sqrt(seed.x0 * seed.x0 + seed.y0 * seed.y0);
+    let phi = Math.atan2(seed.y0, seed.x0);
+    // ṙ = (x·vx + y·vy)/r  (radial velocity from Cartesian).
+    let rdot = (seed.x0 * vx0 + seed.y0 * vy0) / r;
+    // L = x·vy − y·vx  (angular momentum, conserved). The unit-
+    // velocity normalization carries through: |L| = b (impact
+    // parameter) for an asymptotically-flat photon.
+    const L = seed.x0 * vy0 - seed.y0 * vx0;
+
+    let lambda = 0;
+    allRows.push({
+      seed_id: seedIdx,
+      lambda: 0,
+      x: clampSamplerPrecision(seed.x0),
+      y: clampSamplerPrecision(seed.y0),
+    });
+
+    while (lambda < max_lambda) {
+      if (r <= eventHorizon) break;
+
+      // RK4 on the 3-state ODE (r, φ, ṙ). Use a single closure to
+      // compute derivatives at each stage.
+      const k1 = strongDerivatives(r, rdot, L, M);
+      const k2 = strongDerivatives(r + 0.5 * h * k1.dr, rdot + 0.5 * h * k1.drdot, L, M);
+      const k3 = strongDerivatives(r + 0.5 * h * k2.dr, rdot + 0.5 * h * k2.drdot, L, M);
+      const k4 = strongDerivatives(r + h * k3.dr, rdot + h * k3.drdot, L, M);
+
+      r = r + (h / 6) * (k1.dr + 2 * k2.dr + 2 * k3.dr + k4.dr);
+      phi = phi + (h / 6) * (k1.dphi + 2 * k2.dphi + 2 * k3.dphi + k4.dphi);
+      rdot = rdot + (h / 6) * (k1.drdot + 2 * k2.drdot + 2 * k3.drdot + k4.drdot);
+      lambda += h;
+
+      if (!Number.isFinite(r) || !Number.isFinite(phi) || !Number.isFinite(rdot)) break;
+      // Once captured at the event horizon, stop emitting before
+      // the (r, φ) → (x, y) projection produces a coordinate
+      // singularity artifact.
+      if (r <= eventHorizon) break;
+
+      allRows.push({
+        seed_id: seedIdx,
+        lambda: clampSamplerPrecision(lambda),
+        x: clampSamplerPrecision(r * Math.cos(phi)),
+        y: clampSamplerPrecision(r * Math.sin(phi)),
+      });
+    }
+  }
+  return allRows;
+}
+
+/** Strong-field derivatives at (r, ṙ) for the conserved L formulation.
+ *  Returns dr/dλ, dφ/dλ, d²r/dλ² in a stage-compatible shape. */
+function strongDerivatives(
+  r: number,
+  rdot: number,
+  L: number,
+  M: number,
+): { dr: number; dphi: number; drdot: number } {
+  // Guard against division by near-zero r. The event-horizon
+  // truncation in the caller makes this defensive only.
+  if (r < 1e-9) {
+    return { dr: rdot, dphi: 0, drdot: 0 };
+  }
+  const r2 = r * r;
+  const r4 = r2 * r2;
+  return {
+    dr: rdot,
+    dphi: L / r2,
+    drdot: (L * L * (r - 3 * M)) / r4,
+  };
+}
+
 function validateSpec(spec: GeodesicDataSpec): void {
-  if (spec.metric !== "schwarzschild-weak") {
+  if (spec.metric !== "schwarzschild-weak" && spec.metric !== "schwarzschild-strong") {
     throw new Error(
-      `geodesic data: only metric "schwarzschild-weak" is supported in v1 (got "${spec.metric}")`,
+      `geodesic data: metric must be "schwarzschild-weak" or "schwarzschild-strong" (got "${spec.metric}")`,
     );
   }
   if (!Number.isFinite(spec.mass) || spec.mass <= 0) {

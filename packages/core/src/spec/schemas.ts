@@ -328,7 +328,7 @@ export const PdeSolveDataSchema = z
 export const GeodesicDataSchema = z
   .object({
     shape: z.literal("geodesic"),
-    metric: z.literal("schwarzschild-weak"),
+    metric: z.enum(["schwarzschild-weak", "schwarzschild-strong"]),
     mass: z.number().positive().refine(Number.isFinite, "mass must be finite"),
     seeds: z
       .array(

@@ -1,0 +1,40 @@
+{
+  "version": "glyph/0.1",
+  "title": "Strong-field Schwarzschild: photon orbits near the photon sphere (RFC #3 v2)",
+  "data": {
+    "geodesic": {
+      "shape": "geodesic",
+      "metric": "schwarzschild-strong",
+      "mass": 1,
+      "seeds": [
+        { "x0": -30, "y0": 6, "vx0": 1, "vy0": 0 },
+        { "x0": -30, "y0": 5.4, "vx0": 1, "vy0": 0 },
+        { "x0": -30, "y0": 4, "vx0": 1, "vy0": 0 },
+        { "x0": -30, "y0": -5.4, "vx0": 1, "vy0": 0 }
+      ],
+      "step": 0.05,
+      "max_lambda": 200
+    }
+  },
+  "layers": [
+    {
+      "mark": "line",
+      "encoding": {
+        "x": {
+          "field": "x",
+          "type": "quantitative",
+          "scale": { "domain": [-32, 32] }
+        },
+        "y": {
+          "field": "y",
+          "type": "quantitative",
+          "scale": { "domain": [-16, 16] }
+        },
+        "color": {
+          "field": "seed_id",
+          "type": "nominal"
+        }
+      }
+    }
+  ]
+}
