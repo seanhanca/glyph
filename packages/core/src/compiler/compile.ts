@@ -20,6 +20,11 @@ import {
   sampleFunction,
 } from "../data/shapes/function.js";
 import {
+  type GeodesicDataSpec,
+  type GeodesicRow,
+  iterateGeodesic,
+} from "../data/shapes/geodesic.js";
+import {
   type RecurrenceDataSpec,
   type RecurrenceRow,
   iterateRecurrence,
@@ -791,6 +796,49 @@ function materializeRecurrenceInput(input: CompileInput): CompileInput {
   };
 }
 
+/**
+ * RFC 2026-05-22 — Materialize a `data.shape: "geodesic"` spec into
+ * row + schema form. Mirrors the trajectory/recurrence materializers
+ * structurally: skip DuckDB, integrate via `iterateGeodesic`, swap
+ * the data source for the trajectory sentinel so line marks keep
+ * insertion order (deflected geodesics are non-monotone in x when
+ * they cross the y-axis).
+ *
+ * Schema: `[seed_id (BIGINT), lambda (DOUBLE), x (DOUBLE), y (DOUBLE)]`.
+ * `seed_id` first so a `color` encoding on that field gives one hue
+ * per ray (which is exactly how the joy.html gravity-lens demo
+ * visualizes light bending — different rays in different colors).
+ */
+function materializeGeodesicInput(input: CompileInput): CompileInput {
+  const { spec } = input;
+  const geo = spec.data?.geodesic as GeodesicDataSpec | undefined;
+  if (!geo) {
+    throw new Error("materializeGeodesicInput called without spec.data.geodesic");
+  }
+  const sampledRows = iterateGeodesic(geo);
+  const schema: CompileFieldInfo[] = [
+    { name: "seed_id", type: "BIGINT" },
+    { name: "lambda", type: "DOUBLE" },
+    { name: "x", type: "DOUBLE" },
+    { name: "y", type: "DOUBLE" },
+  ];
+  const rows: ReadonlyArray<unknown>[] = sampledRows.map((r: GeodesicRow) => [
+    r.seed_id,
+    r.lambda,
+    r.x,
+    r.y,
+  ]);
+  return {
+    ...input,
+    spec: {
+      ...spec,
+      data: { source: TRAJECTORY_SOURCE },
+    },
+    rows,
+    schema,
+  };
+}
+
 export function compileSpec(input: CompileInput): Scene {
   const { spec, rows, schema } = input;
   // Faceted specs split into multiple panels; handle that upfront before
@@ -843,6 +891,13 @@ export function compileSpec(input: CompileInput): Scene {
   // zero compiler changes because `n` is just another schema column.
   if (spec.data?.recurrence) {
     return compileSpec(materializeRecurrenceInput(input));
+  }
+  // RFC 2026-05-22 — `data.shape: "geodesic"`. RK4-integrates photon
+  // paths through Schwarzschild weak-field gravity and routes
+  // (seed_id, lambda, x, y) rows through the normal compile pipeline.
+  // `encoding.color: "seed_id"` gives one hue per ray.
+  if (spec.data?.geodesic) {
+    return compileSpec(materializeGeodesicInput(input));
   }
   const width = spec.width ?? DEFAULT_WIDTH;
   const height = spec.height ?? DEFAULT_HEIGHT;

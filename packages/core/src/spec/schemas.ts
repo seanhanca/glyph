@@ -230,6 +230,55 @@ export const TrajectoryDataSchema = z
   .strict();
 
 /**
+ * RFC 2026-05-22 — `data.shape: "geodesic"` — relativistic photon
+ * paths through the equatorial plane of a Schwarzschild black hole.
+ *
+ * V1 ships only `metric: "schwarzschild-weak"` (weak-field
+ * approximation with the GR factor-of-2 enhancement, reproducing
+ * the famous 4M/b photon deflection to first order in M/r).
+ * Strong-field Schwarzschild + Kerr + FLRW are queued as follow-ups.
+ *
+ * Each seed is a photon's initial 2D position + velocity. The
+ * integrator emits one row per RK4 step with `[seed_id, lambda, x,
+ * y]` columns — `seed_id` first so `encoding.color` can hue per
+ * ray, `lambda` next so `animation.kind: "scrub"` works the same
+ * way it does for `trajectory`.
+ *
+ * Determinism contract is identical to function / trajectory /
+ * recurrence: same spec → byte-identical rows on every platform,
+ * inheriting the `clampSamplerPrecision` per-step clamp.
+ */
+export const GeodesicDataSchema = z
+  .object({
+    shape: z.literal("geodesic"),
+    metric: z.literal("schwarzschild-weak"),
+    mass: z.number().positive().refine(Number.isFinite, "mass must be finite"),
+    seeds: z
+      .array(
+        z
+          .object({
+            x0: z.number().refine(Number.isFinite, "x0 must be finite"),
+            y0: z.number().refine(Number.isFinite, "y0 must be finite"),
+            vx0: z.number().refine(Number.isFinite, "vx0 must be finite"),
+            vy0: z.number().refine(Number.isFinite, "vy0 must be finite"),
+          })
+          .strict()
+          .refine((s) => s.vx0 !== 0 || s.vy0 !== 0, {
+            message: "geodesic seed velocity must be nonzero",
+          }),
+      )
+      .min(1)
+      .max(200),
+    step: z.number().positive().max(10).refine(Number.isFinite, "step must be finite"),
+    max_lambda: z
+      .number()
+      .positive()
+      .max(1000)
+      .refine(Number.isFinite, "max_lambda must be finite"),
+  })
+  .strict();
+
+/**
  * RFC 2026-05-22 — `data.shape: "recurrence"` — iterative function
  * shape for curlicue curves, the logistic map, IFS attractors, and
  * any system whose forward evolution is "compute next from previous"
@@ -341,6 +390,13 @@ export const DataSourceSchema = z
      */
     recurrence: RecurrenceDataSchema.optional(),
     /**
+     * RFC 2026-05-22 — `data.shape: "geodesic"`. Photon paths through
+     * the equatorial plane of a Schwarzschild black hole. V1 ships
+     * weak-field only; full strong-field Binet integration queued
+     * for a follow-up. See GeodesicDataSchema docstring for details.
+     */
+    geodesic: GeodesicDataSchema.optional(),
+    /**
      * Moat PR3 — failure-aware rendering policy for rows whose
      * y-encoded value is null / undefined / NaN.
      *
@@ -372,8 +428,9 @@ export const DataSourceSchema = z
       d.grid !== undefined ||
       d.function !== undefined ||
       d.trajectory !== undefined ||
-      d.recurrence !== undefined,
-    "data needs a 'source', 'hierarchy', 'graph', 'grid', 'function', 'trajectory', or 'recurrence'",
+      d.recurrence !== undefined ||
+      d.geodesic !== undefined,
+    "data needs a 'source', 'hierarchy', 'graph', 'grid', 'function', 'trajectory', 'recurrence', or 'geodesic'",
   );
 
 // ---------------------------------------------------------------------------
