@@ -1,0 +1,149 @@
+{
+  "compose": {
+    "viewBox": {
+      "width": 900,
+      "height": 900
+    },
+    "title": "Particle field — static · best of streamline mode",
+    "description": "144 RK4-integrated trajectories through an ABC-flavored vector field. Each path is colored by the local flow angle. Static SVG — byte-identical across CI.",
+    "theme": {
+      "background": "#020617",
+      "foreground": "#fef3c7"
+    },
+    "defs": {
+      "gradients": [
+        {
+          "id": "g-bg",
+          "kind": "radial",
+          "cx": "50%",
+          "cy": "50%",
+          "r": "80%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#1e1b4b",
+              "opacity": 1
+            },
+            {
+              "offset": "100%",
+              "color": "#020617",
+              "opacity": 1
+            }
+          ]
+        }
+      ]
+    },
+    "children": [
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 900 0 L 900 900 L 0 900 Z",
+          "fill": "url(#g-bg)",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "starfield",
+        "starfield": {
+          "count": 60,
+          "seed": 13,
+          "region": {
+            "x": 0,
+            "y": 0,
+            "w": 900,
+            "h": 900
+          }
+        }
+      },
+      {
+        "at": {
+          "x": 50,
+          "y": 50
+        },
+        "size": {
+          "w": 800,
+          "h": 800
+        },
+        "mark": "chart",
+        "chart": {
+          "version": "glyph/0.1",
+          "title": "Streamline field · 12×12 seeds · colorBy: angle",
+          "data": {
+            "source": "inline:particle-field"
+          },
+          "layers": [
+            {
+              "mark": "streamline",
+              "encoding": {
+                "x": {
+                  "field": "x",
+                  "type": "quantitative",
+                  "scale": {
+                    "domain": [
+                      -3.141592653589793,
+                      3.141592653589793
+                    ]
+                  }
+                },
+                "y": {
+                  "field": "y",
+                  "type": "quantitative",
+                  "scale": {
+                    "domain": [
+                      -3.141592653589793,
+                      3.141592653589793
+                    ]
+                  }
+                }
+              },
+              "streamline": {
+                "dxdt": "sin(2*y) + 0.4*cos(x)",
+                "dydt": "-sin(2*x) + 0.4*sin(y)",
+                "seeds": {
+                  "kind": "grid",
+                  "rows": 12,
+                  "cols": 12
+                },
+                "step": 0.04,
+                "maxSteps": 100,
+                "domain": {
+                  "x": [
+                    -3.141592653589793,
+                    3.141592653589793
+                  ],
+                  "y": [
+                    -3.141592653589793,
+                    3.141592653589793
+                  ]
+                },
+                "colorBy": "angle"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 870
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Particle field · static · 144 trajectories · colorBy: angle",
+          "fontSize": 13,
+          "fill": "#94a3b8",
+          "italic": true,
+          "anchor": "middle"
+        }
+      }
+    ]
+  }
+}
