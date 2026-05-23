@@ -650,242 +650,370 @@ function buildButterfly() {
 }
 
 // ───────────────────────────────────────────────────────────────────────────
-// BIO — An eye
+// BIO — Heart + circulation (pencil-parchment style, anatomical front-view)
 // ───────────────────────────────────────────────────────────────────────────
-function buildEye() {
-  const W = 900;
-  const H = 600;
-  const cx = W / 2;
-  const cy = 300;
+function buildCirculation() {
+  const W = 1100;
+  const H = 700;
+  const heartCx = 550;
+  const heartCy = 380;
 
-  const fibers = [];
-  const N = 32;
-  for (let i = 0; i < N; i++) {
-    const a = (2 * Math.PI * i) / N;
-    const cos = Math.cos(a);
-    const sin = Math.sin(a);
-    const jitter = (i % 4) * 3 + (i % 7) * 1.5;
-    const inner = 52;
-    const outer = 138 - jitter;
-    fibers.push({
-      at: { x: cx, y: cy },
-      mark: "polyline",
-      polyline: {
-        points: [
-          [round(inner * cos), round(inner * sin)],
-          [round(outer * cos), round(outer * sin)],
-        ],
-        fill: "none",
-        stroke: "url(#g-iris)",
-        strokeWidth: 1.1 + (i % 3) * 0.2,
-      },
-    });
-  }
+  // Heart silhouette — anatomical front view, slightly tilted with the apex
+  // pointing toward the viewer's lower-left. Coordinates are relative to
+  // the heart center (heartCx, heartCy). The shape is a stylized but
+  // anatomical pear with two lobes on top (the atria) and a slight apex
+  // on the lower-left (the natural orientation of a real heart in the chest).
+  const heartD = [
+    "M 0 -130", // start at notch between atria
+    "C 35 -170, 110 -165, 130 -100", // right atrium dome
+    "C 145 -60, 140 -10, 125 30", // right wall going down
+    "C 115 80, 95 130, 60 165", // right ventricle taper
+    "C 30 195, -20 210, -50 195", // approach apex
+    "C -90 175, -130 130, -150 70", // left ventricle big curve
+    "C -165 20, -170 -40, -155 -90", // left wall up
+    "C -135 -150, -75 -170, -40 -160", // left atrium dome
+    "C -20 -150, -8 -140, 0 -130", // back to start (notch)
+    "Z",
+  ].join(" ");
 
-  const upperLashes = [-150, -85, -25, 35, 95, 150].map((dx) => {
-    const baseY = cy - 145 + Math.abs(dx) * 0.18;
-    const tilt = dx < 0 ? -1 : dx > 0 ? 1 : 0;
-    return {
-      at: { x: cx + dx, y: baseY },
+  // Septum: the vertical wall dividing left from right
+  const septumD = "M 0 -130 C 5 -80, 10 -20, 15 30 C 18 80, 15 130, -20 195";
+  // Atrio-ventricular groove: the horizontal-ish line separating atria from ventricles
+  const avGrooveD = "M -150 -10 C -100 0, 0 5, 130 -5";
+
+  // Vessels (each is a separate silhouette-path, drawn relative to the
+  // overall viewBox so they connect cleanly to the heart at its world coords).
+  // Color convention: red = oxygenated, blue = deoxygenated.
+  const vessels = [
+    // Aorta — exits from the top of LV, arches up-right, descends along right
+    {
+      at: { x: 0, y: 0 },
       mark: "silhouette-path",
       silhouettePath: {
-        d: `M 0 0 Q ${tilt * 4} -10, ${tilt * 14} -28`,
+        d: `M ${heartCx - 40} ${heartCy - 130} C ${heartCx - 50} ${heartCy - 220}, ${heartCx + 80} ${heartCy - 270}, ${heartCx + 170} ${heartCy - 210} C ${heartCx + 220} ${heartCy - 170}, ${heartCx + 230} ${heartCy - 90}, ${heartCx + 220} ${heartCy + 60} L ${heartCx + 220} ${heartCy + 210}`,
         fill: "none",
-        stroke: "#1f1a14",
-        strokeWidth: 2.4,
+        stroke: "#b00020",
+        strokeWidth: 14,
         strokeLinecap: "round",
       },
-    };
-  });
-  const lowerLashes = [-100, -40, 0, 40, 100].map((dx) => {
-    const baseY = cy + 130 - Math.abs(dx) * 0.1;
-    const tilt = dx < 0 ? -1 : dx > 0 ? 1 : 0;
-    return {
-      at: { x: cx + dx, y: baseY },
+    },
+    // Aorta inner line (lighter) — gives the vessel a pencil-tube look
+    {
+      at: { x: 0, y: 0 },
       mark: "silhouette-path",
       silhouettePath: {
-        d: `M 0 0 Q ${tilt * 2} 8, ${tilt * 8} 18`,
+        d: `M ${heartCx - 40} ${heartCy - 130} C ${heartCx - 50} ${heartCy - 220}, ${heartCx + 80} ${heartCy - 270}, ${heartCx + 170} ${heartCy - 210} C ${heartCx + 220} ${heartCy - 170}, ${heartCx + 230} ${heartCy - 90}, ${heartCx + 220} ${heartCy + 60} L ${heartCx + 220} ${heartCy + 210}`,
         fill: "none",
-        stroke: "#1f1a14",
-        strokeWidth: 1.8,
+        stroke: "#fca5a5",
+        strokeWidth: 6,
         strokeLinecap: "round",
       },
-    };
-  });
+    },
+    // Branches from the aortic arch (3 small upward arteries to head/arms)
+    ...[-30, 20, 60].map((dx) => ({
+      at: { x: heartCx + 20 + dx * 2, y: heartCy - 270 },
+      mark: "silhouette-path",
+      silhouettePath: {
+        d: `M 0 0 C ${dx} -30, ${dx} -60, ${dx} -90`,
+        fill: "none",
+        stroke: "#b00020",
+        strokeWidth: 4,
+        strokeLinecap: "round",
+      },
+    })),
+    // Pulmonary trunk → splits into L+R pulmonary arteries (deoxygenated, blue)
+    {
+      at: { x: 0, y: 0 },
+      mark: "silhouette-path",
+      silhouettePath: {
+        d: `M ${heartCx + 10} ${heartCy - 130} C ${heartCx + 50} ${heartCy - 190}, ${heartCx + 140} ${heartCy - 200}, ${heartCx + 200} ${heartCy - 140} M ${heartCx + 10} ${heartCy - 130} C ${heartCx - 30} ${heartCy - 190}, ${heartCx - 130} ${heartCy - 200}, ${heartCx - 200} ${heartCy - 140}`,
+        fill: "none",
+        stroke: "#1d4ed8",
+        strokeWidth: 9,
+        strokeLinecap: "round",
+      },
+    },
+    // Pulmonary veins (lungs → LA, red — oxygenated)
+    {
+      at: { x: 0, y: 0 },
+      mark: "silhouette-path",
+      silhouettePath: {
+        d: `M ${heartCx - 80} ${heartCy - 110} C ${heartCx - 180} ${heartCy - 90}, ${heartCx - 280} ${heartCy - 60}, ${heartCx - 350} ${heartCy - 10} M ${heartCx + 50} ${heartCy - 110} C ${heartCx + 180} ${heartCy - 90}, ${heartCx + 280} ${heartCy - 60}, ${heartCx + 340} ${heartCy - 10}`,
+        fill: "none",
+        stroke: "#b00020",
+        strokeWidth: 7,
+        strokeLinecap: "round",
+      },
+    },
+    // Superior vena cava (from above, into RA, blue)
+    {
+      at: { x: 0, y: 0 },
+      mark: "silhouette-path",
+      silhouettePath: {
+        d: `M ${heartCx + 90} ${heartCy - 130} C ${heartCx + 100} ${heartCy - 200}, ${heartCx + 100} ${heartCy - 260}, ${heartCx + 95} ${heartCy - 320}`,
+        fill: "none",
+        stroke: "#1d4ed8",
+        strokeWidth: 11,
+        strokeLinecap: "round",
+      },
+    },
+    // Inferior vena cava (from below the heart, into RA, blue)
+    {
+      at: { x: 0, y: 0 },
+      mark: "silhouette-path",
+      silhouettePath: {
+        d: `M ${heartCx + 110} ${heartCy + 100} C ${heartCx + 115} ${heartCy + 170}, ${heartCx + 110} ${heartCy + 240}, ${heartCx + 105} ${heartCy + 260}`,
+        fill: "none",
+        stroke: "#1d4ed8",
+        strokeWidth: 11,
+        strokeLinecap: "round",
+      },
+    },
+  ];
+
+  // Lungs (left + right, each with lobed silhouette)
+  const lungLeftD =
+    "M 0 0 C -40 -20, -90 -10, -130 30 C -160 70, -170 130, -160 180 C -150 230, -120 260, -80 270 C -40 275, -10 260, 0 220 C 5 180, 5 140, 5 100 C 10 60, 5 20, 0 0 Z";
+  const lungRightD =
+    "M 0 0 C 40 -20, 90 -10, 130 30 C 160 70, 170 130, 160 180 C 150 230, 120 260, 80 270 C 40 275, 10 260, 0 220 C -5 180, -5 140, -5 100 C -10 60, -5 20, 0 0 Z";
+
+  // Heart-pulse animation applied to all heart children (so they pulse in sync
+  // around the same anchor `heartCx, heartCy`).
+  const heartPulse = { kind: "pulse", periodMs: 900, scale: 1.05 };
 
   return {
     compose: {
       viewBox: { width: W, height: H },
-      title: "An eye — the camera that learned to see",
+      title: "Heart + circulation — the engine of you",
       description:
-        "Cross-section through a vertebrate eye: sclera (white), iris (the radial muscle that opens or closes the pupil), pupil (the aperture), catchlight (the reflection that makes the eye look alive).",
-      theme: { background: "#1a0f0a", foreground: "#fef3c7" },
+        "Anatomical front view of the human heart connected to the great vessels and the lungs. Deoxygenated blood (blue) enters the right side from the vena cavae, gets pumped to the lungs via the pulmonary arteries, returns oxygenated (red) through the pulmonary veins, and exits via the aorta to the body. ~5 L/min at rest.",
+      theme: { preset: "pencil-parchment" },
       defs: {
         gradients: [
           {
-            id: "g-skin",
+            id: "g-heart",
             kind: "radial",
-            cx: "50%",
-            cy: "50%",
-            r: "65%",
-            stops: [
-              { offset: "0%", color: "#fde68a", opacity: 1 },
-              { offset: "55%", color: "#d97706", opacity: 1 },
-              { offset: "100%", color: "#451a03", opacity: 1 },
-            ],
-          },
-          {
-            id: "g-iris",
-            kind: "radial",
-            cx: "50%",
-            cy: "50%",
-            r: "50%",
-            stops: [
-              { offset: "0%", color: "#0c4a6e", opacity: 0.95 },
-              { offset: "55%", color: "#0284c7", opacity: 0.95 },
-              { offset: "100%", color: "#7dd3fc", opacity: 0.95 },
-            ],
-          },
-          {
-            id: "g-iris-base",
-            kind: "radial",
-            cx: "50%",
-            cy: "50%",
-            r: "55%",
-            stops: [
-              { offset: "0%", color: "#0c4a6e", opacity: 1 },
-              { offset: "100%", color: "#0a2e44", opacity: 1 },
-            ],
-          },
-          {
-            id: "g-sclera",
-            kind: "radial",
-            cx: "50%",
+            cx: "40%",
             cy: "40%",
             r: "60%",
             stops: [
-              { offset: "0%", color: "#fef9c3", opacity: 1 },
-              { offset: "70%", color: "#fde9b0", opacity: 1 },
-              { offset: "100%", color: "#d97706", opacity: 1 },
+              { offset: "0%", color: "#fda4af", opacity: 0.95 },
+              { offset: "55%", color: "#dc2626", opacity: 0.95 },
+              { offset: "100%", color: "#7c2d12", opacity: 0.95 },
+            ],
+          },
+          {
+            id: "g-lung",
+            kind: "radial",
+            cx: "50%",
+            cy: "40%",
+            r: "65%",
+            stops: [
+              { offset: "0%", color: "#fde9b0", opacity: 0.7 },
+              { offset: "60%", color: "#fbcfe8", opacity: 0.55 },
+              { offset: "100%", color: "#c084fc", opacity: 0.4 },
             ],
           },
         ],
       },
       children: [
+        // Lungs (drawn first, so vessels + heart sit on top)
         {
-          at: { x: 0, y: 0 },
+          at: { x: heartCx - 220, y: heartCy - 200 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: `M 0 0 L ${W} 0 L ${W} ${H} L 0 ${H} Z`,
-            fill: "url(#g-skin)",
-            stroke: "none",
-          },
-        },
-        {
-          at: { x: cx, y: cy - 175 },
-          mark: "silhouette-path",
-          silhouettePath: {
-            d: "M -180 0 Q -90 -30, 20 -22 Q 130 -14, 200 8 Q 130 -6, 20 -10 Q -90 -14, -180 12 Z",
-            fill: "#3a2a14",
-            stroke: "#1f1a14",
-            strokeWidth: 0.8,
-          },
-        },
-        {
-          at: { x: 0, y: 0 },
-          mark: "silhouette-path",
-          silhouettePath: {
-            d: `M ${cx - 240} ${cy} Q ${cx} ${cy - 175}, ${cx + 240} ${cy} Q ${cx} ${cy + 175}, ${cx - 240} ${cy} Z`,
-            fill: "rgba(31,26,20,.35)",
-            stroke: "none",
-          },
-        },
-        {
-          at: { x: 0, y: 0 },
-          mark: "silhouette-path",
-          silhouettePath: {
-            d: `M ${cx - 230} ${cy} Q ${cx} ${cy - 170}, ${cx + 230} ${cy} Q ${cx} ${cy + 170}, ${cx - 230} ${cy} Z`,
-            fill: "url(#g-sclera)",
+            d: lungLeftD,
+            fill: "url(#g-lung)",
             stroke: "#3a2a14",
-            strokeWidth: 2.2,
+            strokeWidth: 1.6,
           },
         },
         {
-          at: { x: cx - 150, y: cy + 30 },
+          at: { x: heartCx + 220, y: heartCy - 200 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: "M 0 0 Q 20 -15, 40 -10 Q 60 -5, 80 5",
+            d: lungRightD,
+            fill: "url(#g-lung)",
+            stroke: "#3a2a14",
+            strokeWidth: 1.6,
+          },
+        },
+        // Lung shading (a few internal hatching strokes per lung)
+        {
+          at: { x: heartCx - 220, y: heartCy - 100 },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: "M -110 -20 Q -80 -10, -50 -20 M -120 30 Q -80 40, -50 30 M -110 80 Q -80 90, -50 80",
             fill: "none",
-            stroke: "rgba(180,30,30,.4)",
+            stroke: "rgba(124,45,18,.25)",
             strokeWidth: 0.8,
           },
         },
         {
-          at: { x: cx + 100, y: cy + 40 },
+          at: { x: heartCx + 220, y: heartCy - 100 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: "M 0 0 Q 30 -20, 70 -5",
+            d: "M 50 -20 Q 80 -10, 110 -20 M 50 30 Q 80 40, 120 30 M 50 80 Q 80 90, 110 80",
             fill: "none",
-            stroke: "rgba(180,30,30,.35)",
-            strokeWidth: 0.7,
+            stroke: "rgba(124,45,18,.25)",
+            strokeWidth: 0.8,
           },
         },
+        // Vessels (between lungs and heart)
+        ...vessels,
+        // Heart silhouette (outer outline with pencil-shaded fill)
         {
-          at: { x: cx, y: cy },
-          mark: "circle",
-          circle: { radius: 138, fill: "url(#g-iris-base)" },
+          at: { x: heartCx, y: heartCy },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: heartD,
+            fill: "url(#g-heart)",
+            stroke: "#1f1a14",
+            strokeWidth: 2.4,
+            strokeLinejoin: "round",
+          },
+          animation: heartPulse,
         },
-        ...fibers,
+        // Septum (chamber divider, drawn on top of heart)
         {
-          at: { x: cx, y: cy },
-          mark: "circle",
-          circle: { radius: 138, fill: "none", stroke: "#1f1a14", strokeWidth: 2 },
+          at: { x: heartCx, y: heartCy },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: septumD,
+            fill: "none",
+            stroke: "rgba(31,26,20,.7)",
+            strokeWidth: 2.2,
+            strokeLinecap: "round",
+          },
+          animation: heartPulse,
         },
+        // AV groove (atria/ventricle boundary)
         {
-          at: { x: cx, y: cy },
-          mark: "circle",
-          circle: { radius: 50, fill: "none", stroke: "rgba(2,6,23,.6)", strokeWidth: 1.2 },
+          at: { x: heartCx, y: heartCy },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: avGrooveD,
+            fill: "none",
+            stroke: "rgba(31,26,20,.55)",
+            strokeWidth: 1.8,
+            strokeLinecap: "round",
+          },
+          animation: heartPulse,
         },
+        // Chamber labels (RA, RV, LA, LV) — italic pencil text
         {
-          at: { x: cx, y: cy },
-          mark: "circle",
-          circle: { radius: 48, fill: "#050505" },
-        },
-        {
-          at: { x: cx - 20, y: cy - 20 },
-          mark: "ellipse",
-          ellipse: { rx: 18, ry: 12, fill: "rgba(255,255,255,.92)" },
-        },
-        {
-          at: { x: cx + 12, y: cy - 4 },
-          mark: "circle",
-          circle: { radius: 4, fill: "rgba(255,255,255,.75)" },
-        },
-        {
-          at: { x: cx - 35, y: cy - 35 },
-          mark: "circle",
-          circle: { radius: 2, fill: "rgba(255,255,255,.85)" },
-        },
-        ...upperLashes,
-        ...lowerLashes,
-        {
-          at: { x: cx, y: 65 },
+          at: { x: heartCx + 70, y: heartCy - 60 },
           mark: "text",
           textMark: {
-            text: "iris · pupil · catchlight",
+            text: "RA",
+            fontSize: 16,
+            fill: "#fef3c7",
+            italic: true,
+            anchor: "middle",
+          },
+          animation: heartPulse,
+        },
+        {
+          at: { x: heartCx + 60, y: heartCy + 80 },
+          mark: "text",
+          textMark: {
+            text: "RV",
+            fontSize: 16,
+            fill: "#fef3c7",
+            italic: true,
+            anchor: "middle",
+          },
+          animation: heartPulse,
+        },
+        {
+          at: { x: heartCx - 80, y: heartCy - 60 },
+          mark: "text",
+          textMark: {
+            text: "LA",
+            fontSize: 16,
+            fill: "#fef3c7",
+            italic: true,
+            anchor: "middle",
+          },
+          animation: heartPulse,
+        },
+        {
+          at: { x: heartCx - 90, y: heartCy + 80 },
+          mark: "text",
+          textMark: {
+            text: "LV",
             fontSize: 18,
             fill: "#fef3c7",
             italic: true,
             anchor: "middle",
           },
+          animation: heartPulse,
+        },
+        // Vessel annotations
+        {
+          at: { x: 0, y: 0 },
+          mark: "annotation-leader",
+          annotation: {
+            from: [heartCx + 215, heartCy - 230],
+            to: [heartCx + 290, heartCy - 280],
+            text: "aorta · oxygenated",
+            italic: true,
+            anchor: "start",
+          },
         },
         {
-          at: { x: cx, y: 555 },
+          at: { x: 0, y: 0 },
+          mark: "annotation-leader",
+          annotation: {
+            from: [heartCx + 100, heartCy - 320],
+            to: [heartCx + 180, heartCy - 360],
+            text: "superior vena cava",
+            italic: true,
+            anchor: "start",
+          },
+        },
+        {
+          at: { x: 0, y: 0 },
+          mark: "annotation-leader",
+          annotation: {
+            from: [heartCx - 180, heartCy - 200],
+            to: [heartCx - 350, heartCy - 230],
+            text: "pulmonary artery → lung",
+            italic: true,
+            anchor: "start",
+          },
+        },
+        {
+          at: { x: 0, y: 0 },
+          mark: "annotation-leader",
+          annotation: {
+            from: [heartCx - 340, heartCy - 50],
+            to: [heartCx - 430, heartCy + 20],
+            text: "pulmonary vein ← lung",
+            italic: true,
+            anchor: "start",
+          },
+        },
+        // Title
+        {
+          at: { x: W / 2, y: 60 },
           mark: "text",
           textMark: {
-            text: "40 radial fibers · one aperture · the camera nature evolved 40 separate times",
+            text: "Cor humanum · the circulation",
+            fontSize: 22,
+            fill: "#1f1a14",
+            italic: true,
+            anchor: "middle",
+          },
+        },
+        // Caption
+        {
+          at: { x: W / 2, y: 670 },
+          mark: "text",
+          textMark: {
+            text: "blue: deoxygenated · red: oxygenated · 60 bpm · ~5 L/min · ~3 billion beats per lifetime",
             fontSize: 13,
-            fill: "#fde68a",
+            fill: "#4a3f30",
             italic: true,
             anchor: "middle",
           },
@@ -2734,7 +2862,7 @@ function buildSkyscraper() {
 const fixtures = {
   "bio-neuron.json": buildNeuron(),
   "bio-butterfly.json": buildButterfly(),
-  "bio-eye.json": buildEye(),
+  "bio-circulation.json": buildCirculation(),
   "eng-bridge.json": buildBridge(),
   "eng-locomotive.json": buildLocomotive(),
   "eng-radio.json": buildRadio(),

@@ -9,7 +9,7 @@
  *   node scripts/gen-showcase-html.mjs
  *
  * Outputs under site/math/:
- *   draw-me-neuron.html, draw-me-butterfly.html, draw-me-eye.html
+ *   draw-me-neuron.html, draw-me-butterfly.html, draw-me-circulation.html
  *   draw-me-bridge.html, draw-me-locomotive.html, draw-me-radio.html
  *   draw-me-temple.html, draw-me-cathedral.html, draw-me-skyscraper.html
  */
@@ -174,86 +174,93 @@ const pages = [
     ctaLinks: [
       { label: "See the gallery ↗", href: "life-in-glyph.html", primary: true },
       { label: "DNA", href: "draw-me-dna.html" },
-      { label: "Eye", href: "draw-me-eye.html" },
+      { label: "Heart", href: "draw-me-circulation.html" },
       { label: "Sunflower", href: "draw-me-sunflower.html" },
     ],
   },
   {
-    slug: "eye",
-    svg: "bio-eye.svg",
-    title: "Draw me an eye",
+    slug: "circulation",
+    svg: "bio-circulation.svg",
+    title: "Draw me a heart + circulation",
     kicker: "Life in Glyph · RFC #9 · bio extension",
-    lede: "The camera nature evolved 40 separate times. <strong>You asked Claude. Glyph drew it — from a compose spec.</strong> Almond sclera, radial-fiber iris, black pupil, a catchlight reflecting the world.",
+    lede: "The engine of you. <strong>You asked Claude. Glyph drew it — from a compose spec, with a real SMIL <code>pulse</code> animation on the heart muscle.</strong> Anatomical front view: four chambers, the great vessels, the lungs. Pencil on parchment.",
     byline:
-      "Substrate: vertebrate eye. The iris's 36 radial muscle fibers open and close the aperture — your camera does the same.",
+      "Subject: <em>Cor humanum</em>. ~60 bpm at rest. ~5 L/min cardiac output. ~3 billion beats in an 80-year life.",
     prompt:
-      '"Draw me an eye looking straight at me. Almond shape. Blue iris with radial fibers. Black pupil. A small white catchlight near the upper-left. Warm skin tone framing. Two or three eyelashes."',
-    alt: "A vertebrate eye in cross-section: an almond-shaped white sclera bordered by warm orange skin, a blue iris with 36 radial muscle fibers and a 3-stop radial gradient, a black pupil with a white catchlight near the top-left, five short eyelashes curving up.",
+      '"Draw me a heart with circulation. Anatomical front view: four chambers (RA, RV, LA, LV), aorta arching up and down, pulmonary trunk splitting to both lungs, vena cavae entering the right side, pulmonary veins from the lungs. The heart should pulse. Pencil-on-parchment."',
+    alt: "Anatomical pencil-drawing of a human heart with its great vessels and lungs. Pear-shaped heart in red with chamber labels RA, RV, LA, LV and a vertical septum. Red aorta arches up from the upper-left of the heart, curves right and descends. Blue pulmonary arteries fan out from the upper-middle of the heart to a lavender lung on each side. Red pulmonary veins return from the lungs to the upper-left of the heart. Blue superior and inferior vena cavae enter the right side from above and below.",
     theme: {
-      primary: "#7dd3fc",
-      primarySoft: "rgba(125,211,252,.10)",
-      primaryEdge: "rgba(125,211,252,.35)",
-      h1: "linear-gradient(180deg, #fde68a, #fbbf24, #7dd3fc)",
-      h2: "#bae6fd",
-      ledeColor: "#fde68a",
-      alt2: "#fbbf24",
-      ctaTextColor: "#1a1a1a",
-      stageBg: "#1a0f0a",
+      primary: "#dc2626",
+      primarySoft: "rgba(220,38,38,.08)",
+      primaryEdge: "rgba(220,38,38,.35)",
+      h1: "linear-gradient(180deg, #fecaca, #dc2626, #7c2d12)",
+      h2: "#fca5a5",
+      ledeColor: "#94a3b8",
+      alt2: "#1d4ed8",
+      ctaTextColor: "#fef3c7",
+      stageBg: "#f5edd9",
     },
     primitives: [
       {
         label: "PRIMITIVE 1",
-        ticks: "polyline × 36",
-        h3: "The iris fibers",
-        p: "Thirty-six polylines radiating from the inner pupil edge to the outer iris. Length jitter by index gives a natural irregular look — real iris muscles don't all reach the limit cleanly.",
+        ticks: "silhouette-path + radial gradient",
+        h3: "The heart itself",
+        p: "One d-string with eight cubic Béziers traces the pear-shaped organ. Two pulled-up lobes at the top (the atria), a tapered body, a slight apex pointing down-left (the natural orientation of a real heart in the chest). Filled with a 3-stop radial gradient (rose → red → maroon).",
       },
       {
         label: "PRIMITIVE 2",
-        ticks: "circle × 3 + ellipse",
-        h3: "Pupil + catchlight",
-        p: "The pupil is a 48-radius black circle. The catchlight — that tiny white reflection that makes the eye look alive — is a small ellipse plus a tiny round secondary highlight. Cinematographers call it the eye-light.",
+        ticks: "silhouette × 6 (red + blue vessels)",
+        h3: "The great vessels",
+        p: "Six silhouette-paths for the aorta (with thin inner highlight tube for the pencil-cross-section look), pulmonary trunk splitting both ways to the lungs, paired vena cavae, and the pulmonary veins. Color convention: red = oxygenated, blue = deoxygenated.",
       },
       {
         label: "PRIMITIVE 3",
-        ticks: "silhouette + 3 radial grads",
-        h3: "Sclera + iris gradients",
-        p: "The sclera is a single d-string with two arcs, almond-shaped. The iris uses a radial gradient with three stops (deep navy → cyan → sky), and a separate radial gradient for the solid iris base behind the fibers.",
+        ticks: "pulse · 900 ms · scale 1.05",
+        h3: "The animation",
+        p: "An RFC #6 <code>pulse</code> loop animation on the heart silhouette + septum + chamber labels makes the heart contract once per 0.9 seconds — that's ~67 bpm, the resting rate of a healthy adult.",
       },
     ],
     jsonExcerpt: `{
   "compose": {
-    "viewBox": { "width": 800, "height": 600 },
-    "theme": { "background": "#1a0f0a" },
+    "viewBox": { "width": 1100, "height": 700 },
+    "theme": { "preset": "pencil-parchment" },
     "defs": {
       "gradients": [
-        { "id": "g-iris", "kind": "radial",
-          "cx": "50%", "cy": "50%", "r": "50%",
+        { "id": "g-heart", "kind": "radial",
+          "cx": "40%", "cy": "40%", "r": "60%",
           "stops": [
-            { "offset": "0%",  "color": "#0c4a6e" },
-            { "offset": "60%", "color": "#0284c7" },
-            { "offset": "100%","color": "#7dd3fc" }
+            { "offset": "0%",   "color": "#fda4af" },
+            { "offset": "55%",  "color": "#dc2626" },
+            { "offset": "100%", "color": "#7c2d12" }
           ]
         }
-        // ... g-sclera, g-iris-base, g-skin
+        // ... g-lung (radial, lavender-blush)
       ]
     },
     "children": [`,
     jsonChildren: [
-      "skin background (radial)",
-      "almond sclera silhouette",
-      "solid iris circle (radial base)",
-      "36 iris-fiber polylines",
-      "outer iris ring",
-      "pupil circle (radius 48)",
-      "catchlight ellipse + dot",
-      "5 eyelash silhouette-paths",
+      "left lung silhouette (radial lavender)",
+      "right lung silhouette (radial lavender)",
+      "2 lung-hatching silhouettes (pencil shading)",
+      "aorta silhouette (red, arches up + descends)",
+      "aorta inner-highlight tube",
+      "3 aortic branches (head + arms)",
+      "pulmonary trunk → L+R pulm arteries (blue)",
+      "L+R pulmonary veins (red, lung → LA)",
+      "superior vena cava (blue, from above → RA)",
+      "inferior vena cava (blue, from below → RA)",
+      "heart silhouette · pulse loop · 900 ms",
+      "septum line · pulse loop",
+      "AV groove line · pulse loop",
+      "4 chamber labels RA, RV, LA, LV · pulse loop",
+      "4 annotation-leaders (aorta, SVC, pulm artery, pulm vein)",
       "title + caption text",
     ],
     ctaLinks: [
       { label: "See the gallery ↗", href: "life-in-glyph.html", primary: true },
-      { label: "Butterfly", href: "draw-me-butterfly.html" },
       { label: "Neuron", href: "draw-me-neuron.html" },
-      { label: "Jellyfish", href: "draw-me-jellyfish.html" },
+      { label: "Heartbeat (ECG)", href: "draw-me-heartbeat.html" },
+      { label: "DNA", href: "draw-me-dna.html" },
     ],
   },
   // ─────────────────────── ENGINEERING ───────────────────────
