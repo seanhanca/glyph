@@ -1,11 +1,11 @@
 {
   "compose": {
     "viewBox": {
-      "width": 800,
-      "height": 600
+      "width": 900,
+      "height": 700
     },
     "title": "A butterfly's wing — symmetry in scales",
-    "description": "Lepidopteran symmetry: same wing pattern reflected across the body axis. Forewing scales catch UV, hindwing eyespots scare predators. Two pairs of wings, one body, ~250,000 species worldwide.",
+    "description": "Lepidoptera, top-down. Same wing pattern reflected across the body axis. Forewing scales catch UV light; hindwing eyespots scare predators. Two pairs of wings, one body, ~250,000 species.",
     "theme": {
       "preset": "pencil-parchment"
     },
@@ -22,17 +22,22 @@
             {
               "offset": "0%",
               "color": "#fbbf24",
-              "opacity": 0.95
+              "opacity": 0.98
             },
             {
-              "offset": "60%",
+              "offset": "45%",
+              "color": "#f97316",
+              "opacity": 0.98
+            },
+            {
+              "offset": "75%",
               "color": "#dc2626",
-              "opacity": 0.95
+              "opacity": 0.98
             },
             {
               "offset": "100%",
-              "color": "#581c87",
-              "opacity": 0.95
+              "color": "#7c2d12",
+              "opacity": 0.98
             }
           ]
         },
@@ -47,17 +52,22 @@
             {
               "offset": "0%",
               "color": "#fbbf24",
-              "opacity": 0.95
+              "opacity": 0.98
             },
             {
-              "offset": "60%",
+              "offset": "45%",
+              "color": "#f97316",
+              "opacity": 0.98
+            },
+            {
+              "offset": "75%",
               "color": "#dc2626",
-              "opacity": 0.95
+              "opacity": 0.98
             },
             {
               "offset": "100%",
-              "color": "#581c87",
-              "opacity": 0.95
+              "color": "#7c2d12",
+              "opacity": 0.98
             }
           ]
         },
@@ -71,18 +81,18 @@
           "stops": [
             {
               "offset": "0%",
-              "color": "#581c87",
-              "opacity": 0.95
+              "color": "#a78bfa",
+              "opacity": 0.98
             },
             {
-              "offset": "70%",
-              "color": "#1e3a8a",
-              "opacity": 0.95
+              "offset": "60%",
+              "color": "#581c87",
+              "opacity": 0.98
             },
             {
               "offset": "100%",
-              "color": "#0f172a",
-              "opacity": 0.95
+              "color": "#1e1b4b",
+              "opacity": 0.98
             }
           ]
         },
@@ -96,18 +106,18 @@
           "stops": [
             {
               "offset": "0%",
-              "color": "#581c87",
-              "opacity": 0.95
+              "color": "#a78bfa",
+              "opacity": 0.98
             },
             {
-              "offset": "70%",
-              "color": "#1e3a8a",
-              "opacity": 0.95
+              "offset": "60%",
+              "color": "#581c87",
+              "opacity": 0.98
             },
             {
               "offset": "100%",
-              "color": "#0f172a",
-              "opacity": 0.95
+              "color": "#1e1b4b",
+              "opacity": 0.98
             }
           ]
         }
@@ -116,240 +126,407 @@
     "children": [
       {
         "at": {
-          "x": 400,
-          "y": 300
+          "x": 450,
+          "y": 360
         },
-        "mark": "polygon",
-        "polygon": {
-          "points": [[0, 10], [60, 30], [160, 80], [180, 130], [120, 160], [40, 130], [10, 60]],
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 8 C 20 30, 90 60, 160 100 C 190 115, 205 140, 180 165 C 165 175, 145 165, 130 155 C 120 165, 100 175, 85 165 C 60 155, 40 130, 20 100 C 5 70, -2 30, 0 8 Z",
           "fill": "url(#g-hind-r)",
           "stroke": "#3a2a14",
-          "strokeWidth": 1.4
+          "strokeWidth": 1.4,
+          "strokeLinejoin": "round"
         }
       },
       {
         "at": {
-          "x": 400,
-          "y": 300
+          "x": 450,
+          "y": 360
         },
-        "mark": "polygon",
-        "polygon": {
-          "points": [
-            [0, 10],
-            [-60, 30],
-            [-160, 80],
-            [-180, 130],
-            [-120, 160],
-            [-40, 130],
-            [-10, 60]
-          ],
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 8 C -20 30, -90 60, -160 100 C -190 115, -205 140, -180 165 C -165 175, -145 165, -130 155 C -120 165, -100 175, -85 165 C -60 155, -40 130, -20 100 C -5 70, 2 30, 0 8 Z",
           "fill": "url(#g-hind-l)",
           "stroke": "#3a2a14",
-          "strokeWidth": 1.4
+          "strokeWidth": 1.4,
+          "strokeLinejoin": "round"
         }
       },
       {
         "at": {
-          "x": 400,
-          "y": 300
+          "x": 450,
+          "y": 360
         },
-        "mark": "polygon",
-        "polygon": {
-          "points": [
-            [0, -10],
-            [70, -110],
-            [180, -120],
-            [240, -80],
-            [230, -20],
-            [180, 10],
-            [60, 20]
-          ],
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 5 10 C 50 40, 100 70, 160 110 M 5 10 C 40 30, 80 50, 120 80 M 5 10 C 60 15, 120 30, 165 60",
+          "fill": "none",
+          "stroke": "rgba(31,26,20,.35)",
+          "strokeWidth": 0.8
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 360
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -5 10 C -50 40, -100 70, -160 110 M -5 10 C -40 30, -80 50, -120 80 M -5 10 C -60 15, -120 30, -165 60",
+          "fill": "none",
+          "stroke": "rgba(31,26,20,.35)",
+          "strokeWidth": 0.8
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 360
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 -8 C 30 -90, 130 -150, 230 -130 C 270 -120, 290 -90, 280 -50 C 260 -10, 200 10, 130 8 C 80 6, 30 -2, 0 -8 Z",
           "fill": "url(#g-wing-r)",
           "stroke": "#3a2a14",
-          "strokeWidth": 1.4
+          "strokeWidth": 1.4,
+          "strokeLinejoin": "round"
         }
       },
       {
         "at": {
-          "x": 400,
-          "y": 300
+          "x": 450,
+          "y": 360
         },
-        "mark": "polygon",
-        "polygon": {
-          "points": [
-            [0, -10],
-            [-70, -110],
-            [-180, -120],
-            [-240, -80],
-            [-230, -20],
-            [-180, 10],
-            [-60, 20]
-          ],
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 -8 C -30 -90, -130 -150, -230 -130 C -270 -120, -290 -90, -280 -50 C -260 -10, -200 10, -130 8 C -80 6, -30 -2, 0 -8 Z",
           "fill": "url(#g-wing-l)",
           "stroke": "#3a2a14",
+          "strokeWidth": 1.4,
+          "strokeLinejoin": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 360
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 5 -5 C 60 -50, 130 -90, 220 -100 M 5 -5 C 50 -30, 130 -50, 240 -65 M 5 -5 C 60 -10, 150 -10, 250 -20 M 5 0 C 70 5, 160 8, 200 5",
+          "fill": "none",
+          "stroke": "rgba(31,26,20,.4)",
+          "strokeWidth": 0.9
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 360
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -5 -5 C -60 -50, -130 -90, -220 -100 M -5 -5 C -50 -30, -130 -50, -240 -65 M -5 -5 C -60 -10, -150 -10, -250 -20 M -5 0 C -70 5, -160 8, -200 5",
+          "fill": "none",
+          "stroke": "rgba(31,26,20,.4)",
+          "strokeWidth": 0.9
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 410
+        },
+        "mark": "ellipse",
+        "ellipse": {
+          "rx": 10,
+          "ry": 90,
+          "fill": "#1f1a14",
+          "stroke": "#3a2a14",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 390
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-10, 0], [10, 0]],
+          "fill": "none",
+          "stroke": "#7c2d12",
+          "strokeWidth": 0.8
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 420
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-10, 0], [10, 0]],
+          "fill": "none",
+          "stroke": "#7c2d12",
+          "strokeWidth": 0.8
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 450
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-10, 0], [10, 0]],
+          "fill": "none",
+          "stroke": "#7c2d12",
+          "strokeWidth": 0.8
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 310
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 12,
+          "fill": "#1f1a14",
+          "stroke": "#3a2a14",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 444,
+          "y": 308
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 3,
+          "fill": "#fbbf24",
+          "stroke": "#7c2d12",
+          "strokeWidth": 0.5
+        }
+      },
+      {
+        "at": {
+          "x": 456,
+          "y": 308
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 3,
+          "fill": "#fbbf24",
+          "stroke": "#7c2d12",
+          "strokeWidth": 0.5
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 302
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 Q -18 -30, -38 -60",
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.6,
+          "strokeLinecap": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 302
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 Q 18 -30, 38 -60",
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.6,
+          "strokeLinecap": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 412,
+          "y": 300
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 3,
+          "fill": "#1f1a14"
+        }
+      },
+      {
+        "at": {
+          "x": 488,
+          "y": 300
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 3,
+          "fill": "#1f1a14"
+        }
+      },
+      {
+        "at": {
+          "x": 280,
+          "y": 295
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 18,
+          "fill": "#1f1a14",
+          "stroke": "#fbbf24",
           "strokeWidth": 1.4
         }
       },
       {
         "at": {
-          "x": 400,
-          "y": 330
-        },
-        "mark": "ellipse",
-        "ellipse": {
-          "rx": 9,
-          "ry": 70,
-          "fill": "#1f1a14",
-          "stroke": "#7c2d12",
-          "strokeWidth": 1
-        }
-      },
-      {
-        "at": {
-          "x": 400,
-          "y": 262
+          "x": 280,
+          "y": 295
         },
         "mark": "circle",
         "circle": {
-          "radius": 9,
-          "fill": "#1f1a14",
-          "stroke": "#7c2d12",
-          "strokeWidth": 1
+          "radius": 11,
+          "fill": "#fef3c7"
         }
       },
       {
         "at": {
-          "x": 400,
-          "y": 270
-        },
-        "mark": "silhouette-path",
-        "silhouettePath": {
-          "d": "M 0 0 Q 18 -40, 36 -55",
-          "fill": "none",
-          "stroke": "#1f1a14",
-          "strokeWidth": 1.5
-        }
-      },
-      {
-        "at": {
-          "x": 400,
-          "y": 270
-        },
-        "mark": "silhouette-path",
-        "silhouettePath": {
-          "d": "M 0 0 Q -18 -40, -36 -55",
-          "fill": "none",
-          "stroke": "#1f1a14",
-          "strokeWidth": 1.5
-        }
-      },
-      {
-        "at": {
-          "x": 436,
-          "y": 245
+          "x": 280,
+          "y": 295
         },
         "mark": "circle",
         "circle": {
-          "radius": 2.5,
+          "radius": 5,
           "fill": "#1f1a14"
         }
       },
       {
         "at": {
-          "x": 364,
-          "y": 245
+          "x": 278,
+          "y": 293
         },
         "mark": "circle",
         "circle": {
-          "radius": 2.5,
+          "radius": 1.4,
+          "fill": "rgba(255,255,255,.85)"
+        }
+      },
+      {
+        "at": {
+          "x": 620,
+          "y": 295
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 18,
+          "fill": "#1f1a14",
+          "stroke": "#fbbf24",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 620,
+          "y": 295
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 11,
+          "fill": "#fef3c7"
+        }
+      },
+      {
+        "at": {
+          "x": 620,
+          "y": 295
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 5,
           "fill": "#1f1a14"
         }
       },
       {
         "at": {
-          "x": 550,
-          "y": 230
+          "x": 618,
+          "y": 293
         },
-        "mark": "ellipse",
-        "ellipse": {
-          "rx": 22,
-          "ry": 16,
-          "fill": "rgba(255,255,255,.55)",
-          "stroke": "#3a2a14",
-          "strokeWidth": 1
+        "mark": "circle",
+        "circle": {
+          "radius": 1.4,
+          "fill": "rgba(255,255,255,.85)"
         }
       },
       {
         "at": {
-          "x": 550,
-          "y": 230
+          "x": 320,
+          "y": 470
         },
         "mark": "circle",
         "circle": {
           "radius": 8,
-          "fill": "#1f1a14"
-        }
-      },
-      {
-        "at": {
-          "x": 250,
-          "y": 230
-        },
-        "mark": "ellipse",
-        "ellipse": {
-          "rx": 22,
-          "ry": 16,
-          "fill": "rgba(255,255,255,.55)",
-          "stroke": "#3a2a14",
+          "fill": "rgba(255,200,80,.85)",
+          "stroke": "#7c2d12",
           "strokeWidth": 1
         }
       },
       {
         "at": {
-          "x": 250,
-          "y": 230
+          "x": 355,
+          "y": 505
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 5,
+          "fill": "rgba(255,150,50,.9)",
+          "stroke": "#7c2d12",
+          "strokeWidth": 0.8
+        }
+      },
+      {
+        "at": {
+          "x": 580,
+          "y": 470
         },
         "mark": "circle",
         "circle": {
           "radius": 8,
-          "fill": "#1f1a14"
-        }
-      },
-      {
-        "at": {
-          "x": 510,
-          "y": 400
-        },
-        "mark": "circle",
-        "circle": {
-          "radius": 14,
-          "fill": "rgba(255, 200, 80, 0.65)",
+          "fill": "rgba(255,200,80,.85)",
           "stroke": "#7c2d12",
           "strokeWidth": 1
         }
       },
       {
         "at": {
-          "x": 290,
-          "y": 400
+          "x": 545,
+          "y": 505
         },
         "mark": "circle",
         "circle": {
-          "radius": 14,
-          "fill": "rgba(255, 200, 80, 0.65)",
+          "radius": 5,
+          "fill": "rgba(255,150,50,.9)",
           "stroke": "#7c2d12",
-          "strokeWidth": 1
+          "strokeWidth": 0.8
         }
       },
       {
         "at": {
-          "x": 400,
-          "y": 50
+          "x": 450,
+          "y": 60
         },
         "mark": "text",
         "textMark": {
           "text": "Order Lepidoptera",
-          "fontSize": 18,
+          "fontSize": 20,
           "fill": "#1f1a14",
           "italic": true,
           "anchor": "middle"
@@ -357,12 +534,12 @@
       },
       {
         "at": {
-          "x": 400,
-          "y": 560
+          "x": 450,
+          "y": 650
         },
         "mark": "text",
         "textMark": {
-          "text": "bilateral symmetry · iridescent scales · two pairs of wings",
+          "text": "bilateral symmetry · iridescent scales · ~250,000 species",
           "fontSize": 13,
           "fill": "#4a3f30",
           "italic": true,

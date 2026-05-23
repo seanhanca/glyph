@@ -1,30 +1,14 @@
 #!/usr/bin/env node
 /**
- * Generate compose JSON fixtures for the second wave of Life-in-Glyph
- * showcases: 3 bio + 3 engineering + 3 architecture (a new section).
+ * Generate compose JSON fixtures for the second-wave Life-in-Glyph
+ * showcases: 3 bio + 3 engineering + 3 architecture pages.
+ *
+ * Quality-pass v2: rebuilt to match the visual bar of the DNA / jellyfish
+ * / hydraulic / windmill scenes — curves over polygons, layered gradients,
+ * better proportions, decorative richness, real animations where possible.
  *
  * Run from repo root:
  *   node scripts/gen-showcase-extensions.mjs
- *
- * Outputs 9 fixtures under packages/core/__fixtures__/compose/:
- *   bio-neuron.json       — soma + dendrites + axon + glow pulse
- *   bio-butterfly.json    — symmetric 4-winged butterfly with gradients
- *   bio-eye.json          — iris + pupil + lashes (radial gradients)
- *   eng-bridge.json       — suspension bridge with parabolic cables
- *   eng-locomotive.json   — steam locomotive with rotating wheels
- *   eng-radio.json        — concentric pulsing radio waves
- *   arch-temple.json      — Greek temple with Doric columns
- *   arch-cathedral.json   — Gothic cathedral with rose window
- *   arch-skyscraper.json  — modern glass skyscraper at sunset
- *
- * Each fixture is fully self-contained and consumed by the shared
- * showcase-extensions.test.ts which locks SVG snapshots.
- *
- * Conventions (matches gen-bio-eng-fixtures.mjs):
- *  - No "schematic" wrapper mark; use bare marks (frame/gear/...).
- *  - Annotation shape: { from: [x,y], to: [x,y], text, italic, anchor }.
- *  - Only "pencil-parchment" theme preset. Dark scenes override
- *    theme.background and lay down a full-canvas silhouette-path.
  */
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -43,120 +27,119 @@ const round = (n, p = 2) => {
 // BIO — A neuron firing
 // ───────────────────────────────────────────────────────────────────────────
 function buildNeuron() {
-  const W = 1000;
-  const H = 500;
-  const somaCx = 200;
-  const somaCy = 250;
-  const somaRx = 60;
-  const somaRy = 50;
+  const W = 1100;
+  const H = 520;
+  const somaCx = 240;
+  const somaCy = 280;
+  const somaRx = 56;
+  const somaRy = 64;
 
-  // Dendrites: 6 branching paths emanating from the soma to the left.
-  // Each one is a hand-sampled path with a primary branch + 2 sub-branches.
-  const dendriteBase = (rootAng, mainLen, fan) => {
-    // root point on soma perimeter
-    const rx = Math.cos(rootAng);
-    const ry = Math.sin(rootAng);
-    const startX = somaCx + somaRx * 0.95 * rx;
-    const startY = somaCy + somaRy * 0.95 * ry;
-    // tip
-    const tipX = startX + mainLen * rx;
-    const tipY = startY + mainLen * ry;
-    // sub-branches at 0.6 along main
-    const midX = startX + 0.6 * (tipX - startX);
-    const midY = startY + 0.6 * (tipY - startY);
-    const subLen = mainLen * 0.45;
-    const subAng1 = rootAng - fan;
-    const subAng2 = rootAng + fan;
-    const sub1X = midX + subLen * Math.cos(subAng1);
-    const sub1Y = midY + subLen * Math.sin(subAng1);
-    const sub2X = midX + subLen * Math.cos(subAng2);
-    const sub2Y = midY + subLen * Math.sin(subAng2);
-    // Two more tiny twigs off the tip
-    const twigLen = mainLen * 0.18;
-    const twigA = rootAng - fan * 0.5;
-    const twigB = rootAng + fan * 0.5;
-    const twigAX = tipX + twigLen * Math.cos(twigA);
-    const twigAY = tipY + twigLen * Math.sin(twigA);
-    const twigBX = tipX + twigLen * Math.cos(twigB);
-    const twigBY = tipY + twigLen * Math.sin(twigB);
+  const buildDendrite = (rootAng, mainLen, fanAng) => {
+    const sx = somaCx + somaRx * 0.95 * Math.cos(rootAng);
+    const sy = somaCy + somaRy * 0.95 * Math.sin(rootAng);
+    const cx1 = sx + 0.45 * mainLen * Math.cos(rootAng + 0.15);
+    const cy1 = sy + 0.45 * mainLen * Math.sin(rootAng + 0.15);
+    const tipX = sx + mainLen * Math.cos(rootAng);
+    const tipY = sy + mainLen * Math.sin(rootAng);
+    const branchX = sx + 0.75 * mainLen * Math.cos(rootAng);
+    const branchY = sy + 0.75 * mainLen * Math.sin(rootAng);
+    const subLen = 0.32 * mainLen;
+    const sub1X = branchX + subLen * Math.cos(rootAng - fanAng);
+    const sub1Y = branchY + subLen * Math.sin(rootAng - fanAng);
+    const sub2X = branchX + subLen * Math.cos(rootAng + fanAng);
+    const sub2Y = branchY + subLen * Math.sin(rootAng + fanAng);
+    const twigLen = 0.45 * subLen;
+    const tw1X = sub1X + twigLen * Math.cos(rootAng - fanAng * 1.8);
+    const tw1Y = sub1Y + twigLen * Math.sin(rootAng - fanAng * 1.8);
+    const tw2X = sub2X + twigLen * Math.cos(rootAng + fanAng * 1.8);
+    const tw2Y = sub2Y + twigLen * Math.sin(rootAng + fanAng * 1.8);
     return [
-      `M ${round(startX)} ${round(startY)} L ${round(tipX)} ${round(tipY)}`,
-      `M ${round(midX)} ${round(midY)} L ${round(sub1X)} ${round(sub1Y)}`,
-      `M ${round(midX)} ${round(midY)} L ${round(sub2X)} ${round(sub2Y)}`,
-      `M ${round(tipX)} ${round(tipY)} L ${round(twigAX)} ${round(twigAY)}`,
-      `M ${round(tipX)} ${round(tipY)} L ${round(twigBX)} ${round(twigBY)}`,
+      `M ${round(sx)} ${round(sy)}`,
+      `Q ${round(cx1)} ${round(cy1)}, ${round(tipX)} ${round(tipY)}`,
+      `M ${round(branchX)} ${round(branchY)} L ${round(sub1X)} ${round(sub1Y)}`,
+      `L ${round(tw1X)} ${round(tw1Y)}`,
+      `M ${round(branchX)} ${round(branchY)} L ${round(sub2X)} ${round(sub2Y)}`,
+      `L ${round(tw2X)} ${round(tw2Y)}`,
     ].join(" ");
   };
 
-  const dendrites = [];
-  // 5 dendrites fanning out to the LEFT (rootAng around π)
-  const dendriteSpec = [
-    [Math.PI - 0.6, 110, 0.4],
-    [Math.PI - 0.25, 130, 0.35],
-    [Math.PI, 150, 0.35],
-    [Math.PI + 0.25, 130, 0.35],
-    [Math.PI + 0.55, 110, 0.4],
+  const dendriteAngles = [
+    [Math.PI - 0.85, 180, 0.42],
+    [Math.PI - 0.35, 220, 0.38],
+    [Math.PI, 250, 0.35],
+    [Math.PI + 0.35, 220, 0.38],
+    [Math.PI + 0.85, 180, 0.42],
   ];
-  for (const [ang, len, fan] of dendriteSpec) {
+
+  const dendrites = [];
+  for (const [ang, len, fan] of dendriteAngles) {
+    const d = buildDendrite(ang, len, fan);
     dendrites.push({
       at: { x: 0, y: 0 },
       mark: "silhouette-path",
       silhouettePath: {
-        d: dendriteBase(ang, len, fan),
+        d,
         fill: "none",
-        stroke: "url(#g-cell)",
-        strokeWidth: 1.6,
+        stroke: "rgba(167,139,250,.35)",
+        strokeWidth: 6,
         strokeLinecap: "round",
+        strokeLinejoin: "round",
       },
     });
-  }
-
-  // Axon: starts on the right side of soma, goes long to the right with
-  // myelin sheath segments along the way.
-  const axonStart = somaCx + somaRx;
-  const axonEndX = 880;
-  const axonY = somaCy;
-  const axonPath = `M ${axonStart} ${axonY} L ${axonEndX} ${axonY}`;
-
-  // Myelin sheaths — small ellipses along the axon
-  const myelin = [];
-  const sheathSpacing = 80;
-  for (let x = axonStart + 50; x < axonEndX - 50; x += sheathSpacing) {
-    myelin.push({
-      at: { x, y: axonY },
-      mark: "ellipse",
-      ellipse: {
-        rx: 26,
-        ry: 9,
-        fill: "rgba(255, 243, 199, 0.85)",
-        stroke: "#b8870e",
-        strokeWidth: 1,
-      },
-    });
-  }
-
-  // Axon terminal — branched at the end with synaptic boutons
-  const terminalAng = [-0.5, -0.18, 0.18, 0.5];
-  const terminals = [];
-  for (const a of terminalAng) {
-    const tx = axonEndX + 40 * Math.cos(a);
-    const ty = axonY + 40 * Math.sin(a);
-    terminals.push({
+    dendrites.push({
       at: { x: 0, y: 0 },
       mark: "silhouette-path",
       silhouettePath: {
-        d: `M ${axonEndX} ${axonY} L ${round(tx)} ${round(ty)}`,
+        d,
+        fill: "none",
+        stroke: "url(#g-cell)",
+        strokeWidth: 1.8,
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+      },
+    });
+  }
+
+  const axonStartX = somaCx + somaRx - 4;
+  const axonEndX = 980;
+  const axonY = somaCy + 4;
+  const axonD = `M ${axonStartX} ${axonY} L ${axonEndX} ${axonY}`;
+
+  const myelinSheaths = [];
+  const sheathSpacing = 90;
+  for (let x = axonStartX + 60; x < axonEndX - 60; x += sheathSpacing) {
+    myelinSheaths.push({
+      at: { x, y: axonY },
+      mark: "ellipse",
+      ellipse: {
+        rx: 32,
+        ry: 10,
+        fill: "url(#g-myelin)",
+        stroke: "#b8870e",
+        strokeWidth: 0.8,
+      },
+    });
+  }
+
+  const synapseTerminals = [];
+  for (const a of [-0.7, -0.3, 0, 0.3, 0.7]) {
+    const tx = axonEndX + 70 * Math.cos(a);
+    const ty = axonY + 70 * Math.sin(a);
+    synapseTerminals.push({
+      at: { x: 0, y: 0 },
+      mark: "silhouette-path",
+      silhouettePath: {
+        d: `M ${axonEndX} ${axonY} Q ${round(axonEndX + 35)} ${round(axonY + 35 * Math.sin(a) * 0.5)}, ${round(tx)} ${round(ty)}`,
         fill: "none",
         stroke: "url(#g-cell)",
         strokeWidth: 1.6,
         strokeLinecap: "round",
       },
     });
-    // synaptic bouton (small circle at tip)
-    terminals.push({
+    synapseTerminals.push({
       at: { x: round(tx), y: round(ty) },
       mark: "circle",
-      circle: { radius: 4, fill: "#fbbf24", stroke: "#7c2d12", strokeWidth: 0.6 },
+      circle: { radius: 5, fill: "#fbbf24", stroke: "#fde68a", strokeWidth: 1 },
     });
   }
 
@@ -165,7 +148,7 @@ function buildNeuron() {
       viewBox: { width: W, height: H },
       title: "A neuron firing — the cell that thinks",
       description:
-        "A single pyramidal neuron. Dendrites on the left collect input; the soma integrates it; the axon on the right fires an action potential down to the synaptic terminals. Same architecture you use to read this sentence.",
+        "A single pyramidal neuron. Dendrites collect input; the soma integrates it; the axon carries the action potential down to the synaptic terminals at the right. The architecture you're using to read this sentence.",
       theme: { background: "#020617", foreground: "#f1f5fb" },
       defs: {
         gradients: [
@@ -176,7 +159,8 @@ function buildNeuron() {
             cy: "50%",
             r: "75%",
             stops: [
-              { offset: "0%", color: "#0f172a", opacity: 1 },
+              { offset: "0%", color: "#1e1b4b", opacity: 1 },
+              { offset: "70%", color: "#0c0a25", opacity: 1 },
               { offset: "100%", color: "#020617", opacity: 1 },
             ],
           },
@@ -198,11 +182,22 @@ function buildNeuron() {
             kind: "radial",
             cx: "40%",
             cy: "40%",
-            r: "60%",
+            r: "65%",
             stops: [
               { offset: "0%", color: "#fef3c7", opacity: 0.95 },
-              { offset: "60%", color: "#a78bfa", opacity: 0.85 },
+              { offset: "55%", color: "#a78bfa", opacity: 0.85 },
               { offset: "100%", color: "#312e81", opacity: 0.95 },
+            ],
+          },
+          {
+            id: "g-myelin",
+            kind: "radial",
+            cx: "50%",
+            cy: "40%",
+            r: "65%",
+            stops: [
+              { offset: "0%", color: "#fef3c7", opacity: 1 },
+              { offset: "100%", color: "#fbbf24", opacity: 0.9 },
             ],
           },
           {
@@ -216,10 +211,20 @@ function buildNeuron() {
               { offset: "100%", color: "#fde68a", opacity: 0 },
             ],
           },
+          {
+            id: "g-soma-halo",
+            kind: "radial",
+            cx: "50%",
+            cy: "50%",
+            r: "50%",
+            stops: [
+              { offset: "0%", color: "#a78bfa", opacity: 0.55 },
+              { offset: "100%", color: "#a78bfa", opacity: 0 },
+            ],
+          },
         ],
       },
       children: [
-        // Background
         {
           at: { x: 0, y: 0 },
           mark: "silhouette-path",
@@ -229,35 +234,40 @@ function buildNeuron() {
             stroke: "none",
           },
         },
-        // Subtle starfield
         {
           at: { x: 0, y: 0 },
           mark: "starfield",
-          starfield: { count: 60, seed: 23, region: { x: 0, y: 0, w: W, h: H } },
+          starfield: { count: 70, seed: 23, region: { x: 0, y: 0, w: W, h: H } },
         },
-        // Dendrites (drawn first so soma overlaps)
         ...dendrites,
-        // Axon
         {
           at: { x: 0, y: 0 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: axonPath,
+            d: axonD,
+            fill: "none",
+            stroke: "rgba(34,211,238,.35)",
+            strokeWidth: 8,
+            strokeLinecap: "round",
+          },
+        },
+        {
+          at: { x: 0, y: 0 },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: axonD,
             fill: "none",
             stroke: "url(#g-cell)",
             strokeWidth: 3,
             strokeLinecap: "round",
           },
         },
-        // Myelin sheaths
-        ...myelin,
-        // Soma halo
+        ...myelinSheaths,
         {
           at: { x: somaCx, y: somaCy },
           mark: "glow",
-          glow: { radius: 130, gradientId: "g-pulse" },
+          glow: { radius: 150, gradientId: "g-soma-halo" },
         },
-        // Soma (cell body)
         {
           at: { x: somaCx, y: somaCy },
           mark: "ellipse",
@@ -265,30 +275,36 @@ function buildNeuron() {
             rx: somaRx,
             ry: somaRy,
             fill: "url(#g-soma)",
-            stroke: "#a78bfa",
-            strokeWidth: 1.5,
+            stroke: "#c4b5fd",
+            strokeWidth: 1.4,
           },
         },
-        // Nucleus
         {
-          at: { x: somaCx - 8, y: somaCy - 6 },
+          at: { x: somaCx - 6, y: somaCy - 6 },
           mark: "circle",
-          circle: { radius: 18, fill: "rgba(2,6,23,.6)", stroke: "#fde68a", strokeWidth: 1 },
+          circle: {
+            radius: 22,
+            fill: "rgba(2,6,23,.55)",
+            stroke: "#fde68a",
+            strokeWidth: 1.2,
+          },
         },
-        // Terminals
-        ...terminals,
-        // Action potential pulse at axon end (glow halo at synapse)
+        {
+          at: { x: somaCx - 2, y: somaCy - 4 },
+          mark: "circle",
+          circle: { radius: 4, fill: "#fde68a" },
+        },
+        ...synapseTerminals,
         {
           at: { x: axonEndX, y: axonY },
           mark: "glow",
-          glow: { radius: 60, gradientId: "g-pulse" },
+          glow: { radius: 110, gradientId: "g-pulse" },
         },
-        // Labels
         {
-          at: { x: 50, y: 60 },
+          at: { x: 50, y: 50 },
           mark: "text",
           textMark: {
-            text: "dendrites",
+            text: "dendrites · input",
             fontSize: 14,
             fill: "#a78bfa",
             italic: true,
@@ -296,10 +312,10 @@ function buildNeuron() {
           },
         },
         {
-          at: { x: somaCx, y: somaCy + 90 },
+          at: { x: somaCx, y: somaCy + 105 },
           mark: "text",
           textMark: {
-            text: "soma",
+            text: "soma · integrate",
             fontSize: 14,
             fill: "#fde68a",
             italic: true,
@@ -307,7 +323,7 @@ function buildNeuron() {
           },
         },
         {
-          at: { x: 530, y: 230 },
+          at: { x: 580, y: 230 },
           mark: "text",
           textMark: {
             text: "axon · myelin sheath",
@@ -318,21 +334,21 @@ function buildNeuron() {
           },
         },
         {
-          at: { x: 900, y: 320 },
+          at: { x: 990, y: 360 },
           mark: "text",
           textMark: {
-            text: "synapse",
+            text: "synapse · transmit",
             fontSize: 14,
             fill: "#fbbf24",
             italic: true,
-            anchor: "start",
+            anchor: "end",
           },
         },
         {
-          at: { x: W / 2, y: 460 },
+          at: { x: W / 2, y: 480 },
           mark: "text",
           textMark: {
-            text: "input · integrate · fire · transmit",
+            text: "86 billion of these, talking to each other right now",
             fontSize: 13,
             fill: "#94a3b8",
             italic: true,
@@ -348,111 +364,74 @@ function buildNeuron() {
 // BIO — A butterfly's wing
 // ───────────────────────────────────────────────────────────────────────────
 function buildButterfly() {
-  const W = 800;
-  const H = 600;
-  const cx = 400;
-  const cy = 300;
+  const W = 900;
+  const H = 700;
+  const cx = W / 2;
+  const cy = 360;
 
-  // Forewing (upper) — drawn as a polygon for one side, mirrored for other.
-  // Origin is the body center; local coords for the right wing point right.
-  const foreWing = [
-    [0, -10],
-    [70, -110],
-    [180, -120],
-    [240, -80],
-    [230, -20],
-    [180, 10],
-    [60, 20],
-  ];
-  const hindWing = [
-    [0, 10],
-    [60, 30],
-    [160, 80],
-    [180, 130],
-    [120, 160],
-    [40, 130],
-    [10, 60],
-  ];
-  const mirrorX = (pts) => pts.map(([x, y]) => [-x, y]);
+  const foreWingD =
+    "M 0 -8 C 30 -90, 130 -150, 230 -130 C 270 -120, 290 -90, 280 -50 C 260 -10, 200 10, 130 8 C 80 6, 30 -2, 0 -8 Z";
 
-  // Wing-spot decorations
-  const spots = [];
-  // Right forewing
-  spots.push({
-    at: { x: cx + 150, y: cy - 70 },
-    mark: "ellipse",
-    ellipse: { rx: 22, ry: 16, fill: "rgba(255,255,255,.55)", stroke: "#3a2a14", strokeWidth: 1 },
-  });
-  spots.push({
-    at: { x: cx + 150, y: cy - 70 },
-    mark: "circle",
-    circle: { radius: 8, fill: "#1f1a14" },
-  });
-  // Left forewing
-  spots.push({
-    at: { x: cx - 150, y: cy - 70 },
-    mark: "ellipse",
-    ellipse: { rx: 22, ry: 16, fill: "rgba(255,255,255,.55)", stroke: "#3a2a14", strokeWidth: 1 },
-  });
-  spots.push({
-    at: { x: cx - 150, y: cy - 70 },
-    mark: "circle",
-    circle: { radius: 8, fill: "#1f1a14" },
-  });
-  // Right hindwing
-  spots.push({
-    at: { x: cx + 110, y: cy + 100 },
-    mark: "circle",
-    circle: { radius: 14, fill: "rgba(255, 200, 80, 0.65)", stroke: "#7c2d12", strokeWidth: 1 },
-  });
-  // Left hindwing
-  spots.push({
-    at: { x: cx - 110, y: cy + 100 },
-    mark: "circle",
-    circle: { radius: 14, fill: "rgba(255, 200, 80, 0.65)", stroke: "#7c2d12", strokeWidth: 1 },
-  });
+  const hindWingD =
+    "M 0 8 C 20 30, 90 60, 160 100 C 190 115, 205 140, 180 165 C 165 175, 145 165, 130 155 C 120 165, 100 175, 85 165 C 60 155, 40 130, 20 100 C 5 70, -2 30, 0 8 Z";
 
-  // Antennae
-  const antennae = [
-    {
-      at: { x: cx, y: cy - 30 },
-      mark: "silhouette-path",
-      silhouettePath: {
-        d: "M 0 0 Q 18 -40, 36 -55",
-        fill: "none",
-        stroke: "#1f1a14",
-        strokeWidth: 1.5,
-      },
-    },
-    {
-      at: { x: cx, y: cy - 30 },
-      mark: "silhouette-path",
-      silhouettePath: {
-        d: "M 0 0 Q -18 -40, -36 -55",
-        fill: "none",
-        stroke: "#1f1a14",
-        strokeWidth: 1.5,
-      },
-    },
-    // Antenna club tips
-    {
-      at: { x: cx + 36, y: cy - 55 },
+  const mirrorD = (d) =>
+    d.replace(
+      /(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)/g,
+      (_m, x, y) => `${-Number.parseFloat(x)} ${y}`,
+    );
+
+  const veinsD =
+    "M 5 -5 C 60 -50, 130 -90, 220 -100 M 5 -5 C 50 -30, 130 -50, 240 -65 M 5 -5 C 60 -10, 150 -10, 250 -20 M 5 0 C 70 5, 160 8, 200 5";
+  const hindVeinsD =
+    "M 5 10 C 50 40, 100 70, 160 110 M 5 10 C 40 30, 80 50, 120 80 M 5 10 C 60 15, 120 30, 165 60";
+
+  const eyespots = [];
+  for (const sign of [-1, 1]) {
+    const ex = cx + sign * 170;
+    const ey = cy - 65;
+    eyespots.push({
+      at: { x: ex, y: ey },
       mark: "circle",
-      circle: { radius: 2.5, fill: "#1f1a14" },
-    },
-    {
-      at: { x: cx - 36, y: cy - 55 },
+      circle: { radius: 18, fill: "#1f1a14", stroke: "#fbbf24", strokeWidth: 1.4 },
+    });
+    eyespots.push({
+      at: { x: ex, y: ey },
       mark: "circle",
-      circle: { radius: 2.5, fill: "#1f1a14" },
-    },
-  ];
+      circle: { radius: 11, fill: "#fef3c7" },
+    });
+    eyespots.push({
+      at: { x: ex, y: ey },
+      mark: "circle",
+      circle: { radius: 5, fill: "#1f1a14" },
+    });
+    eyespots.push({
+      at: { x: ex - 2, y: ey - 2 },
+      mark: "circle",
+      circle: { radius: 1.4, fill: "rgba(255,255,255,.85)" },
+    });
+  }
+
+  const hindSpots = [];
+  for (const sign of [-1, 1]) {
+    hindSpots.push({
+      at: { x: cx + sign * 130, y: cy + 110 },
+      mark: "circle",
+      circle: { radius: 8, fill: "rgba(255,200,80,.85)", stroke: "#7c2d12", strokeWidth: 1 },
+    });
+    hindSpots.push({
+      at: { x: cx + sign * 95, y: cy + 145 },
+      mark: "circle",
+      circle: { radius: 5, fill: "rgba(255,150,50,.9)", stroke: "#7c2d12", strokeWidth: 0.8 },
+    });
+  }
 
   return {
     compose: {
       viewBox: { width: W, height: H },
       title: "A butterfly's wing — symmetry in scales",
       description:
-        "Lepidopteran symmetry: same wing pattern reflected across the body axis. Forewing scales catch UV, hindwing eyespots scare predators. Two pairs of wings, one body, ~250,000 species worldwide.",
+        "Lepidoptera, top-down. Same wing pattern reflected across the body axis. Forewing scales catch UV light; hindwing eyespots scare predators. Two pairs of wings, one body, ~250,000 species.",
       theme: { preset: "pencil-parchment" },
       defs: {
         gradients: [
@@ -464,9 +443,10 @@ function buildButterfly() {
             x2: "100%",
             y2: "100%",
             stops: [
-              { offset: "0%", color: "#fbbf24", opacity: 0.95 },
-              { offset: "60%", color: "#dc2626", opacity: 0.95 },
-              { offset: "100%", color: "#581c87", opacity: 0.95 },
+              { offset: "0%", color: "#fbbf24", opacity: 0.98 },
+              { offset: "45%", color: "#f97316", opacity: 0.98 },
+              { offset: "75%", color: "#dc2626", opacity: 0.98 },
+              { offset: "100%", color: "#7c2d12", opacity: 0.98 },
             ],
           },
           {
@@ -477,9 +457,10 @@ function buildButterfly() {
             x2: "0%",
             y2: "100%",
             stops: [
-              { offset: "0%", color: "#fbbf24", opacity: 0.95 },
-              { offset: "60%", color: "#dc2626", opacity: 0.95 },
-              { offset: "100%", color: "#581c87", opacity: 0.95 },
+              { offset: "0%", color: "#fbbf24", opacity: 0.98 },
+              { offset: "45%", color: "#f97316", opacity: 0.98 },
+              { offset: "75%", color: "#dc2626", opacity: 0.98 },
+              { offset: "100%", color: "#7c2d12", opacity: 0.98 },
             ],
           },
           {
@@ -490,9 +471,9 @@ function buildButterfly() {
             x2: "100%",
             y2: "100%",
             stops: [
-              { offset: "0%", color: "#581c87", opacity: 0.95 },
-              { offset: "70%", color: "#1e3a8a", opacity: 0.95 },
-              { offset: "100%", color: "#0f172a", opacity: 0.95 },
+              { offset: "0%", color: "#a78bfa", opacity: 0.98 },
+              { offset: "60%", color: "#581c87", opacity: 0.98 },
+              { offset: "100%", color: "#1e1b4b", opacity: 0.98 },
             ],
           },
           {
@@ -503,92 +484,160 @@ function buildButterfly() {
             x2: "0%",
             y2: "100%",
             stops: [
-              { offset: "0%", color: "#581c87", opacity: 0.95 },
-              { offset: "70%", color: "#1e3a8a", opacity: 0.95 },
-              { offset: "100%", color: "#0f172a", opacity: 0.95 },
+              { offset: "0%", color: "#a78bfa", opacity: 0.98 },
+              { offset: "60%", color: "#581c87", opacity: 0.98 },
+              { offset: "100%", color: "#1e1b4b", opacity: 0.98 },
             ],
           },
         ],
       },
       children: [
-        // Right hindwing (drawn first so forewing overlaps)
         {
           at: { x: cx, y: cy },
-          mark: "polygon",
-          polygon: {
-            points: hindWing,
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: hindWingD,
             fill: "url(#g-hind-r)",
             stroke: "#3a2a14",
             strokeWidth: 1.4,
+            strokeLinejoin: "round",
           },
         },
-        // Left hindwing (mirrored)
         {
           at: { x: cx, y: cy },
-          mark: "polygon",
-          polygon: {
-            points: mirrorX(hindWing),
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: mirrorD(hindWingD),
             fill: "url(#g-hind-l)",
             stroke: "#3a2a14",
             strokeWidth: 1.4,
+            strokeLinejoin: "round",
           },
         },
-        // Right forewing
         {
           at: { x: cx, y: cy },
-          mark: "polygon",
-          polygon: {
-            points: foreWing,
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: hindVeinsD,
+            fill: "none",
+            stroke: "rgba(31,26,20,.35)",
+            strokeWidth: 0.8,
+          },
+        },
+        {
+          at: { x: cx, y: cy },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: mirrorD(hindVeinsD),
+            fill: "none",
+            stroke: "rgba(31,26,20,.35)",
+            strokeWidth: 0.8,
+          },
+        },
+        {
+          at: { x: cx, y: cy },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: foreWingD,
             fill: "url(#g-wing-r)",
             stroke: "#3a2a14",
             strokeWidth: 1.4,
+            strokeLinejoin: "round",
           },
         },
-        // Left forewing (mirrored)
         {
           at: { x: cx, y: cy },
-          mark: "polygon",
-          polygon: {
-            points: mirrorX(foreWing),
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: mirrorD(foreWingD),
             fill: "url(#g-wing-l)",
             stroke: "#3a2a14",
             strokeWidth: 1.4,
+            strokeLinejoin: "round",
           },
         },
-        // Body (vertical ellipse along centerline)
         {
-          at: { x: cx, y: cy + 30 },
+          at: { x: cx, y: cy },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: veinsD,
+            fill: "none",
+            stroke: "rgba(31,26,20,.4)",
+            strokeWidth: 0.9,
+          },
+        },
+        {
+          at: { x: cx, y: cy },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: mirrorD(veinsD),
+            fill: "none",
+            stroke: "rgba(31,26,20,.4)",
+            strokeWidth: 0.9,
+          },
+        },
+        {
+          at: { x: cx, y: cy + 50 },
           mark: "ellipse",
-          ellipse: { rx: 9, ry: 70, fill: "#1f1a14", stroke: "#7c2d12", strokeWidth: 1 },
+          ellipse: { rx: 10, ry: 90, fill: "#1f1a14", stroke: "#3a2a14", strokeWidth: 1 },
         },
-        // Head
+        ...[-20, 10, 40].map((dy) => ({
+          at: { x: cx, y: cy + 50 + dy },
+          mark: "polyline",
+          polyline: {
+            points: [
+              [-10, 0],
+              [10, 0],
+            ],
+            fill: "none",
+            stroke: "#7c2d12",
+            strokeWidth: 0.8,
+          },
+        })),
         {
-          at: { x: cx, y: cy - 38 },
+          at: { x: cx, y: cy - 50 },
           mark: "circle",
-          circle: { radius: 9, fill: "#1f1a14", stroke: "#7c2d12", strokeWidth: 1 },
+          circle: { radius: 12, fill: "#1f1a14", stroke: "#3a2a14", strokeWidth: 1 },
         },
-        // Antennae
-        ...antennae,
-        // Wing spots
-        ...spots,
-        // Title (top)
+        ...[-1, 1].map((sign) => ({
+          at: { x: cx + sign * 6, y: cy - 52 },
+          mark: "circle",
+          circle: { radius: 3, fill: "#fbbf24", stroke: "#7c2d12", strokeWidth: 0.5 },
+        })),
+        ...[-1, 1].map((sign) => ({
+          at: { x: cx, y: cy - 58 },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: `M 0 0 Q ${sign * 18} -30, ${sign * 38} -60`,
+            fill: "none",
+            stroke: "#1f1a14",
+            strokeWidth: 1.6,
+            strokeLinecap: "round",
+          },
+        })),
+        ...[-1, 1].map((sign) => ({
+          at: { x: cx + sign * 38, y: cy - 60 },
+          mark: "circle",
+          circle: { radius: 3, fill: "#1f1a14" },
+        })),
+        ...eyespots,
+        ...hindSpots,
         {
-          at: { x: cx, y: 50 },
+          at: { x: cx, y: 60 },
           mark: "text",
           textMark: {
             text: "Order Lepidoptera",
-            fontSize: 18,
+            fontSize: 20,
             fill: "#1f1a14",
             italic: true,
             anchor: "middle",
           },
         },
-        // Caption
         {
-          at: { x: cx, y: 560 },
+          at: { x: cx, y: 650 },
           mark: "text",
           textMark: {
-            text: "bilateral symmetry · iridescent scales · two pairs of wings",
+            text: "bilateral symmetry · iridescent scales · ~250,000 species",
             fontSize: 13,
             fill: "#4a3f30",
             italic: true,
@@ -604,23 +653,20 @@ function buildButterfly() {
 // BIO — An eye
 // ───────────────────────────────────────────────────────────────────────────
 function buildEye() {
-  const W = 800;
+  const W = 900;
   const H = 600;
-  const cx = 400;
+  const cx = W / 2;
   const cy = 300;
 
-  // Iris radial fibers — 36 thin polylines from outer iris to inner.
-  // We use a slightly varying length so it doesn't look TOO regular.
   const fibers = [];
-  const N = 36;
+  const N = 32;
   for (let i = 0; i < N; i++) {
     const a = (2 * Math.PI * i) / N;
     const cos = Math.cos(a);
     const sin = Math.sin(a);
-    // Length jitter so fibers don't all reach the pupil cleanly
-    const jitter = (i % 3) * 4;
-    const inner = 50;
-    const outer = 130 - jitter;
+    const jitter = (i % 4) * 3 + (i % 7) * 1.5;
+    const inner = 52;
+    const outer = 138 - jitter;
     fibers.push({
       at: { x: cx, y: cy },
       mark: "polyline",
@@ -631,17 +677,48 @@ function buildEye() {
         ],
         fill: "none",
         stroke: "url(#g-iris)",
-        strokeWidth: 1.1,
+        strokeWidth: 1.1 + (i % 3) * 0.2,
       },
     });
   }
+
+  const upperLashes = [-150, -85, -25, 35, 95, 150].map((dx) => {
+    const baseY = cy - 145 + Math.abs(dx) * 0.18;
+    const tilt = dx < 0 ? -1 : dx > 0 ? 1 : 0;
+    return {
+      at: { x: cx + dx, y: baseY },
+      mark: "silhouette-path",
+      silhouettePath: {
+        d: `M 0 0 Q ${tilt * 4} -10, ${tilt * 14} -28`,
+        fill: "none",
+        stroke: "#1f1a14",
+        strokeWidth: 2.4,
+        strokeLinecap: "round",
+      },
+    };
+  });
+  const lowerLashes = [-100, -40, 0, 40, 100].map((dx) => {
+    const baseY = cy + 130 - Math.abs(dx) * 0.1;
+    const tilt = dx < 0 ? -1 : dx > 0 ? 1 : 0;
+    return {
+      at: { x: cx + dx, y: baseY },
+      mark: "silhouette-path",
+      silhouettePath: {
+        d: `M 0 0 Q ${tilt * 2} 8, ${tilt * 8} 18`,
+        fill: "none",
+        stroke: "#1f1a14",
+        strokeWidth: 1.8,
+        strokeLinecap: "round",
+      },
+    };
+  });
 
   return {
     compose: {
       viewBox: { width: W, height: H },
       title: "An eye — the camera that learned to see",
       description:
-        "Cross-section through a vertebrate eye: sclera (white), iris (the radial muscle that opens or closes the pupil), pupil (the aperture), and a catchlight reflecting whatever the eye is looking at.",
+        "Cross-section through a vertebrate eye: sclera (white), iris (the radial muscle that opens or closes the pupil), pupil (the aperture), catchlight (the reflection that makes the eye look alive).",
       theme: { background: "#1a0f0a", foreground: "#fef3c7" },
       defs: {
         gradients: [
@@ -650,10 +727,10 @@ function buildEye() {
             kind: "radial",
             cx: "50%",
             cy: "50%",
-            r: "60%",
+            r: "65%",
             stops: [
               { offset: "0%", color: "#fde68a", opacity: 1 },
-              { offset: "60%", color: "#d97706", opacity: 1 },
+              { offset: "55%", color: "#d97706", opacity: 1 },
               { offset: "100%", color: "#451a03", opacity: 1 },
             ],
           },
@@ -665,7 +742,7 @@ function buildEye() {
             r: "50%",
             stops: [
               { offset: "0%", color: "#0c4a6e", opacity: 0.95 },
-              { offset: "60%", color: "#0284c7", opacity: 0.95 },
+              { offset: "55%", color: "#0284c7", opacity: 0.95 },
               { offset: "100%", color: "#7dd3fc", opacity: 0.95 },
             ],
           },
@@ -677,7 +754,7 @@ function buildEye() {
             r: "55%",
             stops: [
               { offset: "0%", color: "#0c4a6e", opacity: 1 },
-              { offset: "100%", color: "#082f49", opacity: 1 },
+              { offset: "100%", color: "#0a2e44", opacity: 1 },
             ],
           },
           {
@@ -687,7 +764,7 @@ function buildEye() {
             cy: "40%",
             r: "60%",
             stops: [
-              { offset: "0%", color: "#fef3c7", opacity: 1 },
+              { offset: "0%", color: "#fef9c3", opacity: 1 },
               { offset: "70%", color: "#fde9b0", opacity: 1 },
               { offset: "100%", color: "#d97706", opacity: 1 },
             ],
@@ -695,7 +772,6 @@ function buildEye() {
         ],
       },
       children: [
-        // Skin background
         {
           at: { x: 0, y: 0 },
           mark: "silhouette-path",
@@ -705,78 +781,109 @@ function buildEye() {
             stroke: "none",
           },
         },
-        // Sclera (the white of the eye) — almond-shaped via two arcs
+        {
+          at: { x: cx, y: cy - 175 },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: "M -180 0 Q -90 -30, 20 -22 Q 130 -14, 200 8 Q 130 -6, 20 -10 Q -90 -14, -180 12 Z",
+            fill: "#3a2a14",
+            stroke: "#1f1a14",
+            strokeWidth: 0.8,
+          },
+        },
         {
           at: { x: 0, y: 0 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: `M ${cx - 220} ${cy} Q ${cx} ${cy - 160}, ${cx + 220} ${cy} Q ${cx} ${cy + 160}, ${cx - 220} ${cy} Z`,
-            fill: "url(#g-sclera)",
-            stroke: "#3a2a14",
-            strokeWidth: 2,
+            d: `M ${cx - 240} ${cy} Q ${cx} ${cy - 175}, ${cx + 240} ${cy} Q ${cx} ${cy + 175}, ${cx - 240} ${cy} Z`,
+            fill: "rgba(31,26,20,.35)",
+            stroke: "none",
           },
         },
-        // Iris base (solid)
         {
-          at: { x: cx, y: cy },
-          mark: "circle",
-          circle: { radius: 130, fill: "url(#g-iris-base)" },
-        },
-        // Iris radial fibers
-        ...fibers,
-        // Outer iris ring
-        {
-          at: { x: cx, y: cy },
-          mark: "circle",
-          circle: { radius: 130, fill: "none", stroke: "#1f1a14", strokeWidth: 1.5 },
-        },
-        // Pupil
-        {
-          at: { x: cx, y: cy },
-          mark: "circle",
-          circle: { radius: 48, fill: "#0a0a0a" },
-        },
-        // Catchlight (the small white reflection)
-        {
-          at: { x: cx - 18, y: cy - 18 },
-          mark: "ellipse",
-          ellipse: { rx: 14, ry: 10, fill: "rgba(255,255,255,.85)" },
-        },
-        {
-          at: { x: cx + 8, y: cy - 6 },
-          mark: "circle",
-          circle: { radius: 3, fill: "rgba(255,255,255,.7)" },
-        },
-        // Upper lashes (5 silhouette curves)
-        ...[-110, -55, 0, 55, 110].map((dx) => ({
-          at: { x: cx + dx, y: cy - 130 + (Math.abs(dx) < 60 ? -8 : 0) },
+          at: { x: 0, y: 0 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: `M 0 0 Q ${dx < 0 ? 4 : -4} -10, ${dx < 0 ? 10 : -10} -22`,
-            fill: "none",
-            stroke: "#1f1a14",
-            strokeWidth: 2,
-            strokeLinecap: "round",
+            d: `M ${cx - 230} ${cy} Q ${cx} ${cy - 170}, ${cx + 230} ${cy} Q ${cx} ${cy + 170}, ${cx - 230} ${cy} Z`,
+            fill: "url(#g-sclera)",
+            stroke: "#3a2a14",
+            strokeWidth: 2.2,
           },
-        })),
-        // Title
+        },
         {
-          at: { x: cx, y: 60 },
+          at: { x: cx - 150, y: cy + 30 },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: "M 0 0 Q 20 -15, 40 -10 Q 60 -5, 80 5",
+            fill: "none",
+            stroke: "rgba(180,30,30,.4)",
+            strokeWidth: 0.8,
+          },
+        },
+        {
+          at: { x: cx + 100, y: cy + 40 },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: "M 0 0 Q 30 -20, 70 -5",
+            fill: "none",
+            stroke: "rgba(180,30,30,.35)",
+            strokeWidth: 0.7,
+          },
+        },
+        {
+          at: { x: cx, y: cy },
+          mark: "circle",
+          circle: { radius: 138, fill: "url(#g-iris-base)" },
+        },
+        ...fibers,
+        {
+          at: { x: cx, y: cy },
+          mark: "circle",
+          circle: { radius: 138, fill: "none", stroke: "#1f1a14", strokeWidth: 2 },
+        },
+        {
+          at: { x: cx, y: cy },
+          mark: "circle",
+          circle: { radius: 50, fill: "none", stroke: "rgba(2,6,23,.6)", strokeWidth: 1.2 },
+        },
+        {
+          at: { x: cx, y: cy },
+          mark: "circle",
+          circle: { radius: 48, fill: "#050505" },
+        },
+        {
+          at: { x: cx - 20, y: cy - 20 },
+          mark: "ellipse",
+          ellipse: { rx: 18, ry: 12, fill: "rgba(255,255,255,.92)" },
+        },
+        {
+          at: { x: cx + 12, y: cy - 4 },
+          mark: "circle",
+          circle: { radius: 4, fill: "rgba(255,255,255,.75)" },
+        },
+        {
+          at: { x: cx - 35, y: cy - 35 },
+          mark: "circle",
+          circle: { radius: 2, fill: "rgba(255,255,255,.85)" },
+        },
+        ...upperLashes,
+        ...lowerLashes,
+        {
+          at: { x: cx, y: 65 },
           mark: "text",
           textMark: {
             text: "iris · pupil · catchlight",
-            fontSize: 16,
+            fontSize: 18,
             fill: "#fef3c7",
             italic: true,
             anchor: "middle",
           },
         },
-        // Caption
         {
-          at: { x: cx, y: 540 },
+          at: { x: cx, y: 555 },
           mark: "text",
           textMark: {
-            text: "36 radial muscle fibers · one aperture · the camera nature evolved 40 separate times",
+            text: "40 radial fibers · one aperture · the camera nature evolved 40 separate times",
             fontSize: 13,
             fill: "#fde68a",
             italic: true,
@@ -789,53 +896,83 @@ function buildEye() {
 }
 
 // ───────────────────────────────────────────────────────────────────────────
-// ENG — Suspension bridge (Golden Gate style)
+// ENG — Suspension bridge
 // ───────────────────────────────────────────────────────────────────────────
 function buildBridge() {
-  const W = 1200;
-  const H = 600;
-  const deckY = 420;
-  const towerTopY = 120;
-  const tower1X = 280;
-  const tower2X = 920;
-  const towerWidth = 22;
+  const W = 1300;
+  const H = 700;
+  const deckY = 480;
+  const tower1X = 320;
+  const tower2X = 980;
+  const towerTopY = 100;
 
-  // Main cable: parabolic between the two towers.
-  // y = ay + (deckY - ay) * ((2t - 1)^2), where t goes 0..1 across the span.
-  // Simpler: build with explicit sample points.
-  const ay = towerTopY + 20; // cable hugs just below tower top
-  const minCableY = deckY - 30; // sag bottom near deck
-  const dip = deckY - minCableY; // how far below tower top the lowest point sits
+  const baseHalfW = 24;
+  const midHalfW = 16;
+  const topHalfW = 10;
+  const setback1Y = towerTopY + 100;
+  const setback2Y = towerTopY + 220;
+  const towerD = [
+    `M ${-baseHalfW} ${deckY + 30}`,
+    `L ${-baseHalfW} ${setback2Y}`,
+    `L ${-midHalfW} ${setback2Y}`,
+    `L ${-midHalfW} ${setback1Y}`,
+    `L ${-topHalfW} ${setback1Y}`,
+    `L ${-topHalfW} ${towerTopY}`,
+    `L ${topHalfW} ${towerTopY}`,
+    `L ${topHalfW} ${setback1Y}`,
+    `L ${midHalfW} ${setback1Y}`,
+    `L ${midHalfW} ${setback2Y}`,
+    `L ${baseHalfW} ${setback2Y}`,
+    `L ${baseHalfW} ${deckY + 30}`,
+    "Z",
+  ].join(" ");
+
+  const ay = towerTopY + 25;
+  const minCableY = deckY - 30;
+  const dip = minCableY - ay;
+  const cableSteps = 50;
   const cablePts = [];
-  const cableSteps = 40;
   for (let i = 0; i <= cableSteps; i++) {
     const t = i / cableSteps;
     const x = tower1X + t * (tower2X - tower1X);
-    const y = ay + (1 - 4 * (t - 0.5) * (t - 0.5)) * 0; // placeholder
-    // Use cosh-like parabola: y = minCableY - dip * (1 - 4(t-.5)^2)
-    const yp = minCableY - dip * (1 - 4 * (t - 0.5) * (t - 0.5));
+    const yp = ay + dip * (1 - 4 * (t - 0.5) * (t - 0.5));
     cablePts.push([round(x), round(yp)]);
   }
   const cablePath = `M ${cablePts.map(([x, y]) => `${x} ${y}`).join(" L ")}`;
 
-  // Side cables (from anchor to tower tops)
   const anchorL = [80, deckY + 30];
   const anchorR = [W - 80, deckY + 30];
 
-  // Vertical suspenders from cable to deck
+  const suspendersCount = 30;
   const suspenders = [];
-  for (let i = 4; i <= cableSteps - 4; i += 2) {
-    const [x, y] = cablePts[i];
+  for (let i = 1; i < suspendersCount; i++) {
+    const t = i / suspendersCount;
+    const x = tower1X + t * (tower2X - tower1X);
+    const cableY = ay + dip * (1 - 4 * (t - 0.5) * (t - 0.5));
     suspenders.push({
-      at: { x, y },
+      at: { x: round(x), y: round(cableY) },
       mark: "polyline",
       polyline: {
         points: [
           [0, 0],
-          [0, deckY - y - 2],
+          [0, round(deckY - cableY)],
         ],
         fill: "none",
-        stroke: "#1f1a14",
+        stroke: "#3a2a14",
+        strokeWidth: 0.8,
+      },
+    });
+  }
+
+  const waves = [];
+  for (let i = 0; i < 4; i++) {
+    waves.push({
+      at: { x: 0, y: deckY + 80 + i * 30 },
+      mark: "silhouette-path",
+      silhouettePath: {
+        d: `M 0 0 Q ${W / 4} ${-4 - i}, ${W / 2} 0 T ${W} 0`,
+        fill: "none",
+        stroke: "rgba(255,255,255,.25)",
         strokeWidth: 1,
       },
     });
@@ -846,7 +983,7 @@ function buildBridge() {
       viewBox: { width: W, height: H },
       title: "A suspension bridge — gravity solved",
       description:
-        "Two towers, one main cable per side, hundreds of vertical suspenders carrying the deck. The cable hangs in a parabola because the load (the deck) is uniform per horizontal distance, not per arc length. Roebling, 1883 (Brooklyn) → Strauss, 1937 (Golden Gate).",
+        "Two art-deco towers, one parabolic main cable per side, hundreds of vertical suspenders carrying a deck. The cable hangs in a parabola because the load is uniform per horizontal distance. Roebling 1883 → Strauss 1937.",
       theme: { preset: "pencil-parchment" },
       defs: {
         gradients: [
@@ -858,9 +995,9 @@ function buildBridge() {
             x2: "0%",
             y2: "100%",
             stops: [
-              { offset: "0%", color: "#fef3c7", opacity: 1 },
-              { offset: "70%", color: "#fde9b0", opacity: 1 },
-              { offset: "100%", color: "#ebe1c4", opacity: 1 },
+              { offset: "0%", color: "#fed7aa", opacity: 1 },
+              { offset: "50%", color: "#fbbf24", opacity: 1 },
+              { offset: "100%", color: "#fde9b0", opacity: 1 },
             ],
           },
           {
@@ -871,8 +1008,9 @@ function buildBridge() {
             x2: "0%",
             y2: "100%",
             stops: [
-              { offset: "0%", color: "#7dd3fc", opacity: 0.85 },
-              { offset: "100%", color: "#0c4a6e", opacity: 0.95 },
+              { offset: "0%", color: "#0284c7", opacity: 1 },
+              { offset: "70%", color: "#0c4a6e", opacity: 1 },
+              { offset: "100%", color: "#082f49", opacity: 1 },
             ],
           },
           {
@@ -888,10 +1026,21 @@ function buildBridge() {
               { offset: "100%", color: "#7c2d12", opacity: 1 },
             ],
           },
+          {
+            id: "g-fog",
+            kind: "linear",
+            x1: "0%",
+            y1: "0%",
+            x2: "0%",
+            y2: "100%",
+            stops: [
+              { offset: "0%", color: "#fef3c7", opacity: 0.6 },
+              { offset: "100%", color: "#fef3c7", opacity: 0 },
+            ],
+          },
         ],
       },
       children: [
-        // Sky
         {
           at: { x: 0, y: 0 },
           mark: "silhouette-path",
@@ -901,7 +1050,24 @@ function buildBridge() {
             stroke: "none",
           },
         },
-        // Water
+        {
+          at: { x: 480, y: deckY - 60 },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: "M 0 60 L 30 60 L 30 20 L 50 20 L 50 50 L 80 50 L 80 10 L 110 10 L 110 45 L 145 45 L 145 25 L 170 25 L 170 55 L 200 55 L 200 30 L 240 30 L 240 50 L 280 50 L 280 35 L 320 35 L 320 60 L 0 60 Z",
+            fill: "rgba(124,45,18,.25)",
+            stroke: "none",
+          },
+        },
+        {
+          at: { x: 0, y: deckY - 80 },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: `M 0 0 L ${W} 0 L ${W} 110 L 0 110 Z`,
+            fill: "url(#g-fog)",
+            stroke: "none",
+          },
+        },
         {
           at: { x: 0, y: deckY + 30 },
           mark: "silhouette-path",
@@ -911,7 +1077,7 @@ function buildBridge() {
             stroke: "none",
           },
         },
-        // Side cable left (anchor to tower top)
+        ...waves,
         {
           at: { x: 0, y: 0 },
           mark: "polyline",
@@ -922,7 +1088,6 @@ function buildBridge() {
             strokeWidth: 2.5,
           },
         },
-        // Side cable right
         {
           at: { x: 0, y: 0 },
           mark: "polyline",
@@ -933,9 +1098,7 @@ function buildBridge() {
             strokeWidth: 2.5,
           },
         },
-        // Suspenders (drawn first so cable + deck overlap)
         ...suspenders,
-        // Main parabolic cable
         {
           at: { x: 0, y: 0 },
           mark: "silhouette-path",
@@ -943,41 +1106,38 @@ function buildBridge() {
             d: cablePath,
             fill: "none",
             stroke: "#1f1a14",
-            strokeWidth: 3,
+            strokeWidth: 3.5,
             strokeLinecap: "round",
           },
         },
-        // Tower 1 (left) — trapezoidal red art-deco style
         {
-          at: { x: tower1X, y: towerTopY },
+          at: { x: tower1X, y: 0 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: `M ${-towerWidth / 2} 0 L ${towerWidth / 2} 0 L ${towerWidth / 2 + 6} ${deckY - towerTopY + 30} L ${-towerWidth / 2 - 6} ${deckY - towerTopY + 30} Z`,
+            d: towerD,
             fill: "url(#g-tower)",
             stroke: "#1f1a14",
             strokeWidth: 1.4,
           },
         },
-        // Tower 2 (right)
         {
-          at: { x: tower2X, y: towerTopY },
+          at: { x: tower2X, y: 0 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: `M ${-towerWidth / 2} 0 L ${towerWidth / 2} 0 L ${towerWidth / 2 + 6} ${deckY - towerTopY + 30} L ${-towerWidth / 2 - 6} ${deckY - towerTopY + 30} Z`,
+            d: towerD,
             fill: "url(#g-tower)",
             stroke: "#1f1a14",
             strokeWidth: 1.4,
           },
         },
-        // Cross-bracing on each tower (5 horizontals)
-        ...[0.2, 0.4, 0.6, 0.8].flatMap((t) =>
+        ...[180, 280, 380].flatMap((y) =>
           [tower1X, tower2X].map((tx) => ({
-            at: { x: tx, y: towerTopY + t * (deckY - towerTopY + 20) },
+            at: { x: tx, y },
             mark: "polyline",
             polyline: {
               points: [
-                [-towerWidth / 2 - 3 - t * 3, 0],
-                [towerWidth / 2 + 3 + t * 3, 0],
+                [-24, 0],
+                [24, 0],
               ],
               fill: "none",
               stroke: "#1f1a14",
@@ -985,64 +1145,59 @@ function buildBridge() {
             },
           })),
         ),
-        // Deck (the road)
         {
-          at: { x: 0, y: deckY },
+          at: { x: 60, y: deckY },
           mark: "silhouette-path",
           silhouettePath: {
-            d: `M 60 0 L ${W - 60} 0 L ${W - 60} 30 L 60 30 Z`,
+            d: `M 0 0 L ${W - 120} 0 L ${W - 120} 30 L 0 30 Z`,
             fill: "#3b3a2a",
             stroke: "#1f1a14",
             strokeWidth: 1.4,
           },
         },
-        // Deck centerline
         {
-          at: { x: 0, y: deckY + 15 },
+          at: { x: 60, y: deckY + 15 },
           mark: "polyline",
           polyline: {
             points: [
-              [60, 0],
-              [W - 60, 0],
+              [0, 0],
+              [W - 120, 0],
             ],
             fill: "none",
             stroke: "#fde68a",
-            strokeWidth: 1,
-            strokeDasharray: "12 8",
+            strokeWidth: 1.2,
+            strokeDasharray: "16 12",
           },
         },
-        // Annotation: cable
         {
           at: { x: 0, y: 0 },
           mark: "annotation-leader",
           annotation: {
-            from: [W / 2, minCableY - 2],
-            to: [W / 2 + 80, 240],
-            text: "main cable · parabolic sag",
+            from: [W / 2, minCableY],
+            to: [W / 2 + 120, 280],
+            text: "parabolic main cable",
             italic: true,
             anchor: "start",
           },
         },
-        // Annotation: tower
         {
           at: { x: 0, y: 0 },
           mark: "annotation-leader",
           annotation: {
-            from: [tower2X, towerTopY],
-            to: [tower2X + 90, 90],
-            text: "tower (~ 230 m)",
+            from: [tower2X + 28, towerTopY + 18],
+            to: [tower2X + 110, 130],
+            text: "tower · 227 m",
             italic: true,
             anchor: "start",
           },
         },
-        // Caption
         {
-          at: { x: W / 2, y: 565 },
+          at: { x: W / 2, y: 670 },
           mark: "text",
           textMark: {
-            text: "two towers, one parabola, a road suspended in mid-air",
+            text: "two towers, a parabola, a road suspended in mid-air",
             fontSize: 14,
-            fill: "#4a3f30",
+            fill: "#fef3c7",
             italic: true,
             anchor: "middle",
           },
@@ -1056,26 +1211,55 @@ function buildBridge() {
 // ENG — Steam locomotive
 // ───────────────────────────────────────────────────────────────────────────
 function buildLocomotive() {
-  const W = 1200;
-  const H = 600;
+  const W = 1300;
+  const H = 620;
 
-  const trackY = 480;
+  const trackY = 500;
   const bodyY = 280;
+  const wheelY = trackY - 8;
 
-  // Wheels: three big drivers + one small leading wheel
   const wheels = [
-    { x: 280, r: 60, teeth: 24 }, // leading
-    { x: 470, r: 80, teeth: 28 }, // driver 1
-    { x: 660, r: 80, teeth: 28 }, // driver 2
-    { x: 850, r: 80, teeth: 28 }, // driver 3
+    { x: 320, r: 38, isDriver: false },
+    { x: 460, r: 60, isDriver: true },
+    { x: 620, r: 60, isDriver: true },
+    { x: 780, r: 60, isDriver: true },
   ];
+
+  const buildWheelSpokes = (r) => {
+    const spokes = [];
+    for (let k = 0; k < 8; k++) {
+      const a = (Math.PI * k) / 4;
+      const x1 = round(8 * Math.cos(a));
+      const y1 = round(8 * Math.sin(a));
+      const x2 = round((r - 4) * Math.cos(a));
+      const y2 = round((r - 4) * Math.sin(a));
+      spokes.push(`M ${x1} ${y1} L ${x2} ${y2}`);
+    }
+    return spokes.join(" ");
+  };
+
+  const smokePuffs = [];
+  for (let i = 0; i < 7; i++) {
+    const t = i / 6;
+    const px = 480 + i * 50 - i * i * 4 + (i % 2) * 8;
+    const py = 130 - i * 22 - t * 12;
+    const pr = 36 + i * 4 + (i % 3) * 8;
+    smokePuffs.push({
+      at: { x: round(px), y: round(py) },
+      mark: "circle",
+      circle: { radius: pr, fill: "url(#g-smoke)" },
+    });
+  }
+
+  const hillsD =
+    "M 0 380 L 80 320 L 160 350 L 240 290 L 350 320 L 480 280 L 600 310 L 740 290 L 880 320 L 1020 285 L 1170 310 L 1300 290 L 1300 460 L 0 460 Z";
 
   return {
     compose: {
       viewBox: { width: W, height: H },
       title: "Steam locomotive — fire on wheels",
       description:
-        "Stevenson's Rocket (1829) → Mallard (1938, world speed record 203 km/h). Coal in the firebox boils water in the boiler; steam expands through the cylinders; connecting rods turn the drivers; the whole thing rolls on steel rails.",
+        "Stevenson's Rocket (1829) → Mallard (1938, 203 km/h). Coal in the firebox boils water in the boiler; steam expands through cylinders; connecting rods turn the drivers; the whole thing rolls on steel rails.",
       theme: { preset: "pencil-parchment" },
       defs: {
         gradients: [
@@ -1099,26 +1283,49 @@ function buildLocomotive() {
             x2: "0%",
             y2: "100%",
             stops: [
-              { offset: "0%", color: "#1f1a14", opacity: 1 },
-              { offset: "60%", color: "#3a3a2a", opacity: 1 },
-              { offset: "100%", color: "#1f1a14", opacity: 1 },
+              { offset: "0%", color: "#0a0a0a", opacity: 1 },
+              { offset: "50%", color: "#3a3a2a", opacity: 1 },
+              { offset: "100%", color: "#0a0a0a", opacity: 1 },
             ],
           },
           {
             id: "g-smoke",
             kind: "radial",
+            cx: "40%",
+            cy: "40%",
+            r: "60%",
+            stops: [
+              { offset: "0%", color: "#e2e8f0", opacity: 0.85 },
+              { offset: "60%", color: "#94a3b8", opacity: 0.5 },
+              { offset: "100%", color: "#94a3b8", opacity: 0 },
+            ],
+          },
+          {
+            id: "g-wheel",
+            kind: "radial",
             cx: "50%",
             cy: "50%",
             r: "50%",
             stops: [
-              { offset: "0%", color: "#94a3b8", opacity: 0.8 },
-              { offset: "100%", color: "#94a3b8", opacity: 0 },
+              { offset: "0%", color: "#1f1a14", opacity: 1 },
+              { offset: "100%", color: "#0a0a0a", opacity: 1 },
+            ],
+          },
+          {
+            id: "g-cab",
+            kind: "linear",
+            x1: "0%",
+            y1: "0%",
+            x2: "0%",
+            y2: "100%",
+            stops: [
+              { offset: "0%", color: "#dc2626", opacity: 1 },
+              { offset: "100%", color: "#7c2d12", opacity: 1 },
             ],
           },
         ],
       },
       children: [
-        // Sky
         {
           at: { x: 0, y: 0 },
           mark: "silhouette-path",
@@ -1128,161 +1335,190 @@ function buildLocomotive() {
             stroke: "none",
           },
         },
-        // Ground (gravel band below track)
-        {
-          at: { x: 0, y: trackY + 16 },
-          mark: "silhouette-path",
-          silhouettePath: {
-            d: `M 0 0 L ${W} 0 L ${W} ${H - trackY - 16} L 0 ${H - trackY - 16} Z`,
-            fill: "#a3b18a",
-            stroke: "none",
-          },
-        },
-        // Far hills (silhouette)
         {
           at: { x: 0, y: 0 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: "M 0 380 L 120 320 L 220 360 L 340 290 L 480 340 L 620 300 L 760 350 L 880 305 L 1020 345 L 1200 320 L 1200 460 L 0 460 Z",
-            fill: "rgba(107,138,74,.4)",
+            d: hillsD,
+            fill: "rgba(107,138,74,.35)",
             stroke: "none",
           },
         },
-        // Smoke (5 cloud-like puffs above the stack)
-        ...[0, 1, 2, 3, 4].map((i) => ({
-          at: { x: 360 + i * 50 - i * i * 8, y: 130 - i * 25 },
-          mark: "circle",
-          circle: { radius: 35 + i * 6, fill: "url(#g-smoke)" },
-        })),
-        // Boiler (main horizontal cylinder)
         {
-          at: { x: 360, y: bodyY },
+          at: { x: 0, y: trackY + 18 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: "M 0 0 L 540 0 L 540 110 L 0 110 Z",
+            d: `M 0 0 L ${W} 0 L ${W} ${H - trackY - 18} L 0 ${H - trackY - 18} Z`,
+            fill: "#a3b18a",
+            stroke: "none",
+          },
+        },
+        ...smokePuffs,
+        {
+          at: { x: 340, y: bodyY },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: "M 0 0 L 560 0 L 560 120 L 0 120 Z",
             fill: "url(#g-boiler)",
             stroke: "#1f1a14",
             strokeWidth: 2,
           },
         },
-        // Boiler bands (3 horizontal stripes)
-        ...[15, 55, 95].map((dy) => ({
-          at: { x: 360, y: bodyY + dy },
+        ...[20, 50, 80, 110].map((dy) => ({
+          at: { x: 340, y: bodyY + dy },
           mark: "polyline",
           polyline: {
             points: [
               [0, 0],
-              [540, 0],
+              [560, 0],
             ],
             fill: "none",
             stroke: "#fde68a",
             strokeWidth: 1.4,
           },
         })),
-        // Boiler front (round face)
         {
-          at: { x: 350, y: bodyY + 55 },
+          at: { x: 330, y: bodyY + 60 },
           mark: "circle",
-          circle: { radius: 60, fill: "#1f1a14", stroke: "#fde68a", strokeWidth: 2 },
+          circle: { radius: 68, fill: "#1f1a14", stroke: "#fde68a", strokeWidth: 2.5 },
         },
-        // Headlight
         {
-          at: { x: 300, y: bodyY + 55 },
+          at: { x: 330, y: bodyY + 60 },
           mark: "circle",
-          circle: { radius: 16, fill: "#fde68a", stroke: "#1f1a14", strokeWidth: 1.5 },
+          circle: { radius: 50, fill: "none", stroke: "#fde68a", strokeWidth: 1.4 },
         },
-        // Smoke stack
         {
-          at: { x: 410, y: bodyY - 60 },
+          at: { x: 280, y: bodyY + 60 },
+          mark: "circle",
+          circle: { radius: 18, fill: "#fef3c7", stroke: "#1f1a14", strokeWidth: 1.5 },
+        },
+        {
+          at: { x: 280, y: bodyY + 60 },
+          mark: "circle",
+          circle: { radius: 10, fill: "#fde68a" },
+        },
+        {
+          at: { x: 0, y: 0 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: "M 0 0 L 60 0 L 70 60 L -10 60 Z",
+            d: `M 260 ${trackY - 10} L 330 ${bodyY + 110} L 330 ${trackY - 10} Z`,
+            fill: "#1f1a14",
+            stroke: "#fde68a",
+            strokeWidth: 1.4,
+          },
+        },
+        {
+          at: { x: 420, y: bodyY - 65 },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: "M 0 0 L 60 0 L 70 65 L -10 65 Z",
             fill: "#1f1a14",
             stroke: "#fde68a",
             strokeWidth: 1.5,
           },
         },
-        // Steam dome (small dome on top of boiler)
         {
           at: { x: 580, y: bodyY - 20 },
           mark: "ellipse",
-          ellipse: { rx: 30, ry: 22, fill: "#1f1a14", stroke: "#fde68a", strokeWidth: 1.5 },
+          ellipse: { rx: 32, ry: 22, fill: "#1f1a14", stroke: "#fde68a", strokeWidth: 1.5 },
         },
-        // Whistle
         {
-          at: { x: 640, y: bodyY - 10 },
+          at: { x: 650, y: bodyY - 8 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: "M 0 0 L 6 0 L 6 -20 L 0 -20 Z",
+            d: "M 0 0 L 8 0 L 8 -22 L 0 -22 Z",
             fill: "#fde68a",
             stroke: "#1f1a14",
             strokeWidth: 1,
           },
         },
-        // Cab (driver compartment) — at rear
         {
-          at: { x: 750, y: bodyY - 80 },
+          at: { x: 900, y: bodyY - 90 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: "M 0 0 L 150 0 L 150 200 L 0 200 Z",
-            fill: "#7c2d12",
+            d: "M 0 0 L 160 0 L 160 210 L 0 210 Z",
+            fill: "url(#g-cab)",
             stroke: "#1f1a14",
             strokeWidth: 2,
           },
         },
-        // Cab roof overhang
         {
-          at: { x: 740, y: bodyY - 85 },
+          at: { x: 888, y: bodyY - 95 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: "M 0 0 L 170 0 L 170 10 L 0 10 Z",
+            d: "M 0 0 L 184 0 L 184 10 L 0 10 Z",
             fill: "#1f1a14",
-            stroke: "#1f1a14",
-            strokeWidth: 1,
+            stroke: "none",
           },
         },
-        // Cab window
         {
-          at: { x: 770, y: bodyY - 60 },
+          at: { x: 920, y: bodyY - 70 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: "M 0 0 L 50 0 L 50 50 L 0 50 Z",
-            fill: "#fde68a",
+            d: "M 0 0 L 60 0 L 60 55 L 0 55 Z",
+            fill: "#fef3c7",
             stroke: "#1f1a14",
             strokeWidth: 1.4,
           },
         },
-        // Connecting rod (links the 3 drivers)
         {
-          at: { x: 0, y: trackY - 8 },
+          at: { x: 1060, y: bodyY - 20 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: "M 470 0 L 850 0",
+            d: "M 0 0 L 180 0 L 180 140 L 0 140 Z",
+            fill: "#3a2a14",
+            stroke: "#1f1a14",
+            strokeWidth: 2,
+          },
+        },
+        {
+          at: { x: 1070, y: bodyY - 30 },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: "M 0 0 L 160 0 L 160 12 L 80 5 L 0 12 Z",
+            fill: "#0a0a0a",
+            stroke: "#1f1a14",
+            strokeWidth: 1,
+          },
+        },
+        {
+          at: { x: 0, y: 0 },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: `M ${wheels[1].x} ${wheelY} L ${wheels[3].x} ${wheelY}`,
             fill: "none",
             stroke: "#fde68a",
-            strokeWidth: 5,
+            strokeWidth: 6,
             strokeLinecap: "round",
           },
         },
-        // Wheels (gear marks for the spoked-wheel look) with rotation
         ...wheels.map((w) => ({
-          at: { x: w.x, y: trackY - 8 },
-          mark: "gear",
-          gear: {
-            radius: w.r,
-            teeth: w.teeth,
-            toothLength: 4,
-            hubRadius: 8,
-          },
-          animation: { kind: "rotate-loop", periodMs: 4000, direction: "cw" },
-        })),
-        // Wheel pin (on each driver, attached to connecting rod)
-        ...wheels.slice(1).map((w) => ({
-          at: { x: w.x, y: trackY - 8 },
+          at: { x: w.x, y: wheelY },
           mark: "circle",
-          circle: { radius: 6, fill: "#1f1a14", stroke: "#fde68a", strokeWidth: 1 },
+          circle: {
+            radius: w.r,
+            fill: "url(#g-wheel)",
+            stroke: "#fde68a",
+            strokeWidth: 2.5,
+          },
+          animation: { kind: "rotate-loop", periodMs: 3500, direction: "cw" },
         })),
-        // Rails (two)
+        ...wheels.map((w) => ({
+          at: { x: w.x, y: wheelY },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: buildWheelSpokes(w.r),
+            fill: "none",
+            stroke: "#fde68a",
+            strokeWidth: 2.2,
+          },
+          animation: { kind: "rotate-loop", periodMs: 3500, direction: "cw" },
+        })),
+        ...wheels.map((w) => ({
+          at: { x: w.x, y: wheelY },
+          mark: "circle",
+          circle: { radius: 6, fill: "#fde68a", stroke: "#1f1a14", strokeWidth: 1 },
+        })),
         {
           at: { x: 0, y: trackY },
           mark: "polyline",
@@ -1293,11 +1529,11 @@ function buildLocomotive() {
             ],
             fill: "none",
             stroke: "#1f1a14",
-            strokeWidth: 3,
+            strokeWidth: 3.5,
           },
         },
         {
-          at: { x: 0, y: trackY + 4 },
+          at: { x: 0, y: trackY + 6 },
           mark: "polyline",
           polyline: {
             points: [
@@ -1306,25 +1542,14 @@ function buildLocomotive() {
             ],
             fill: "none",
             stroke: "#1f1a14",
-            strokeWidth: 3,
+            strokeWidth: 3.5,
           },
         },
-        // Ties (railroad sleepers) — every 80 px
-        ...Array.from({ length: 15 }, (_, i) => ({
-          at: { x: 40 + i * 80, y: trackY + 10 },
-          mark: "silhouette-path",
-          silhouettePath: {
-            d: "M 0 0 L 50 0 L 50 8 L 0 8 Z",
-            fill: "#3a2a14",
-            stroke: "none",
-          },
-        })),
-        // Caption
         {
-          at: { x: W / 2, y: 560 },
+          at: { x: W / 2, y: 580 },
           mark: "text",
           textMark: {
-            text: "fire → boiling water → expanding steam → turning wheels → 200 km/h",
+            text: "coal → steam → connecting rods → 200 km/h on steel",
             fontSize: 14,
             fill: "#4a3f30",
             italic: true,
@@ -1340,25 +1565,24 @@ function buildLocomotive() {
 // ENG — Radio waves broadcasting
 // ───────────────────────────────────────────────────────────────────────────
 function buildRadio() {
-  const W = 800;
-  const H = 800;
+  const W = 900;
+  const H = 850;
   const towerX = W / 2;
-  const towerBaseY = 700;
+  const towerBaseY = 720;
   const towerTopY = 280;
-  const antennaTipY = 200;
+  const antennaTipY = 180;
 
-  // Tower silhouette (a lattice triangle)
-  const towerD = `M ${towerX - 70} ${towerBaseY} L ${towerX + 70} ${towerBaseY} L ${towerX + 10} ${towerTopY} L ${towerX - 10} ${towerTopY} Z`;
-  // Lattice crossbars
+  const towerD = `M ${towerX - 80} ${towerBaseY} L ${towerX + 80} ${towerBaseY} L ${towerX + 12} ${towerTopY} L ${towerX - 12} ${towerTopY} Z`;
+
   const crossBars = [];
-  const latticeSteps = 16;
+  const latticeSteps = 12;
   for (let i = 0; i < latticeSteps; i++) {
     const t1 = i / latticeSteps;
     const t2 = (i + 1) / latticeSteps;
-    const x1L = towerX - 70 + t1 * 60;
-    const x1R = towerX + 70 - t1 * 60;
-    const x2L = towerX - 70 + t2 * 60;
-    const x2R = towerX + 70 - t2 * 60;
+    const x1L = towerX - 80 + t1 * 68;
+    const x1R = towerX + 80 - t1 * 68;
+    const x2L = towerX - 80 + t2 * 68;
+    const x2R = towerX + 80 - t2 * 68;
     const y1 = towerBaseY + t1 * (towerTopY - towerBaseY);
     const y2 = towerBaseY + t2 * (towerTopY - towerBaseY);
     crossBars.push({
@@ -1371,8 +1595,7 @@ function buildRadio() {
         ],
         fill: "none",
         stroke: "#fde68a",
-        strokeWidth: 1,
-        strokeDasharray: "",
+        strokeWidth: 0.8,
       },
     });
     crossBars.push({
@@ -1385,41 +1608,40 @@ function buildRadio() {
         ],
         fill: "none",
         stroke: "#fde68a",
-        strokeWidth: 1,
+        strokeWidth: 0.8,
       },
     });
   }
 
-  // Antenna (single line from tower top to tip)
   const antennaPath = `M ${towerX} ${towerTopY} L ${towerX} ${antennaTipY}`;
 
-  // Radio waves — 6 concentric ellipses emanating from the antenna tip,
-  // each with decreasing opacity. We use ellipses to suggest horizontal
-  // ground-wave dominance.
   const waves = [];
-  for (let i = 1; i <= 7; i++) {
-    const r = 60 * i;
+  for (let i = 1; i <= 9; i++) {
+    const r = 50 * i;
     waves.push({
       at: { x: towerX, y: antennaTipY },
       mark: "ellipse",
       ellipse: {
         rx: r,
-        ry: r * 0.55,
+        ry: r * 0.5,
         fill: "none",
         stroke: "#fde68a",
-        strokeWidth: 1.4,
-        opacity: 0.7 - i * 0.08,
+        strokeWidth: 1.8,
+        opacity: 0.85 - i * 0.07,
       },
-      animation: { kind: "pulse", periodMs: 3000 + i * 200, scale: 1.05 },
+      animation: { kind: "pulse", periodMs: 3000 + i * 180, scale: 1.06 },
     });
   }
+
+  const cityD =
+    "M 0 100 L 30 100 L 30 60 L 60 60 L 60 90 L 100 90 L 100 50 L 140 50 L 140 80 L 180 80 L 180 70 L 220 70 L 220 95 L 260 95 L 260 60 L 300 60 L 300 75 L 340 75 L 340 90 L 380 90 L 380 100 L 0 100 Z";
 
   return {
     compose: {
       viewBox: { width: W, height: H },
       title: "Radio waves — invisible voices",
       description:
-        "Marconi, 1901 — the first wireless transatlantic signal. A single antenna driven by an oscillator radiates electromagnetic waves at the speed of light in all directions. Every radio, every wifi router, every cell tower is a refinement of this one trick.",
+        "Marconi, 1901. A single antenna driven by an oscillator radiates electromagnetic waves at the speed of light in all directions. Every radio, every wifi router, every cell tower is a refinement of this one trick.",
       theme: { background: "#020617", foreground: "#fef3c7" },
       defs: {
         gradients: [
@@ -1427,11 +1649,11 @@ function buildRadio() {
             id: "g-bg",
             kind: "radial",
             cx: "50%",
-            cy: "50%",
-            r: "80%",
+            cy: "30%",
+            r: "85%",
             stops: [
-              { offset: "0%", color: "#0c1e3a", opacity: 1 },
-              { offset: "60%", color: "#04102a", opacity: 1 },
+              { offset: "0%", color: "#1e1b4b", opacity: 1 },
+              { offset: "60%", color: "#0c1e3a", opacity: 1 },
               { offset: "100%", color: "#020617", opacity: 1 },
             ],
           },
@@ -1446,10 +1668,33 @@ function buildRadio() {
               { offset: "100%", color: "#fde68a", opacity: 0 },
             ],
           },
+          {
+            id: "g-tower",
+            kind: "linear",
+            x1: "0%",
+            y1: "0%",
+            x2: "0%",
+            y2: "100%",
+            stops: [
+              { offset: "0%", color: "#3a3a2a", opacity: 0.85 },
+              { offset: "100%", color: "#1f1a14", opacity: 0.85 },
+            ],
+          },
+          {
+            id: "g-horizon",
+            kind: "linear",
+            x1: "0%",
+            y1: "0%",
+            x2: "0%",
+            y2: "100%",
+            stops: [
+              { offset: "0%", color: "#0c1e3a", opacity: 0.85 },
+              { offset: "100%", color: "#020617", opacity: 1 },
+            ],
+          },
         ],
       },
       children: [
-        // Background
         {
           at: { x: 0, y: 0 },
           mark: "silhouette-path",
@@ -1459,44 +1704,42 @@ function buildRadio() {
             stroke: "none",
           },
         },
-        // Starfield
         {
           at: { x: 0, y: 0 },
           mark: "starfield",
-          starfield: { count: 100, seed: 31, region: { x: 0, y: 0, w: W, h: H } },
+          starfield: { count: 90, seed: 31, region: { x: 0, y: 0, w: W, h: H * 0.7 } },
         },
-        // Ground horizon
         {
-          at: { x: 0, y: towerBaseY },
+          at: { x: 0, y: towerBaseY - 40 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: `M 0 0 L ${W} 0 L ${W} ${H - towerBaseY} L 0 ${H - towerBaseY} Z`,
-            fill: "rgba(15, 23, 42, 0.85)",
+            d: cityD,
+            fill: "url(#g-horizon)",
             stroke: "none",
           },
         },
-        // Radio waves (drawn first so tower is on top)
+        ...[120, 280, 460, 660].map((dx) => ({
+          at: { x: dx, y: 690 },
+          mark: "circle",
+          circle: { radius: 2.4, fill: "#fde68a", stroke: "#fbbf24", strokeWidth: 0.6 },
+        })),
         ...waves,
-        // Glow at tip
         {
           at: { x: towerX, y: antennaTipY },
           mark: "glow",
-          glow: { radius: 50, gradientId: "g-tip" },
+          glow: { radius: 60, gradientId: "g-tip" },
         },
-        // Tower silhouette
         {
           at: { x: 0, y: 0 },
           mark: "silhouette-path",
           silhouettePath: {
             d: towerD,
-            fill: "rgba(15, 23, 42, 0.4)",
+            fill: "url(#g-tower)",
             stroke: "#fde68a",
             strokeWidth: 1.5,
           },
         },
-        // Lattice cross-bars
         ...crossBars,
-        // Antenna
         {
           at: { x: 0, y: 0 },
           mark: "silhouette-path",
@@ -1507,13 +1750,11 @@ function buildRadio() {
             strokeWidth: 2.5,
           },
         },
-        // Antenna tip bulb
         {
           at: { x: towerX, y: antennaTipY },
           mark: "circle",
-          circle: { radius: 6, fill: "#fde68a", stroke: "#fbbf24", strokeWidth: 1 },
+          circle: { radius: 7, fill: "#fde68a", stroke: "#fbbf24", strokeWidth: 1 },
         },
-        // Label
         {
           at: { x: towerX, y: 90 },
           mark: "text",
@@ -1525,12 +1766,11 @@ function buildRadio() {
             anchor: "middle",
           },
         },
-        // Caption
         {
-          at: { x: towerX, y: 765 },
+          at: { x: towerX, y: 815 },
           mark: "text",
           textMark: {
-            text: "electromagnetic waves · speed of light · receives everywhere within range",
+            text: "electromagnetic waves · speed of light · the city listens",
             fontSize: 13,
             fill: "#94a3b8",
             italic: true,
@@ -1543,51 +1783,59 @@ function buildRadio() {
 }
 
 // ───────────────────────────────────────────────────────────────────────────
-// ARCH — Greek temple (Doric)
+// ARCH — Greek temple
 // ───────────────────────────────────────────────────────────────────────────
 function buildTemple() {
-  const W = 1000;
+  const W = 1100;
   const H = 700;
-  const groundY = 590;
+  const groundY = 600;
   const colCount = 6;
-  const colWidth = 50;
-  const colSpacing = 130;
-  const colTopY = 280;
-  const colBaseY = groundY - 20;
+  const colSpacing = 140;
+  const colTopY = 230;
+  const colBaseY = groundY - 30;
+  const colHalfBase = 28;
+  const colHalfTop = 22;
+  const colMidBulge = 4;
 
-  // 6 columns evenly spaced
+  const h = colBaseY - colTopY;
+  const colBodyD = [
+    `M ${-colHalfTop} 0`,
+    `L ${colHalfTop} 0`,
+    `Q ${colHalfBase + colMidBulge} ${h / 2}, ${colHalfBase} ${h}`,
+    `L ${-colHalfBase} ${h}`,
+    `Q ${-colHalfBase - colMidBulge} ${h / 2}, ${-colHalfTop} 0`,
+    "Z",
+  ].join(" ");
+
   const colStartX = W / 2 - ((colCount - 1) / 2) * colSpacing;
   const columns = [];
   for (let i = 0; i < colCount; i++) {
-    const cx = colStartX + i * colSpacing;
-    // Doric column has fluting — draw vertical lines on the column body
+    const colX = colStartX + i * colSpacing;
     columns.push({
-      at: { x: cx, y: colTopY },
+      at: { x: colX, y: colTopY },
       mark: "silhouette-path",
       silhouettePath: {
-        d: `M ${-colWidth / 2} 0 L ${colWidth / 2} 0 L ${colWidth / 2 + 4} ${colBaseY - colTopY} L ${-colWidth / 2 - 4} ${colBaseY - colTopY} Z`,
+        d: colBodyD,
         fill: "url(#p-flute)",
         stroke: "#3a3a2a",
         strokeWidth: 1.4,
       },
     });
-    // Column capital (Doric: simple flat cap)
     columns.push({
-      at: { x: cx, y: colTopY - 18 },
+      at: { x: colX, y: colTopY - 14 },
       mark: "silhouette-path",
       silhouettePath: {
-        d: `M ${-colWidth / 2 - 8} 0 L ${colWidth / 2 + 8} 0 L ${colWidth / 2 + 12} 12 L ${-colWidth / 2 - 12} 12 Z M ${-colWidth / 2 - 12} 12 L ${colWidth / 2 + 12} 12 L ${colWidth / 2 + 12} 18 L ${-colWidth / 2 - 12} 18 Z`,
+        d: `M ${-colHalfTop} 14 L ${-colHalfTop - 4} 8 Q ${-colHalfTop - 8} 0, ${-colHalfTop - 6} -2 L ${colHalfTop + 6} -2 Q ${colHalfTop + 8} 0, ${colHalfTop + 4} 8 L ${colHalfTop} 14 Z`,
         fill: "#fefce8",
         stroke: "#3a3a2a",
         strokeWidth: 1.4,
       },
     });
-    // Column base
     columns.push({
-      at: { x: cx, y: colBaseY - 6 },
+      at: { x: colX, y: colTopY - 26 },
       mark: "silhouette-path",
       silhouettePath: {
-        d: `M ${-colWidth / 2 - 8} 0 L ${colWidth / 2 + 8} 0 L ${colWidth / 2 + 8} 6 L ${-colWidth / 2 - 8} 6 Z`,
+        d: `M ${-colHalfTop - 14} 0 L ${colHalfTop + 14} 0 L ${colHalfTop + 14} 12 L ${-colHalfTop - 14} 12 Z`,
         fill: "#fefce8",
         stroke: "#3a3a2a",
         strokeWidth: 1.4,
@@ -1595,36 +1843,32 @@ function buildTemple() {
     });
   }
 
-  // Pediment triangle
-  const pedimentLeft = colStartX - colWidth / 2 - 30;
-  const pedimentRight = colStartX + (colCount - 1) * colSpacing + colWidth / 2 + 30;
-  const pedimentBase = 180;
-  const pedimentApex = 80;
+  const pedimentLeft = colStartX - colHalfBase - 30;
+  const pedimentRight = colStartX + (colCount - 1) * colSpacing + colHalfBase + 30;
+  const pedimentBaseY = colTopY - 70;
+  const pedimentApexY = 100;
 
-  // Triglyphs and metopes on the entablature
-  const entYTop = colTopY - 60;
-  const entYBot = colTopY - 28;
+  const friezeYTop = colTopY - 60;
   const triglyphs = [];
   for (let i = 0; i < colCount; i++) {
-    const cx = colStartX + i * colSpacing;
+    const colX = colStartX + i * colSpacing;
     triglyphs.push({
-      at: { x: cx - 8, y: entYTop + 6 },
+      at: { x: colX - 10, y: friezeYTop + 4 },
       mark: "silhouette-path",
       silhouettePath: {
-        d: "M 0 0 L 16 0 L 16 26 L 0 26 Z",
+        d: "M 0 0 L 20 0 L 20 28 L 0 28 Z",
         fill: "#fefce8",
         stroke: "#3a3a2a",
         strokeWidth: 1,
       },
     });
-    // Vertical lines on triglyph
     triglyphs.push({
-      at: { x: cx, y: entYTop + 6 },
+      at: { x: colX, y: friezeYTop + 4 },
       mark: "polyline",
       polyline: {
         points: [
           [0, 0],
-          [0, 26],
+          [0, 28],
         ],
         fill: "none",
         stroke: "#3a3a2a",
@@ -1638,7 +1882,7 @@ function buildTemple() {
       viewBox: { width: W, height: H },
       title: "A Greek temple — order in stone",
       description:
-        "Doric order, the oldest of the classical Greek styles. Six columns front the cella; their proportion (height : diameter ≈ 5:1) and the triglyph-metope frieze date this to ~500 BCE. The Parthenon's blueprint, scaled down.",
+        "Doric order, ~500 BCE. Six fluted columns with entasis stand on a stylobate; a triglyph-metope frieze runs across the entablature; a pediment caps the front. Height:diameter ≈ 5:1 — the Parthenon's blueprint.",
       theme: { preset: "pencil-parchment" },
       defs: {
         gradients: [
@@ -1651,7 +1895,7 @@ function buildTemple() {
             y2: "100%",
             stops: [
               { offset: "0%", color: "#7dd3fc", opacity: 1 },
-              { offset: "60%", color: "#fde9b0", opacity: 1 },
+              { offset: "55%", color: "#fde9b0", opacity: 1 },
               { offset: "100%", color: "#ebe1c4", opacity: 1 },
             ],
           },
@@ -1671,29 +1915,28 @@ function buildTemple() {
         patterns: [
           {
             id: "p-flute",
-            width: 8,
+            width: 7,
             height: 8,
             children: [
               { kind: "line", x1: 0, y1: 0, x2: 0, y2: 8, stroke: "#3a3a2a", strokeWidth: 0.5 },
-              { kind: "line", x1: 4, y1: 0, x2: 4, y2: 8, stroke: "#3a3a2a", strokeWidth: 0.3 },
+              { kind: "line", x1: 3.5, y1: 0, x2: 3.5, y2: 8, stroke: "#3a3a2a", strokeWidth: 0.3 },
             ],
           },
           {
             id: "p-marble",
-            width: 60,
+            width: 80,
             height: 30,
             children: [
-              { kind: "line", x1: 0, y1: 0, x2: 60, y2: 0, stroke: "#3a3a2a", strokeWidth: 0.3 },
-              { kind: "line", x1: 0, y1: 15, x2: 60, y2: 15, stroke: "#3a3a2a", strokeWidth: 0.3 },
-              { kind: "line", x1: 30, y1: 0, x2: 30, y2: 15, stroke: "#3a3a2a", strokeWidth: 0.3 },
+              { kind: "line", x1: 0, y1: 0, x2: 80, y2: 0, stroke: "#3a3a2a", strokeWidth: 0.3 },
+              { kind: "line", x1: 0, y1: 15, x2: 80, y2: 15, stroke: "#3a3a2a", strokeWidth: 0.3 },
+              { kind: "line", x1: 40, y1: 0, x2: 40, y2: 15, stroke: "#3a3a2a", strokeWidth: 0.3 },
               { kind: "line", x1: 0, y1: 15, x2: 0, y2: 30, stroke: "#3a3a2a", strokeWidth: 0.3 },
-              { kind: "line", x1: 60, y1: 15, x2: 60, y2: 30, stroke: "#3a3a2a", strokeWidth: 0.3 },
+              { kind: "line", x1: 80, y1: 15, x2: 80, y2: 30, stroke: "#3a3a2a", strokeWidth: 0.3 },
             ],
           },
         ],
       },
       children: [
-        // Sky
         {
           at: { x: 0, y: 0 },
           mark: "silhouette-path",
@@ -1703,7 +1946,6 @@ function buildTemple() {
             stroke: "none",
           },
         },
-        // Ground
         {
           at: { x: 0, y: groundY },
           mark: "silhouette-path",
@@ -1713,33 +1955,39 @@ function buildTemple() {
             stroke: "none",
           },
         },
-        // Stylobate (the temple base, marble-pattern filled)
         {
           at: { x: pedimentLeft - 20, y: colBaseY },
           mark: "silhouette-path",
           silhouettePath: {
-            d: `M 0 0 L ${pedimentRight - pedimentLeft + 40} 0 L ${pedimentRight - pedimentLeft + 30} 30 L 10 30 Z`,
+            d: `M 0 0 L ${pedimentRight - pedimentLeft + 40} 0 L ${pedimentRight - pedimentLeft + 30} 14 L 10 14 Z`,
             fill: "url(#p-marble)",
             stroke: "#3a3a2a",
             strokeWidth: 2,
           },
         },
-        // Stylobate steps
         {
-          at: { x: pedimentLeft - 30, y: colBaseY + 30 },
+          at: { x: pedimentLeft - 30, y: colBaseY + 14 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: `M 0 0 L ${pedimentRight - pedimentLeft + 60} 0 L ${pedimentRight - pedimentLeft + 50} 20 L 10 20 Z`,
+            d: `M 0 0 L ${pedimentRight - pedimentLeft + 60} 0 L ${pedimentRight - pedimentLeft + 50} 14 L 10 14 Z`,
             fill: "url(#p-marble)",
             stroke: "#3a3a2a",
             strokeWidth: 2,
           },
         },
-        // Columns
-        ...columns,
-        // Architrave (the horizontal beam ON the columns)
         {
-          at: { x: pedimentLeft, y: colTopY - 28 },
+          at: { x: pedimentLeft - 40, y: colBaseY + 28 },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: `M 0 0 L ${pedimentRight - pedimentLeft + 80} 0 L ${pedimentRight - pedimentLeft + 70} 14 L 10 14 Z`,
+            fill: "url(#p-marble)",
+            stroke: "#3a3a2a",
+            strokeWidth: 2,
+          },
+        },
+        ...columns,
+        {
+          at: { x: pedimentLeft, y: colTopY - 38 },
           mark: "silhouette-path",
           silhouettePath: {
             d: `M 0 0 L ${pedimentRight - pedimentLeft} 0 L ${pedimentRight - pedimentLeft} 12 L 0 12 Z`,
@@ -1748,78 +1996,77 @@ function buildTemple() {
             strokeWidth: 2,
           },
         },
-        // Frieze area background
         {
-          at: { x: pedimentLeft, y: colTopY - 60 },
+          at: { x: pedimentLeft, y: friezeYTop },
           mark: "silhouette-path",
           silhouettePath: {
-            d: `M 0 0 L ${pedimentRight - pedimentLeft} 0 L ${pedimentRight - pedimentLeft} 32 L 0 32 Z`,
+            d: `M 0 0 L ${pedimentRight - pedimentLeft} 0 L ${pedimentRight - pedimentLeft} 36 L 0 36 Z`,
             fill: "#fefce8",
             stroke: "#3a3a2a",
             strokeWidth: 2,
           },
         },
-        // Triglyphs
         ...triglyphs,
-        // Cornice (horizontal band above frieze)
         {
-          at: { x: pedimentLeft - 10, y: colTopY - 80 },
+          at: { x: pedimentLeft - 10, y: pedimentBaseY },
           mark: "silhouette-path",
           silhouettePath: {
-            d: `M 0 0 L ${pedimentRight - pedimentLeft + 20} 0 L ${pedimentRight - pedimentLeft + 20} 14 L 0 14 Z`,
+            d: `M 0 0 L ${pedimentRight - pedimentLeft + 20} 0 L ${pedimentRight - pedimentLeft + 20} 12 L 0 12 Z`,
             fill: "url(#p-marble)",
             stroke: "#3a3a2a",
             strokeWidth: 2,
           },
         },
-        // Pediment (triangular gable)
         {
           at: { x: 0, y: 0 },
           mark: "polygon",
           polygon: {
             points: [
-              [pedimentLeft - 10, colTopY - 80],
-              [pedimentRight + 10, colTopY - 80],
-              [W / 2, pedimentApex],
+              [pedimentLeft - 10, pedimentBaseY],
+              [pedimentRight + 10, pedimentBaseY],
+              [W / 2, pedimentApexY],
             ],
             fill: "url(#p-marble)",
             stroke: "#3a3a2a",
             strokeWidth: 2,
           },
         },
-        // Akroterion (decorative finial atop pediment)
         {
-          at: { x: W / 2, y: pedimentApex - 24 },
-          mark: "polygon",
-          polygon: {
-            points: [
-              [-10, 24],
-              [0, 0],
-              [10, 24],
-            ],
+          at: { x: W / 2, y: pedimentBaseY - 35 },
+          mark: "ellipse",
+          ellipse: { rx: 14, ry: 11, fill: "#3a3a2a" },
+        },
+        ...[-50, 50].map((dx) => ({
+          at: { x: W / 2 + dx, y: pedimentBaseY - 22 },
+          mark: "ellipse",
+          ellipse: { rx: 10, ry: 8, fill: "#3a3a2a" },
+        })),
+        {
+          at: { x: W / 2, y: pedimentApexY - 20 },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: "M -8 20 Q -4 0, 0 -12 Q 4 0, 8 20 Z",
             fill: "#fefce8",
             stroke: "#3a3a2a",
             strokeWidth: 1.4,
           },
         },
-        // Title
         {
-          at: { x: W / 2, y: 60 },
+          at: { x: W / 2, y: 65 },
           mark: "text",
           textMark: {
             text: "Templum Doricum",
-            fontSize: 20,
+            fontSize: 22,
             fill: "#1f1a14",
             italic: true,
             anchor: "middle",
           },
         },
-        // Caption
         {
           at: { x: W / 2, y: 670 },
           mark: "text",
           textMark: {
-            text: "stylobate · column · architrave · frieze · cornice · pediment",
+            text: "stylobate · entasis · echinus · abacus · architrave · frieze · pediment",
             fontSize: 13,
             fill: "#4a3f30",
             italic: true,
@@ -1836,31 +2083,26 @@ function buildTemple() {
 // ───────────────────────────────────────────────────────────────────────────
 function buildCathedral() {
   const W = 800;
-  const H = 1000;
-  const groundY = 900;
+  const H = 1050;
+  const groundY = 950;
 
-  // Central nave (wider lower body) + towers on each side rising higher
-  const naveX0 = 240;
-  const naveX1 = 560;
-  const naveTopY = 460;
-  const towerX0L = 130; // outer-left tower
-  const towerX1L = 230;
-  const towerX0R = 570;
-  const towerX1R = 670;
-  const towerTopY = 200;
-  const spireBaseY = 200;
-  const spireTipY = 40;
+  const naveX0 = 220;
+  const naveX1 = 580;
+  const naveTopY = 480;
+  const towerX0L = 110;
+  const towerX1L = 220;
+  const towerX0R = 580;
+  const towerX1R = 690;
+  const towerTopY = 240;
+  const spireBaseY = 240;
+  const spireTipY = 60;
+  const centralSpireBaseY = 280;
+  const centralSpireTipY = 30;
 
-  // Central spire (tallest, above the nave's gable)
-  const centralSpireBaseY = naveTopY - 20;
-  const centralSpireTipY = 60;
-
-  // Rose window position
   const roseCx = W / 2;
-  const roseCy = 580;
-  const roseR = 75;
+  const roseCy = 600;
+  const roseR = 80;
 
-  // Rose window rays (12 spokes)
   const roseRays = [];
   for (let i = 0; i < 12; i++) {
     const a = (2 * Math.PI * i) / 12;
@@ -1874,32 +2116,30 @@ function buildCathedral() {
         ],
         fill: "none",
         stroke: "#3a2a14",
-        strokeWidth: 1.5,
+        strokeWidth: 1.6,
       },
     });
   }
 
-  // Smaller arched windows on the nave (3 tall pointed arches at lower facade)
-  const lowerArches = [];
+  const naveArches = [];
   for (let i = 0; i < 3; i++) {
     const ax = 320 + i * 80;
-    lowerArches.push({
-      at: { x: ax, y: 830 },
+    naveArches.push({
+      at: { x: ax, y: 860 },
       mark: "silhouette-path",
       silhouettePath: {
-        d: "M -22 0 L -22 -100 Q -22 -135, 0 -135 Q 22 -135, 22 -100 L 22 0 Z",
+        d: "M -22 0 L -22 -110 Q -22 -145, 0 -145 Q 22 -145, 22 -110 L 22 0 Z",
         fill: "#1f1a14",
         stroke: "#3a2a14",
         strokeWidth: 1.5,
       },
     });
-    // Tracery: vertical mullion
-    lowerArches.push({
-      at: { x: ax, y: 830 },
+    naveArches.push({
+      at: { x: ax, y: 860 },
       mark: "polyline",
       polyline: {
         points: [
-          [0, -125],
+          [0, -135],
           [0, 0],
         ],
         fill: "none",
@@ -1909,26 +2149,24 @@ function buildCathedral() {
     });
   }
 
-  // Tower lancet windows (one tall pointed arch per tower)
-  const towerWindows = [];
+  const towerDetails = [];
   for (const [tx0, tx1] of [
     [towerX0L, towerX1L],
     [towerX0R, towerX1R],
   ]) {
     const mid = (tx0 + tx1) / 2;
-    towerWindows.push({
-      at: { x: mid, y: 700 },
+    towerDetails.push({
+      at: { x: mid, y: 770 },
       mark: "silhouette-path",
       silhouettePath: {
-        d: "M -16 0 L -16 -70 Q -16 -95, 0 -95 Q 16 -95, 16 -70 L 16 0 Z",
+        d: "M -18 0 L -18 -90 Q -18 -120, 0 -120 Q 18 -120, 18 -90 L 18 0 Z",
         fill: "#1f1a14",
         stroke: "#3a2a14",
         strokeWidth: 1.2,
       },
     });
-    // Small round window above each lancet
-    towerWindows.push({
-      at: { x: mid, y: 550 },
+    towerDetails.push({
+      at: { x: mid, y: 580 },
       mark: "circle",
       circle: {
         radius: 16,
@@ -1937,7 +2175,6 @@ function buildCathedral() {
         strokeWidth: 1.4,
       },
     });
-    // Pinnacle (small spire) at top of each tower (drawn after main spire)
   }
 
   return {
@@ -1945,7 +2182,7 @@ function buildCathedral() {
       viewBox: { width: W, height: H },
       title: "A Gothic cathedral — light through stone",
       description:
-        "Pointed arches let the cathedral go higher than Romanesque round arches ever could. The rose window — a wheel of stained glass radiating from a central oculus — became the calling card of 12th–15th century Europe. Notre-Dame, Chartres, Reims, Cologne.",
+        "Notre-Dame, Chartres, Reims, Cologne. The pointed arch lets the cathedral reach for sky in a way the Romanesque round arch never could. The rose window — a wheel of stained glass — became the calling card of 12th–15th century Europe.",
       theme: { preset: "pencil-parchment" },
       defs: {
         gradients: [
@@ -1991,7 +2228,6 @@ function buildCathedral() {
         ],
       },
       children: [
-        // Dawn sky
         {
           at: { x: 0, y: 0 },
           mark: "silhouette-path",
@@ -2001,7 +2237,6 @@ function buildCathedral() {
             stroke: "none",
           },
         },
-        // Ground
         {
           at: { x: 0, y: groundY },
           mark: "silhouette-path",
@@ -2011,18 +2246,16 @@ function buildCathedral() {
             stroke: "none",
           },
         },
-        // Nave body (wider middle section between the two towers)
         {
           at: { x: 0, y: 0 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: `M ${naveX0} ${groundY} L ${naveX0} ${naveTopY + 60} L ${naveX0 + 30} ${naveTopY + 30} L ${W / 2} ${naveTopY - 10} L ${naveX1 - 30} ${naveTopY + 30} L ${naveX1} ${naveTopY + 60} L ${naveX1} ${groundY} Z`,
+            d: `M ${naveX0} ${groundY} L ${naveX0} ${naveTopY + 60} L ${naveX0 + 20} ${naveTopY + 20} L ${W / 2} ${naveTopY - 30} L ${naveX1 - 20} ${naveTopY + 20} L ${naveX1} ${naveTopY + 60} L ${naveX1} ${groundY} Z`,
             fill: "url(#g-stone)",
             stroke: "#3a2a14",
             strokeWidth: 2.2,
           },
         },
-        // Left tower (rectangular block rising higher than nave)
         {
           at: { x: 0, y: 0 },
           mark: "silhouette-path",
@@ -2033,7 +2266,6 @@ function buildCathedral() {
             strokeWidth: 2.2,
           },
         },
-        // Right tower
         {
           at: { x: 0, y: 0 },
           mark: "silhouette-path",
@@ -2044,8 +2276,7 @@ function buildCathedral() {
             strokeWidth: 2.2,
           },
         },
-        // Tower string-course bands (2 horizontal stone lines per tower)
-        ...[450, 730].flatMap((y) =>
+        ...[490, 800].flatMap((y) =>
           [
             [towerX0L, towerX1L],
             [towerX0R, towerX1R],
@@ -2059,85 +2290,88 @@ function buildCathedral() {
               ],
               fill: "none",
               stroke: "#3a2a14",
-              strokeWidth: 0.8,
+              strokeWidth: 1,
             },
           })),
         ),
-        // Left tower spire (sharp pointed roof)
         {
           at: { x: 0, y: 0 },
           mark: "polygon",
           polygon: {
             points: [
-              [towerX0L - 8, spireBaseY],
-              [towerX1L + 8, spireBaseY],
+              [towerX0L - 12, spireBaseY],
+              [towerX1L + 12, spireBaseY],
               [(towerX0L + towerX1L) / 2, spireTipY],
             ],
-            fill: "#5a2d12",
-            stroke: "#3a2a14",
+            fill: "#3a4a2a",
+            stroke: "#1f1a14",
             strokeWidth: 2,
           },
         },
-        // Right tower spire
         {
           at: { x: 0, y: 0 },
           mark: "polygon",
           polygon: {
             points: [
-              [towerX0R - 8, spireBaseY],
-              [towerX1R + 8, spireBaseY],
+              [towerX0R - 12, spireBaseY],
+              [towerX1R + 12, spireBaseY],
               [(towerX0R + towerX1R) / 2, spireTipY],
             ],
-            fill: "#5a2d12",
-            stroke: "#3a2a14",
+            fill: "#3a4a2a",
+            stroke: "#1f1a14",
             strokeWidth: 2,
           },
         },
-        // Cross at top of each tower spire
         ...[(towerX0L + towerX1L) / 2, (towerX0R + towerX1R) / 2].map((cx) => ({
           at: { x: cx, y: spireTipY - 4 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: "M 0 0 L 0 -16 M -6 -10 L 6 -10",
+            d: "M 0 0 L 0 -18 M -7 -12 L 7 -12",
             fill: "none",
             stroke: "#3a2a14",
-            strokeWidth: 1.6,
+            strokeWidth: 1.8,
           },
         })),
-        // Central tallest spire (above the nave's gable)
         {
           at: { x: 0, y: 0 },
           mark: "polygon",
           polygon: {
             points: [
-              [W / 2 - 28, centralSpireBaseY],
-              [W / 2 + 28, centralSpireBaseY],
+              [W / 2 - 26, centralSpireBaseY],
+              [W / 2 + 26, centralSpireBaseY],
               [W / 2, centralSpireTipY],
             ],
-            fill: "#5a2d12",
-            stroke: "#3a2a14",
+            fill: "#3a4a2a",
+            stroke: "#1f1a14",
             strokeWidth: 2,
           },
         },
-        // Cross at top of central spire
         {
           at: { x: W / 2, y: centralSpireTipY - 6 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: "M 0 0 L 0 -22 M -8 -14 L 8 -14",
+            d: "M 0 0 L 0 -24 M -9 -16 L 9 -16",
             fill: "none",
             stroke: "#3a2a14",
             strokeWidth: 2,
           },
         },
-        // Tower windows
-        ...towerWindows,
-        // Rose window (drawn in layers)
+        ...towerDetails,
+        {
+          at: { x: W / 2, y: roseCy },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: `M ${-roseR - 25} ${roseR + 50} L ${-roseR - 25} -10 Q ${-roseR - 25} ${-roseR - 60}, 0 ${-roseR - 70} Q ${roseR + 25} ${-roseR - 60}, ${roseR + 25} -10 L ${roseR + 25} ${roseR + 50} Z`,
+            fill: "rgba(31,26,20,.2)",
+            stroke: "#3a2a14",
+            strokeWidth: 1.4,
+          },
+        },
         {
           at: { x: roseCx, y: roseCy },
           mark: "circle",
           circle: {
-            radius: roseR + 6,
+            radius: roseR + 8,
             fill: "#3a2a14",
             stroke: "#fefce8",
             strokeWidth: 2,
@@ -2148,89 +2382,54 @@ function buildCathedral() {
           mark: "circle",
           circle: { radius: roseR, fill: "url(#g-rose)" },
         },
-        // Rose window rays
         ...roseRays,
-        // Central rose hub
         {
           at: { x: roseCx, y: roseCy },
           mark: "circle",
-          circle: { radius: 15, fill: "#fef3c7", stroke: "#3a2a14", strokeWidth: 1.5 },
+          circle: {
+            radius: 16,
+            fill: "#fef3c7",
+            stroke: "#3a2a14",
+            strokeWidth: 1.5,
+          },
         },
-        // Outer rose-ring decorative dots (12 small circles around the perimeter)
-        ...Array.from({ length: 12 }, (_, i) => {
-          const a = (2 * Math.PI * i) / 12;
-          return {
-            at: {
-              x: roseCx + round((roseR + 14) * Math.cos(a)),
-              y: roseCy + round((roseR + 14) * Math.sin(a)),
-            },
-            mark: "circle",
-            circle: { radius: 3, fill: "#fef3c7", stroke: "#3a2a14", strokeWidth: 0.8 },
-          };
-        }),
-        // Lower pointed-arch windows on the nave
-        ...lowerArches,
-        // Central main doorway (large pointed arch)
+        ...naveArches,
         {
           at: { x: W / 2, y: groundY },
           mark: "silhouette-path",
           silhouettePath: {
-            d: "M -60 0 L -60 -120 Q -60 -160, 0 -160 Q 60 -160, 60 -120 L 60 0 Z",
+            d: "M -65 0 L -65 -130 Q -65 -180, 0 -180 Q 65 -180, 65 -130 L 65 0 Z",
             fill: "#3a2a14",
             stroke: "#1f1a14",
-            strokeWidth: 2,
+            strokeWidth: 2.2,
           },
         },
-        // Doorway concentric arch ribs (Gothic detail)
         {
-          at: { x: W / 2, y: groundY - 4 },
-          mark: "silhouette-path",
-          silhouettePath: {
-            d: "M -68 0 Q -68 -170, 0 -170 Q 68 -170, 68 0",
-            fill: "none",
-            stroke: "#3a2a14",
-            strokeWidth: 1.4,
-          },
-        },
-        // Doorway rivets
-        ...[-32, 0, 32].map((dx) => ({
-          at: { x: W / 2 + dx, y: groundY - 60 },
-          mark: "circle",
-          circle: { radius: 3, fill: "#fde68a", stroke: "#3a2a14", strokeWidth: 0.5 },
-        })),
-        // Buttresses on the sides of the nave (small triangular supports)
-        ...[
-          [naveX0 - 30, groundY],
-          [naveX1 + 30, groundY],
-        ].map(([bx, by]) => ({
-          at: { x: bx, y: by },
-          mark: "polygon",
-          polygon: {
+          at: { x: W / 2, y: groundY - 2 },
+          mark: "polyline",
+          polyline: {
             points: [
-              [-20, 0],
-              [0, -120],
-              [20, 0],
+              [0, -178],
+              [0, 0],
             ],
-            fill: "url(#g-stone)",
-            stroke: "#3a2a14",
-            strokeWidth: 1.6,
+            fill: "none",
+            stroke: "#fefce8",
+            strokeWidth: 1.2,
           },
-        })),
-        // Title
+        },
         {
-          at: { x: W / 2, y: 70 },
+          at: { x: W / 2, y: 80 },
           mark: "text",
           textMark: {
             text: "Ecclesia Cathedralis · Gothic order",
-            fontSize: 16,
+            fontSize: 18,
             fill: "#1f1a14",
             italic: true,
             anchor: "middle",
           },
         },
-        // Caption
         {
-          at: { x: W / 2, y: 960 },
+          at: { x: W / 2, y: 1010 },
           mark: "text",
           textMark: {
             text: "pointed arch · flying buttress · rose window · light + stone",
@@ -2249,14 +2448,12 @@ function buildCathedral() {
 // ARCH — Modern skyscraper
 // ───────────────────────────────────────────────────────────────────────────
 function buildSkyscraper() {
-  const W = 800;
-  const H = 1000;
-  const groundY = 940;
-  const towerX0 = 280;
-  const towerX1 = 520;
+  const W = 900;
+  const H = 1050;
+  const groundY = 980;
+  const towerX0 = 320;
+  const towerX1 = 580;
   const towerTopY = 80;
-
-  // Antenna mast on top
   const antennaTopY = 20;
 
   return {
@@ -2264,7 +2461,7 @@ function buildSkyscraper() {
       viewBox: { width: W, height: H },
       title: "A skyscraper at dusk — the city in one column",
       description:
-        "Modernist glass tower at last light. A steel skeleton sheathed in a curtain wall of windows. Sullivan's principle (1896): form follows function. Mies's gift (1958, Seagram Building): glass plus rhythm = the entire 20th century.",
+        "Modernist glass tower at last light. A steel skeleton sheathed in a curtain wall of windows. Sullivan, 1896: form follows function. Mies, 1958 (Seagram Building): glass plus rhythm = the 20th century.",
       theme: { background: "#0c1126", foreground: "#fef3c7" },
       defs: {
         gradients: [
@@ -2277,8 +2474,8 @@ function buildSkyscraper() {
             y2: "100%",
             stops: [
               { offset: "0%", color: "#1e3a8a", opacity: 1 },
-              { offset: "40%", color: "#7c2d12", opacity: 1 },
-              { offset: "70%", color: "#dc2626", opacity: 1 },
+              { offset: "35%", color: "#7c2d12", opacity: 1 },
+              { offset: "65%", color: "#dc2626", opacity: 1 },
               { offset: "100%", color: "#fed7aa", opacity: 1 },
             ],
           },
@@ -2303,7 +2500,7 @@ function buildSkyscraper() {
             x2: "100%",
             y2: "100%",
             stops: [
-              { offset: "0%", color: "#fbbf24", opacity: 0.45 },
+              { offset: "0%", color: "#fbbf24", opacity: 0.5 },
               { offset: "60%", color: "#dc2626", opacity: 0.15 },
               { offset: "100%", color: "#fbbf24", opacity: 0 },
             ],
@@ -2320,23 +2517,50 @@ function buildSkyscraper() {
               { offset: "100%", color: "#0c0a08", opacity: 1 },
             ],
           },
+          {
+            id: "g-moon",
+            kind: "radial",
+            cx: "50%",
+            cy: "50%",
+            r: "50%",
+            stops: [
+              { offset: "0%", color: "#fef9c3", opacity: 1 },
+              { offset: "100%", color: "#fde68a", opacity: 0.95 },
+            ],
+          },
         ],
         patterns: [
           {
             id: "p-windows",
-            width: 24,
-            height: 36,
+            width: 28,
+            height: 40,
             children: [
-              { kind: "rect", x: 4, y: 6, width: 7, height: 12, fill: "#fde68a" },
-              { kind: "rect", x: 13, y: 6, width: 7, height: 12, fill: "#fbbf24" },
-              { kind: "rect", x: 4, y: 22, width: 7, height: 12, fill: "rgba(253,230,138,.35)" },
-              { kind: "rect", x: 13, y: 22, width: 7, height: 12, fill: "#fde68a" },
+              { kind: "rect", x: 4, y: 6, width: 9, height: 14, fill: "#fde68a" },
+              { kind: "rect", x: 15, y: 6, width: 9, height: 14, fill: "#fbbf24" },
+              {
+                kind: "rect",
+                x: 4,
+                y: 24,
+                width: 9,
+                height: 14,
+                fill: "rgba(253,230,138,.35)",
+              },
+              { kind: "rect", x: 15, y: 24, width: 9, height: 14, fill: "#fde68a" },
+            ],
+          },
+          {
+            id: "p-adj-windows",
+            width: 18,
+            height: 24,
+            children: [
+              { kind: "rect", x: 3, y: 4, width: 5, height: 8, fill: "#fde68a" },
+              { kind: "rect", x: 10, y: 4, width: 5, height: 8, fill: "rgba(253,230,138,.4)" },
+              { kind: "rect", x: 3, y: 14, width: 5, height: 8, fill: "#fde68a" },
             ],
           },
         ],
       },
       children: [
-        // Dusk sky
         {
           at: { x: 0, y: 0 },
           mark: "silhouette-path",
@@ -2346,98 +2570,121 @@ function buildSkyscraper() {
             stroke: "none",
           },
         },
-        // Faint stars (smaller starfield)
+        {
+          at: { x: 740, y: 140 },
+          mark: "circle",
+          circle: {
+            radius: 38,
+            fill: "url(#g-moon)",
+            stroke: "rgba(254,243,199,.5)",
+            strokeWidth: 1,
+          },
+        },
+        ...[
+          [-8, -10, 4],
+          [10, -2, 3],
+          [-2, 12, 2.5],
+        ].map(([dx, dy, r]) => ({
+          at: { x: 740 + dx, y: 140 + dy },
+          mark: "circle",
+          circle: { radius: r, fill: "rgba(202,138,4,.25)" },
+        })),
         {
           at: { x: 0, y: 0 },
           mark: "starfield",
-          starfield: { count: 30, seed: 47, region: { x: 0, y: 0, w: W, h: 200 } },
+          starfield: { count: 35, seed: 47, region: { x: 0, y: 0, w: W, h: 250 } },
         },
-        // Adjacent shorter buildings (silhouettes)
         {
           at: { x: 0, y: 0 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: "M 0 600 L 70 600 L 70 940 L 0 940 Z M 70 660 L 170 660 L 170 940 L 70 940 Z M 580 580 L 660 580 L 660 940 L 580 940 Z M 660 700 L 760 700 L 760 940 L 660 940 Z M 760 640 L 800 640 L 800 940 L 760 940 Z",
+            d: "M 0 600 L 80 600 L 80 980 L 0 980 Z M 80 680 L 180 680 L 180 980 L 80 980 Z M 180 720 L 250 720 L 250 980 L 180 980 Z",
             fill: "#0c1126",
             stroke: "#1d2444",
             strokeWidth: 1,
           },
         },
-        // Side building windows (small grid)
         {
           at: { x: 0, y: 0 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: "M 0 600 L 70 600 L 70 940 L 0 940 Z M 70 660 L 170 660 L 170 940 L 70 940 Z M 580 580 L 660 580 L 660 940 L 580 940 Z M 660 700 L 760 700 L 760 940 L 660 940 Z M 760 640 L 800 640 L 800 940 L 760 940 Z",
-            fill: "url(#p-windows)",
+            d: "M 620 540 L 700 540 L 700 980 L 620 980 Z M 700 660 L 800 660 L 800 980 L 700 980 Z M 800 600 L 880 600 L 880 980 L 800 980 Z M 880 700 L 900 700 L 900 980 L 880 980 Z",
+            fill: "#0c1126",
+            stroke: "#1d2444",
+            strokeWidth: 1,
+          },
+        },
+        {
+          at: { x: 0, y: 0 },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: "M 0 600 L 80 600 L 80 980 L 0 980 Z M 80 680 L 180 680 L 180 980 L 80 980 Z M 180 720 L 250 720 L 250 980 L 180 980 Z M 620 540 L 700 540 L 700 980 L 620 980 Z M 700 660 L 800 660 L 800 980 L 700 980 Z M 800 600 L 880 600 L 880 980 L 800 980 Z M 880 700 L 900 700 L 900 980 L 880 980 Z",
+            fill: "url(#p-adj-windows)",
             stroke: "none",
             opacity: 0.55,
           },
         },
-        // Main tower
         {
           at: { x: 0, y: 0 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: `M ${towerX0} ${groundY} L ${towerX0} ${towerTopY} L ${towerX1} ${towerTopY} L ${towerX1} ${groundY} Z`,
+            d: `M ${towerX0} ${groundY} L ${towerX0} ${towerTopY + 70} L ${towerX0 + 30} ${towerTopY + 70} L ${towerX0 + 30} ${towerTopY} L ${towerX1 - 30} ${towerTopY} L ${towerX1 - 30} ${towerTopY + 70} L ${towerX1} ${towerTopY + 70} L ${towerX1} ${groundY} Z`,
             fill: "url(#g-tower)",
             stroke: "#0c4a6e",
             strokeWidth: 2,
           },
         },
-        // Window grid
         {
           at: { x: 0, y: 0 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: `M ${towerX0 + 8} ${towerTopY + 24} L ${towerX1 - 8} ${towerTopY + 24} L ${towerX1 - 8} ${groundY - 80} L ${towerX0 + 8} ${groundY - 80} Z`,
+            d: `M ${towerX0 + 12} ${towerTopY + 90} L ${towerX1 - 12} ${towerTopY + 90} L ${towerX1 - 12} ${groundY - 90} L ${towerX0 + 12} ${groundY - 90} Z`,
             fill: "url(#p-windows)",
             stroke: "none",
           },
         },
-        // Sunset reflection on the glass facade (a slanted band)
         {
           at: { x: 0, y: 0 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: `M ${towerX0 + 8} ${towerTopY + 24} L ${towerX1 - 8} ${towerTopY + 24} L ${towerX1 - 8} ${groundY - 80} L ${towerX0 + 8} ${groundY - 80} Z`,
+            d: `M ${towerX0 + 40} ${towerTopY + 10} L ${towerX1 - 40} ${towerTopY + 10} L ${towerX1 - 40} ${towerTopY + 65} L ${towerX0 + 40} ${towerTopY + 65} Z`,
+            fill: "url(#p-windows)",
+            stroke: "none",
+          },
+        },
+        {
+          at: { x: 0, y: 0 },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: `M ${towerX0 + 12} ${towerTopY + 90} L ${towerX1 - 12} ${towerTopY + 90} L ${towerX1 - 12} ${groundY - 90} L ${towerX0 + 12} ${groundY - 90} Z`,
             fill: "url(#g-reflect)",
             stroke: "none",
           },
         },
-        // Setback at top (Art-Deco-style)
-        {
-          at: { x: 0, y: 0 },
-          mark: "silhouette-path",
-          silhouettePath: {
-            d: `M ${towerX0 + 30} ${towerTopY - 60} L ${towerX1 - 30} ${towerTopY - 60} L ${towerX1 - 30} ${towerTopY} L ${towerX0 + 30} ${towerTopY} Z`,
-            fill: "#0c1e3a",
-            stroke: "#0c4a6e",
-            strokeWidth: 2,
-          },
-        },
-        // Antenna mast
         {
           at: { x: W / 2, y: antennaTopY },
           mark: "polyline",
           polyline: {
             points: [
               [0, 0],
-              [0, towerTopY - 60 - antennaTopY],
+              [0, towerTopY - antennaTopY],
             ],
             fill: "none",
             stroke: "#0c1126",
-            strokeWidth: 2.5,
+            strokeWidth: 3,
           },
         },
-        // Antenna tip warning light
         {
           at: { x: W / 2, y: antennaTopY + 4 },
           mark: "circle",
-          circle: { radius: 3, fill: "#dc2626", stroke: "#7c2d12", strokeWidth: 0.5 },
-          animation: { kind: "pulse", periodMs: 1500, scale: 1.4 },
+          circle: {
+            radius: 4,
+            fill: "#dc2626",
+            stroke: "#7c2d12",
+            strokeWidth: 0.5,
+          },
+          animation: { kind: "pulse", periodMs: 1500, scale: 1.5 },
         },
-        // Ground (street level)
         {
           at: { x: 0, y: groundY },
           mark: "silhouette-path",
@@ -2447,21 +2694,16 @@ function buildSkyscraper() {
             stroke: "none",
           },
         },
-        // Plaza horizontal line (sidewalk edge)
-        {
-          at: { x: 0, y: groundY + 5 },
-          mark: "polyline",
-          polyline: {
-            points: [
-              [0, 0],
-              [W, 0],
-            ],
-            fill: "none",
-            stroke: "#94a3b8",
-            strokeWidth: 0.5,
+        ...[140, 280, 440, 620, 760].map((dx) => ({
+          at: { x: dx, y: groundY + 22 },
+          mark: "circle",
+          circle: {
+            radius: 3,
+            fill: "#fef3c7",
+            stroke: "rgba(254,243,199,.4)",
+            strokeWidth: 4,
           },
-        },
-        // Title (top, in the sky)
+        })),
         {
           at: { x: W / 2, y: 36 },
           mark: "text",
@@ -2473,12 +2715,11 @@ function buildSkyscraper() {
             anchor: "middle",
           },
         },
-        // Caption
         {
-          at: { x: W / 2, y: 980 },
+          at: { x: W / 2, y: 1025 },
           mark: "text",
           textMark: {
-            text: "steel frame · curtain wall · 720 lit windows at dusk",
+            text: "steel frame · curtain wall · the city in one column",
             fontSize: 13,
             fill: "#fbbf24",
             italic: true,
@@ -2490,9 +2731,6 @@ function buildSkyscraper() {
   };
 }
 
-// ───────────────────────────────────────────────────────────────────────────
-// Write all nine
-// ───────────────────────────────────────────────────────────────────────────
 const fixtures = {
   "bio-neuron.json": buildNeuron(),
   "bio-butterfly.json": buildButterfly(),

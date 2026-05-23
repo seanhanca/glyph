@@ -1,11 +1,11 @@
 {
   "compose": {
     "viewBox": {
-      "width": 800,
+      "width": 900,
       "height": 600
     },
     "title": "An eye — the camera that learned to see",
-    "description": "Cross-section through a vertebrate eye: sclera (white), iris (the radial muscle that opens or closes the pupil), pupil (the aperture), and a catchlight reflecting whatever the eye is looking at.",
+    "description": "Cross-section through a vertebrate eye: sclera (white), iris (the radial muscle that opens or closes the pupil), pupil (the aperture), catchlight (the reflection that makes the eye look alive).",
     "theme": {
       "background": "#1a0f0a",
       "foreground": "#fef3c7"
@@ -17,7 +17,7 @@
           "kind": "radial",
           "cx": "50%",
           "cy": "50%",
-          "r": "60%",
+          "r": "65%",
           "stops": [
             {
               "offset": "0%",
@@ -25,7 +25,7 @@
               "opacity": 1
             },
             {
-              "offset": "60%",
+              "offset": "55%",
               "color": "#d97706",
               "opacity": 1
             },
@@ -49,7 +49,7 @@
               "opacity": 0.95
             },
             {
-              "offset": "60%",
+              "offset": "55%",
               "color": "#0284c7",
               "opacity": 0.95
             },
@@ -74,7 +74,7 @@
             },
             {
               "offset": "100%",
-              "color": "#082f49",
+              "color": "#0a2e44",
               "opacity": 1
             }
           ]
@@ -88,7 +88,7 @@
           "stops": [
             {
               "offset": "0%",
-              "color": "#fef3c7",
+              "color": "#fef9c3",
               "opacity": 1
             },
             {
@@ -113,8 +113,33 @@
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 0 0 L 800 0 L 800 600 L 0 600 Z",
+          "d": "M 0 0 L 900 0 L 900 600 L 0 600 Z",
           "fill": "url(#g-skin)",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 125
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -180 0 Q -90 -30, 20 -22 Q 130 -14, 200 8 Q 130 -6, 20 -10 Q -90 -14, -180 12 Z",
+          "fill": "#3a2a14",
+          "stroke": "#1f1a14",
+          "strokeWidth": 0.8
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 210 300 Q 450 125, 690 300 Q 450 475, 210 300 Z",
+          "fill": "rgba(31,26,20,.35)",
           "stroke": "none"
         }
       },
@@ -125,31 +150,57 @@
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 180 300 Q 400 140, 620 300 Q 400 460, 180 300 Z",
+          "d": "M 220 300 Q 450 130, 680 300 Q 450 470, 220 300 Z",
           "fill": "url(#g-sclera)",
           "stroke": "#3a2a14",
-          "strokeWidth": 2
+          "strokeWidth": 2.2
         }
       },
       {
         "at": {
-          "x": 400,
+          "x": 300,
+          "y": 330
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 Q 20 -15, 40 -10 Q 60 -5, 80 5",
+          "fill": "none",
+          "stroke": "rgba(180,30,30,.4)",
+          "strokeWidth": 0.8
+        }
+      },
+      {
+        "at": {
+          "x": 550,
+          "y": 340
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 Q 30 -20, 70 -5",
+          "fill": "none",
+          "stroke": "rgba(180,30,30,.35)",
+          "strokeWidth": 0.7
+        }
+      },
+      {
+        "at": {
+          "x": 450,
           "y": 300
         },
         "mark": "circle",
         "circle": {
-          "radius": 130,
+          "radius": 138,
           "fill": "url(#g-iris-base)"
         }
       },
       {
         "at": {
-          "x": 400,
+          "x": 450,
           "y": 300
         },
         "mark": "polyline",
         "polyline": {
-          "points": [[50, 0], [130, 0]],
+          "points": [[52, 0], [138, 0]],
           "fill": "none",
           "stroke": "url(#g-iris)",
           "strokeWidth": 1.1
@@ -157,585 +208,641 @@
       },
       {
         "at": {
-          "x": 400,
+          "x": 450,
           "y": 300
         },
         "mark": "polyline",
         "polyline": {
-          "points": [[49.24, 8.68], [124.09, 21.88]],
+          "points": [[51, 10.14], [130.93, 26.04]],
           "fill": "none",
           "stroke": "url(#g-iris)",
-          "strokeWidth": 1.1
+          "strokeWidth": 1.3
         }
       },
       {
         "at": {
-          "x": 400,
+          "x": 450,
           "y": 300
         },
         "mark": "polyline",
         "polyline": {
-          "points": [[46.98, 17.1], [114.64, 41.73]],
+          "points": [[48.04, 19.9], [119.18, 49.37]],
           "fill": "none",
           "stroke": "url(#g-iris)",
-          "strokeWidth": 1.1
-        }
-      },
-      {
-        "at": {
-          "x": 400,
-          "y": 300
-        },
-        "mark": "polyline",
-        "polyline": {
-          "points": [[43.3, 25], [112.58, 65]],
-          "fill": "none",
-          "stroke": "url(#g-iris)",
-          "strokeWidth": 1.1
-        }
-      },
-      {
-        "at": {
-          "x": 400,
-          "y": 300
-        },
-        "mark": "polyline",
-        "polyline": {
-          "points": [[38.3, 32.14], [96.52, 80.99]],
-          "fill": "none",
-          "stroke": "url(#g-iris)",
-          "strokeWidth": 1.1
-        }
-      },
-      {
-        "at": {
-          "x": 400,
-          "y": 300
-        },
-        "mark": "polyline",
-        "polyline": {
-          "points": [[32.14, 38.3], [78.42, 93.46]],
-          "fill": "none",
-          "stroke": "url(#g-iris)",
-          "strokeWidth": 1.1
-        }
-      },
-      {
-        "at": {
-          "x": 400,
-          "y": 300
-        },
-        "mark": "polyline",
-        "polyline": {
-          "points": [[25, 43.3], [65, 112.58]],
-          "fill": "none",
-          "stroke": "url(#g-iris)",
-          "strokeWidth": 1.1
-        }
-      },
-      {
-        "at": {
-          "x": 400,
-          "y": 300
-        },
-        "mark": "polyline",
-        "polyline": {
-          "points": [[17.1, 46.98], [43.09, 118.4]],
-          "fill": "none",
-          "stroke": "url(#g-iris)",
-          "strokeWidth": 1.1
-        }
-      },
-      {
-        "at": {
-          "x": 400,
-          "y": 300
-        },
-        "mark": "polyline",
-        "polyline": {
-          "points": [[8.68, 49.24], [21.19, 120.15]],
-          "fill": "none",
-          "stroke": "url(#g-iris)",
-          "strokeWidth": 1.1
-        }
-      },
-      {
-        "at": {
-          "x": 400,
-          "y": 300
-        },
-        "mark": "polyline",
-        "polyline": {
-          "points": [[0, 50], [0, 130]],
-          "fill": "none",
-          "stroke": "url(#g-iris)",
-          "strokeWidth": 1.1
-        }
-      },
-      {
-        "at": {
-          "x": 400,
-          "y": 300
-        },
-        "mark": "polyline",
-        "polyline": {
-          "points": [[-8.68, 49.24], [-21.88, 124.09]],
-          "fill": "none",
-          "stroke": "url(#g-iris)",
-          "strokeWidth": 1.1
-        }
-      },
-      {
-        "at": {
-          "x": 400,
-          "y": 300
-        },
-        "mark": "polyline",
-        "polyline": {
-          "points": [[-17.1, 46.98], [-41.73, 114.64]],
-          "fill": "none",
-          "stroke": "url(#g-iris)",
-          "strokeWidth": 1.1
-        }
-      },
-      {
-        "at": {
-          "x": 400,
-          "y": 300
-        },
-        "mark": "polyline",
-        "polyline": {
-          "points": [[-25, 43.3], [-65, 112.58]],
-          "fill": "none",
-          "stroke": "url(#g-iris)",
-          "strokeWidth": 1.1
-        }
-      },
-      {
-        "at": {
-          "x": 400,
-          "y": 300
-        },
-        "mark": "polyline",
-        "polyline": {
-          "points": [[-32.14, 38.3], [-80.99, 96.52]],
-          "fill": "none",
-          "stroke": "url(#g-iris)",
-          "strokeWidth": 1.1
-        }
-      },
-      {
-        "at": {
-          "x": 400,
-          "y": 300
-        },
-        "mark": "polyline",
-        "polyline": {
-          "points": [[-38.3, 32.14], [-93.46, 78.42]],
-          "fill": "none",
-          "stroke": "url(#g-iris)",
-          "strokeWidth": 1.1
-        }
-      },
-      {
-        "at": {
-          "x": 400,
-          "y": 300
-        },
-        "mark": "polyline",
-        "polyline": {
-          "points": [[-43.3, 25], [-112.58, 65]],
-          "fill": "none",
-          "stroke": "url(#g-iris)",
-          "strokeWidth": 1.1
-        }
-      },
-      {
-        "at": {
-          "x": 400,
-          "y": 300
-        },
-        "mark": "polyline",
-        "polyline": {
-          "points": [[-46.98, 17.1], [-118.4, 43.09]],
-          "fill": "none",
-          "stroke": "url(#g-iris)",
-          "strokeWidth": 1.1
-        }
-      },
-      {
-        "at": {
-          "x": 400,
-          "y": 300
-        },
-        "mark": "polyline",
-        "polyline": {
-          "points": [[-49.24, 8.68], [-120.15, 21.19]],
-          "fill": "none",
-          "stroke": "url(#g-iris)",
-          "strokeWidth": 1.1
-        }
-      },
-      {
-        "at": {
-          "x": 400,
-          "y": 300
-        },
-        "mark": "polyline",
-        "polyline": {
-          "points": [[-50, 0], [-130, 0]],
-          "fill": "none",
-          "stroke": "url(#g-iris)",
-          "strokeWidth": 1.1
-        }
-      },
-      {
-        "at": {
-          "x": 400,
-          "y": 300
-        },
-        "mark": "polyline",
-        "polyline": {
-          "points": [[-49.24, -8.68], [-124.09, -21.88]],
-          "fill": "none",
-          "stroke": "url(#g-iris)",
-          "strokeWidth": 1.1
-        }
-      },
-      {
-        "at": {
-          "x": 400,
-          "y": 300
-        },
-        "mark": "polyline",
-        "polyline": {
-          "points": [[-46.98, -17.1], [-114.64, -41.73]],
-          "fill": "none",
-          "stroke": "url(#g-iris)",
-          "strokeWidth": 1.1
-        }
-      },
-      {
-        "at": {
-          "x": 400,
-          "y": 300
-        },
-        "mark": "polyline",
-        "polyline": {
-          "points": [[-43.3, -25], [-112.58, -65]],
-          "fill": "none",
-          "stroke": "url(#g-iris)",
-          "strokeWidth": 1.1
-        }
-      },
-      {
-        "at": {
-          "x": 400,
-          "y": 300
-        },
-        "mark": "polyline",
-        "polyline": {
-          "points": [[-38.3, -32.14], [-96.52, -80.99]],
-          "fill": "none",
-          "stroke": "url(#g-iris)",
-          "strokeWidth": 1.1
-        }
-      },
-      {
-        "at": {
-          "x": 400,
-          "y": 300
-        },
-        "mark": "polyline",
-        "polyline": {
-          "points": [[-32.14, -38.3], [-78.42, -93.46]],
-          "fill": "none",
-          "stroke": "url(#g-iris)",
-          "strokeWidth": 1.1
-        }
-      },
-      {
-        "at": {
-          "x": 400,
-          "y": 300
-        },
-        "mark": "polyline",
-        "polyline": {
-          "points": [[-25, -43.3], [-65, -112.58]],
-          "fill": "none",
-          "stroke": "url(#g-iris)",
-          "strokeWidth": 1.1
-        }
-      },
-      {
-        "at": {
-          "x": 400,
-          "y": 300
-        },
-        "mark": "polyline",
-        "polyline": {
-          "points": [[-17.1, -46.98], [-43.09, -118.4]],
-          "fill": "none",
-          "stroke": "url(#g-iris)",
-          "strokeWidth": 1.1
-        }
-      },
-      {
-        "at": {
-          "x": 400,
-          "y": 300
-        },
-        "mark": "polyline",
-        "polyline": {
-          "points": [[-8.68, -49.24], [-21.19, -120.15]],
-          "fill": "none",
-          "stroke": "url(#g-iris)",
-          "strokeWidth": 1.1
-        }
-      },
-      {
-        "at": {
-          "x": 400,
-          "y": 300
-        },
-        "mark": "polyline",
-        "polyline": {
-          "points": [[0, -50], [0, -130]],
-          "fill": "none",
-          "stroke": "url(#g-iris)",
-          "strokeWidth": 1.1
-        }
-      },
-      {
-        "at": {
-          "x": 400,
-          "y": 300
-        },
-        "mark": "polyline",
-        "polyline": {
-          "points": [[8.68, -49.24], [21.88, -124.09]],
-          "fill": "none",
-          "stroke": "url(#g-iris)",
-          "strokeWidth": 1.1
-        }
-      },
-      {
-        "at": {
-          "x": 400,
-          "y": 300
-        },
-        "mark": "polyline",
-        "polyline": {
-          "points": [[17.1, -46.98], [41.73, -114.64]],
-          "fill": "none",
-          "stroke": "url(#g-iris)",
-          "strokeWidth": 1.1
-        }
-      },
-      {
-        "at": {
-          "x": 400,
-          "y": 300
-        },
-        "mark": "polyline",
-        "polyline": {
-          "points": [[25, -43.3], [65, -112.58]],
-          "fill": "none",
-          "stroke": "url(#g-iris)",
-          "strokeWidth": 1.1
-        }
-      },
-      {
-        "at": {
-          "x": 400,
-          "y": 300
-        },
-        "mark": "polyline",
-        "polyline": {
-          "points": [[32.14, -38.3], [80.99, -96.52]],
-          "fill": "none",
-          "stroke": "url(#g-iris)",
-          "strokeWidth": 1.1
-        }
-      },
-      {
-        "at": {
-          "x": 400,
-          "y": 300
-        },
-        "mark": "polyline",
-        "polyline": {
-          "points": [[38.3, -32.14], [93.46, -78.42]],
-          "fill": "none",
-          "stroke": "url(#g-iris)",
-          "strokeWidth": 1.1
-        }
-      },
-      {
-        "at": {
-          "x": 400,
-          "y": 300
-        },
-        "mark": "polyline",
-        "polyline": {
-          "points": [[43.3, -25], [112.58, -65]],
-          "fill": "none",
-          "stroke": "url(#g-iris)",
-          "strokeWidth": 1.1
-        }
-      },
-      {
-        "at": {
-          "x": 400,
-          "y": 300
-        },
-        "mark": "polyline",
-        "polyline": {
-          "points": [[46.98, -17.1], [118.4, -43.09]],
-          "fill": "none",
-          "stroke": "url(#g-iris)",
-          "strokeWidth": 1.1
-        }
-      },
-      {
-        "at": {
-          "x": 400,
-          "y": 300
-        },
-        "mark": "polyline",
-        "polyline": {
-          "points": [[49.24, -8.68], [120.15, -21.19]],
-          "fill": "none",
-          "stroke": "url(#g-iris)",
-          "strokeWidth": 1.1
-        }
-      },
-      {
-        "at": {
-          "x": 400,
-          "y": 300
-        },
-        "mark": "circle",
-        "circle": {
-          "radius": 130,
-          "fill": "none",
-          "stroke": "#1f1a14",
           "strokeWidth": 1.5
         }
       },
       {
         "at": {
-          "x": 400,
+          "x": 450,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[43.24, 28.89], [103.52, 69.17]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[36.77, 36.77], [93.34, 93.34]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.3
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[28.89, 43.24], [70.84, 106.01]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[19.9, 48.04], [47.07, 113.64]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[10.14, 51], [25.17, 126.52]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.3
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 52], [0, 136.5]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-10.14, 51], [-25.75, 129.46]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-19.9, 48.04], [-48.79, 117.79]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.3
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-28.89, 43.24], [-68.34, 102.27]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-36.77, 36.77], [-92.28, 92.28]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-43.24, 28.89], [-104.77, 70]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.3
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-48.04, 19.9], [-121.95, 50.51]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-51, 10.14], [-125.05, 24.87]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-52, 0], [-135, 0]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.3
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-51, -10.14], [-127.99, -25.46]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-48.04, -19.9], [-116.41, -48.22]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-43.24, -28.89], [-101.02, -67.5]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.3
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-36.77, -36.77], [-91.22, -91.22]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-28.89, -43.24], [-75, -112.25]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-19.9, -48.04], [-49.94, -120.57]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.3
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-10.14, -51], [-24.58, -123.58]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, -52], [0, -133.5]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[10.14, -51], [25.17, -126.52]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.3
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[19.9, -48.04], [47.64, -115.02]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[28.89, -43.24], [66.67, -99.78]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[36.77, -36.77], [97.58, -97.58]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.3
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[43.24, -28.89], [111, -74.17]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[48.04, -19.9], [119.18, -49.37]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[51, -10.14], [122.11, -24.29]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.3
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 300
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 138,
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 2
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 300
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 50,
+          "fill": "none",
+          "stroke": "rgba(2,6,23,.6)",
+          "strokeWidth": 1.2
+        }
+      },
+      {
+        "at": {
+          "x": 450,
           "y": 300
         },
         "mark": "circle",
         "circle": {
           "radius": 48,
-          "fill": "#0a0a0a"
+          "fill": "#050505"
         }
       },
       {
         "at": {
-          "x": 382,
-          "y": 282
+          "x": 430,
+          "y": 280
         },
         "mark": "ellipse",
         "ellipse": {
-          "rx": 14,
-          "ry": 10,
+          "rx": 18,
+          "ry": 12,
+          "fill": "rgba(255,255,255,.92)"
+        }
+      },
+      {
+        "at": {
+          "x": 462,
+          "y": 296
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 4,
+          "fill": "rgba(255,255,255,.75)"
+        }
+      },
+      {
+        "at": {
+          "x": 415,
+          "y": 265
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 2,
           "fill": "rgba(255,255,255,.85)"
         }
       },
       {
         "at": {
-          "x": 408,
-          "y": 294
-        },
-        "mark": "circle",
-        "circle": {
-          "radius": 3,
-          "fill": "rgba(255,255,255,.7)"
-        }
-      },
-      {
-        "at": {
-          "x": 290,
-          "y": 170
+          "x": 300,
+          "y": 182
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 0 0 Q 4 -10, 10 -22",
+          "d": "M 0 0 Q -4 -10, -14 -28",
           "fill": "none",
           "stroke": "#1f1a14",
-          "strokeWidth": 2,
+          "strokeWidth": 2.4,
           "strokeLinecap": "round"
         }
       },
       {
         "at": {
-          "x": 345,
-          "y": 162
+          "x": 365,
+          "y": 170.3
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 0 0 Q 4 -10, 10 -22",
+          "d": "M 0 0 Q -4 -10, -14 -28",
           "fill": "none",
           "stroke": "#1f1a14",
-          "strokeWidth": 2,
+          "strokeWidth": 2.4,
           "strokeLinecap": "round"
         }
       },
       {
         "at": {
-          "x": 400,
-          "y": 162
+          "x": 425,
+          "y": 159.5
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 0 0 Q -4 -10, -10 -22",
+          "d": "M 0 0 Q -4 -10, -14 -28",
           "fill": "none",
           "stroke": "#1f1a14",
-          "strokeWidth": 2,
+          "strokeWidth": 2.4,
           "strokeLinecap": "round"
         }
       },
       {
         "at": {
-          "x": 455,
-          "y": 162
+          "x": 485,
+          "y": 161.3
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 0 0 Q -4 -10, -10 -22",
+          "d": "M 0 0 Q 4 -10, 14 -28",
           "fill": "none",
           "stroke": "#1f1a14",
-          "strokeWidth": 2,
+          "strokeWidth": 2.4,
           "strokeLinecap": "round"
         }
       },
       {
         "at": {
-          "x": 510,
-          "y": 170
+          "x": 545,
+          "y": 172.1
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 0 0 Q -4 -10, -10 -22",
+          "d": "M 0 0 Q 4 -10, 14 -28",
           "fill": "none",
           "stroke": "#1f1a14",
-          "strokeWidth": 2,
+          "strokeWidth": 2.4,
           "strokeLinecap": "round"
         }
       },
       {
         "at": {
-          "x": 400,
-          "y": 60
+          "x": 600,
+          "y": 182
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 Q 4 -10, 14 -28",
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 2.4,
+          "strokeLinecap": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 350,
+          "y": 420
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 Q -2 8, -8 18",
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.8,
+          "strokeLinecap": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 410,
+          "y": 426
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 Q -2 8, -8 18",
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.8,
+          "strokeLinecap": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 430
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 Q 0 8, 0 18",
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.8,
+          "strokeLinecap": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 490,
+          "y": 426
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 Q 2 8, 8 18",
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.8,
+          "strokeLinecap": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 550,
+          "y": 420
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 Q 2 8, 8 18",
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.8,
+          "strokeLinecap": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 65
         },
         "mark": "text",
         "textMark": {
           "text": "iris · pupil · catchlight",
-          "fontSize": 16,
+          "fontSize": 18,
           "fill": "#fef3c7",
           "italic": true,
           "anchor": "middle"
@@ -743,12 +850,12 @@
       },
       {
         "at": {
-          "x": 400,
-          "y": 540
+          "x": 450,
+          "y": 555
         },
         "mark": "text",
         "textMark": {
-          "text": "36 radial muscle fibers · one aperture · the camera nature evolved 40 separate times",
+          "text": "40 radial fibers · one aperture · the camera nature evolved 40 separate times",
           "fontSize": 13,
           "fill": "#fde68a",
           "italic": true,

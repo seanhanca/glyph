@@ -1,11 +1,11 @@
 {
   "compose": {
     "viewBox": {
-      "width": 1000,
-      "height": 500
+      "width": 1100,
+      "height": 520
     },
     "title": "A neuron firing — the cell that thinks",
-    "description": "A single pyramidal neuron. Dendrites on the left collect input; the soma integrates it; the axon on the right fires an action potential down to the synaptic terminals. Same architecture you use to read this sentence.",
+    "description": "A single pyramidal neuron. Dendrites collect input; the soma integrates it; the axon carries the action potential down to the synaptic terminals at the right. The architecture you're using to read this sentence.",
     "theme": {
       "background": "#020617",
       "foreground": "#f1f5fb"
@@ -21,7 +21,12 @@
           "stops": [
             {
               "offset": "0%",
-              "color": "#0f172a",
+              "color": "#1e1b4b",
+              "opacity": 1
+            },
+            {
+              "offset": "70%",
+              "color": "#0c0a25",
               "opacity": 1
             },
             {
@@ -61,7 +66,7 @@
           "kind": "radial",
           "cx": "40%",
           "cy": "40%",
-          "r": "60%",
+          "r": "65%",
           "stops": [
             {
               "offset": "0%",
@@ -69,7 +74,7 @@
               "opacity": 0.95
             },
             {
-              "offset": "60%",
+              "offset": "55%",
               "color": "#a78bfa",
               "opacity": 0.85
             },
@@ -77,6 +82,25 @@
               "offset": "100%",
               "color": "#312e81",
               "opacity": 0.95
+            }
+          ]
+        },
+        {
+          "id": "g-myelin",
+          "kind": "radial",
+          "cx": "50%",
+          "cy": "40%",
+          "r": "65%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#fef3c7",
+              "opacity": 1
+            },
+            {
+              "offset": "100%",
+              "color": "#fbbf24",
+              "opacity": 0.9
             }
           ]
         },
@@ -98,6 +122,25 @@
               "opacity": 0
             }
           ]
+        },
+        {
+          "id": "g-soma-halo",
+          "kind": "radial",
+          "cx": "50%",
+          "cy": "50%",
+          "r": "50%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#a78bfa",
+              "opacity": 0.55
+            },
+            {
+              "offset": "100%",
+              "color": "#a78bfa",
+              "opacity": 0
+            }
+          ]
         }
       ]
     },
@@ -109,7 +152,7 @@
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 0 0 L 1000 0 L 1000 500 L 0 500 Z",
+          "d": "M 0 0 L 1100 0 L 1100 520 L 0 520 Z",
           "fill": "url(#g-bg)",
           "stroke": "none"
         }
@@ -121,13 +164,13 @@
         },
         "mark": "starfield",
         "starfield": {
-          "count": 60,
+          "count": 70,
           "seed": 23,
           "region": {
             "x": 0,
             "y": 0,
-            "w": 1000,
-            "h": 500
+            "w": 1100,
+            "h": 520
           }
         }
       },
@@ -138,10 +181,160 @@
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 152.96 276.82 L 62.17 338.93 M 98.48 314.09 L 71.74 355.74 M 98.48 314.09 L 49.97 323.92 M 62.17 338.93 L 48.37 353.13 M 62.17 338.93 L 43.93 346.64",
+          "d": "M 204.89 325.68 Q 142.94 377.86, 86.09 460.91 M 115.79 427.1 L 98.73 482.11 L 99.64 508.02 M 115.79 427.1 L 63.43 451.11 L 37.63 453.55",
+          "fill": "none",
+          "stroke": "rgba(167,139,250,.35)",
+          "strokeWidth": 6,
+          "strokeLinecap": "round",
+          "strokeLinejoin": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 204.89 325.68 Q 142.94 377.86, 86.09 460.91 M 115.79 427.1 L 98.73 482.11 L 99.64 508.02 M 115.79 427.1 L 63.43 451.11 L 37.63 453.55",
           "fill": "none",
           "stroke": "url(#g-cell)",
-          "strokeWidth": 1.6,
+          "strokeWidth": 1.8,
+          "strokeLinecap": "round",
+          "strokeLinejoin": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 190.03 300.85 Q 93 320.52, -16.64 376.29 M 35.03 357.43 L -17.43 404.37 L -33.63 431.6 M 35.03 357.43 L -35.34 355.31 L -65.27 344.93",
+          "fill": "none",
+          "stroke": "rgba(167,139,250,.35)",
+          "strokeWidth": 6,
+          "strokeLinecap": "round",
+          "strokeLinejoin": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 190.03 300.85 Q 93 320.52, -16.64 376.29 M 35.03 357.43 L -17.43 404.37 L -33.63 431.6 M 35.03 357.43 L -35.34 355.31 L -65.27 344.93",
+          "fill": "none",
+          "stroke": "url(#g-cell)",
+          "strokeWidth": 1.8,
+          "strokeLinecap": "round",
+          "strokeLinejoin": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 186.8 280 Q 75.56 263.19, -63.2 280 M -0.7 280 L -75.85 307.43 L -104.94 328.64 M -0.7 280 L -75.85 252.57 L -104.94 231.36",
+          "fill": "none",
+          "stroke": "rgba(167,139,250,.35)",
+          "strokeWidth": 6,
+          "strokeLinecap": "round",
+          "strokeLinejoin": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 186.8 280 Q 75.56 263.19, -63.2 280 M -0.7 280 L -75.85 307.43 L -104.94 328.64 M -0.7 280 L -75.85 252.57 L -104.94 231.36",
+          "fill": "none",
+          "stroke": "url(#g-cell)",
+          "strokeWidth": 1.8,
+          "strokeLinecap": "round",
+          "strokeLinejoin": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 190.03 259.15 Q 103.14 211.69, -16.64 183.71 M 35.03 202.57 L -35.34 204.69 L -65.27 215.07 M 35.03 202.57 L -17.43 155.63 L -33.63 128.4",
+          "fill": "none",
+          "stroke": "rgba(167,139,250,.35)",
+          "strokeWidth": 6,
+          "strokeLinecap": "round",
+          "strokeLinejoin": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 190.03 259.15 Q 103.14 211.69, -16.64 183.71 M 35.03 202.57 L -35.34 204.69 L -65.27 215.07 M 35.03 202.57 L -17.43 155.63 L -33.63 128.4",
+          "fill": "none",
+          "stroke": "url(#g-cell)",
+          "strokeWidth": 1.8,
+          "strokeLinecap": "round",
+          "strokeLinejoin": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 204.89 234.32 Q 161.12 166.16, 86.09 99.09 M 115.79 132.9 L 63.43 108.89 L 37.63 106.45 M 115.79 132.9 L 98.73 77.89 L 99.64 51.98",
+          "fill": "none",
+          "stroke": "rgba(167,139,250,.35)",
+          "strokeWidth": 6,
+          "strokeLinecap": "round",
+          "strokeLinejoin": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 204.89 234.32 Q 161.12 166.16, 86.09 99.09 M 115.79 132.9 L 63.43 108.89 L 37.63 106.45 M 115.79 132.9 L 98.73 77.89 L 99.64 51.98",
+          "fill": "none",
+          "stroke": "url(#g-cell)",
+          "strokeWidth": 1.8,
+          "strokeLinecap": "round",
+          "strokeLinejoin": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 292 284 L 980 284",
+          "fill": "none",
+          "stroke": "rgba(34,211,238,.35)",
+          "strokeWidth": 8,
           "strokeLinecap": "round"
         }
       },
@@ -152,63 +345,7 @@
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 144.77 261.75 L 18.81 293.91 M 69.2 281.05 L 20.91 314.08 M 69.2 281.05 L 10.99 275.21 M 18.81 293.91 L -2.5 303.56 M 18.81 293.91 L -4.52 295.67",
-          "fill": "none",
-          "stroke": "url(#g-cell)",
-          "strokeWidth": 1.6,
-          "strokeLinecap": "round"
-        }
-      },
-      {
-        "at": {
-          "x": 0,
-          "y": 0
-        },
-        "mark": "silhouette-path",
-        "silhouettePath": {
-          "d": "M 143 250 L -7 250 M 53 250 L -10.41 273.15 M 53 250 L -10.41 226.85 M -7 250 L -33.59 254.7 M -7 250 L -33.59 245.3",
-          "fill": "none",
-          "stroke": "url(#g-cell)",
-          "strokeWidth": 1.6,
-          "strokeLinecap": "round"
-        }
-      },
-      {
-        "at": {
-          "x": 0,
-          "y": 0
-        },
-        "mark": "silhouette-path",
-        "silhouettePath": {
-          "d": "M 144.77 238.25 L 18.81 206.09 M 69.2 218.95 L 10.99 224.79 M 69.2 218.95 L 20.91 185.92 M 18.81 206.09 L -4.52 204.33 M 18.81 206.09 L -2.5 196.44",
-          "fill": "none",
-          "stroke": "url(#g-cell)",
-          "strokeWidth": 1.6,
-          "strokeLinecap": "round"
-        }
-      },
-      {
-        "at": {
-          "x": 0,
-          "y": 0
-        },
-        "mark": "silhouette-path",
-        "silhouettePath": {
-          "d": "M 151.41 225.17 L 57.63 167.68 M 95.14 190.67 L 46.2 183.28 M 95.14 190.67 L 66.35 150.41 M 57.63 167.68 L 39.03 160.89 M 57.63 167.68 L 43.14 154.18",
-          "fill": "none",
-          "stroke": "url(#g-cell)",
-          "strokeWidth": 1.6,
-          "strokeLinecap": "round"
-        }
-      },
-      {
-        "at": {
-          "x": 0,
-          "y": 0
-        },
-        "mark": "silhouette-path",
-        "silhouettePath": {
-          "d": "M 260 250 L 880 250",
+          "d": "M 292 284 L 980 284",
           "fill": "none",
           "stroke": "url(#g-cell)",
           "strokeWidth": 3,
@@ -217,136 +354,174 @@
       },
       {
         "at": {
-          "x": 310,
-          "y": 250
+          "x": 352,
+          "y": 284
         },
         "mark": "ellipse",
         "ellipse": {
-          "rx": 26,
-          "ry": 9,
-          "fill": "rgba(255, 243, 199, 0.85)",
+          "rx": 32,
+          "ry": 10,
+          "fill": "url(#g-myelin)",
           "stroke": "#b8870e",
-          "strokeWidth": 1
+          "strokeWidth": 0.8
         }
       },
       {
         "at": {
-          "x": 390,
-          "y": 250
+          "x": 442,
+          "y": 284
         },
         "mark": "ellipse",
         "ellipse": {
-          "rx": 26,
-          "ry": 9,
-          "fill": "rgba(255, 243, 199, 0.85)",
+          "rx": 32,
+          "ry": 10,
+          "fill": "url(#g-myelin)",
           "stroke": "#b8870e",
-          "strokeWidth": 1
+          "strokeWidth": 0.8
         }
       },
       {
         "at": {
-          "x": 470,
-          "y": 250
+          "x": 532,
+          "y": 284
         },
         "mark": "ellipse",
         "ellipse": {
-          "rx": 26,
-          "ry": 9,
-          "fill": "rgba(255, 243, 199, 0.85)",
+          "rx": 32,
+          "ry": 10,
+          "fill": "url(#g-myelin)",
           "stroke": "#b8870e",
-          "strokeWidth": 1
+          "strokeWidth": 0.8
         }
       },
       {
         "at": {
-          "x": 550,
-          "y": 250
+          "x": 622,
+          "y": 284
         },
         "mark": "ellipse",
         "ellipse": {
-          "rx": 26,
-          "ry": 9,
-          "fill": "rgba(255, 243, 199, 0.85)",
+          "rx": 32,
+          "ry": 10,
+          "fill": "url(#g-myelin)",
           "stroke": "#b8870e",
-          "strokeWidth": 1
+          "strokeWidth": 0.8
         }
       },
       {
         "at": {
-          "x": 630,
-          "y": 250
+          "x": 712,
+          "y": 284
         },
         "mark": "ellipse",
         "ellipse": {
-          "rx": 26,
-          "ry": 9,
-          "fill": "rgba(255, 243, 199, 0.85)",
+          "rx": 32,
+          "ry": 10,
+          "fill": "url(#g-myelin)",
           "stroke": "#b8870e",
-          "strokeWidth": 1
+          "strokeWidth": 0.8
         }
       },
       {
         "at": {
-          "x": 710,
-          "y": 250
+          "x": 802,
+          "y": 284
         },
         "mark": "ellipse",
         "ellipse": {
-          "rx": 26,
-          "ry": 9,
-          "fill": "rgba(255, 243, 199, 0.85)",
+          "rx": 32,
+          "ry": 10,
+          "fill": "url(#g-myelin)",
           "stroke": "#b8870e",
-          "strokeWidth": 1
+          "strokeWidth": 0.8
         }
       },
       {
         "at": {
-          "x": 790,
-          "y": 250
+          "x": 892,
+          "y": 284
         },
         "mark": "ellipse",
         "ellipse": {
-          "rx": 26,
-          "ry": 9,
-          "fill": "rgba(255, 243, 199, 0.85)",
+          "rx": 32,
+          "ry": 10,
+          "fill": "url(#g-myelin)",
           "stroke": "#b8870e",
-          "strokeWidth": 1
+          "strokeWidth": 0.8
         }
       },
       {
         "at": {
-          "x": 200,
-          "y": 250
+          "x": 240,
+          "y": 280
         },
         "mark": "glow",
         "glow": {
-          "radius": 130,
-          "gradientId": "g-pulse"
+          "radius": 150,
+          "gradientId": "g-soma-halo"
         }
       },
       {
         "at": {
-          "x": 200,
-          "y": 250
+          "x": 240,
+          "y": 280
         },
         "mark": "ellipse",
         "ellipse": {
-          "rx": 60,
-          "ry": 50,
+          "rx": 56,
+          "ry": 64,
           "fill": "url(#g-soma)",
-          "stroke": "#a78bfa",
-          "strokeWidth": 1.5
+          "stroke": "#c4b5fd",
+          "strokeWidth": 1.4
         }
       },
       {
         "at": {
-          "x": 192,
-          "y": 244
+          "x": 234,
+          "y": 274
         },
         "mark": "circle",
         "circle": {
-          "radius": 18,
-          "fill": "rgba(2,6,23,.6)",
+          "radius": 22,
+          "fill": "rgba(2,6,23,.55)",
+          "stroke": "#fde68a",
+          "strokeWidth": 1.2
+        }
+      },
+      {
+        "at": {
+          "x": 238,
+          "y": 276
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 4,
+          "fill": "#fde68a"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 980 284 Q 1015 272.73, 1033.54 238.9",
+          "fill": "none",
+          "stroke": "url(#g-cell)",
+          "strokeWidth": 1.6,
+          "strokeLinecap": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 1033.54,
+          "y": 238.9
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 5,
+          "fill": "#fbbf24",
           "stroke": "#fde68a",
           "strokeWidth": 1
         }
@@ -358,7 +533,7 @@
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 880 250 L 915.1 230.82",
+          "d": "M 980 284 Q 1015 278.83, 1046.87 263.31",
           "fill": "none",
           "stroke": "url(#g-cell)",
           "strokeWidth": 1.6,
@@ -367,15 +542,15 @@
       },
       {
         "at": {
-          "x": 915.1,
-          "y": 230.82
+          "x": 1046.87,
+          "y": 263.31
         },
         "mark": "circle",
         "circle": {
-          "radius": 4,
+          "radius": 5,
           "fill": "#fbbf24",
-          "stroke": "#7c2d12",
-          "strokeWidth": 0.6
+          "stroke": "#fde68a",
+          "strokeWidth": 1
         }
       },
       {
@@ -385,7 +560,7 @@
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 880 250 L 919.35 242.84",
+          "d": "M 980 284 Q 1015 284, 1050 284",
           "fill": "none",
           "stroke": "url(#g-cell)",
           "strokeWidth": 1.6,
@@ -394,15 +569,15 @@
       },
       {
         "at": {
-          "x": 919.35,
-          "y": 242.84
+          "x": 1050,
+          "y": 284
         },
         "mark": "circle",
         "circle": {
-          "radius": 4,
+          "radius": 5,
           "fill": "#fbbf24",
-          "stroke": "#7c2d12",
-          "strokeWidth": 0.6
+          "stroke": "#fde68a",
+          "strokeWidth": 1
         }
       },
       {
@@ -412,7 +587,7 @@
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 880 250 L 919.35 257.16",
+          "d": "M 980 284 Q 1015 289.17, 1046.87 304.69",
           "fill": "none",
           "stroke": "url(#g-cell)",
           "strokeWidth": 1.6,
@@ -421,15 +596,15 @@
       },
       {
         "at": {
-          "x": 919.35,
-          "y": 257.16
+          "x": 1046.87,
+          "y": 304.69
         },
         "mark": "circle",
         "circle": {
-          "radius": 4,
+          "radius": 5,
           "fill": "#fbbf24",
-          "stroke": "#7c2d12",
-          "strokeWidth": 0.6
+          "stroke": "#fde68a",
+          "strokeWidth": 1
         }
       },
       {
@@ -439,7 +614,7 @@
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 880 250 L 915.1 269.18",
+          "d": "M 980 284 Q 1015 295.27, 1033.54 329.1",
           "fill": "none",
           "stroke": "url(#g-cell)",
           "strokeWidth": 1.6,
@@ -448,36 +623,36 @@
       },
       {
         "at": {
-          "x": 915.1,
-          "y": 269.18
+          "x": 1033.54,
+          "y": 329.1
         },
         "mark": "circle",
         "circle": {
-          "radius": 4,
+          "radius": 5,
           "fill": "#fbbf24",
-          "stroke": "#7c2d12",
-          "strokeWidth": 0.6
+          "stroke": "#fde68a",
+          "strokeWidth": 1
         }
       },
       {
         "at": {
-          "x": 880,
-          "y": 250
+          "x": 980,
+          "y": 284
         },
         "mark": "glow",
         "glow": {
-          "radius": 60,
+          "radius": 110,
           "gradientId": "g-pulse"
         }
       },
       {
         "at": {
           "x": 50,
-          "y": 60
+          "y": 50
         },
         "mark": "text",
         "textMark": {
-          "text": "dendrites",
+          "text": "dendrites · input",
           "fontSize": 14,
           "fill": "#a78bfa",
           "italic": true,
@@ -486,12 +661,12 @@
       },
       {
         "at": {
-          "x": 200,
-          "y": 340
+          "x": 240,
+          "y": 385
         },
         "mark": "text",
         "textMark": {
-          "text": "soma",
+          "text": "soma · integrate",
           "fontSize": 14,
           "fill": "#fde68a",
           "italic": true,
@@ -500,7 +675,7 @@
       },
       {
         "at": {
-          "x": 530,
+          "x": 580,
           "y": 230
         },
         "mark": "text",
@@ -514,26 +689,26 @@
       },
       {
         "at": {
-          "x": 900,
-          "y": 320
+          "x": 990,
+          "y": 360
         },
         "mark": "text",
         "textMark": {
-          "text": "synapse",
+          "text": "synapse · transmit",
           "fontSize": 14,
           "fill": "#fbbf24",
           "italic": true,
-          "anchor": "start"
+          "anchor": "end"
         }
       },
       {
         "at": {
-          "x": 500,
-          "y": 460
+          "x": 550,
+          "y": 480
         },
         "mark": "text",
         "textMark": {
-          "text": "input · integrate · fire · transmit",
+          "text": "86 billion of these, talking to each other right now",
           "fontSize": 13,
           "fill": "#94a3b8",
           "italic": true,
