@@ -1,0 +1,270 @@
+{
+  "compose": {
+    "viewBox": {
+      "width": 1000,
+      "height": 600
+    },
+    "title": "Hydraulic press — Pascal's principle in pencil",
+    "description": "Two pistons of unequal area connected by an incompressible fluid. Push down with force F on the small piston; the large piston pushes up with force F × (A_big / A_small). Pascal, 1647. Why a single foot can lift a car.",
+    "theme": {
+      "preset": "pencil-parchment"
+    },
+    "defs": {
+      "patterns": [
+        {
+          "id": "p-fluid",
+          "width": 6,
+          "height": 10,
+          "children": [
+            {
+              "kind": "line",
+              "x1": 0,
+              "y1": 0,
+              "x2": 0,
+              "y2": 10,
+              "stroke": "#3b4d80",
+              "strokeWidth": 0.5
+            },
+            {
+              "kind": "line",
+              "x1": 3,
+              "y1": 5,
+              "x2": 3,
+              "y2": 10,
+              "stroke": "#3b4d80",
+              "strokeWidth": 0.5
+            }
+          ]
+        },
+        {
+          "id": "p-piston",
+          "width": 5,
+          "height": 5,
+          "patternTransform": "rotate(135)",
+          "children": [
+            {
+              "kind": "line",
+              "x1": 0,
+              "y1": 0,
+              "x2": 0,
+              "y2": 5,
+              "stroke": "#1f1a14",
+              "strokeWidth": 0.6
+            }
+          ]
+        }
+      ]
+    },
+    "children": [
+      {
+        "at": {
+          "x": 180,
+          "y": 240
+        },
+        "mark": "frame",
+        "frame": {
+          "width": 80,
+          "height": 240,
+          "title": "A₁ — input"
+        }
+      },
+      {
+        "at": {
+          "x": 620,
+          "y": 180
+        },
+        "mark": "frame",
+        "frame": {
+          "width": 240,
+          "height": 300,
+          "title": "A₂ — output (3× wider)"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 182 316 L 182 478 L 858 478 L 858 278 L 622 278 L 622 442 L 258 442 L 258 316 Z",
+          "fill": "url(#p-fluid)",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 184,
+          "y": 300
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 72 0 L 72 16 L 0 16 Z",
+          "fill": "url(#p-piston)",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.6
+        }
+      },
+      {
+        "at": {
+          "x": 212,
+          "y": 180
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 16 0 L 16 65 L 0 65 Z",
+          "fill": "#fefce8",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.6
+        }
+      },
+      {
+        "at": {
+          "x": 176,
+          "y": 160
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 88 0 L 88 20 L 0 20 Z",
+          "fill": "#fefce8",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.6
+        }
+      },
+      {
+        "at": {
+          "x": 624,
+          "y": 260
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 232 0 L 232 18 L 0 18 Z",
+          "fill": "url(#p-piston)",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.6
+        }
+      },
+      {
+        "at": {
+          "x": 718,
+          "y": 110
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 44 0 L 44 78 L 0 78 Z",
+          "fill": "#fefce8",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.6
+        }
+      },
+      {
+        "at": {
+          "x": 604,
+          "y": 90
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 272 0 L 272 20 L 0 20 Z",
+          "fill": "#fefce8",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.6
+        }
+      },
+      {
+        "at": {
+          "x": 220,
+          "y": 50
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 0 80 M -10 65 L 0 82 L 10 65",
+          "fill": "none",
+          "stroke": "#b00020",
+          "strokeWidth": 2.4
+        }
+      },
+      {
+        "at": {
+          "x": 740,
+          "y": 90
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 0 -70 M -16 -52 L 0 -74 L 16 -52",
+          "fill": "none",
+          "stroke": "#0b6c3a",
+          "strokeWidth": 4.4
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "annotation-leader",
+        "annotation": {
+          "from": [
+            220,
+            40
+          ],
+          "to": [
+            140,
+            28
+          ],
+          "text": "F = 1 unit",
+          "italic": true,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "annotation-leader",
+        "annotation": {
+          "from": [
+            740,
+            10
+          ],
+          "to": [
+            920,
+            22
+          ],
+          "text": "≈ 9× the lift",
+          "italic": true,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 440,
+          "y": 90
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "p  =  F₁ / A₁  =  F₂ / A₂",
+          "fontSize": 24,
+          "fill": "#1f1a14",
+          "italic": true,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 500,
+          "y": 555
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Pressure equalizes through the fluid. A wider piston turns the same pressure into more force.",
+          "fontSize": 13,
+          "fill": "#4a3f30",
+          "italic": true,
+          "anchor": "middle"
+        }
+      }
+    ]
+  }
+}

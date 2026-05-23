@@ -1,0 +1,601 @@
+{
+  "compose": {
+    "viewBox": {
+      "width": 600,
+      "height": 800
+    },
+    "title": "A jellyfish in the deep — bioluminescence in the dark",
+    "description": "Aurelia aurita drifts through midnight water. Translucent bell, seven tentacles trailing sine-modulated curtains, bioluminescent dots inside the medusa. The sea around it is computed: a deep-ocean gradient with no horizon.",
+    "theme": {
+      "background": "#010516",
+      "foreground": "#f1f5fb"
+    },
+    "defs": {
+      "gradients": [
+        {
+          "id": "g-sea",
+          "kind": "linear",
+          "x1": "0%",
+          "y1": "0%",
+          "x2": "0%",
+          "y2": "100%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#0c1e3a",
+              "opacity": 1
+            },
+            {
+              "offset": "50%",
+              "color": "#04102a",
+              "opacity": 1
+            },
+            {
+              "offset": "100%",
+              "color": "#010516",
+              "opacity": 1
+            }
+          ]
+        },
+        {
+          "id": "g-bell",
+          "kind": "radial",
+          "cx": "50%",
+          "cy": "30%",
+          "r": "70%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#fef3c7",
+              "opacity": 0.85
+            },
+            {
+              "offset": "55%",
+              "color": "#f9a8d4",
+              "opacity": 0.55
+            },
+            {
+              "offset": "100%",
+              "color": "#a78bfa",
+              "opacity": 0.25
+            }
+          ]
+        },
+        {
+          "id": "g-inner",
+          "kind": "radial",
+          "cx": "50%",
+          "cy": "50%",
+          "r": "60%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#fef9c3",
+              "opacity": 0.75
+            },
+            {
+              "offset": "100%",
+              "color": "#fbbf24",
+              "opacity": 0
+            }
+          ]
+        },
+        {
+          "id": "g-tentacle",
+          "kind": "linear",
+          "x1": "0%",
+          "y1": "0%",
+          "x2": "0%",
+          "y2": "100%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#f9a8d4",
+              "opacity": 0.85
+            },
+            {
+              "offset": "100%",
+              "color": "#a78bfa",
+              "opacity": 0.05
+            }
+          ]
+        },
+        {
+          "id": "g-halo",
+          "kind": "radial",
+          "cx": "50%",
+          "cy": "50%",
+          "r": "50%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#fde68a",
+              "opacity": 0.4
+            },
+            {
+              "offset": "100%",
+              "color": "#fde68a",
+              "opacity": 0
+            }
+          ]
+        }
+      ]
+    },
+    "children": [
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 600 0 L 600 800 L 0 800 Z",
+          "fill": "url(#g-sea)",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "starfield",
+        "starfield": {
+          "count": 80,
+          "seed": 11,
+          "region": {
+            "x": 0,
+            "y": 0,
+            "w": 600,
+            "h": 800
+          }
+        }
+      },
+      {
+        "at": {
+          "x": 300,
+          "y": 320
+        },
+        "mark": "glow",
+        "glow": {
+          "radius": 220,
+          "gradientId": "g-halo"
+        }
+      },
+      {
+        "at": {
+          "x": 189.5,
+          "y": 338.5
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 0.43 10 L 1.11 20 L 0.84 30 L -0.79 40 L -2.66 50 L -2.91 60 L -0.63 70 L 2.95 80 L 5.07 90 L 3.54 100 L -1.21 110 L -5.93 120 L -6.82 130 L -2.49 140 L 4.44 150 L 8.92 160 L 7.13 170 L -0.36 180 L -8.45 190 L -11.01 200 L -5.49 210 L 4.73 220 L 12.36 230 L 11.38 240 L 1.77 250 L -9.97 260 L -15.19 270 L -9.46 280",
+          "fill": "none",
+          "stroke": "url(#g-tentacle)",
+          "strokeWidth": 1.6
+        }
+      },
+      {
+        "at": {
+          "x": 226.33333333333331,
+          "y": 338.5
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 0.61 10 L 0.92 20 L -0.11 30 L -2.02 40 L -2.96 50 L -1.39 60 L 2.12 70 L 4.87 80 L 4.09 90 L -0.44 100 L -5.6 110 L -7.07 120 L -2.9 130 L 4.36 140 L 9.16 150 L 7.17 160 L -0.91 170 L -9.26 180 L -11.14 190 L -4.3 200 L 6.7 210 L 13.46 220 L 10.16 230 L -1.49 240 L -12.98 250 L -15.17 260 L -5.58 270 L 9.14 280 L 17.77 290 L 13.06 300 L -2.2 310 L -16.76 320",
+          "fill": "none",
+          "stroke": "url(#g-tentacle)",
+          "strokeWidth": 1.6
+        }
+      },
+      {
+        "at": {
+          "x": 263.16666666666663,
+          "y": 338.5
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 0.34 10 L 0.28 20 L -0.45 30 L -1.35 40 L -1.45 50 L -0.23 60 L 1.68 70 L 2.8 80 L 1.94 90 L -0.69 100 L -3.36 110 L -3.94 120 L -1.59 130 L 2.37 140 L 5.14 150 L 4.43 160 L 0.29 170 L -4.58 180 L -6.61 190 L -3.97 200 L 1.88 210 L 6.94 220 L 7.38 230 L 2.45 240 L -4.7 250 L -9.01 260 L -7.1 270 L 0.11 280 L 7.79 290 L 10.36 300 L 5.61 310 L -3.52 320 L -10.69 330 L -10.59 340",
+          "fill": "none",
+          "stroke": "url(#g-tentacle)",
+          "strokeWidth": 1.6
+        }
+      },
+      {
+        "at": {
+          "x": 300,
+          "y": 338.5
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 0.18 10 L 0.04 20 L -0.43 30 L -0.91 40 L -0.91 50 L -0.2 60 L 0.94 70 L 1.81 80 L 1.71 90 L 0.46 100 L -1.37 110 L -2.69 120 L -2.55 130 L -0.8 140 L 1.72 150 L 3.53 160 L 3.43 170 L 1.23 180 L -1.97 190 L -4.35 200 L -4.36 210 L -1.75 220 L 2.14 230 L 5.12 240 L 5.31 250 L 2.36 260 L -2.22 270 L -5.84 280 L -6.28 290 L -3.04 300 L 2.21 310 L 6.51 320 L 7.26 330 L 3.81 340 L -2.09 350 L -7.11 360",
+          "fill": "none",
+          "stroke": "url(#g-tentacle)",
+          "strokeWidth": 1.6
+        }
+      },
+      {
+        "at": {
+          "x": 336.8333333333333,
+          "y": 338.5
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 0.21 10 L -0.15 20 L -0.99 30 L -1.8 40 L -1.91 50 L -0.95 60 L 0.93 70 L 2.94 80 L 4.06 90 L 3.48 100 L 1.12 110 L -2.25 120 L -5.18 130 L -6.24 140 L -4.62 150 L -0.7 160 L 4.06 170 L 7.61 180 L 8.21 190 L 5.25 200 L -0.32 210 L -6.31 220 L -10.12 230 L -9.87 240 L -5.32 250 L 1.91 260 L 8.9 270 L 12.58 280 L 11.12 290 L 4.78 300 L -4.05 310 L -11.74 320 L -14.89 330 L -11.88 340",
+          "fill": "none",
+          "stroke": "url(#g-tentacle)",
+          "strokeWidth": 1.6
+        }
+      },
+      {
+        "at": {
+          "x": 373.6666666666667,
+          "y": 338.5
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 0.06 10 L -0.52 20 L -1.53 30 L -2.46 40 L -2.73 50 L -1.92 60 L -0.03 70 L 2.51 80 L 4.87 90 L 6.16 100 L 5.67 110 L 3.22 120 L -0.71 130 L -5.07 140 L -8.51 150 L -9.77 160 L -8.18 170 L -3.86 180 L 2.14 190 L 8.17 200 L 12.34 210 L 13.2 220 L 10.17 230 L 3.8 240 L -4.25 250 L -11.71 260 L -16.28 270 L -16.35 280 L -11.58 290 L -3.03 300 L 7 310 L 15.63 320",
+          "fill": "none",
+          "stroke": "url(#g-tentacle)",
+          "strokeWidth": 1.6
+        }
+      },
+      {
+        "at": {
+          "x": 410.5,
+          "y": 338.5
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L -0.14 10 L -0.61 20 L -1.24 30 L -1.73 40 L -1.82 50 L -1.33 60 L -0.22 70 L 1.32 80 L 2.94 90 L 4.21 100 L 4.72 110 L 4.17 120 L 2.53 130 L 0.02 140 L -2.88 150 L -5.54 160 L -7.28 170 L -7.59 180 L -6.24 190 L -3.34 200 L 0.61 210 L 4.82 220 L 8.36 230 L 10.39 240 L 10.33 250 L 8 260 L 3.74 270 L -1.66 280",
+          "fill": "none",
+          "stroke": "url(#g-tentacle)",
+          "strokeWidth": 1.6
+        }
+      },
+      {
+        "at": {
+          "x": 300,
+          "y": 320
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -130 0 L -129.82 -4.71 L -129.29 -9.41 L -128.4 -14.08 L -127.16 -18.71 L -125.57 -23.29 L -123.64 -27.81 L -121.37 -32.25 L -118.76 -36.61 L -115.83 -40.86 L -112.58 -45 L -109.03 -49.02 L -105.17 -52.9 L -101.03 -56.64 L -96.61 -60.22 L -91.92 -63.64 L -86.99 -66.88 L -81.81 -69.94 L -76.41 -72.81 L -70.8 -75.48 L -65 -77.94 L -59.02 -80.19 L -52.88 -82.22 L -46.59 -84.02 L -40.17 -85.6 L -33.65 -86.93 L -27.03 -88.03 L -20.34 -88.89 L -13.59 -89.51 L -6.8 -89.88 L 0 -90 L 6.8 -89.88 L 13.59 -89.51 L 20.34 -88.89 L 27.03 -88.03 L 33.65 -86.93 L 40.17 -85.6 L 46.59 -84.02 L 52.88 -82.22 L 59.02 -80.19 L 65 -77.94 L 70.8 -75.48 L 76.41 -72.81 L 81.81 -69.94 L 86.99 -66.88 L 91.92 -63.64 L 96.61 -60.22 L 101.03 -56.64 L 105.17 -52.9 L 109.03 -49.02 L 112.58 -45 L 115.83 -40.86 L 118.76 -36.61 L 121.37 -32.25 L 123.64 -27.81 L 125.57 -23.29 L 127.16 -18.71 L 128.4 -14.08 L 129.29 -9.41 L 129.82 -4.71 L 130 0 L 111.43 14 L 92.86 0 L 74.29 14 L 55.71 0 L 37.14 14 L 18.57 0 L 0 14 L -18.57 0 L -37.14 14 L -55.71 0 L -74.29 14 L -92.86 0 L -111.43 14 L -130 0 Z",
+          "fill": "url(#g-bell)",
+          "stroke": "rgba(254, 240, 196, 0.55)",
+          "strokeWidth": 1.2
+        }
+      },
+      {
+        "at": {
+          "x": 300,
+          "y": 310
+        },
+        "mark": "ellipse",
+        "ellipse": {
+          "rx": 71.5,
+          "ry": 54,
+          "fill": "url(#g-inner)"
+        }
+      },
+      {
+        "at": {
+          "x": 261.78,
+          "y": 320
+        },
+        "mark": "icon",
+        "icon": {
+          "id": "star",
+          "size": 8,
+          "fill": "#fde68a"
+        }
+      },
+      {
+        "at": {
+          "x": 258.9,
+          "y": 310.64
+        },
+        "mark": "icon",
+        "icon": {
+          "id": "star",
+          "size": 8,
+          "fill": "#fde68a"
+        }
+      },
+      {
+        "at": {
+          "x": 264.78,
+          "y": 300.63
+        },
+        "mark": "icon",
+        "icon": {
+          "id": "star",
+          "size": 8,
+          "fill": "#fde68a"
+        }
+      },
+      {
+        "at": {
+          "x": 279.58,
+          "y": 292.89
+        },
+        "mark": "icon",
+        "icon": {
+          "id": "star",
+          "size": 8,
+          "fill": "#fde68a"
+        }
+      },
+      {
+        "at": {
+          "x": 300,
+          "y": 289.97
+        },
+        "mark": "icon",
+        "icon": {
+          "id": "star",
+          "size": 8,
+          "fill": "#fde68a"
+        }
+      },
+      {
+        "at": {
+          "x": 320.42,
+          "y": 292.89
+        },
+        "mark": "icon",
+        "icon": {
+          "id": "star",
+          "size": 8,
+          "fill": "#fde68a"
+        }
+      },
+      {
+        "at": {
+          "x": 335.22,
+          "y": 300.63
+        },
+        "mark": "icon",
+        "icon": {
+          "id": "star",
+          "size": 8,
+          "fill": "#fde68a"
+        }
+      },
+      {
+        "at": {
+          "x": 341.1,
+          "y": 310.64
+        },
+        "mark": "icon",
+        "icon": {
+          "id": "star",
+          "size": 8,
+          "fill": "#fde68a"
+        }
+      },
+      {
+        "at": {
+          "x": 338.22,
+          "y": 320
+        },
+        "mark": "icon",
+        "icon": {
+          "id": "star",
+          "size": 8,
+          "fill": "#fde68a"
+        }
+      },
+      {
+        "at": {
+          "x": 80,
+          "y": 704.24
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 7.37,
+          "fill": "rgba(165, 220, 240, 0.35)",
+          "stroke": "rgba(165, 220, 240, 0.6)",
+          "strokeWidth": 0.5
+        }
+      },
+      {
+        "at": {
+          "x": 133.74,
+          "y": 623.28
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 7.21,
+          "fill": "rgba(165, 220, 240, 0.35)",
+          "stroke": "rgba(165, 220, 240, 0.6)",
+          "strokeWidth": 0.5
+        }
+      },
+      {
+        "at": {
+          "x": 177.47,
+          "y": 568.35
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 2.91,
+          "fill": "rgba(165, 220, 240, 0.35)",
+          "stroke": "rgba(165, 220, 240, 0.6)",
+          "strokeWidth": 0.5
+        }
+      },
+      {
+        "at": {
+          "x": 206.23,
+          "y": 551.33
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 2,
+          "fill": "rgba(165, 220, 240, 0.35)",
+          "stroke": "rgba(165, 220, 240, 0.6)",
+          "strokeWidth": 0.5
+        }
+      },
+      {
+        "at": {
+          "x": 222.56,
+          "y": 575.43
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 2.26,
+          "fill": "rgba(165, 220, 240, 0.35)",
+          "stroke": "rgba(165, 220, 240, 0.6)",
+          "strokeWidth": 0.5
+        }
+      },
+      {
+        "at": {
+          "x": 235.29,
+          "y": 634.4
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 6.75,
+          "fill": "rgba(165, 220, 240, 0.35)",
+          "stroke": "rgba(165, 220, 240, 0.6)",
+          "strokeWidth": 0.5
+        }
+      },
+      {
+        "at": {
+          "x": 255.03,
+          "y": 714.04
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 7.69,
+          "fill": "rgba(165, 220, 240, 0.35)",
+          "stroke": "rgba(165, 220, 240, 0.6)",
+          "strokeWidth": 0.5
+        }
+      },
+      {
+        "at": {
+          "x": 288.87,
+          "y": 795.4
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 3.87,
+          "fill": "rgba(165, 220, 240, 0.35)",
+          "stroke": "rgba(165, 220, 240, 0.6)",
+          "strokeWidth": 0.5
+        }
+      },
+      {
+        "at": {
+          "x": 336.83,
+          "y": 859.13
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 2,
+          "fill": "rgba(165, 220, 240, 0.35)",
+          "stroke": "rgba(165, 220, 240, 0.6)",
+          "strokeWidth": 0.5
+        }
+      },
+      {
+        "at": {
+          "x": 391.79,
+          "y": 889.94
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 2,
+          "fill": "rgba(165, 220, 240, 0.35)",
+          "stroke": "rgba(165, 220, 240, 0.6)",
+          "strokeWidth": 0.5
+        }
+      },
+      {
+        "at": {
+          "x": 443.15,
+          "y": 880.05
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 5.98,
+          "fill": "rgba(165, 220, 240, 0.35)",
+          "stroke": "rgba(165, 220, 240, 0.6)",
+          "strokeWidth": 0.5
+        }
+      },
+      {
+        "at": {
+          "x": 482.09,
+          "y": 831.02
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 7.95,
+          "fill": "rgba(165, 220, 240, 0.35)",
+          "stroke": "rgba(165, 220, 240, 0.6)",
+          "strokeWidth": 0.5
+        }
+      },
+      {
+        "at": {
+          "x": 506.05,
+          "y": 753.4
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 4.83,
+          "fill": "rgba(165, 220, 240, 0.35)",
+          "stroke": "rgba(165, 220, 240, 0.6)",
+          "strokeWidth": 0.5
+        }
+      },
+      {
+        "at": {
+          "x": 520,
+          "y": 664.24
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 2,
+          "fill": "rgba(165, 220, 240, 0.35)",
+          "stroke": "rgba(165, 220, 240, 0.6)",
+          "strokeWidth": 0.5
+        }
+      },
+      {
+        "at": {
+          "x": 300,
+          "y": 40
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Aurelia aurita — light in the deep",
+          "fontSize": 18,
+          "fill": "#f1f5fb",
+          "italic": true,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 300,
+          "y": 776
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "tentacles trail · plankton drift · the medusa glows",
+          "fontSize": 13,
+          "fill": "#94a3b8",
+          "italic": true,
+          "anchor": "middle"
+        }
+      }
+    ]
+  }
+}

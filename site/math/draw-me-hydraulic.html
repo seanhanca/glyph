@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Draw Me a Hydraulic Press — Claude × Glyph showcase</title>
+<meta name="description" content="One English prompt to Claude. One Glyph compose spec. Pascal's principle drawn in pencil — two cylinders, one fluid, the equation that turns one foot into a ton.">
+<meta property="og:title" content="Draw Me a Hydraulic Press — Life in Glyph">
+<meta property="og:description" content="Pascal, 1647. The reason a single foot can lift a car.">
+<style>
+  :root {
+    --bg-deep: #02030a;
+    --panel: #0c1126;
+    --panel-edge: #1d2444;
+    --ink: #f1f5fb;
+    --muted: #94a3b8;
+    --machine: #94a3b8;
+    --machine-soft: rgba(148,163,184,.08);
+    --machine-edge: rgba(148,163,184,.35);
+    --fluid: #3b4d80;
+    --force: #b00020;
+    --lift: #0b6c3a;
+    --font-sans: -apple-system, "Helvetica Neue", system-ui, "Segoe UI", sans-serif;
+    --font-mono: "SF Mono", "Cascadia Code", ui-monospace, monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg-deep);color:var(--ink);font-family:var(--font-sans);-webkit-font-smoothing:antialiased;line-height:1.6}
+  body{background:
+    radial-gradient(ellipse at 30% 20%, rgba(148,163,184,.05), transparent 55%),
+    radial-gradient(ellipse at 75% 75%, rgba(125,211,252,.04), transparent 55%),
+    var(--bg-deep);
+    min-height:100vh}
+  a{color:var(--machine);text-underline-offset:3px}
+  h1,h2,h3{margin:0 0 .4em;letter-spacing:-.015em;line-height:1.15}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);font-weight:800;background:linear-gradient(180deg, #f1f5fb, #94a3b8);-webkit-background-clip:text;background-clip:text;color:transparent}
+  h2{font-size:clamp(1.6rem,3.5vw,2.4rem);font-weight:700;color:#cbd5e1}
+  h3{font-size:1.18rem;font-weight:600;color:var(--ink)}
+  p{margin:0 0 1em}
+  .container{max-width:1100px;margin:0 auto;padding:0 24px}
+  code{font-family:var(--font-mono);font-size:.92em;background:#1a1f3a;padding:.12em .4em;border-radius:4px;color:#cbd5e1}
+  pre{font-family:var(--font-mono);font-size:.86rem;background:#0a0f25;border:1px solid var(--panel-edge);border-radius:10px;padding:18px 20px;color:#cbd5e1;overflow-x:auto;line-height:1.55;margin:0;max-height:520px}
+  pre .k{color:#7eb6ff}
+  pre .s{color:#fda4af}
+  pre .n{color:#34d399}
+  pre .c{color:#94a3b8;font-style:italic}
+
+  .breadcrumb{padding:18px 0;font-size:.86rem;color:var(--muted);text-align:center}
+  .breadcrumb a{color:var(--muted);text-decoration:none;border-bottom:1px dashed transparent;transition:border-color .15s ease,color .15s ease}
+  .breadcrumb a:hover{color:var(--ink);border-bottom-color:var(--ink)}
+
+  .hero{padding:24px 0 24px;text-align:center}
+  .hero .kicker{display:inline-block;padding:6px 16px;border-radius:9999px;background:var(--machine-soft);color:var(--machine);font-size:.82rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:24px;border:1px solid var(--machine-edge)}
+  .hero p.lede{color:var(--muted);max-width:64ch;margin:.6em auto 0;font-size:1.12rem}
+  .hero p.lede strong{color:var(--ink)}
+  .hero p.byline{color:var(--muted);font-size:.92rem;margin-top:24px;font-style:italic}
+
+  .prompt-card{margin:32px auto 24px;max-width:760px;background:linear-gradient(180deg, rgba(148,163,184,.04), rgba(125,211,252,.03));border:1px solid var(--panel-edge);border-radius:18px;padding:28px 32px}
+  .prompt-card .label{display:inline-block;font-size:.74rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#7dd3fc;margin-bottom:10px}
+  .prompt-card blockquote{margin:0;font-family:var(--font-mono);font-size:1.04rem;line-height:1.7;color:var(--ink);padding-left:18px;border-left:3px solid var(--machine)}
+  .prompt-card .who{margin-top:14px;font-size:.86rem;color:var(--muted)}
+
+  .stage{margin:0 auto 48px;max-width:980px;background:#f5edd9;border:1px solid var(--panel-edge);border-radius:22px;overflow:hidden;position:relative;padding:10px}
+  .stage img{display:block;width:100%;height:auto;border-radius:14px}
+
+  .timeline{padding:48px 0 24px}
+  .timeline h2{text-align:center}
+  .timeline > .container > p.lede{color:var(--muted);text-align:center;max-width:54ch;margin:0 auto 32px;font-size:1.02rem}
+  .timeline-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:18px;max-width:1000px;margin:0 auto}
+  @media (max-width:880px){.timeline-grid{grid-template-columns:1fr}}
+  .timeline-card{background:var(--panel);border:1px solid var(--panel-edge);border-radius:14px;padding:22px 22px 20px;transition:transform .2s ease,border-color .2s ease}
+  .timeline-card:hover{transform:translateY(-3px);border-color:var(--machine-edge)}
+  .timeline-card .phase-num{display:inline-block;font-family:var(--font-mono);font-size:.78rem;color:var(--machine);letter-spacing:.05em;margin-bottom:4px}
+  .timeline-card .ticks{font-family:var(--font-mono);font-size:.84rem;color:#7dd3fc;margin-bottom:10px}
+  .timeline-card h3{margin-bottom:8px}
+  .timeline-card p{font-size:.96rem;color:var(--muted);margin:0}
+
+  .reveal{padding:48px 0;border-top:1px solid var(--panel-edge);background:linear-gradient(180deg, rgba(148,163,184,.03), transparent 40%)}
+  .reveal h2{text-align:center}
+  .reveal > .container > p.lede{color:var(--muted);text-align:center;max-width:60ch;margin:0 auto 32px;font-size:1.02rem}
+  .reveal-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;max-width:1080px;margin:0 auto}
+  @media (max-width:880px){.reveal-grid{grid-template-columns:1fr}}
+  .reveal-side h3{margin-bottom:10px;display:flex;align-items:center;gap:10px;color:#cbd5e1}
+  .reveal-side h3 .pill{font-size:.66rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:9999px;background:var(--machine-soft);color:var(--machine);border:1px solid var(--machine-edge)}
+  .reveal-side p.cap{color:var(--muted);font-size:.92rem;margin-top:10px}
+  .reveal-svg-frame{background:#f5edd9;border-radius:12px;padding:6px;border:1px solid var(--panel-edge)}
+  .reveal-svg-frame img{display:block;width:100%;height:auto;border-radius:8px}
+
+  .try{padding:48px 0;border-top:1px solid var(--panel-edge)}
+  .try h2{text-align:center}
+  .try > .container > p.lede{color:var(--muted);text-align:center;max-width:54ch;margin:0 auto 32px}
+  .try-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:980px;margin:0 auto}
+  @media (max-width:720px){.try-grid{grid-template-columns:1fr}}
+  .try-card{background:var(--panel);border:1px solid var(--panel-edge);border-radius:14px;padding:22px 24px;transition:border-color .2s ease}
+  .try-card:hover{border-color:var(--machine-edge)}
+  .try-card .tag{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#7dd3fc;margin-bottom:8px}
+  .try-card blockquote{margin:0;font-family:var(--font-mono);font-size:.94rem;line-height:1.65;color:var(--ink)}
+
+  .cta{text-align:center;padding:48px 24px;border-top:1px solid var(--panel-edge)}
+  .cta .btn{display:inline-block;margin:6px;padding:12px 22px;border-radius:9999px;text-decoration:none;font-weight:600;font-size:.96rem;border:1px solid transparent;transition:transform .15s ease,background .15s ease}
+  .cta .btn-primary{background:var(--machine);color:#1a1a1a}
+  .cta .btn-primary:hover{transform:translateY(-1px);background:#cbd5e1}
+  .cta .btn-ghost{border-color:#374151;color:var(--ink)}
+  .cta .btn-ghost:hover{border-color:var(--machine);color:var(--machine)}
+  footer{padding:24px 0 48px;text-align:center;color:var(--muted);font-size:.88rem}
+</style>
+</head>
+<body>
+
+<div class="breadcrumb">
+  <a href="life-in-glyph.html">← Life in Glyph</a> &nbsp;·&nbsp; <a href="joy.html">Joy of Math</a>
+</div>
+
+<header class="hero">
+  <div class="container">
+    <span class="kicker">Machines of Wonder · RFC #9 · engineering extension</span>
+    <h1>Draw me a hydraulic press</h1>
+    <p class="lede">Pascal's principle, drawn in pencil on parchment. <strong>You asked Claude. Glyph drew it — from a compose spec.</strong> Two cylinders, one fluid, one equation. The reason a single foot can lift a car.</p>
+    <p class="byline">Blaise Pascal · <em>Treatise on the Equilibrium of Liquids</em> · 1647, published 1663.</p>
+  </div>
+</header>
+
+<section class="container">
+  <div class="prompt-card">
+    <span class="label">▸ The prompt</span>
+    <blockquote>"Draw me a hydraulic press — Pascal's principle. Two cylinders connected by a pipe, one narrow on the left (input) and one wide on the right (output). Hatched fluid filling both. A small downward force on the left turns into a much larger upward force on the right. Pencil-on-parchment style."</blockquote>
+    <p class="who">— what to say to your AI agent. Claude writes the Glyph compose spec; the compose compiler emits patterns, silhouette paths, frames, and annotations into one byte-locked SVG.</p>
+  </div>
+</section>
+
+<section class="container">
+  <div class="stage" aria-label="Glyph-rendered hydraulic press schematic">
+    <img src="eng-hydraulic.svg" alt="A hand-drawn-style hydraulic press: two cylinders connected by a low pipe filled with hatched fluid (the U-tube). On the left a small piston with a downward red force arrow labeled 'F = 1 unit'. On the right a wide piston with a much taller upward green force arrow labeled '≈ 9× the lift'. Pressure equation p = F₁/A₁ = F₂/A₂ in the center." loading="lazy">
+  </div>
+</section>
+
+<section class="timeline">
+  <div class="container">
+    <h2>One press, three primitives</h2>
+    <p class="lede">RFC #9's pattern fills + silhouette paths + frame schematic + annotation leaders cover this entire engineering drawing.</p>
+    <div class="timeline-grid">
+      <div class="timeline-card">
+        <span class="phase-num">PRIMITIVE 1</span>
+        <div class="ticks">pattern · p-fluid</div>
+        <h3>The fluid</h3>
+        <p>A 6×10 tiled pattern of vertical short strokes — reads as still water. One U-shaped silhouette-path (8 line commands) traces the boundary; the pattern fills it. The pipe and both cylinders share one continuous closed region.</p>
+      </div>
+      <div class="timeline-card">
+        <span class="phase-num">PRIMITIVE 2</span>
+        <div class="ticks">frame × 2 + silhouette</div>
+        <h3>The cylinders + pistons</h3>
+        <p>Each cylinder is a <code>frame</code> mark (RFC #7) with a labeled header bar. The pistons inside are pattern-filled rectangles (a 135°-rotated hatch reads as machined steel) plus rod and platform plates in cream.</p>
+      </div>
+      <div class="timeline-card">
+        <span class="phase-num">PRIMITIVE 3</span>
+        <div class="ticks">annotation × 2 + arrows</div>
+        <h3>The forces + equation</h3>
+        <p>Two leader-line annotations with italic labels (RFC #7). Two force arrows as silhouette-paths — red downward on the input, green upward on the output. The middle holds the equation, set in compose's text mark.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="reveal">
+  <div class="container">
+    <h2>How Glyph drew it</h2>
+    <p class="lede">Claude writes the compose JSON; Glyph's compose compiler turns it into byte-identical SVG. Same fluid pattern, same arrow angles, every CI run.</p>
+    <div class="reveal-grid">
+      <div class="reveal-side">
+        <h3>The compose spec <span class="pill">JSON · excerpt</span></h3>
+        <pre><span class="c">// eng-hydraulic.json — the fluid pattern + U-shape</span>
+{
+  <span class="k">"compose"</span>: {
+    <span class="k">"viewBox"</span>: { <span class="k">"width"</span>: <span class="n">1000</span>, <span class="k">"height"</span>: <span class="n">600</span> },
+    <span class="k">"theme"</span>: { <span class="k">"preset"</span>: <span class="s">"pencil-parchment"</span> },
+    <span class="k">"defs"</span>: {
+      <span class="k">"patterns"</span>: [
+        { <span class="k">"id"</span>: <span class="s">"p-fluid"</span>,
+          <span class="k">"width"</span>: <span class="n">6</span>, <span class="k">"height"</span>: <span class="n">10</span>,
+          <span class="k">"children"</span>: [
+            { <span class="k">"kind"</span>: <span class="s">"line"</span>, <span class="k">"x1"</span>: <span class="n">0</span>, <span class="k">"y1"</span>: <span class="n">0</span>,
+              <span class="k">"x2"</span>: <span class="n">0</span>, <span class="k">"y2"</span>: <span class="n">10</span>,
+              <span class="k">"stroke"</span>: <span class="s">"#3b4d80"</span> }
+            <span class="c">// ... + a half-stroke for density</span>
+          ]
+        }
+      ]
+    },
+    <span class="k">"children"</span>: [
+      <span class="c">// 1. frame · small cylinder, "A₁ — input"</span>
+      <span class="c">// 2. frame · large cylinder, "A₂ — output (3× wider)"</span>
+      <span class="c">// 3. fluid silhouette (U-shape, p-fluid filled)</span>
+      <span class="c">// 4. small piston head + rod + handle</span>
+      <span class="c">// 5. large piston head + rod + platform</span>
+      <span class="c">// 6. F_in arrow (red, down)</span>
+      <span class="c">// 7. F_out arrow (green, up, 4.4× thicker)</span>
+      <span class="c">// 8. two annotation-leaders</span>
+      <span class="c">// 9. equation + caption text</span>
+    ]
+  }
+}</pre>
+        <p class="cap">Everything you see on the press — the hatching, the U-shape, the force arrows, even the leader-line angles — is in the compose spec. <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/compose/eng-hydraulic.json">View on GitHub</a>.</p>
+      </div>
+      <div class="reveal-side">
+        <h3>Glyph compose output <span class="pill">SVG</span></h3>
+        <div class="reveal-svg-frame">
+          <img src="eng-hydraulic.svg" alt="Glyph-rendered hydraulic press, same SVG as the hero stage" loading="lazy">
+        </div>
+        <p class="cap">Byte-stable across Ubuntu / macOS / Windows × Node 20 / 22. The compose compiler emits patterns into <code>&lt;defs&gt;</code>, then walks children, attaching pattern URLs as fills.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="try">
+  <div class="container">
+    <h2>Your turn — prompts to try</h2>
+    <p class="lede">Compose extends naturally to other classical machines. Just frames + pattern fills + silhouette paths.</p>
+    <div class="try-grid">
+      <div class="try-card">
+        <span class="tag">▸ Hydraulics</span>
+        <blockquote>"Draw me a hydraulic jack — same Pascal's principle, but with a check valve and a reservoir. Show one stroke filling the lift chamber. Pencil-on-parchment."</blockquote>
+      </div>
+      <div class="try-card">
+        <span class="tag">▸ Pneumatics</span>
+        <blockquote>"Draw me a pneumatic cylinder driven by compressed air. Single-acting and double-acting versions, side by side. Same pencil style."</blockquote>
+      </div>
+      <div class="try-card">
+        <span class="tag">▸ Thermodynamics</span>
+        <blockquote>"Draw me a Stirling engine — two pistons, a regenerator between them, hot side and cold side. Hatched gas in the cylinders. Show one full thermodynamic cycle as four panels."</blockquote>
+      </div>
+      <div class="try-card">
+        <span class="tag">▸ Civil engineering</span>
+        <blockquote>"Draw me a Roman arch carrying a load. Stress arrows showing how the load is transferred to the abutments. Same pencil aesthetic."</blockquote>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <h2 style="margin-bottom:24px">More Life in Glyph</h2>
+  <a class="btn btn-primary" href="life-in-glyph.html">See the gallery ↗</a>
+  <a class="btn btn-ghost" href="draw-me-windmill.html">A Windmill</a>
+  <a class="btn btn-ghost" href="draw-me-piston.html">Watt's Steam Engine</a>
+  <a class="btn btn-ghost" href="draw-me-pendulum-clock.html">A Pendulum Clock</a>
+</section>
+
+<footer>
+  <div class="container">
+    Drawn by Glyph · Asked by you · Apache 2.0 · <a href="https://github.com/seanhanca/glyph">GitHub</a>
+  </div>
+</footer>
+
+</body>
+</html>

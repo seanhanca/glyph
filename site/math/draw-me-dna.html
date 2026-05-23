@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Draw Me DNA — Claude × Glyph showcase</title>
+<meta name="description" content="One English prompt to Claude. One Glyph compose spec. A double helix rendered from gradients, rungs, and starfield primitives. Part of Life in Glyph.">
+<meta property="og:title" content="Draw Me DNA — Life in Glyph">
+<meta property="og:description" content="The blueprint of life, drawn from one English sentence.">
+<style>
+  :root {
+    --bg-deep: #02030a;
+    --panel: #0c1126;
+    --panel-edge: #1d2444;
+    --ink: #f1f5fb;
+    --muted: #94a3b8;
+    --helix: #a78bfa;
+    --helix-soft: rgba(167,139,250,.10);
+    --helix-edge: rgba(167,139,250,.35);
+    --rung-at: #60a5fa;
+    --rung-gc: #f87171;
+    --font-sans: -apple-system, "Helvetica Neue", system-ui, "Segoe UI", sans-serif;
+    --font-mono: "SF Mono", "Cascadia Code", ui-monospace, monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg-deep);color:var(--ink);font-family:var(--font-sans);-webkit-font-smoothing:antialiased;line-height:1.6}
+  body{background:
+    radial-gradient(ellipse at 50% 18%, rgba(167,139,250,.10), transparent 55%),
+    radial-gradient(ellipse at 80% 80%, rgba(96,165,250,.04), transparent 55%),
+    var(--bg-deep);
+    min-height:100vh}
+  a{color:var(--helix);text-underline-offset:3px}
+  h1,h2,h3{margin:0 0 .4em;letter-spacing:-.015em;line-height:1.15}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);font-weight:800;background:linear-gradient(180deg, #ddd6fe, #a78bfa);-webkit-background-clip:text;background-clip:text;color:transparent}
+  h2{font-size:clamp(1.6rem,3.5vw,2.4rem);font-weight:700;color:#c4b5fd}
+  h3{font-size:1.18rem;font-weight:600;color:var(--ink)}
+  p{margin:0 0 1em}
+  .container{max-width:1100px;margin:0 auto;padding:0 24px}
+  code{font-family:var(--font-mono);font-size:.92em;background:#1a1f3a;padding:.12em .4em;border-radius:4px;color:#ddd6fe}
+  pre{font-family:var(--font-mono);font-size:.86rem;background:#0a0f25;border:1px solid var(--panel-edge);border-radius:10px;padding:18px 20px;color:#ddd6fe;overflow-x:auto;line-height:1.55;margin:0;max-height:520px}
+  pre .k{color:#7eb6ff}
+  pre .s{color:#fda4af}
+  pre .n{color:#34d399}
+  pre .c{color:#94a3b8;font-style:italic}
+
+  .breadcrumb{padding:18px 0;font-size:.86rem;color:var(--muted);text-align:center}
+  .breadcrumb a{color:var(--muted);text-decoration:none;border-bottom:1px dashed transparent;transition:border-color .15s ease,color .15s ease}
+  .breadcrumb a:hover{color:var(--helix);border-bottom-color:var(--helix)}
+
+  .hero{padding:24px 0 24px;text-align:center}
+  .hero .kicker{display:inline-block;padding:6px 16px;border-radius:9999px;background:var(--helix-soft);color:var(--helix);font-size:.82rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:24px;border:1px solid var(--helix-edge)}
+  .hero p.lede{color:var(--muted);max-width:64ch;margin:.6em auto 0;font-size:1.12rem}
+  .hero p.lede strong{color:var(--ink)}
+  .hero p.byline{color:var(--muted);font-size:.92rem;margin-top:24px;font-style:italic}
+
+  .prompt-card{margin:32px auto 24px;max-width:760px;background:linear-gradient(180deg, rgba(167,139,250,.06), rgba(96,165,250,.03));border:1px solid var(--panel-edge);border-radius:18px;padding:28px 32px}
+  .prompt-card .label{display:inline-block;font-size:.74rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--rung-at);margin-bottom:10px}
+  .prompt-card blockquote{margin:0;font-family:var(--font-mono);font-size:1.04rem;line-height:1.7;color:var(--ink);padding-left:18px;border-left:3px solid var(--helix)}
+  .prompt-card .who{margin-top:14px;font-size:.86rem;color:var(--muted)}
+
+  .stage{margin:0 auto 48px;max-width:720px;background:radial-gradient(ellipse at 50% 50%, rgba(15,23,42,.6), rgba(2,6,13,.85) 70%);border:1px solid var(--panel-edge);border-radius:22px;overflow:hidden;position:relative;padding:8px}
+  .stage img{display:block;width:100%;height:auto;border-radius:16px}
+
+  .legend{padding:24px 0 8px;max-width:760px;margin:0 auto;display:flex;justify-content:center;gap:32px;flex-wrap:wrap;font-size:.92rem;color:var(--muted)}
+  .legend .item{display:inline-flex;align-items:center;gap:8px}
+  .legend .swatch{display:inline-block;width:18px;height:3px;border-radius:1px;flex:none}
+
+  .timeline{padding:48px 0 24px}
+  .timeline h2{text-align:center}
+  .timeline > .container > p.lede{color:var(--muted);text-align:center;max-width:54ch;margin:0 auto 32px;font-size:1.02rem}
+  .timeline-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:18px;max-width:1000px;margin:0 auto}
+  @media (max-width:880px){.timeline-grid{grid-template-columns:1fr}}
+  .timeline-card{background:var(--panel);border:1px solid var(--panel-edge);border-radius:14px;padding:22px 22px 20px;transition:transform .2s ease,border-color .2s ease}
+  .timeline-card:hover{transform:translateY(-3px);border-color:var(--helix-edge)}
+  .timeline-card .phase-num{display:inline-block;font-family:var(--font-mono);font-size:.78rem;color:var(--helix);letter-spacing:.05em;margin-bottom:4px}
+  .timeline-card .ticks{font-family:var(--font-mono);font-size:.84rem;color:var(--rung-at);margin-bottom:10px}
+  .timeline-card h3{margin-bottom:8px}
+  .timeline-card p{font-size:.96rem;color:var(--muted);margin:0}
+
+  .reveal{padding:48px 0;border-top:1px solid var(--panel-edge);background:linear-gradient(180deg, rgba(167,139,250,.03), transparent 40%)}
+  .reveal h2{text-align:center}
+  .reveal > .container > p.lede{color:var(--muted);text-align:center;max-width:60ch;margin:0 auto 32px;font-size:1.02rem}
+  .reveal-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;max-width:1080px;margin:0 auto}
+  @media (max-width:880px){.reveal-grid{grid-template-columns:1fr}}
+  .reveal-side h3{margin-bottom:10px;display:flex;align-items:center;gap:10px;color:#c4b5fd}
+  .reveal-side h3 .pill{font-size:.66rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:9999px;background:var(--helix-soft);color:var(--helix);border:1px solid var(--helix-edge)}
+  .reveal-side p.cap{color:var(--muted);font-size:.92rem;margin-top:10px}
+
+  .try{padding:48px 0;border-top:1px solid var(--panel-edge)}
+  .try h2{text-align:center}
+  .try > .container > p.lede{color:var(--muted);text-align:center;max-width:54ch;margin:0 auto 32px}
+  .try-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:980px;margin:0 auto}
+  @media (max-width:720px){.try-grid{grid-template-columns:1fr}}
+  .try-card{background:var(--panel);border:1px solid var(--panel-edge);border-radius:14px;padding:22px 24px;transition:border-color .2s ease}
+  .try-card:hover{border-color:var(--helix-edge)}
+  .try-card .tag{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--rung-at);margin-bottom:8px}
+  .try-card blockquote{margin:0;font-family:var(--font-mono);font-size:.94rem;line-height:1.65;color:var(--ink)}
+
+  .cta{text-align:center;padding:48px 24px;border-top:1px solid var(--panel-edge)}
+  .cta .btn{display:inline-block;margin:6px;padding:12px 22px;border-radius:9999px;text-decoration:none;font-weight:600;font-size:.96rem;border:1px solid transparent;transition:transform .15s ease,background .15s ease}
+  .cta .btn-primary{background:var(--helix);color:#1a1a1a}
+  .cta .btn-primary:hover{transform:translateY(-1px);background:#c4b5fd}
+  .cta .btn-ghost{border-color:#374151;color:var(--ink)}
+  .cta .btn-ghost:hover{border-color:var(--helix);color:var(--helix)}
+  footer{padding:24px 0 48px;text-align:center;color:var(--muted);font-size:.88rem}
+</style>
+</head>
+<body>
+
+<div class="breadcrumb">
+  <a href="life-in-glyph.html">← Life in Glyph</a> &nbsp;·&nbsp; <a href="joy.html">Joy of Math</a>
+</div>
+
+<header class="hero">
+  <div class="container">
+    <span class="kicker">Life in Glyph · RFC #9 · bio extension</span>
+    <h1>Draw me DNA</h1>
+    <p class="lede">A double helix in deep space, animated from one English sentence. <strong>You asked Claude. Glyph drew it — from a compose spec, no hand-tweaked SVG.</strong> Two phosphate strands spiraling at ten base pairs per turn, against a deterministic starfield.</p>
+    <p class="byline">First X-ray diffraction · Franklin · King's College, 1952. Structure paper · Watson &amp; Crick · Nature, April 1953.</p>
+  </div>
+</header>
+
+<section class="container">
+  <div class="prompt-card">
+    <span class="label">▸ The prompt</span>
+    <blockquote>"Draw me DNA. The double helix. Two phosphate-sugar backbones winding around each other, base-pair rungs in the middle (A-T blue, G-C red), against a starfield because the blueprint of life deserves a backdrop. Beautiful for a 5-year-old, accurate for a molecular biologist."</blockquote>
+    <p class="who">— what to say to your AI agent. Claude writes the Glyph compose spec; the compose compiler emits gradients, polylines, starfield, and silhouette paths into one byte-locked SVG.</p>
+  </div>
+</section>
+
+<section class="container">
+  <div class="stage" aria-label="Glyph-rendered DNA double helix">
+    <img src="bio-dna.svg" alt="A DNA double helix: two sinusoidal strands winding around the vertical axis, base-pair rungs in blue and red, deterministic starfield in the background, soft purple halo behind the helix." loading="lazy">
+  </div>
+  <div class="legend" aria-hidden="true">
+    <span class="item"><span class="swatch" style="background:var(--rung-at)"></span> A-T base pair</span>
+    <span class="item"><span class="swatch" style="background:var(--rung-gc)"></span> G-C base pair</span>
+    <span class="item"><span class="swatch" style="background:linear-gradient(90deg,#22d3ee,#a78bfa,#ec4899)"></span> sugar-phosphate backbone</span>
+  </div>
+</section>
+
+<section class="timeline">
+  <div class="container">
+    <h2>One helix, three primitives</h2>
+    <p class="lede">RFC #9 added everything we needed to render this without a single hand-authored SVG primitive: gradients, silhouette paths, polylines, and starfield.</p>
+    <div class="timeline-grid">
+      <div class="timeline-card">
+        <span class="phase-num">PRIMITIVE 1</span>
+        <div class="ticks">silhouette-path × 2</div>
+        <h3>The backbones</h3>
+        <p>Each strand is a sampled sine — 114 points along <code>x = 90·sin(2π·y/170)</code>, joined as an SVG path. Strand A goes cyan-purple-magenta from top to bottom; strand B is π out of phase and runs the gradient backwards.</p>
+      </div>
+      <div class="timeline-card">
+        <span class="phase-num">PRIMITIVE 2</span>
+        <div class="ticks">polyline × 27</div>
+        <h3>The base pairs</h3>
+        <p>Every 24 px in y we draw a horizontal rung connecting the two strands — blue for A-T, red for G-C. Compose skips rungs where the strands cross (would be visually overlapping).</p>
+      </div>
+      <div class="timeline-card">
+        <span class="phase-num">PRIMITIVE 3</span>
+        <div class="ticks">starfield · seed 7</div>
+        <h3>The cosmos</h3>
+        <p>60 stars placed by a Park-Miller LCG seeded at 7. Same seed, same positions, byte-identical SVG on every CI run. A radial-gradient halo sits behind the helix; a giant rect at the back is filled by the same gradient.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="reveal">
+  <div class="container">
+    <h2>How Glyph drew it</h2>
+    <p class="lede">Claude writes the compose JSON; Glyph's compose compiler turns it into byte-identical SVG. No CSS, no manual coordinates outside the spec.</p>
+    <div class="reveal-grid">
+      <div class="reveal-side">
+        <h3>The compose spec <span class="pill">JSON</span></h3>
+        <pre><span class="c">// bio-dna.json — top level (children elided)</span>
+{
+  <span class="k">"compose"</span>: {
+    <span class="k">"viewBox"</span>: { <span class="k">"width"</span>: <span class="n">600</span>, <span class="k">"height"</span>: <span class="n">800</span> },
+    <span class="k">"title"</span>: <span class="s">"DNA double helix"</span>,
+    <span class="k">"theme"</span>: { <span class="k">"background"</span>: <span class="s">"#020617"</span> },
+    <span class="k">"defs"</span>: {
+      <span class="k">"gradients"</span>: [
+        { <span class="k">"id"</span>: <span class="s">"g-strand-a"</span>, <span class="k">"kind"</span>: <span class="s">"linear"</span>,
+          <span class="k">"x1"</span>: <span class="s">"0%"</span>, <span class="k">"y1"</span>: <span class="s">"0%"</span>,
+          <span class="k">"x2"</span>: <span class="s">"0%"</span>, <span class="k">"y2"</span>: <span class="s">"100%"</span>,
+          <span class="k">"stops"</span>: [
+            { <span class="k">"offset"</span>: <span class="s">"0%"</span>,   <span class="k">"color"</span>: <span class="s">"#22d3ee"</span> },
+            { <span class="k">"offset"</span>: <span class="s">"50%"</span>,  <span class="k">"color"</span>: <span class="s">"#a78bfa"</span> },
+            { <span class="k">"offset"</span>: <span class="s">"100%"</span>, <span class="k">"color"</span>: <span class="s">"#ec4899"</span> }
+          ]
+        },
+        <span class="c">// ... g-strand-b (reverse stops), g-halo, g-bg</span>
+      ]
+    },
+    <span class="k">"children"</span>: [
+      <span class="c">// 1. background rect, gradient-filled</span>
+      <span class="c">// 2. starfield { count: 60, seed: 7, region }</span>
+      <span class="c">// 3. glow halo behind the helix</span>
+      <span class="c">// 4. ~27 polyline rungs (A-T blue, G-C red)</span>
+      <span class="c">// 5. silhouette-path A (gradient stroke)</span>
+      <span class="c">// 6. silhouette-path B (reverse-gradient stroke)</span>
+      <span class="c">// 7. title + caption text</span>
+    ]
+  }
+}</pre>
+        <p class="cap">The points along each strand are computed once by a small generator script; the JSON itself is fully static. <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/compose/bio-dna.json">View on GitHub</a>.</p>
+      </div>
+      <div class="reveal-side">
+        <h3>Glyph compose output <span class="pill">SVG</span></h3>
+        <div class="stage" style="padding:0;margin:0;background:#020617">
+          <img src="bio-dna.svg" alt="Glyph-rendered double helix, same SVG as the hero stage, embedded inline" loading="lazy">
+        </div>
+        <p class="cap">Byte-stable across Ubuntu / macOS / Windows × Node 20 / 22. The compose compiler emits <code>&lt;defs&gt;</code> with gradients + the deterministic starfield, then walks children in order.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="try">
+  <div class="container">
+    <h2>Your turn — prompts to try</h2>
+    <p class="lede">Compose extends naturally to other biological scaffolds. Each is a few children and a defs block.</p>
+    <div class="try-grid">
+      <div class="try-card">
+        <span class="tag">▸ Molecular biology</span>
+        <blockquote>"Draw me a single nucleotide — phosphate, sugar, base. Labeled, against the same starfield. Show how four of these tile into the rungs of the helix."</blockquote>
+      </div>
+      <div class="try-card">
+        <span class="tag">▸ Comparative anatomy</span>
+        <blockquote>"Draw me a triple helix — collagen. Three strands instead of two, wound at a tighter pitch. Use the same primitives, the same starfield, a different palette."</blockquote>
+      </div>
+      <div class="try-card">
+        <span class="tag">▸ Pattern formation</span>
+        <blockquote>"Draw me telomeres at the ends of a chromosome — the repeating TTAGGG cap that shortens each cell division. Show three lengths: young cell, middle-aged cell, senescent cell."</blockquote>
+      </div>
+      <div class="try-card">
+        <span class="tag">▸ Evolution</span>
+        <blockquote>"Draw me the RNA single helix — the older molecule. Beside the DNA double helix. Same scale, same backdrop, so the structural difference is the whole story."</blockquote>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <h2 style="margin-bottom:24px">More Life in Glyph</h2>
+  <a class="btn btn-primary" href="life-in-glyph.html">See the gallery ↗</a>
+  <a class="btn btn-ghost" href="draw-me-jellyfish.html">A Jellyfish</a>
+  <a class="btn btn-ghost" href="draw-me-heartbeat.html">A Heartbeat</a>
+  <a class="btn btn-ghost" href="draw-me-leopard.html">A Leopard's Spots</a>
+</section>
+
+<footer>
+  <div class="container">
+    Drawn by Glyph · Asked by you · Apache 2.0 · <a href="https://github.com/seanhanca/glyph">GitHub</a>
+  </div>
+</footer>
+
+</body>
+</html>
