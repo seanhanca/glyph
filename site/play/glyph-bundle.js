@@ -28001,9 +28001,15 @@ function renderMark(m, interactive) {
     case "group": {
       const tx = m.translateX.toFixed(3);
       const ty = m.translateY.toFixed(3);
+      let transform = `translate(${tx}, ${ty})`;
+      if (m.scaleX !== void 0 || m.scaleY !== void 0) {
+        const sx = (m.scaleX ?? 1).toFixed(6);
+        const sy = (m.scaleY ?? m.scaleX ?? 1).toFixed(6);
+        transform += ` scale(${sx}, ${sy})`;
+      }
       const childrenSvg = m.children.map((c) => renderMark(c, interactive)).join("");
       const anim = m.loopAnimationXml ?? "";
-      return `<g transform="translate(${tx}, ${ty})">${childrenSvg}${anim}</g>`;
+      return `<g transform="${transform}">${childrenSvg}${anim}</g>`;
     }
   }
 }
