@@ -160,8 +160,15 @@
              y(t) = 4·sin(t) + sin(3t)
            Sampled at 200 points and traced as the chamber outline. -->
 
-      <!-- Housing outline — manually computed sample points from the
-           formula scaled by 30 px/unit, centered at (500, 230). -->
+      <!-- Housing outline — built by JS at page load from the SAME
+           parametric formula the rotor's apexes trace, so the
+           housing curve and the apex trajectories are guaranteed
+           consistent. JS samples 400 points and writes the d
+           attribute below. -->
+      <path class="housing-curve" d="" fill="rgba(31,26,20,.04)"
+            stroke="var(--graphite)" stroke-width="1.5" aria-hidden="true"/>
+
+      <g style="display:none">
       <path d="M 650.00 230.00
                L 649.32 233.93 L 647.30 237.85 L 643.96 241.74 L 639.32 245.58 L 633.43 249.35
                L 626.33 253.04 L 618.10 256.61 L 608.83 260.05 L 598.62 263.34 L 587.59 266.45
@@ -214,6 +221,7 @@
                L 575.86 185.94 L 587.59 186.55 L 598.62 187.15 L 608.83 187.73 L 618.10 188.27
                L 626.33 188.78 L 633.43 189.24 L 639.32 189.66 L 643.96 190.03 L 647.30 190.34
                L 649.32 190.61 Z" fill="rgba(31,26,20,.04)" stroke="var(--graphite)" stroke-width="1.5" aria-hidden="true"/>
+      </g>
 
       <!-- Eccentric arm — dashed line from the (fixed) output-shaft
            axis to the (moving) rotor bearing. JS sets the x2/y2
@@ -241,14 +249,14 @@
            the body angle is zero. Apex distance from rotor center =
            generating radius R = 120 px (must equal the housing's
            generating radius for the apexes to touch the chamber
-           wall). The three rounded sides are circular arcs whose
-           centers are at the opposite apex (radius = chord length
-           = 120·√3 ≈ 208 px). Transform set per frame by JS. -->
+           wall). Sides are STRAIGHT lines (a real Wankel rotor has
+           subtly curved sides that follow the inverse offset of the
+           housing — we don't try to draw that exactly, since simple
+           arc-bulged sides overshoot the housing wall at the
+           narrow waist. The simplified flat-sided triangle keeps
+           the rotor fully inside the housing at every angle.) -->
       <g class="rotor-group" aria-hidden="true" transform="translate(530, 230)">
-        <path d="M 120 0
-                 A 208 208 0 0 1 -60 103.92
-                 A 208 208 0 0 1 -60 -103.92
-                 A 208 208 0 0 1 120 0 Z"
+        <path d="M 120 0 L -60 103.92 L -60 -103.92 Z"
               fill="url(#rotor-hatch)" stroke="var(--graphite)" stroke-width="2" stroke-linejoin="round"/>
         <!-- Apex markers — always sit on the housing wall -->
         <circle cx="120" cy="0" r="4" fill="var(--rust)" stroke="var(--graphite)" stroke-width="0.8"/>
@@ -414,6 +422,28 @@
   // housing's generating radius) and three apexes at α ∈ {0,
   // 2π/3, 4π/3}, every apex always touches the housing wall —
   // the defining geometric property of the Wankel design.
+  // Build the housing curve from the same parametric formula the
+  // Glyph fixture compiles: x(t) = R·cos t + e·cos 3t, y(t) = R·sin t
+  // + e·sin 3t. We sample 400 evenly-spaced t-values around the
+  // [0, 2π) circle. R = 120 px and e = 30 px match the rotor's
+  // R = 120 px (apex radius) and e = 30 px (eccentricity), so every
+  // apex always lies exactly on this curve as the rotor moves.
+  function buildHousing(){
+    const path = document.querySelector('.housing-curve');
+    if (!path) return;
+    const cx = 500, cy = 230, R = 120, e = 30, N = 400;
+    let d = "";
+    for (let i = 0; i <= N; i++) {
+      const t = (i / N) * 2 * Math.PI;
+      const x = cx + R * Math.cos(t) + e * Math.cos(3 * t);
+      const y = cy + R * Math.sin(t) + e * Math.sin(3 * t);
+      d += (i === 0 ? "M " : " L ") + x.toFixed(3) + " " + y.toFixed(3);
+    }
+    d += " Z";
+    path.setAttribute("d", d);
+  }
+  buildHousing();
+
   function animateRotor(){
     const rotor = document.querySelector('.rotor-group');
     const arm = document.querySelector('.eccentric-arm');
