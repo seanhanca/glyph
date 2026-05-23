@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>The five things Glyph does best — an essay</title>
+<meta name="description" content="Glyph is a 2D SVG renderer. Setting aside the things it doesn't do (real-time, 3D, dashboards), here are the five non-chart capabilities where it genuinely wins. Each with two showcases.">
+<meta property="og:title" content="The five things Glyph does best">
+<meta property="og:description" content="An essay on what Glyph is for — and what it isn't.">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{
+    background:#0a0d18;
+    color:#e2dccb;
+    font-family:"Iowan Old Style","Palatino Linotype",Georgia,"Times New Roman",serif;
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+    font-feature-settings:"liga","onum","kern";
+  }
+  ::selection{background:#a78bfa;color:#0a0d18}
+  a{color:#c4b5fd;text-underline-offset:3px;text-decoration-thickness:1px}
+  a:hover{color:#ddd6fe}
+
+  .wrap{max-width:780px;margin:0 auto;padding:64px 24px 96px}
+
+  .meta{font-family:-apple-system,system-ui,sans-serif;font-size:.78rem;text-transform:uppercase;letter-spacing:.18em;color:#6b7280;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+  .meta a{color:#6b7280;text-decoration:none;border-bottom:1px dashed transparent;transition:color .15s,border-color .15s}
+  .meta a:hover{color:#e2dccb;border-bottom-color:#e2dccb}
+
+  h1.title{
+    font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;
+    font-size:clamp(2.4rem,5.2vw,3.8rem);
+    font-weight:600;
+    letter-spacing:-.015em;
+    line-height:1.1;
+    color:#f5f0e0;
+    margin-bottom:18px;
+    text-wrap:balance;
+  }
+  h1.title .accent{color:#c4b5fd;font-style:italic}
+
+  .standfirst{
+    font-family:-apple-system,system-ui,sans-serif;
+    font-size:1.18rem;
+    line-height:1.6;
+    color:#9ca3af;
+    margin-bottom:40px;
+    max-width:65ch;
+  }
+  .standfirst strong{color:#e2dccb;font-weight:500}
+
+  .byline{font-family:-apple-system,system-ui,sans-serif;font-size:.84rem;color:#6b7280;border-top:1px solid #1f2937;border-bottom:1px solid #1f2937;padding:14px 0;margin-bottom:48px;display:flex;justify-content:space-between;gap:24px}
+
+  .intro{font-size:1.06rem;line-height:1.75;color:#cdc4b0;margin-bottom:64px}
+  .intro p{margin-bottom:18px}
+  .intro p::first-letter{
+    font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;
+    font-size:3.6rem;
+    line-height:.85;
+    float:left;
+    margin:6px 8px 0 0;
+    color:#c4b5fd;
+    font-weight:600;
+  }
+
+  .chapter{margin-bottom:96px}
+  .chapter-num{
+    font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;
+    font-style:italic;
+    font-size:1.4rem;
+    color:#a78bfa;
+    margin-bottom:8px;
+    letter-spacing:.05em;
+  }
+  .chapter h2{
+    font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;
+    font-size:2.1rem;
+    font-weight:600;
+    line-height:1.15;
+    letter-spacing:-.015em;
+    color:#f5f0e0;
+    margin-bottom:14px;
+    text-wrap:balance;
+  }
+  .chapter .summary{
+    font-family:-apple-system,system-ui,sans-serif;
+    font-size:.92rem;
+    color:#8b9bb4;
+    font-style:italic;
+    margin-bottom:24px;
+    letter-spacing:.01em;
+  }
+  .chapter p{margin-bottom:18px;font-size:1.06rem;line-height:1.75;color:#cdc4b0}
+  .chapter p strong{color:#f5f0e0;font-weight:500}
+  .chapter code{font-family:"SF Mono","Cascadia Code",ui-monospace,monospace;font-size:.88em;background:#13192a;padding:.12em .42em;border-radius:3px;color:#c4b5fd}
+
+  .showcase-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:24px;
+    margin:32px 0;
+  }
+  @media (max-width:720px){.showcase-row{grid-template-columns:1fr}}
+  .showcase{margin:0}
+  .showcase .frame{
+    background:#020617;
+    border:1px solid #1f2937;
+    border-radius:6px;
+    overflow:hidden;
+    aspect-ratio:1;
+  }
+  .showcase .frame.parchment{background:#f5edd9}
+  .showcase .frame img{display:block;width:100%;height:100%;object-fit:contain}
+  .showcase figcaption{
+    font-family:-apple-system,system-ui,sans-serif;
+    font-size:.86rem;
+    line-height:1.5;
+    color:#8b9bb4;
+    margin-top:12px;
+    padding:0 4px;
+  }
+  .showcase figcaption strong{color:#cdc4b0;font-weight:500}
+  .showcase figcaption a{color:#a78bfa}
+
+  /* Wider showcases for landscape SVGs */
+  .showcase-wide{margin:32px 0}
+  .showcase-wide .frame{
+    background:#020617;
+    border:1px solid #1f2937;
+    border-radius:6px;
+    overflow:hidden;
+  }
+  .showcase-wide .frame.parchment{background:#f5edd9}
+  .showcase-wide .frame img{display:block;width:100%;height:auto}
+  .showcase-wide figcaption{font-family:-apple-system,system-ui,sans-serif;font-size:.86rem;line-height:1.5;color:#8b9bb4;margin-top:12px;padding:0 4px}
+  .showcase-wide figcaption strong{color:#cdc4b0;font-weight:500}
+
+  hr.section{border:none;height:1px;background:linear-gradient(90deg, transparent, #1f2937 30%, #1f2937 70%, transparent);margin:80px 0 64px}
+
+  .not-top{margin-top:96px}
+  .not-top h2{
+    font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;
+    font-size:1.75rem;
+    font-weight:600;
+    color:#f5f0e0;
+    margin-bottom:14px;
+    text-wrap:balance;
+  }
+  .not-top > p{font-size:1.04rem;color:#cdc4b0;margin-bottom:28px;line-height:1.7}
+
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-family:-apple-system,system-ui,sans-serif;
+    font-size:.92rem;
+    margin-top:16px;
+  }
+  table th{
+    text-align:left;
+    padding:14px 16px;
+    background:#13192a;
+    color:#a78bfa;
+    font-weight:600;
+    border-bottom:2px solid #1f2937;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+    font-size:.72rem;
+  }
+  table td{padding:14px 16px;border-bottom:1px solid #1f2937;color:#cdc4b0;vertical-align:top}
+  table td:first-child{color:#f5f0e0;font-weight:500;width:30%}
+  table td:last-child{color:#8b9bb4;font-style:italic}
+
+  .closing{
+    margin-top:96px;
+    padding:32px 0 0;
+    border-top:1px solid #1f2937;
+    font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;
+    font-size:1.1rem;
+    font-style:italic;
+    line-height:1.7;
+    color:#cdc4b0;
+  }
+  .closing strong{font-style:normal;color:#f5f0e0;font-weight:500}
+
+  footer{
+    margin-top:64px;
+    padding:24px 0;
+    border-top:1px solid #1f2937;
+    font-family:-apple-system,system-ui,sans-serif;
+    font-size:.84rem;
+    color:#6b7280;
+    text-align:center;
+  }
+  footer a{color:#6b7280}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="meta">
+    <span><a href="life-in-glyph.html">← Life in Glyph</a> · <a href="extendedcases.html">Extended Cases</a></span>
+    <span>Essay · vol. 1</span>
+  </div>
+
+  <h1 class="title">The five things <span class="accent">Glyph</span> does best</h1>
+
+  <p class="standfirst">Glyph is a 2D SVG renderer. Setting aside the things it doesn't do — real-time GPU, 3D, dashboards, network graphs — <strong>here are the five non-chart capabilities where it genuinely wins.</strong> Each one with two examples.</p>
+
+  <div class="byline">
+    <span>Drawn by Glyph · Asked by you</span>
+    <span>Apache 2.0 · <a href="https://github.com/seanhanca/glyph">source</a></span>
+  </div>
+
+  <div class="intro">
+    <p>Most viz tools optimize for one thing: <em>plotting data</em>. Glyph does that too, but it isn't where Glyph is most distinctive. The interesting question is the inverse — once you set aside bar charts and line plots, what does Glyph do that nothing else does as well?</p>
+    <p>This essay answers that question by walking through the five capabilities, in order of how unique they are. Each chapter pairs a one-paragraph argument with two rendered examples. The aim is not to claim Glyph is best at everything; the closing table lists exactly the things it isn't.</p>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────────────────────────── -->
+
+  <article class="chapter">
+    <div class="chapter-num">I.</div>
+    <h2>Algorithm-driven math visualization</h2>
+    <p class="summary">You describe the equation, not the data. Glyph integrates and renders in one pass.</p>
+
+    <p>Almost no other declarative viz tool integrates ODEs and PDEs inside the renderer. Vega and Plotly expect pre-computed data; you write Python or JavaScript first, then plot. Glyph collapses that into one JSON spec. <code>data.shape: "trajectory"</code> takes <code>dxdt</code> and <code>dydt</code> as math expressions and runs RK4 to produce the curve. <code>data.shape: "pde-solve"</code> does the same for the heat equation, the wave equation, or Gray-Scott reaction-diffusion.</p>
+
+    <p>This matters most when the <strong>equation is the thing you're trying to teach</strong> — a physiology trace, a phyllotaxis, a Wankel rotor's kinematics. The math is what you write down; the picture is what falls out.</p>
+
+    <div class="showcase-row">
+      <figure class="showcase">
+        <div class="frame">
+          <img src="heartbeat.svg" alt="FitzHugh-Nagumo heartbeat trace rendered by Glyph" loading="lazy">
+        </div>
+        <figcaption><strong>FitzHugh-Nagumo heartbeat</strong> — two coupled ODEs (1961). 2000 RK4 steps integrate the relaxation oscillator into the spike-and-recover trace of a resting heart at 60 bpm. The data shape <em>is</em> the equation.</figcaption>
+      </figure>
+      <figure class="showcase">
+        <div class="frame">
+          <img src="leopard-spots.svg" alt="Gray-Scott reaction-diffusion leopard spots rendered by Glyph" loading="lazy">
+        </div>
+        <figcaption><strong>Gray-Scott reaction-diffusion</strong> — two chemicals U and V on a 32×32 grid (1952 Turing prediction, 1984 Gray-Scott parametrization). 400 finite-difference steps produce the leopard's coat from a single seed.</figcaption>
+      </figure>
+    </div>
+  </article>
+
+  <!-- ─────────────────────────────────────────────────────────────────────── -->
+
+  <article class="chapter">
+    <div class="chapter-num">II.</div>
+    <h2>Agent-native generation</h2>
+    <p class="summary">One English prompt → one JSON spec → one byte-identical SVG. Survives the LLM-as-author transition cleanly.</p>
+
+    <p>Most viz tools were designed when humans typed code. Glyph was designed when humans type prompts. The JSON spec is small enough for an LLM to write end-to-end, Zod-validated so bad specs fail loudly, and the output is byte-identical across CI runs — meaning regression-testable like code. The <em>Life in Glyph</em> gallery is the proof: 21 pages now, the latest 16 generated by Claude from single English sentences.</p>
+
+    <p>Why this is rare: text-to-image tools (DALL-E, Midjourney) emit pixels that can't be diffed in git, edited in JSON, or regression-tested. Glyph emits a <strong>durable, inspectable artifact</strong> — the spec — alongside the picture.</p>
+
+    <div class="showcase-row">
+      <figure class="showcase">
+        <div class="frame">
+          <img src="bio-dna.svg" alt="DNA double helix rendered by Glyph from one English prompt" loading="lazy">
+        </div>
+        <figcaption><strong>DNA double helix</strong> — from the single prompt <em>"draw me DNA, A-T blue, G-C red, against a starfield."</em> Two phosphate strands sampled along sinusoids; rungs as polylines; 60-star LCG starfield; 4 gradients. One Claude turn, one byte-stable SVG.</figcaption>
+      </figure>
+      <figure class="showcase">
+        <div class="frame parchment">
+          <img src="bio-circulation.svg" alt="Heart and circulation diagram rendered by Glyph" loading="lazy">
+        </div>
+        <figcaption><strong>Heart + circulation</strong> — from the prompt <em>"anatomical heart with vessels and lungs, pencil-on-parchment, the heart should pulse."</em> Pulse animation included. The agent picked the chamber positions, the vessel curves, and the SMIL period.</figcaption>
+      </figure>
+    </div>
+  </article>
+
+  <!-- ─────────────────────────────────────────────────────────────────────── -->
+
+  <article class="chapter">
+    <div class="chapter-num">III.</div>
+    <h2>Composable engineering schematics in pencil</h2>
+    <p class="summary">A drafting-board aesthetic with a real schematic vocabulary. Looks like the 1930s shop drawings of the things it depicts.</p>
+
+    <p>Glyph ships with a tiny, opinionated visual voice: the <code>pencil-parchment</code> theme preset, the <code>frame</code> / <code>gear</code> / <code>pendulum</code> / <code>annotation-leader</code> schematic marks, and pattern fills (fluted columns, hatched fluid, marble, stone-block, photovoltaic cells). The combination produces drawings that read as actual engineering elevations, not chart-library output.</p>
+
+    <p>This is a deliberately narrow capability. It's exactly what you want for textbook chapters, museum panels, engineering documentation. It's not what you want for a startup dashboard. <strong>The aesthetic is the feature.</strong></p>
+
+    <figure class="showcase-wide">
+      <div class="frame parchment">
+        <img src="eng-locomotive.svg" alt="4-6-2 Pacific class steam locomotive rendered by Glyph in pencil-on-parchment style" loading="lazy">
+      </div>
+      <figcaption><strong>4-6-2 Pacific class steam locomotive</strong> — full anatomy: smokebox with rivets and a "4-6-2" builder's plate, cylindrical boiler with 6 brass bands, steam dome + sand dome + bell + whistle, brass side rod linking 3 drivers, pilot truck + trailing axle + tender. The wheels are SMIL-rotating. Stevenson's Rocket (1829) → Mallard (1938, 203 km/h world record).</figcaption>
+    </figure>
+
+    <figure class="showcase-wide">
+      <div class="frame parchment">
+        <img src="eng-bridge.svg" alt="Golden Gate-style suspension bridge rendered by Glyph in pencil-on-parchment style" loading="lazy">
+      </div>
+      <figcaption><strong>Golden Gate-style suspension bridge</strong> — art-deco stepped towers (three setbacks each), one parabolic main cable per side, 30 vertical suspenders dropping to a roadway with dashed centerline. A distant city silhouette fades into fog on the horizon. The cable hangs in a parabola because the load is uniform per horizontal distance — Roebling (1883) → Strauss (1937).</figcaption>
+    </figure>
+  </article>
+
+  <!-- ─────────────────────────────────────────────────────────────────────── -->
+
+  <article class="chapter">
+    <div class="chapter-num">IV.</div>
+    <h2>Composed animated dioramas</h2>
+    <p class="summary">Multiple marks + loop animations + (optionally) an embedded chart, all in one declarative spec. The right shape for explanatory visualizations.</p>
+
+    <p>The <em>diorama</em> is the right shape for the kind of viz that pairs with text: a science explainer, a textbook figure, a museum panel. It needs more than a chart, less than a 3D scene. Glyph's compose grammar lets you combine schematic marks + decorative primitives + embedded charts + SMIL loop animations in a single JSON spec. The result moves when viewed in a browser, sits still when snapshotted in CI.</p>
+
+    <p>Most animation libraries (Lottie, GreenSock, Three.js) want hand-authored keyframes or imperative JavaScript. Glyph gives you <strong>one declarative <code>animation</code> block per child</strong> — pick <code>rotate-loop</code>, <code>swing</code>, or <code>pulse</code>, give it a period, done.</p>
+
+    <div class="showcase-row">
+      <figure class="showcase">
+        <div class="frame">
+          <img src="ext-orrery.svg" alt="Solar system orrery animation rendered by Glyph" loading="lazy">
+        </div>
+        <figcaption><strong>Solar-system orrery</strong> — six planets, six SMIL <code>rotate-loop</code> animations, periods scaled by real orbital years (Earth = 8 s, Saturn = ~3m55s). Asteroid belt deterministically placed; Saturn's ring co-rotates with the planet. What NASA Eyes does in 3D, Glyph does as a flat orrery.</figcaption>
+      </figure>
+      <figure class="showcase">
+        <div class="frame parchment">
+          <img src="eng-windmill.svg" alt="Dutch windmill with rotating blades rendered by Glyph" loading="lazy">
+        </div>
+        <figcaption><strong>Dutch tower mill</strong> — four blade polygons each on a <code>rotate-loop</code> at 8 s, plus a stone-pattern tower, a brown cap, sun + clouds + birds + grass tufts. Schematic mark + decorative primitives + loop animation, all in one compose spec.</figcaption>
+      </figure>
+    </div>
+  </article>
+
+  <!-- ─────────────────────────────────────────────────────────────────────── -->
+
+  <article class="chapter">
+    <div class="chapter-num">V.</div>
+    <h2>Byte-deterministic generative art</h2>
+    <p class="summary">The aesthetic of generative art with the rigor of unit tests. Same seed → same pixels → snapshot-testable.</p>
+
+    <p>"Generative art" usually means "looks different every run." That's incompatible with snapshot testing, version control, and reproducible papers. Glyph's seed-driven generators — a Park-Miller LCG for the <code>starfield</code> mark, deterministic RK4 for trajectories, finite-difference PDE solvers, recurrence relations — give you the aesthetic of generative art with the rigor of unit tests.</p>
+
+    <p>The leopard spots, the sunflower seeds, the Physarum chemistry, the particle fields: <strong>byte-identical on every CI run, every platform, every Node version.</strong> The artwork is the spec; the SVG is its shadow.</p>
+
+    <div class="showcase-row">
+      <figure class="showcase">
+        <div class="frame parchment">
+          <img src="sunflower-seeds.svg" alt="Sunflower phyllotaxis pattern rendered by Glyph from Vogel's 1979 recurrence" loading="lazy">
+        </div>
+        <figcaption><strong>Sunflower phyllotaxis</strong> — Vogel's 1979 model. Each seed <em>n</em> at radius √n and angle <em>n</em>·137.5° (the golden angle). 200 seeds → the only angle that fills a disc without leaving gaps. Pure recurrence; no Phyllotaxis trickery; same SVG every time.</figcaption>
+      </figure>
+      <figure class="showcase">
+        <div class="frame">
+          <img src="particle-static.svg" alt="Particle field streamlines rendered by Glyph from a deterministic vector field" loading="lazy">
+        </div>
+        <figcaption><strong>Particle field</strong> — 144 RK4-integrated trajectories through an Arnold-Beltrami-Childress-flavored vector field. Each path colored by local flow angle. The signature of a million-particle GPU demo, drawn deterministically by integrating exactly 144 trajectories. See <a href="particles.html">the recipe</a>.</figcaption>
+      </figure>
+    </div>
+  </article>
+
+  <hr class="section">
+
+  <!-- ─────────────────────────────────────────────────────────────────────── -->
+
+  <section class="not-top">
+    <h2>What's <em>not</em> in the top five</h2>
+    <p>The list above is short because the list of things Glyph <em>isn't</em> for is longer. Reach for a different tool when you want any of these:</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>What you want</th>
+          <th>Why Glyph isn't it</th>
+          <th>Better tool</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Generic charts (bar, line, scatter)</td>
+          <td>Commodity. Glyph has them but no advantage</td>
+          <td>Vega-Lite, Observable Plot</td>
+        </tr>
+        <tr>
+          <td>Interactive zoom, pan, brush</td>
+          <td>Render-once-declarative. No event model</td>
+          <td>D3, Plotly</td>
+        </tr>
+        <tr>
+          <td>3D scenes</td>
+          <td>Pure 2D SVG. No camera, no mesh, no lighting</td>
+          <td>Three.js, Deck.gl</td>
+        </tr>
+        <tr>
+          <td>Force-directed network graphs</td>
+          <td>No physics simulator; SVG node ceiling ~10k</td>
+          <td>D3-force, sigma.js</td>
+        </tr>
+        <tr>
+          <td>Geographic maps with tiles</td>
+          <td>No projection grammar, no tile server</td>
+          <td>Mapbox, Leaflet, D3-geo</td>
+        </tr>
+        <tr>
+          <td>Real-time particles (millions @ 60 fps)</td>
+          <td>SVG can't paint that many DOM nodes</td>
+          <td>regl, PixiJS, particle-love</td>
+        </tr>
+        <tr>
+          <td>Photo-realistic / pixel art</td>
+          <td>Vector output, not raster</td>
+          <td>DALL-E, Midjourney, Procreate</td>
+        </tr>
+        <tr>
+          <td>Hand-edited illustration</td>
+          <td>JSON-authored, not direct-manipulation</td>
+          <td>Figma, Inkscape</td>
+        </tr>
+        <tr>
+          <td>Multi-chart dashboards</td>
+          <td>64-child compose cap; SVG perf ceiling</td>
+          <td>Grafana, Observable</td>
+        </tr>
+        <tr>
+          <td>UML / ER / sequence diagrams</td>
+          <td>Doable but no optimized grammar</td>
+          <td>Mermaid, PlantUML, Graphviz</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────────────────── -->
+
+  <p class="closing">The pattern in the top five — and the contrast with the bottom ten — is the same idea: <strong>Glyph is for visualizations where the math, the schematic, or the composition is the durable artifact, and the SVG is its byte-stable shadow.</strong> Narrow but real. Pick the right tool for each job; this is what Glyph's tool is for.</p>
+
+  <footer>
+    Drawn by Glyph · Asked by you · Apache 2.0 · <a href="https://github.com/seanhanca/glyph">github.com/seanhanca/glyph</a>
+  </footer>
+
+</div>
+
+</body>
+</html>
