@@ -28009,7 +28009,40 @@ function renderMark(m, interactive) {
       }
       const childrenSvg = m.children.map((c) => renderMark(c, interactive)).join("");
       const anim = m.loopAnimationXml ?? "";
-      return `<g transform="${transform}">${childrenSvg}${anim}</g>`;
+      const idAttr = m.id ? ` id="${esc(m.id)}"` : "";
+      return `<g${idAttr} transform="${transform}">${childrenSvg}${anim}</g>`;
+    }
+    case "gradient-def": {
+      const tag = m.kind === "linear" ? "linearGradient" : "radialGradient";
+      const attrs = Object.entries(m.attrs).map(([k, v]) => `${k}="${esc(v)}"`).join(" ");
+      const stops = m.stops.map((s) => `<stop offset="${esc(s.offset)}" stop-color="${esc(s.color)}"${s.opacity !== void 0 ? ` stop-opacity="${s.opacity}"` : ""}/>`).join("");
+      return `<${tag} id="${esc(m.id)}" ${attrs}>${stops}</${tag}>`;
+    }
+    case "pattern-def": {
+      const transform = m.patternTransform ? ` patternTransform="${esc(m.patternTransform)}"` : "";
+      const childrenSvg = m.children.map((c) => renderMark(c, interactive)).join("");
+      return `<pattern id="${esc(m.id)}" width="${m.width}" height="${m.height}" patternUnits="userSpaceOnUse"${transform}>${childrenSvg}</pattern>`;
+    }
+    case "ellipse": {
+      const stroke = m.stroke ? ` stroke="${esc(m.stroke)}"` : "";
+      const sw = m.strokeWidth !== void 0 ? ` stroke-width="${m.strokeWidth}"` : "";
+      const op2 = m.opacity !== void 0 ? ` opacity="${m.opacity}"` : "";
+      const rot = m.rotateDeg !== void 0 && m.rotateDeg !== 0 ? ` transform="rotate(${m.rotateDeg.toFixed(3)})"` : "";
+      return `<ellipse cx="${m.cx}" cy="${m.cy}" rx="${m.rx}" ry="${m.ry}" fill="${esc(m.fill)}"${stroke}${sw}${op2}${rot}/>`;
+    }
+    case "polygon": {
+      const pts = m.points.map(([x, y]) => `${x},${y}`).join(" ");
+      const stroke = m.stroke ? ` stroke="${esc(m.stroke)}"` : "";
+      const sw = m.strokeWidth !== void 0 ? ` stroke-width="${m.strokeWidth}"` : "";
+      return `<polygon points="${pts}" fill="${esc(m.fill)}"${stroke}${sw}/>`;
+    }
+    case "polyline": {
+      const pts = m.points.map(([x, y]) => `${x},${y}`).join(" ");
+      const dash = m.strokeDasharray ? ` stroke-dasharray="${esc(m.strokeDasharray)}"` : "";
+      return `<polyline points="${pts}" fill="${esc(m.fill)}" stroke="${esc(m.stroke)}" stroke-width="${m.strokeWidth}"${dash}/>`;
+    }
+    case "raw-svg": {
+      return m.xml;
     }
   }
 }
@@ -28182,7 +28215,16 @@ function renderSvg(scene) {
   const grid = renderGrid(scene);
   const animKind = scene.animation?.kind;
   const stagger = animKind === "stage-stagger" ? scene.animation.stagger_ms ?? 60 : 0;
-  const renderedMarks = scene.marks.map((m, i) => decorateMarkForAnimation(renderMark(m, interactive), i, scene, stagger));
+  const defsMarks = [];
+  const contentMarks = [];
+  for (const m of scene.marks) {
+    if (m.type === "gradient-def" || m.type === "pattern-def")
+      defsMarks.push(m);
+    else
+      contentMarks.push(m);
+  }
+  const renderedMarks = contentMarks.map((m, i) => decorateMarkForAnimation(renderMark(m, interactive), i, scene, stagger));
+  const composeDefsBlock = defsMarks.length > 0 ? `<defs>${defsMarks.map((d) => renderMark(d, interactive)).join("")}</defs>` : "";
   const animClass = animKind === "stage" ? " glyph-stage" : animKind === "stage-stagger" ? " glyph-stage-stagger" : animKind === "race" || animKind === "scrub" ? " glyph-race" : animKind === "draw-in" ? " glyph-draw-in" : animKind === "timeline" ? " glyph-timeline" : "";
   const uncertainClass = scene.uncertainty?.dimPoints ? " glyph-uncertain" : "";
   const markStrs = animKind === "timeline" ? buildTimelineMarks(scene, renderedMarks) : renderedMarks.join("");
@@ -28190,7 +28232,7 @@ function renderSvg(scene) {
   const marks = interactive || animClass || uncertainClass ? `<g class="glyph-marks${animClass}${uncertainClass}">${markStrs}</g>` : markStrs;
   const axes = scene.axes.map((a) => renderAxis(a, labelColor)).join("");
   const arrowDefs = renderArrowDefs(scene);
-  return `${head}${desc}${provenance}${hoverStyle}${crossfilterStyle}${animationStyle}${uncertaintyStyle}${arrowDefs}${bg}${title}${grid}${marks}${axes}${timelineCaptions}${uncertaintyOverlay}${legends}</svg>
+  return `${head}${desc}${provenance}${hoverStyle}${crossfilterStyle}${animationStyle}${uncertaintyStyle}${arrowDefs}${composeDefsBlock}${bg}${title}${grid}${marks}${axes}${timelineCaptions}${uncertaintyOverlay}${legends}</svg>
 `;
 }
 function buildTimelineMarks(scene, renderedMarks) {
