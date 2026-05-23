@@ -40,7 +40,7 @@ const scenes: Scene[] = [
       'id="g-wing-l"',
       'id="g-hind-r"',
       'id="g-hind-l"',
-      "<polygon",
+      "<path",
       "Lepidoptera",
       "bilateral symmetry",
     ],
@@ -62,7 +62,14 @@ const scenes: Scene[] = [
   {
     label: "eng · suspension bridge",
     file: "./eng-bridge.json",
-    expects: ['id="g-sky"', 'id="g-water"', 'id="g-tower"', "<polyline", "parabolic sag", "tower"],
+    expects: [
+      'id="g-sky"',
+      'id="g-water"',
+      'id="g-tower"',
+      "<polyline",
+      "parabolic main cable",
+      "tower",
+    ],
   },
   {
     label: "eng · steam locomotive",
@@ -70,14 +77,22 @@ const scenes: Scene[] = [
     expects: [
       'id="g-boiler"',
       'id="g-smoke"',
+      'id="g-wheel"',
       '<animateTransform attributeName="transform" type="rotate"',
-      "boiling water",
+      "connecting rods",
     ],
   },
   {
     label: "eng · radio waves",
     file: "./eng-radio.json",
-    expects: ['id="g-tip"', "<ellipse", "<polyline", "broadcasting", "electromagnetic"],
+    expects: [
+      'id="g-tip"',
+      'id="g-bg"',
+      "<ellipse",
+      "<polyline",
+      "broadcasting",
+      "electromagnetic",
+    ],
   },
   {
     label: "arch · greek temple",

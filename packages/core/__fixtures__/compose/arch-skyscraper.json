@@ -1,11 +1,11 @@
 {
   "compose": {
     "viewBox": {
-      "width": 800,
-      "height": 1000
+      "width": 900,
+      "height": 1050
     },
     "title": "A skyscraper at dusk — the city in one column",
-    "description": "Modernist glass tower at last light. A steel skeleton sheathed in a curtain wall of windows. Sullivan's principle (1896): form follows function. Mies's gift (1958, Seagram Building): glass plus rhythm = the entire 20th century.",
+    "description": "Modernist glass tower at last light. A steel skeleton sheathed in a curtain wall of windows. Sullivan, 1896: form follows function. Mies, 1958 (Seagram Building): glass plus rhythm = the 20th century.",
     "theme": {
       "background": "#0c1126",
       "foreground": "#fef3c7"
@@ -26,12 +26,12 @@
               "opacity": 1
             },
             {
-              "offset": "40%",
+              "offset": "35%",
               "color": "#7c2d12",
               "opacity": 1
             },
             {
-              "offset": "70%",
+              "offset": "65%",
               "color": "#dc2626",
               "opacity": 1
             },
@@ -78,7 +78,7 @@
             {
               "offset": "0%",
               "color": "#fbbf24",
-              "opacity": 0.45
+              "opacity": 0.5
             },
             {
               "offset": "60%",
@@ -111,44 +111,94 @@
               "opacity": 1
             }
           ]
+        },
+        {
+          "id": "g-moon",
+          "kind": "radial",
+          "cx": "50%",
+          "cy": "50%",
+          "r": "50%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#fef9c3",
+              "opacity": 1
+            },
+            {
+              "offset": "100%",
+              "color": "#fde68a",
+              "opacity": 0.95
+            }
+          ]
         }
       ],
       "patterns": [
         {
           "id": "p-windows",
-          "width": 24,
-          "height": 36,
+          "width": 28,
+          "height": 40,
           "children": [
             {
               "kind": "rect",
               "x": 4,
               "y": 6,
-              "width": 7,
-              "height": 12,
+              "width": 9,
+              "height": 14,
               "fill": "#fde68a"
             },
             {
               "kind": "rect",
-              "x": 13,
+              "x": 15,
               "y": 6,
-              "width": 7,
-              "height": 12,
+              "width": 9,
+              "height": 14,
               "fill": "#fbbf24"
             },
             {
               "kind": "rect",
               "x": 4,
-              "y": 22,
-              "width": 7,
-              "height": 12,
+              "y": 24,
+              "width": 9,
+              "height": 14,
               "fill": "rgba(253,230,138,.35)"
             },
             {
               "kind": "rect",
-              "x": 13,
-              "y": 22,
-              "width": 7,
-              "height": 12,
+              "x": 15,
+              "y": 24,
+              "width": 9,
+              "height": 14,
+              "fill": "#fde68a"
+            }
+          ]
+        },
+        {
+          "id": "p-adj-windows",
+          "width": 18,
+          "height": 24,
+          "children": [
+            {
+              "kind": "rect",
+              "x": 3,
+              "y": 4,
+              "width": 5,
+              "height": 8,
+              "fill": "#fde68a"
+            },
+            {
+              "kind": "rect",
+              "x": 10,
+              "y": 4,
+              "width": 5,
+              "height": 8,
+              "fill": "rgba(253,230,138,.4)"
+            },
+            {
+              "kind": "rect",
+              "x": 3,
+              "y": 14,
+              "width": 5,
+              "height": 8,
               "fill": "#fde68a"
             }
           ]
@@ -163,9 +213,55 @@
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 0 0 L 800 0 L 800 940 L 0 940 Z",
+          "d": "M 0 0 L 900 0 L 900 980 L 0 980 Z",
           "fill": "url(#g-dusk)",
           "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 740,
+          "y": 140
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 38,
+          "fill": "url(#g-moon)",
+          "stroke": "rgba(254,243,199,.5)",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 732,
+          "y": 130
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 4,
+          "fill": "rgba(202,138,4,.25)"
+        }
+      },
+      {
+        "at": {
+          "x": 750,
+          "y": 138
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 3,
+          "fill": "rgba(202,138,4,.25)"
+        }
+      },
+      {
+        "at": {
+          "x": 738,
+          "y": 152
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 2.5,
+          "fill": "rgba(202,138,4,.25)"
         }
       },
       {
@@ -175,13 +271,13 @@
         },
         "mark": "starfield",
         "starfield": {
-          "count": 30,
+          "count": 35,
           "seed": 47,
           "region": {
             "x": 0,
             "y": 0,
-            "w": 800,
-            "h": 200
+            "w": 900,
+            "h": 250
           }
         }
       },
@@ -192,7 +288,7 @@
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 0 600 L 70 600 L 70 940 L 0 940 Z M 70 660 L 170 660 L 170 940 L 70 940 Z M 580 580 L 660 580 L 660 940 L 580 940 Z M 660 700 L 760 700 L 760 940 L 660 940 Z M 760 640 L 800 640 L 800 940 L 760 940 Z",
+          "d": "M 0 600 L 80 600 L 80 980 L 0 980 Z M 80 680 L 180 680 L 180 980 L 80 980 Z M 180 720 L 250 720 L 250 980 L 180 980 Z",
           "fill": "#0c1126",
           "stroke": "#1d2444",
           "strokeWidth": 1
@@ -205,8 +301,21 @@
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 0 600 L 70 600 L 70 940 L 0 940 Z M 70 660 L 170 660 L 170 940 L 70 940 Z M 580 580 L 660 580 L 660 940 L 580 940 Z M 660 700 L 760 700 L 760 940 L 660 940 Z M 760 640 L 800 640 L 800 940 L 760 940 Z",
-          "fill": "url(#p-windows)",
+          "d": "M 620 540 L 700 540 L 700 980 L 620 980 Z M 700 660 L 800 660 L 800 980 L 700 980 Z M 800 600 L 880 600 L 880 980 L 800 980 Z M 880 700 L 900 700 L 900 980 L 880 980 Z",
+          "fill": "#0c1126",
+          "stroke": "#1d2444",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 600 L 80 600 L 80 980 L 0 980 Z M 80 680 L 180 680 L 180 980 L 80 980 Z M 180 720 L 250 720 L 250 980 L 180 980 Z M 620 540 L 700 540 L 700 980 L 620 980 Z M 700 660 L 800 660 L 800 980 L 700 980 Z M 800 600 L 880 600 L 880 980 L 800 980 Z M 880 700 L 900 700 L 900 980 L 880 980 Z",
+          "fill": "url(#p-adj-windows)",
           "stroke": "none",
           "opacity": 0.55
         }
@@ -218,7 +327,7 @@
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 280 940 L 280 80 L 520 80 L 520 940 Z",
+          "d": "M 320 980 L 320 150 L 350 150 L 350 80 L 550 80 L 550 150 L 580 150 L 580 980 Z",
           "fill": "url(#g-tower)",
           "stroke": "#0c4a6e",
           "strokeWidth": 2
@@ -231,7 +340,7 @@
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 288 104 L 512 104 L 512 860 L 288 860 Z",
+          "d": "M 332 170 L 568 170 L 568 890 L 332 890 Z",
           "fill": "url(#p-windows)",
           "stroke": "none"
         }
@@ -243,8 +352,8 @@
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 288 104 L 512 104 L 512 860 L 288 860 Z",
-          "fill": "url(#g-reflect)",
+          "d": "M 360 90 L 540 90 L 540 145 L 360 145 Z",
+          "fill": "url(#p-windows)",
           "stroke": "none"
         }
       },
@@ -255,33 +364,32 @@
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 310 20 L 490 20 L 490 80 L 310 80 Z",
-          "fill": "#0c1e3a",
-          "stroke": "#0c4a6e",
-          "strokeWidth": 2
+          "d": "M 332 170 L 568 170 L 568 890 L 332 890 Z",
+          "fill": "url(#g-reflect)",
+          "stroke": "none"
         }
       },
       {
         "at": {
-          "x": 400,
+          "x": 450,
           "y": 20
         },
         "mark": "polyline",
         "polyline": {
-          "points": [[0, 0], [0, 0]],
+          "points": [[0, 0], [0, 60]],
           "fill": "none",
           "stroke": "#0c1126",
-          "strokeWidth": 2.5
+          "strokeWidth": 3
         }
       },
       {
         "at": {
-          "x": 400,
+          "x": 450,
           "y": 24
         },
         "mark": "circle",
         "circle": {
-          "radius": 3,
+          "radius": 4,
           "fill": "#dc2626",
           "stroke": "#7c2d12",
           "strokeWidth": 0.5
@@ -289,37 +397,89 @@
         "animation": {
           "kind": "pulse",
           "periodMs": 1500,
-          "scale": 1.4
+          "scale": 1.5
         }
       },
       {
         "at": {
           "x": 0,
-          "y": 940
+          "y": 980
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 0 0 L 800 0 L 800 60 L 0 60 Z",
+          "d": "M 0 0 L 900 0 L 900 70 L 0 70 Z",
           "fill": "url(#g-ground)",
           "stroke": "none"
         }
       },
       {
         "at": {
-          "x": 0,
-          "y": 945
+          "x": 140,
+          "y": 1002
         },
-        "mark": "polyline",
-        "polyline": {
-          "points": [[0, 0], [800, 0]],
-          "fill": "none",
-          "stroke": "#94a3b8",
-          "strokeWidth": 0.5
+        "mark": "circle",
+        "circle": {
+          "radius": 3,
+          "fill": "#fef3c7",
+          "stroke": "rgba(254,243,199,.4)",
+          "strokeWidth": 4
         }
       },
       {
         "at": {
-          "x": 400,
+          "x": 280,
+          "y": 1002
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 3,
+          "fill": "#fef3c7",
+          "stroke": "rgba(254,243,199,.4)",
+          "strokeWidth": 4
+        }
+      },
+      {
+        "at": {
+          "x": 440,
+          "y": 1002
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 3,
+          "fill": "#fef3c7",
+          "stroke": "rgba(254,243,199,.4)",
+          "strokeWidth": 4
+        }
+      },
+      {
+        "at": {
+          "x": 620,
+          "y": 1002
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 3,
+          "fill": "#fef3c7",
+          "stroke": "rgba(254,243,199,.4)",
+          "strokeWidth": 4
+        }
+      },
+      {
+        "at": {
+          "x": 760,
+          "y": 1002
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 3,
+          "fill": "#fef3c7",
+          "stroke": "rgba(254,243,199,.4)",
+          "strokeWidth": 4
+        }
+      },
+      {
+        "at": {
+          "x": 450,
           "y": 36
         },
         "mark": "text",
@@ -333,12 +493,12 @@
       },
       {
         "at": {
-          "x": 400,
-          "y": 980
+          "x": 450,
+          "y": 1025
         },
         "mark": "text",
         "textMark": {
-          "text": "steel frame · curtain wall · 720 lit windows at dusk",
+          "text": "steel frame · curtain wall · the city in one column",
           "fontSize": 13,
           "fill": "#fbbf24",
           "italic": true,
