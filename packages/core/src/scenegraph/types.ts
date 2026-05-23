@@ -215,7 +215,11 @@ export type SceneMark =
       readonly id: string;
       readonly kind: "linear" | "radial";
       readonly attrs: Record<string, string>;
-      readonly stops: ReadonlyArray<{ readonly offset: string; readonly color: string; readonly opacity?: number }>;
+      readonly stops: ReadonlyArray<{
+        readonly offset: string;
+        readonly color: string;
+        readonly opacity?: number;
+      }>;
     }
   | {
       /** RFC #9 — pattern def emitted inside the SVG `<defs>` block. */

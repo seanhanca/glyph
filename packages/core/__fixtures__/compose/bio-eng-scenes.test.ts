@@ -39,13 +39,7 @@ const scenes: Scene[] = [
   {
     label: "bio · jellyfish",
     file: "./bio-jellyfish.json",
-    expects: [
-      'id="g-bell"',
-      'id="g-tentacle"',
-      "<ellipse",
-      "Aurelia aurita",
-      "<circle ",
-    ],
+    expects: ['id="g-bell"', 'id="g-tentacle"', "<ellipse", "Aurelia aurita", "<circle "],
   },
   {
     label: "eng · hydraulic press",

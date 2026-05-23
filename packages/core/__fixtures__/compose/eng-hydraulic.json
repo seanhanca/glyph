@@ -204,14 +204,8 @@
         },
         "mark": "annotation-leader",
         "annotation": {
-          "from": [
-            220,
-            40
-          ],
-          "to": [
-            140,
-            28
-          ],
+          "from": [220, 40],
+          "to": [140, 28],
           "text": "F = 1 unit",
           "italic": true,
           "anchor": "end"
@@ -224,14 +218,8 @@
         },
         "mark": "annotation-leader",
         "annotation": {
-          "from": [
-            740,
-            10
-          ],
-          "to": [
-            920,
-            22
-          ],
+          "from": [740, 10],
+          "to": [920, 22],
           "text": "≈ 9× the lift",
           "italic": true,
           "anchor": "start"

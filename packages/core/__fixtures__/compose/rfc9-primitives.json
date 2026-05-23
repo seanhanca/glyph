@@ -9,7 +9,9 @@
         {
           "id": "g-blue",
           "kind": "radial",
-          "cx": "40%", "cy": "40%", "r": "60%",
+          "cx": "40%",
+          "cy": "40%",
+          "r": "60%",
           "stops": [
             { "offset": "0%", "color": "#7dd3fc" },
             { "offset": "55%", "color": "#0284c7" },
@@ -19,7 +21,10 @@
         {
           "id": "g-trail",
           "kind": "linear",
-          "x1": "0%", "y1": "0%", "x2": "100%", "y2": "0%",
+          "x1": "0%",
+          "y1": "0%",
+          "x2": "100%",
+          "y2": "0%",
           "stops": [
             { "offset": "0%", "color": "#fde68a", "opacity": 0.4 },
             { "offset": "100%", "color": "#fbbf24", "opacity": 1 }
@@ -29,33 +34,94 @@
       "patterns": [
         {
           "id": "p-hatch",
-          "width": 6, "height": 6,
+          "width": 6,
+          "height": 6,
           "patternTransform": "rotate(45)",
           "children": [
-            { "kind": "line", "x1": 0, "y1": 0, "x2": 0, "y2": 6, "stroke": "#1f1a14", "strokeWidth": 1 }
+            {
+              "kind": "line",
+              "x1": 0,
+              "y1": 0,
+              "x2": 0,
+              "y2": 6,
+              "stroke": "#1f1a14",
+              "strokeWidth": 1
+            }
           ]
         }
       ]
     },
     "children": [
-      { "at": { "x": 0, "y": 0 }, "mark": "starfield",
-        "starfield": { "count": 30, "seed": 42, "region": { "x": 0, "y": 0, "w": 800, "h": 200 } } },
-      { "at": { "x": 150, "y": 280 }, "mark": "circle",
-        "circle": { "radius": 50, "fill": "url(#g-blue)" } },
-      { "at": { "x": 150, "y": 280 }, "mark": "glow",
-        "glow": { "radius": 70, "gradientId": "g-blue" } },
-      { "at": { "x": 50, "y": 420 }, "id": "trail-path", "mark": "silhouette-path",
-        "silhouettePath": { "d": "M 0 0 Q 350 -80, 700 0", "fill": "none", "stroke": "url(#g-trail)", "strokeWidth": 3 } },
-      { "at": { "x": 400, "y": 280 }, "mark": "icon",
-        "icon": { "id": "heart", "size": 60, "fill": "#ef4444" } },
-      { "at": { "x": 550, "y": 280 }, "mark": "ellipse",
-        "ellipse": { "rx": 40, "ry": 20, "fill": "url(#p-hatch)", "stroke": "#1f1a14", "strokeWidth": 1 } },
-      { "at": { "x": 670, "y": 280 }, "mark": "polygon",
-        "polygon": { "points": [[0, -30], [26, 15], [-26, 15]], "fill": "#facc15", "stroke": "#1f1a14", "strokeWidth": 1 } },
-      { "at": { "x": 50, "y": 100 }, "mark": "polyline",
-        "polyline": { "points": [[0, 0], [60, 30], [120, 0], [180, 30], [240, 0]], "fill": "none", "stroke": "#3b4d80", "strokeWidth": 1.5, "strokeDasharray": "4 4" } },
-      { "at": { "x": 400, "y": 100 }, "mark": "raw-svg",
-        "rawSvg": { "xml": "<text x='0' y='0' font-size='14' fill='#1f1a14' text-anchor='middle' font-style='italic'>raw-svg escape hatch</text>" } }
+      {
+        "at": { "x": 0, "y": 0 },
+        "mark": "starfield",
+        "starfield": { "count": 30, "seed": 42, "region": { "x": 0, "y": 0, "w": 800, "h": 200 } }
+      },
+      {
+        "at": { "x": 150, "y": 280 },
+        "mark": "circle",
+        "circle": { "radius": 50, "fill": "url(#g-blue)" }
+      },
+      {
+        "at": { "x": 150, "y": 280 },
+        "mark": "glow",
+        "glow": { "radius": 70, "gradientId": "g-blue" }
+      },
+      {
+        "at": { "x": 50, "y": 420 },
+        "id": "trail-path",
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 Q 350 -80, 700 0",
+          "fill": "none",
+          "stroke": "url(#g-trail)",
+          "strokeWidth": 3
+        }
+      },
+      {
+        "at": { "x": 400, "y": 280 },
+        "mark": "icon",
+        "icon": { "id": "heart", "size": 60, "fill": "#ef4444" }
+      },
+      {
+        "at": { "x": 550, "y": 280 },
+        "mark": "ellipse",
+        "ellipse": {
+          "rx": 40,
+          "ry": 20,
+          "fill": "url(#p-hatch)",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": { "x": 670, "y": 280 },
+        "mark": "polygon",
+        "polygon": {
+          "points": [[0, -30], [26, 15], [-26, 15]],
+          "fill": "#facc15",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": { "x": 50, "y": 100 },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [60, 30], [120, 0], [180, 30], [240, 0]],
+          "fill": "none",
+          "stroke": "#3b4d80",
+          "strokeWidth": 1.5,
+          "strokeDasharray": "4 4"
+        }
+      },
+      {
+        "at": { "x": 400, "y": 100 },
+        "mark": "raw-svg",
+        "rawSvg": {
+          "xml": "<text x='0' y='0' font-size='14' fill='#1f1a14' text-anchor='middle' font-style='italic'>raw-svg escape hatch</text>"
+        }
+      }
     ]
   }
 }

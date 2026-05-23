@@ -303,7 +303,9 @@ export const GlowSchema = z
  *  and numeric whitespace only — no XML injection surface. */
 export const SilhouettePathSchema = z
   .object({
-    d: z.string().regex(/^[ MmLlHhVvCcSsQqTtAaZz0-9.,\s+\-eE]+$/, "d must be a valid SVG path string"),
+    d: z
+      .string()
+      .regex(/^[ MmLlHhVvCcSsQqTtAaZz0-9.,\s+\-eE]+$/, "d must be a valid SVG path string"),
     fill: z.string().max(60).default("none"),
     stroke: z.string().max(60).optional(),
     strokeWidth: z.number().min(0).max(20).optional(),
@@ -318,7 +320,18 @@ export const SilhouettePathSchema = z
  *  size. The library entry contains the path `d` + viewBox. */
 export const IconSchema = z
   .object({
-    id: z.enum(["heart", "spacecraft", "leopard", "sunflower", "flame", "lightning", "leaf", "star", "raindrop", "snowflake"]),
+    id: z.enum([
+      "heart",
+      "spacecraft",
+      "leopard",
+      "sunflower",
+      "flame",
+      "lightning",
+      "leaf",
+      "star",
+      "raindrop",
+      "snowflake",
+    ]),
     size: z.number().positive().max(400).default(40),
     fill: z.string().max(60).default("#1f1a14"),
     stroke: z.string().max(60).optional(),
@@ -343,7 +356,10 @@ export const EllipseSchema = z
  *  the Orion spacecraft body, Reuleaux triangles, etc. */
 export const PolygonSchema = z
   .object({
-    points: z.array(z.tuple([z.number(), z.number()])).min(3).max(200),
+    points: z
+      .array(z.tuple([z.number(), z.number()]))
+      .min(3)
+      .max(200),
     fill: z.string().max(60).default("none"),
     stroke: z.string().max(60).optional(),
     strokeWidth: z.number().min(0).max(20).optional(),
@@ -353,7 +369,10 @@ export const PolygonSchema = z
 /** Polyline — open shape from an explicit list of points. */
 export const PolylineSchema = z
   .object({
-    points: z.array(z.tuple([z.number(), z.number()])).min(2).max(2000),
+    points: z
+      .array(z.tuple([z.number(), z.number()]))
+      .min(2)
+      .max(2000),
     fill: z.string().max(60).default("none"),
     stroke: z.string().max(60).default("#1f1a14"),
     strokeWidth: z.number().min(0).max(20).default(1),
@@ -367,13 +386,18 @@ export const PolylineSchema = z
  *  to block <script>, <foreignObject>, <image>, javascript:, on*=
  *  event handlers. The 4 KB cap stops one DoS spec from inflating
  *  the SVG. */
-const SAFE_SVG_REGEX = /^(?:(?!<\s*(?:script|foreignObject|image)\b)(?!\bon[a-z]+\s*=)(?!\bjavascript:)[\s\S])*$/i;
+const SAFE_SVG_REGEX =
+  /^(?:(?!<\s*(?:script|foreignObject|image)\b)(?!\bon[a-z]+\s*=)(?!\bjavascript:)[\s\S])*$/i;
 export const RawSvgSchema = z
   .object({
-    xml: z.string().min(1).max(4096).refine(
-      (s) => SAFE_SVG_REGEX.test(s),
-      "raw-svg xml contains forbidden tags (script, foreignObject, image) or event handlers",
-    ),
+    xml: z
+      .string()
+      .min(1)
+      .max(4096)
+      .refine(
+        (s) => SAFE_SVG_REGEX.test(s),
+        "raw-svg xml contains forbidden tags (script, foreignObject, image) or event handlers",
+      ),
   })
   .strict();
 

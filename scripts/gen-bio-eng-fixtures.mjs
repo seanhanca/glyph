@@ -44,13 +44,15 @@ const round = (n, p = 2) => {
 // BIO 1 — DNA double helix
 // ───────────────────────────────────────────────────────────────────────────
 function buildDna() {
-  const W = 600, H = 800;
-  const yStart = 60, yEnd = 740;
-  const period = 170;      // 4 full periods over the vertical span
-  const amplitude = 90;    // strand half-width
+  const W = 600;
+  const H = 800;
+  const yStart = 60;
+  const yEnd = 740;
+  const period = 170; // 4 full periods over the vertical span
+  const amplitude = 90; // strand half-width
   const cx = 300;
-  const step = 6;          // sample every 6px in y
-  const phase = Math.PI;   // strand B is π out of phase
+  const step = 6; // sample every 6px in y
+  const phase = Math.PI; // strand B is π out of phase
 
   // Sample both strands.
   const ptsA = [];
@@ -60,8 +62,7 @@ function buildDna() {
     ptsA.push([round(amplitude * Math.sin(theta)), round(y - yStart)]);
     ptsB.push([round(amplitude * Math.sin(theta + phase)), round(y - yStart)]);
   }
-  const dStrand = (pts) =>
-    "M " + pts.map(([x, y]) => `${x} ${y}`).join(" L ");
+  const dStrand = (pts) => `M ${pts.map(([x, y]) => `${x} ${y}`).join(" L ")}`;
 
   // Rungs (base pairs) every 24 px in y. Alternate A-T (blue) and G-C (red).
   const rungs = [];
@@ -82,7 +83,10 @@ function buildDna() {
       at: { x: cx + left, y },
       mark: "polyline",
       polyline: {
-        points: [[0, 0], [round(Math.abs(bx - ax)), 0]],
+        points: [
+          [0, 0],
+          [round(Math.abs(bx - ax)), 0],
+        ],
         fill: "none",
         stroke: isAT ? "#60a5fa" : "#f87171",
         strokeWidth: 2.2,
@@ -103,7 +107,9 @@ function buildDna() {
           {
             id: "g-bg",
             kind: "radial",
-            cx: "50%", cy: "30%", r: "80%",
+            cx: "50%",
+            cy: "30%",
+            r: "80%",
             stops: [
               { offset: "0%", color: "#1e1b4b", opacity: 1 },
               { offset: "70%", color: "#0f0a2e", opacity: 1 },
@@ -113,7 +119,10 @@ function buildDna() {
           {
             id: "g-strand-a",
             kind: "linear",
-            x1: "0%", y1: "0%", x2: "0%", y2: "100%",
+            x1: "0%",
+            y1: "0%",
+            x2: "0%",
+            y2: "100%",
             stops: [
               { offset: "0%", color: "#22d3ee", opacity: 0.95 },
               { offset: "50%", color: "#a78bfa", opacity: 0.95 },
@@ -123,7 +132,10 @@ function buildDna() {
           {
             id: "g-strand-b",
             kind: "linear",
-            x1: "0%", y1: "0%", x2: "0%", y2: "100%",
+            x1: "0%",
+            y1: "0%",
+            x2: "0%",
+            y2: "100%",
             stops: [
               { offset: "0%", color: "#ec4899", opacity: 0.95 },
               { offset: "50%", color: "#a78bfa", opacity: 0.95 },
@@ -133,7 +145,9 @@ function buildDna() {
           {
             id: "g-halo",
             kind: "radial",
-            cx: "50%", cy: "50%", r: "50%",
+            cx: "50%",
+            cy: "50%",
+            r: "50%",
             stops: [
               { offset: "0%", color: "#a78bfa", opacity: 0.55 },
               { offset: "100%", color: "#a78bfa", opacity: 0 },
@@ -221,7 +235,8 @@ function buildDna() {
 // BIO 2 — Jellyfish in the deep
 // ───────────────────────────────────────────────────────────────────────────
 function buildJellyfish() {
-  const W = 600, H = 800;
+  const W = 600;
+  const H = 800;
 
   const bellCx = 300;
   const bellCy = 320;
@@ -246,7 +261,7 @@ function buildJellyfish() {
       pts.push([round(xm), round(14)]); // dip down
       pts.push([round(x1), round(0)]);
     }
-    return "M " + pts.map(([x, y]) => `${x} ${y}`).join(" L ") + " Z";
+    return `M ${pts.map(([x, y]) => `${x} ${y}`).join(" L ")} Z`;
   })();
 
   // Tentacles: long wavy paths from bell bottom down.
@@ -257,7 +272,7 @@ function buildJellyfish() {
       const x = amp * Math.sin((freq * y) / 30 + phase) * (y / lenY);
       pts.push([round(x), round(y)]);
     }
-    return "M " + pts.map(([x, y]) => `${x} ${y}`).join(" L ");
+    return `M ${pts.map(([x, y]) => `${x} ${y}`).join(" L ")}`;
   };
 
   const tentacles = [];
@@ -325,7 +340,10 @@ function buildJellyfish() {
           {
             id: "g-sea",
             kind: "linear",
-            x1: "0%", y1: "0%", x2: "0%", y2: "100%",
+            x1: "0%",
+            y1: "0%",
+            x2: "0%",
+            y2: "100%",
             stops: [
               { offset: "0%", color: "#0c1e3a", opacity: 1 },
               { offset: "50%", color: "#04102a", opacity: 1 },
@@ -335,7 +353,9 @@ function buildJellyfish() {
           {
             id: "g-bell",
             kind: "radial",
-            cx: "50%", cy: "30%", r: "70%",
+            cx: "50%",
+            cy: "30%",
+            r: "70%",
             stops: [
               { offset: "0%", color: "#fef3c7", opacity: 0.85 },
               { offset: "55%", color: "#f9a8d4", opacity: 0.55 },
@@ -345,7 +365,9 @@ function buildJellyfish() {
           {
             id: "g-inner",
             kind: "radial",
-            cx: "50%", cy: "50%", r: "60%",
+            cx: "50%",
+            cy: "50%",
+            r: "60%",
             stops: [
               { offset: "0%", color: "#fef9c3", opacity: 0.75 },
               { offset: "100%", color: "#fbbf24", opacity: 0 },
@@ -354,7 +376,10 @@ function buildJellyfish() {
           {
             id: "g-tentacle",
             kind: "linear",
-            x1: "0%", y1: "0%", x2: "0%", y2: "100%",
+            x1: "0%",
+            y1: "0%",
+            x2: "0%",
+            y2: "100%",
             stops: [
               { offset: "0%", color: "#f9a8d4", opacity: 0.85 },
               { offset: "100%", color: "#a78bfa", opacity: 0.05 },
@@ -363,7 +388,9 @@ function buildJellyfish() {
           {
             id: "g-halo",
             kind: "radial",
-            cx: "50%", cy: "50%", r: "50%",
+            cx: "50%",
+            cy: "50%",
+            r: "50%",
             stops: [
               { offset: "0%", color: "#fde68a", opacity: 0.4 },
               { offset: "100%", color: "#fde68a", opacity: 0 },
@@ -454,19 +481,29 @@ function buildJellyfish() {
 // ENGINEERING 1 — Hydraulic press (Pascal's principle)
 // ───────────────────────────────────────────────────────────────────────────
 function buildHydraulic() {
-  const W = 1000, H = 600;
+  const W = 1000;
+  const H = 600;
 
   // Coordinate layout (single source of truth):
   //   Small cylinder: x=180..260 (w=80),   y=240..480 (h=240)
   //   Large cylinder: x=620..860 (w=240),  y=180..480 (h=300)
   //   Connecting pipe top: y=440 (shared bottom-pipe band)
   //   Fluid extends from piston head (top) down to bottom (y=480)
-  const smX = 180, smW = 80, smY = 240, smH = 240;
-  const lgX = 620, lgW = 240, lgY = 180, lgH = 300;
-  const pipeTop = 440, pipeBot = 480;
+  const smX = 180;
+  const smW = 80;
+  const smY = 240;
+  const smH = 240;
+  const lgX = 620;
+  const lgW = 240;
+  const lgY = 180;
+  const lgH = 300;
+  const pipeTop = 440;
+  const pipeBot = 480;
   // Piston heads inside cylinders (offset 60 / 80 from cylinder top)
-  const smPistonY = smY + 60, smPistonH = 16;
-  const lgPistonY = lgY + 80, lgPistonH = 18;
+  const smPistonY = smY + 60;
+  const smPistonH = 16;
+  const lgPistonY = lgY + 80;
+  const lgPistonH = 18;
 
   return {
     compose: {
@@ -479,7 +516,8 @@ function buildHydraulic() {
         patterns: [
           {
             id: "p-fluid",
-            width: 6, height: 10,
+            width: 6,
+            height: 10,
             children: [
               // Vertical strokes — reads as still water.
               { kind: "line", x1: 0, y1: 0, x2: 0, y2: 10, stroke: "#3b4d80", strokeWidth: 0.5 },
@@ -488,7 +526,8 @@ function buildHydraulic() {
           },
           {
             id: "p-piston",
-            width: 5, height: 5,
+            width: 5,
+            height: 5,
             patternTransform: "rotate(135)",
             children: [
               { kind: "line", x1: 0, y1: 0, x2: 0, y2: 5, stroke: "#1f1a14", strokeWidth: 0.6 },
@@ -520,14 +559,14 @@ function buildHydraulic() {
             //   right wall → top of large fluid → down left wall of large to
             //   pipe top → across pipe to small right wall → up to start.
             d: [
-              `M ${smX + 2} ${smPistonY + smPistonH}`,                // top-left small fluid (just below piston)
-              `L ${smX + 2} ${pipeBot - 2}`,                          // down left wall of small fluid
-              `L ${lgX + lgW - 2} ${pipeBot - 2}`,                    // across bottom (small + pipe + large)
-              `L ${lgX + lgW - 2} ${lgPistonY + lgPistonH}`,          // up right wall of large fluid
-              `L ${lgX + 2} ${lgPistonY + lgPistonH}`,                // across top of large fluid (under piston)
-              `L ${lgX + 2} ${pipeTop + 2}`,                          // down left wall of large to pipe top
-              `L ${smX + smW - 2} ${pipeTop + 2}`,                    // across pipe top
-              `L ${smX + smW - 2} ${smPistonY + smPistonH}`,          // up right wall of small fluid
+              `M ${smX + 2} ${smPistonY + smPistonH}`, // top-left small fluid (just below piston)
+              `L ${smX + 2} ${pipeBot - 2}`, // down left wall of small fluid
+              `L ${lgX + lgW - 2} ${pipeBot - 2}`, // across bottom (small + pipe + large)
+              `L ${lgX + lgW - 2} ${lgPistonY + lgPistonH}`, // up right wall of large fluid
+              `L ${lgX + 2} ${lgPistonY + lgPistonH}`, // across top of large fluid (under piston)
+              `L ${lgX + 2} ${pipeTop + 2}`, // down left wall of large to pipe top
+              `L ${smX + smW - 2} ${pipeTop + 2}`, // across pipe top
+              `L ${smX + smW - 2} ${smPistonY + smPistonH}`, // up right wall of small fluid
               "Z",
             ].join(" "),
             fill: "url(#p-fluid)",
@@ -680,7 +719,8 @@ function buildHydraulic() {
 // ENGINEERING 2 — Windmill
 // ───────────────────────────────────────────────────────────────────────────
 function buildWindmill() {
-  const W = 800, H = 800;
+  const W = 800;
+  const H = 800;
 
   const towerTopY = 350;
   const towerBotY = 700;
@@ -688,8 +728,10 @@ function buildWindmill() {
   const towerTopW = 80;
   const towerBotW = 140;
   const towerD = (() => {
-    const x1 = -towerTopW / 2, x2 = towerTopW / 2;
-    const x3 = towerBotW / 2, x4 = -towerBotW / 2;
+    const x1 = -towerTopW / 2;
+    const x2 = towerTopW / 2;
+    const x3 = towerBotW / 2;
+    const x4 = -towerBotW / 2;
     const h = towerBotY - towerTopY;
     return `M ${x1} 0 L ${x2} 0 L ${x3} ${h} L ${x4} ${h} Z`;
   })();
@@ -719,10 +761,7 @@ function buildWindmill() {
       [bladeLen * 0.4, bladeWide * 0.3],
       [10, bladeWide * 0.45],
     ];
-    return localPts.map(([x, y]) => [
-      round(x * cos - y * sin),
-      round(x * sin + y * cos),
-    ]);
+    return localPts.map(([x, y]) => [round(x * cos - y * sin), round(x * sin + y * cos)]);
   };
 
   const bladeAngles = [0, Math.PI / 2, Math.PI, (3 * Math.PI) / 2];
@@ -749,7 +788,11 @@ function buildWindmill() {
       at: { x: gx, y: gy },
       mark: "polyline",
       polyline: {
-        points: [[0, 0], [bend, -round(len * 0.6)], [round(bend * 1.4), -len]],
+        points: [
+          [0, 0],
+          [bend, -round(len * 0.6)],
+          [round(bend * 1.4), -len],
+        ],
         fill: "none",
         stroke: "#3a5a3a",
         strokeWidth: 1.6,
@@ -766,7 +809,11 @@ function buildWindmill() {
       at: { x: round(bx), y: round(by) },
       mark: "polyline",
       polyline: {
-        points: [[-7, 4], [0, 0], [7, 4]],
+        points: [
+          [-7, 4],
+          [0, 0],
+          [7, 4],
+        ],
         fill: "none",
         stroke: "#1f1a14",
         strokeWidth: 1.4,
@@ -783,7 +830,8 @@ function buildWindmill() {
     at,
     mark: "ellipse",
     ellipse: {
-      rx, ry,
+      rx,
+      ry,
       fill: "rgba(255, 255, 255, 0.65)",
     },
   }));
@@ -800,7 +848,10 @@ function buildWindmill() {
           {
             id: "g-sky",
             kind: "linear",
-            x1: "0%", y1: "0%", x2: "0%", y2: "100%",
+            x1: "0%",
+            y1: "0%",
+            x2: "0%",
+            y2: "100%",
             stops: [
               { offset: "0%", color: "#fef3c7", opacity: 1 },
               { offset: "60%", color: "#fde9b0", opacity: 1 },
@@ -810,7 +861,9 @@ function buildWindmill() {
           {
             id: "g-sun",
             kind: "radial",
-            cx: "50%", cy: "50%", r: "50%",
+            cx: "50%",
+            cy: "50%",
+            r: "50%",
             stops: [
               { offset: "0%", color: "#fef9c3", opacity: 1 },
               { offset: "100%", color: "#fbbf24", opacity: 0.95 },
@@ -819,7 +872,10 @@ function buildWindmill() {
           {
             id: "g-ground",
             kind: "linear",
-            x1: "0%", y1: "0%", x2: "0%", y2: "100%",
+            x1: "0%",
+            y1: "0%",
+            x2: "0%",
+            y2: "100%",
             stops: [
               { offset: "0%", color: "#a3b18a", opacity: 1 },
               { offset: "100%", color: "#6b8a4a", opacity: 1 },
@@ -829,7 +885,8 @@ function buildWindmill() {
         patterns: [
           {
             id: "p-stone",
-            width: 18, height: 12,
+            width: 18,
+            height: 12,
             children: [
               { kind: "line", x1: 0, y1: 0, x2: 18, y2: 0, stroke: "#3b3a2a", strokeWidth: 0.5 },
               { kind: "line", x1: 0, y1: 6, x2: 18, y2: 6, stroke: "#3b3a2a", strokeWidth: 0.5 },
@@ -925,7 +982,8 @@ function buildWindmill() {
           at: { x: towerCx, y: capCy },
           mark: "ellipse",
           ellipse: {
-            rx: capRx, ry: capRy,
+            rx: capRx,
+            ry: capRy,
             fill: "#5a3a1f",
             stroke: "#1f1a14",
             strokeWidth: 2,
@@ -970,6 +1028,6 @@ const fixtures = {
 
 for (const [name, spec] of Object.entries(fixtures)) {
   const path = join(outDir, name);
-  writeFileSync(path, JSON.stringify(spec, null, 2) + "\n");
+  writeFileSync(path, `${JSON.stringify(spec, null, 2)}\n`);
   console.log(`wrote ${path} (${Math.round(JSON.stringify(spec).length / 1024)} KB)`);
 }

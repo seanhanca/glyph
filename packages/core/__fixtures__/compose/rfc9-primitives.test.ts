@@ -100,7 +100,7 @@ describe("compose — RFC #9 decorative primitives", () => {
             {
               at: { x: 0, y: 0 },
               mark: "raw-svg",
-              rawSvg: { xml: "<rect onclick=\"alert(1)\"/>" },
+              rawSvg: { xml: '<rect onclick="alert(1)"/>' },
             },
           ],
         },

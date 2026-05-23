@@ -10,8 +10,8 @@
  */
 
 import { emitLoopAnimation } from "../animation/loops.js";
-import type { Scene, SceneMark } from "../scenegraph/types.js";
 import { ICON_LIBRARY } from "../icons/library.js";
+import type { Scene, SceneMark } from "../scenegraph/types.js";
 import type {
   AnnotationMarkConfig,
   CircleMarkConfig,
@@ -783,9 +783,7 @@ export function compileSilhouettePath(cfg: SilhouettePathConfig): SceneMark[] {
       ? {
           stroke: cfg.stroke,
           ...(cfg.strokeWidth !== undefined ? { strokeWidth: cfg.strokeWidth } : {}),
-          ...(cfg.strokeDasharray !== undefined
-            ? { strokeDasharray: cfg.strokeDasharray }
-            : {}),
+          ...(cfg.strokeDasharray !== undefined ? { strokeDasharray: cfg.strokeDasharray } : {}),
         }
       : {};
   return [{ ...base, ...strokeBits, ...opacityBit } as SceneMark];

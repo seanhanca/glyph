@@ -336,9 +336,10 @@ function renderMark(m: SceneMark, interactive: boolean): string {
       const stroke = m.stroke ? ` stroke="${esc(m.stroke)}"` : "";
       const sw = m.strokeWidth !== undefined ? ` stroke-width="${m.strokeWidth}"` : "";
       const op = m.opacity !== undefined ? ` opacity="${m.opacity}"` : "";
-      const rot = m.rotateDeg !== undefined && m.rotateDeg !== 0
-        ? ` transform="rotate(${m.rotateDeg.toFixed(3)})"`
-        : "";
+      const rot =
+        m.rotateDeg !== undefined && m.rotateDeg !== 0
+          ? ` transform="rotate(${m.rotateDeg.toFixed(3)})"`
+          : "";
       return `<ellipse cx="${m.cx}" cy="${m.cy}" rx="${m.rx}" ry="${m.ry}" fill="${esc(m.fill)}"${stroke}${sw}${op}${rot}/>`;
     }
     case "polygon": {
@@ -716,9 +717,10 @@ export function renderSvg(scene: Scene): string {
   const renderedMarks = contentMarks.map((m, i) =>
     decorateMarkForAnimation(renderMark(m, interactive), i, scene, stagger),
   );
-  const composeDefsBlock = defsMarks.length > 0
-    ? `<defs>${defsMarks.map((d) => renderMark(d, interactive)).join("")}</defs>`
-    : "";
+  const composeDefsBlock =
+    defsMarks.length > 0
+      ? `<defs>${defsMarks.map((d) => renderMark(d, interactive)).join("")}</defs>`
+      : "";
   const animClass =
     animKind === "stage"
       ? " glyph-stage"

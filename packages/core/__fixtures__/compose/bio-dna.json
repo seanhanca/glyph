@@ -155,16 +155,7 @@
         },
         "mark": "polyline",
         "polyline": {
-          "points": [
-            [
-              0,
-              0
-            ],
-            [
-              77.24,
-              0
-            ]
-          ],
+          "points": [[0, 0], [77.24, 0]],
           "fill": "none",
           "stroke": "#60a5fa",
           "strokeWidth": 2.2
@@ -177,16 +168,7 @@
         },
         "mark": "polyline",
         "polyline": {
-          "points": [
-            [
-              0,
-              0
-            ],
-            [
-              174.83,
-              0
-            ]
-          ],
+          "points": [[0, 0], [174.83, 0]],
           "fill": "none",
           "stroke": "#f87171",
           "strokeWidth": 2.2
@@ -199,16 +181,7 @@
         },
         "mark": "polyline",
         "polyline": {
-          "points": [
-            [
-              0,
-              0
-            ],
-            [
-              143.64,
-              0
-            ]
-          ],
+          "points": [[0, 0], [143.64, 0]],
           "fill": "none",
           "stroke": "#60a5fa",
           "strokeWidth": 2.2
@@ -221,16 +194,7 @@
         },
         "mark": "polyline",
         "polyline": {
-          "points": [
-            [
-              0,
-              0
-            ],
-            [
-              135.24,
-              0
-            ]
-          ],
+          "points": [[0, 0], [135.24, 0]],
           "fill": "none",
           "stroke": "#60a5fa",
           "strokeWidth": 2.2
@@ -243,16 +207,7 @@
         },
         "mark": "polyline",
         "polyline": {
-          "points": [
-            [
-              0,
-              0
-            ],
-            [
-              177.52,
-              0
-            ]
-          ],
+          "points": [[0, 0], [177.52, 0]],
           "fill": "none",
           "stroke": "#f87171",
           "strokeWidth": 2.2
@@ -265,16 +220,7 @@
         },
         "mark": "polyline",
         "polyline": {
-          "points": [
-            [
-              0,
-              0
-            ],
-            [
-              89.04,
-              0
-            ]
-          ],
+          "points": [[0, 0], [89.04, 0]],
           "fill": "none",
           "stroke": "#60a5fa",
           "strokeWidth": 2.2
@@ -287,16 +233,7 @@
         },
         "mark": "polyline",
         "polyline": {
-          "points": [
-            [
-              0,
-              0
-            ],
-            [
-              65.02,
-              0
-            ]
-          ],
+          "points": [[0, 0], [65.02, 0]],
           "fill": "none",
           "stroke": "#f87171",
           "strokeWidth": 2.2
@@ -309,16 +246,7 @@
         },
         "mark": "polyline",
         "polyline": {
-          "points": [
-            [
-              0,
-              0
-            ],
-            [
-              171.19,
-              0
-            ]
-          ],
+          "points": [[0, 0], [171.19, 0]],
           "fill": "none",
           "stroke": "#60a5fa",
           "strokeWidth": 2.2
@@ -331,16 +259,7 @@
         },
         "mark": "polyline",
         "polyline": {
-          "points": [
-            [
-              0,
-              0
-            ],
-            [
-              151.26,
-              0
-            ]
-          ],
+          "points": [[0, 0], [151.26, 0]],
           "fill": "none",
           "stroke": "#f87171",
           "strokeWidth": 2.2
@@ -353,16 +272,7 @@
         },
         "mark": "polyline",
         "polyline": {
-          "points": [
-            [
-              0,
-              0
-            ],
-            [
-              19.92,
-              0
-            ]
-          ],
+          "points": [[0, 0], [19.92, 0]],
           "fill": "none",
           "stroke": "#60a5fa",
           "strokeWidth": 2.2
@@ -375,16 +285,7 @@
         },
         "mark": "polyline",
         "polyline": {
-          "points": [
-            [
-              0,
-              0
-            ],
-            [
-              126.1,
-              0
-            ]
-          ],
+          "points": [[0, 0], [126.1, 0]],
           "fill": "none",
           "stroke": "#f87171",
           "strokeWidth": 2.2
@@ -397,16 +298,7 @@
         },
         "mark": "polyline",
         "polyline": {
-          "points": [
-            [
-              0,
-              0
-            ],
-            [
-              179.23,
-              0
-            ]
-          ],
+          "points": [[0, 0], [179.23, 0]],
           "fill": "none",
           "stroke": "#60a5fa",
           "strokeWidth": 2.2
@@ -419,16 +311,7 @@
         },
         "mark": "polyline",
         "polyline": {
-          "points": [
-            [
-              0,
-              0
-            ],
-            [
-              100.35,
-              0
-            ]
-          ],
+          "points": [[0, 0], [100.35, 0]],
           "fill": "none",
           "stroke": "#f87171",
           "strokeWidth": 2.2
@@ -441,16 +324,7 @@
         },
         "mark": "polyline",
         "polyline": {
-          "points": [
-            [
-              0,
-              0
-            ],
-            [
-              52.45,
-              0
-            ]
-          ],
+          "points": [[0, 0], [52.45, 0]],
           "fill": "none",
           "stroke": "#60a5fa",
           "strokeWidth": 2.2
@@ -463,16 +337,7 @@
         },
         "mark": "polyline",
         "polyline": {
-          "points": [
-            [
-              0,
-              0
-            ],
-            [
-              166.61,
-              0
-            ]
-          ],
+          "points": [[0, 0], [166.61, 0]],
           "fill": "none",
           "stroke": "#f87171",
           "strokeWidth": 2.2
@@ -485,16 +350,7 @@
         },
         "mark": "polyline",
         "polyline": {
-          "points": [
-            [
-              0,
-              0
-            ],
-            [
-              158.05,
-              0
-            ]
-          ],
+          "points": [[0, 0], [158.05, 0]],
           "fill": "none",
           "stroke": "#60a5fa",
           "strokeWidth": 2.2
@@ -507,16 +363,7 @@
         },
         "mark": "polyline",
         "polyline": {
-          "points": [
-            [
-              0,
-              0
-            ],
-            [
-              33.07,
-              0
-            ]
-          ],
+          "points": [[0, 0], [33.07, 0]],
           "fill": "none",
           "stroke": "#f87171",
           "strokeWidth": 2.2
@@ -529,16 +376,7 @@
         },
         "mark": "polyline",
         "polyline": {
-          "points": [
-            [
-              0,
-              0
-            ],
-            [
-              116.27,
-              0
-            ]
-          ],
+          "points": [[0, 0], [116.27, 0]],
           "fill": "none",
           "stroke": "#60a5fa",
           "strokeWidth": 2.2
@@ -551,16 +389,7 @@
         },
         "mark": "polyline",
         "polyline": {
-          "points": [
-            [
-              0,
-              0
-            ],
-            [
-              179.97,
-              0
-            ]
-          ],
+          "points": [[0, 0], [179.97, 0]],
           "fill": "none",
           "stroke": "#f87171",
           "strokeWidth": 2.2
@@ -573,16 +402,7 @@
         },
         "mark": "polyline",
         "polyline": {
-          "points": [
-            [
-              0,
-              0
-            ],
-            [
-              111.11,
-              0
-            ]
-          ],
+          "points": [[0, 0], [111.11, 0]],
           "fill": "none",
           "stroke": "#60a5fa",
           "strokeWidth": 2.2
@@ -595,16 +415,7 @@
         },
         "mark": "polyline",
         "polyline": {
-          "points": [
-            [
-              0,
-              0
-            ],
-            [
-              39.59,
-              0
-            ]
-          ],
+          "points": [[0, 0], [39.59, 0]],
           "fill": "none",
           "stroke": "#f87171",
           "strokeWidth": 2.2
@@ -617,16 +428,7 @@
         },
         "mark": "polyline",
         "polyline": {
-          "points": [
-            [
-              0,
-              0
-            ],
-            [
-              161.13,
-              0
-            ]
-          ],
+          "points": [[0, 0], [161.13, 0]],
           "fill": "none",
           "stroke": "#60a5fa",
           "strokeWidth": 2.2
@@ -639,16 +441,7 @@
         },
         "mark": "polyline",
         "polyline": {
-          "points": [
-            [
-              0,
-              0
-            ],
-            [
-              163.98,
-              0
-            ]
-          ],
+          "points": [[0, 0], [163.98, 0]],
           "fill": "none",
           "stroke": "#f87171",
           "strokeWidth": 2.2
@@ -661,16 +454,7 @@
         },
         "mark": "polyline",
         "polyline": {
-          "points": [
-            [
-              0,
-              0
-            ],
-            [
-              46.05,
-              0
-            ]
-          ],
+          "points": [[0, 0], [46.05, 0]],
           "fill": "none",
           "stroke": "#60a5fa",
           "strokeWidth": 2.2
@@ -683,16 +467,7 @@
         },
         "mark": "polyline",
         "polyline": {
-          "points": [
-            [
-              0,
-              0
-            ],
-            [
-              105.8,
-              0
-            ]
-          ],
+          "points": [[0, 0], [105.8, 0]],
           "fill": "none",
           "stroke": "#f87171",
           "strokeWidth": 2.2
@@ -705,16 +480,7 @@
         },
         "mark": "polyline",
         "polyline": {
-          "points": [
-            [
-              0,
-              0
-            ],
-            [
-              179.72,
-              0
-            ]
-          ],
+          "points": [[0, 0], [179.72, 0]],
           "fill": "none",
           "stroke": "#60a5fa",
           "strokeWidth": 2.2
@@ -727,16 +493,7 @@
         },
         "mark": "polyline",
         "polyline": {
-          "points": [
-            [
-              0,
-              0
-            ],
-            [
-              121.27,
-              0
-            ]
-          ],
+          "points": [[0, 0], [121.27, 0]],
           "fill": "none",
           "stroke": "#f87171",
           "strokeWidth": 2.2
