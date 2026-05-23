@@ -106,19 +106,18 @@
   .cta .btn-ghost:hover{background:var(--parchment-deep);border-color:var(--rust);color:var(--rust)}
   footer{padding:24px 0 48px;text-align:center;color:var(--graphite-light);font-size:.88rem;font-style:italic}
 
-  /* The rotor revolves around the eccentric shaft.
-     1 rotor revolution = 3 chamber sweeps. We use 12 seconds per
-     full rotor period — slow enough that you can follow each apex. */
-  @keyframes rotor-spin {
-    from { transform: translate(500px, 230px) rotate(0deg) translate(0px, 0px); }
-    to   { transform: translate(500px, 230px) rotate(360deg) translate(0px, 0px); }
+  /* Wankel kinematics — DON'T animate the rotor with CSS. The real
+     motion superposes two independent things:
+       1. The rotor's CENTER orbits the eccentric shaft at angular
+          velocity ω (the output-shaft speed), offset by eccentricity e.
+       2. The rotor BODY rotates about its (moving) center at ω/3 —
+          slower, in the same direction.
+     A single CSS rotate() can't express both; we drive the rotor's
+     transform per frame in JS below so the three apexes always
+     touch the housing wall (as the real Wankel design demands). */
+  @media (prefers-reduced-motion: reduce){
+    .rotor-group{transform:translate(530px, 230px) !important}
   }
-  /* Wankel kinematics: rotor center orbits around shaft center at
-     3× the rotor's own rotation. For simple visualization we use
-     a single combined rotation animation — close enough for the
-     pencil-style demo. */
-  .rotor-group{transform-origin:500px 230px;animation:rotor-spin 12s linear infinite}
-  @media (prefers-reduced-motion: reduce){.rotor-group{animation:none !important}}
 </style>
 </head>
 <body>
@@ -216,26 +215,47 @@
                L 626.33 188.78 L 633.43 189.24 L 639.32 189.66 L 643.96 190.03 L 647.30 190.34
                L 649.32 190.61 Z" fill="rgba(31,26,20,.04)" stroke="var(--graphite)" stroke-width="1.5" aria-hidden="true"/>
 
-      <!-- Eccentric shaft circle (rotor pivot — fixed at center) -->
+      <!-- Eccentric arm — dashed line from the (fixed) output-shaft
+           axis to the (moving) rotor bearing. JS sets the x2/y2
+           endpoint per frame. The arm makes the eccentric offset
+           visually legible: this is what every Wankel cutaway
+           drawing shows. -->
+      <line class="eccentric-arm" x1="500" y1="230" x2="530" y2="230"
+            stroke="var(--graphite-light)" stroke-width="1.5"
+            stroke-dasharray="3 3" aria-hidden="true"/>
+
+      <!-- Stationary internal ring gear (drawn at the eccentric-shaft
+           axis, not on the rotor). In a real Wankel this is the
+           timing ring fixed to the engine block that the rotor's
+           internal gear meshes with — it's what enforces the 3:1
+           ratio mechanically. -->
+      <circle cx="500" cy="230" r="32" fill="none"
+              stroke="var(--graphite-light)" stroke-width="0.8"
+              stroke-dasharray="2 2" aria-hidden="true"/>
+
+      <!-- Output-shaft axis (stationary at housing center) -->
       <circle cx="500" cy="230" r="6" fill="var(--graphite)" aria-hidden="true"/>
       <circle cx="500" cy="230" r="3" fill="var(--rust)" aria-hidden="true"/>
 
-      <!-- Triangular rotor with rounded sides — sits centered on the
-           eccentric, three apexes always touch the housing wall.
-           The rotor's body is an equilateral triangle with apexes at
-           radius ~75 from rotor center. -->
-      <g class="rotor-group" aria-hidden="true">
-        <path d="M 0 -75
-                 A 130 130 0 0 1 64.95 37.5
-                 A 130 130 0 0 1 -64.95 37.5
-                 A 130 130 0 0 1 0 -75 Z"
+      <!-- Triangular rotor — apex 0 at the 3-o'clock position when
+           the body angle is zero. Apex distance from rotor center =
+           generating radius R = 120 px (must equal the housing's
+           generating radius for the apexes to touch the chamber
+           wall). The three rounded sides are circular arcs whose
+           centers are at the opposite apex (radius = chord length
+           = 120·√3 ≈ 208 px). Transform set per frame by JS. -->
+      <g class="rotor-group" aria-hidden="true" transform="translate(530, 230)">
+        <path d="M 120 0
+                 A 208 208 0 0 1 -60 103.92
+                 A 208 208 0 0 1 -60 -103.92
+                 A 208 208 0 0 1 120 0 Z"
               fill="url(#rotor-hatch)" stroke="var(--graphite)" stroke-width="2" stroke-linejoin="round"/>
-        <!-- Apex markers (the corners) -->
-        <circle cx="0" cy="-75" r="3" fill="var(--rust)" stroke="var(--graphite)" stroke-width="0.8"/>
-        <circle cx="64.95" cy="37.5" r="3" fill="var(--rust)" stroke="var(--graphite)" stroke-width="0.8"/>
-        <circle cx="-64.95" cy="37.5" r="3" fill="var(--rust)" stroke="var(--graphite)" stroke-width="0.8"/>
-        <!-- Inner ring gear (suggested) -->
-        <circle cx="0" cy="0" r="25" fill="none" stroke="var(--graphite-light)" stroke-width="0.8" stroke-dasharray="2 2"/>
+        <!-- Apex markers — always sit on the housing wall -->
+        <circle cx="120" cy="0" r="4" fill="var(--rust)" stroke="var(--graphite)" stroke-width="0.8"/>
+        <circle cx="-60" cy="103.92" r="4" fill="var(--rust)" stroke="var(--graphite)" stroke-width="0.8"/>
+        <circle cx="-60" cy="-103.92" r="4" fill="var(--rust)" stroke="var(--graphite)" stroke-width="0.8"/>
+        <!-- Rotor bearing center (where the eccentric arm attaches) -->
+        <circle cx="0" cy="0" r="4" fill="var(--graphite-light)"/>
       </g>
 
       <!-- Annotations -->
@@ -261,7 +281,7 @@
         <text x="0" y="36" font-size="9" letter-spacing="0.06em" text-anchor="end" font-style="italic">working chambers</text>
       </g>
     </svg>
-    <div class="stage-caption">12 seconds per rotor revolution · <span class="accent">three explosions</span> per turn — three times the work-strokes-per-revolution of a piston engine</div>
+    <div class="stage-caption">8 seconds per output-shaft revolution · 24 s per rotor revolution · the <span class="accent">three apexes</span> always touch the housing — that's the defining property of the design</div>
   </div>
 </section>
 
@@ -374,6 +394,56 @@
     Drawn by Glyph · Asked by you · Apache 2.0 · <a href="https://github.com/seanhanca/glyph">GitHub</a>
   </div>
 </footer>
+
+<script>
+  // Wankel kinematics, frame-by-frame.
+  //
+  // Two coupled rotations:
+  //   1. The rotor's CENTER orbits the eccentric (output) shaft at
+  //      angular velocity ω, offset by eccentricity e.
+  //          rotor_center = (cx + e·cos(ωt), cy + e·sin(ωt))
+  //   2. The rotor BODY rotates about its (moving) center at ω/3,
+  //      in the SAME direction. Three eccentric revolutions → one
+  //      rotor revolution → the three apexes return to their
+  //      starting positions on the housing wall.
+  //
+  // The rotor apex at body-angle α has world position
+  //     (e·cos(ωt) + R·cos(α + ωt/3),  e·sin(ωt) + R·sin(α + ωt/3))
+  // which is exactly the housing epitrochoid at curve parameter
+  // ωt/3 + α. So with apex distance R = 120 px (matching the
+  // housing's generating radius) and three apexes at α ∈ {0,
+  // 2π/3, 4π/3}, every apex always touches the housing wall —
+  // the defining geometric property of the Wankel design.
+  function animateRotor(){
+    const rotor = document.querySelector('.rotor-group');
+    const arm = document.querySelector('.eccentric-arm');
+    if (!rotor || !arm) return;
+    const cx = 500, cy = 230;
+    const e = 30;                       // eccentricity in px
+    const eccentricPeriodMs = 8000;     // one output-shaft revolution
+    // Loop on three eccentric revolutions = one full rotor revolution.
+    // Looping any shorter creates a visible discontinuity at the
+    // wrap, since the body angle jumps from 120° back to 0°.
+    const cycleMs = eccentricPeriodMs * 3;
+    function frame(ts){
+      const theta = ((ts % cycleMs) / eccentricPeriodMs) * 2 * Math.PI;
+      const rcx = cx + e * Math.cos(theta);
+      const rcy = cy + e * Math.sin(theta);
+      const bodyDeg = (theta / 3) * 180 / Math.PI;
+      rotor.setAttribute(
+        "transform",
+        `translate(${rcx.toFixed(3)}, ${rcy.toFixed(3)}) rotate(${bodyDeg.toFixed(3)})`,
+      );
+      arm.setAttribute("x2", rcx.toFixed(3));
+      arm.setAttribute("y2", rcy.toFixed(3));
+      requestAnimationFrame(frame);
+    }
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      requestAnimationFrame(frame);
+    }
+  }
+  animateRotor();
+</script>
 
 </body>
 </html>
