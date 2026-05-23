@@ -171,6 +171,53 @@
   table td:first-child{color:#f5f0e0;font-weight:500;width:30%}
   table td:last-child{color:#8b9bb4;font-style:italic}
 
+  .scenarios{margin-top:96px}
+  .scenarios h2{
+    font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;
+    font-size:1.75rem;
+    font-weight:600;
+    color:#f5f0e0;
+    margin-bottom:14px;
+    text-wrap:balance;
+  }
+  .scenarios > p{font-size:1.04rem;color:#cdc4b0;margin-bottom:32px;line-height:1.7}
+
+  .scenario{margin-bottom:36px;padding-left:56px;position:relative}
+  .scenario-num{
+    position:absolute;
+    left:0; top:6px;
+    font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;
+    font-style:italic;
+    font-size:1.4rem;
+    color:#a78bfa;
+    width:40px;
+    text-align:right;
+  }
+  .scenario h3{
+    font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;
+    font-size:1.3rem;
+    font-weight:600;
+    color:#f5f0e0;
+    margin-bottom:10px;
+    letter-spacing:-.005em;
+    text-wrap:balance;
+  }
+  .scenario p{
+    font-size:1.02rem;
+    line-height:1.7;
+    color:#cdc4b0;
+    margin-bottom:10px;
+  }
+  .scenario .reach{
+    font-family:-apple-system,system-ui,sans-serif;
+    font-size:.86rem;
+    color:#8b9bb4;
+    margin-top:8px;
+  }
+  .scenario .reach .label{color:#a78bfa;font-weight:500;letter-spacing:.04em;text-transform:uppercase;font-size:.72rem;margin-right:8px}
+  .scenario .reach a{color:#c4b5fd;text-decoration:none;border-bottom:1px dashed transparent;transition:border-color .15s}
+  .scenario .reach a:hover{border-bottom-color:#c4b5fd}
+
   .closing{
     margin-top:96px;
     padding:32px 0 0;
@@ -425,7 +472,57 @@
 
   <!-- ─────────────────────────────────────────────────────────────────────── -->
 
-  <p class="closing">The pattern in the top five — and the contrast with the bottom ten — is the same idea: <strong>Glyph is for visualizations where the math, the schematic, or the composition is the durable artifact, and the SVG is its byte-stable shadow.</strong> Narrow but real. Pick the right tool for each job; this is what Glyph's tool is for.</p>
+  <section class="scenarios">
+    <h2>Where to use it</h2>
+    <p>Reading the strengths back as use cases, six scenarios cover the bulk of where Glyph genuinely fits. None of these are revolutionary; they're the situations where Glyph's particular trade-offs — declarative, deterministic, 2D SVG, LLM-friendly — line up with the work.</p>
+
+    <article class="scenario">
+      <span class="scenario-num">i.</span>
+      <h3>Textbook figures and lecture diagrams</h3>
+      <p>Where the math is the point. Differential-equations textbooks need phase portraits and trajectories; reaction-diffusion needs heatmaps; geometry needs constructions; mechanisms need kinematic snapshots. Glyph compiles all four from a single grammar, and the same JSON spec the author writes is the figure that gets committed to the manuscript repository.</p>
+      <p class="reach"><span class="label">In the gallery</span><a href="joy.html">Joy of Math</a> — nine math demos including FitzHugh-Nagumo, sine-waves, sums, sqrt traces, hypotrochoid, gravity-lensing.</p>
+    </article>
+
+    <article class="scenario">
+      <span class="scenario-num">ii.</span>
+      <h3>Engineering documentation and patent illustrations</h3>
+      <p>Patent figures, mechanical-assembly diagrams, architectural elevations, schematic blueprints. The pencil-on-parchment aesthetic and the schematic vocabulary (<code>frame</code>, <code>gear</code>, <code>pendulum</code>, <code>annotation-leader</code>) are exactly the right shape for these. Think 1930s shop drawings, not generic chart-library output. The same spec produces the same drawing every time — important when the drawing is itself part of a regulated document.</p>
+      <p class="reach"><span class="label">In the gallery</span><a href="draw-me-locomotive.html">Steam locomotive</a> · <a href="draw-me-bridge.html">Suspension bridge</a> · <a href="draw-me-hydraulic.html">Hydraulic press</a> · <a href="draw-me-windmill.html">Windmill</a> · <a href="draw-me-pendulum-clock.html">Pendulum clock</a></p>
+    </article>
+
+    <article class="scenario">
+      <span class="scenario-num">iii.</span>
+      <h3>Science communication and museum panels</h3>
+      <p>Popular-science articles, Wikipedia illustrations, museum exhibit panels, conference posters. Pair a paragraph of text with one byte-stable SVG that renders on every device and survives every print run. The "Life in Glyph" series is built on this shape: an English-language prompt, a Glyph spec, a story told around a single image.</p>
+      <p class="reach"><span class="label">In the gallery</span><a href="draw-me-heartbeat.html">A heartbeat at rest</a> · <a href="draw-me-leopard.html">How the leopard got his spots</a> · <a href="draw-me-sunflower.html">A sunflower's seeds</a></p>
+    </article>
+
+    <article class="scenario">
+      <span class="scenario-num">iv.</span>
+      <h3>Animated explainers and slide decks</h3>
+      <p>Online course modules, conference slide decks, embedded YouTube graphics, MOOC supplements. SMIL loop animations work in every modern browser without a single line of JavaScript. A planet orbits, a heart pulses, gears turn, blades rotate — described once in JSON, animated forever on the page. The orrery and windmill in this essay are the proof.</p>
+      <p class="reach"><span class="label">In the gallery</span><a href="extendedcases.html#orrery">Animated orrery</a> · <a href="draw-me-windmill.html">Rotating windmill</a> · <a href="draw-me-circulation.html">Pulsing heart</a> · <a href="draw-me-pendulum-clock.html">Swinging pendulum</a></p>
+    </article>
+
+    <article class="scenario">
+      <span class="scenario-num">v.</span>
+      <h3>Agent-driven visualization</h3>
+      <p>When a chat agent — an LLM tutor, a code assistant, a conversational analyst — needs to draw something on demand. The JSON spec is small enough for the agent to author end-to-end; Zod's schema errors give it a clear repair signal when it gets a comma wrong; the SVG output is durable enough to embed in chat history or cite in a downstream document. The entire "Life in Glyph" series above was authored this way, prompt by prompt.</p>
+      <p class="reach"><span class="label">Read the recipe</span><a href="particles.html">Particles in Glyph</a> — the 4-step playbook for prompting Glyph for a complex spec.</p>
+    </article>
+
+    <article class="scenario">
+      <span class="scenario-num">vi.</span>
+      <h3>Procedural illustration pipelines</h3>
+      <p>Generate <em>N</em> illustrations from <em>N</em> data rows, all reproducible: per-student educational figures, per-device datasheets, per-game sports diagrams, per-attendee conference badges, per-experiment science-paper supplements. Glyph is a pure function — pipe data in, get reproducible SVGs out. The byte-stability matters: if the same row produces the same picture today and a year from now, you can re-render archives without auditing every diff.</p>
+      <p class="reach"><span class="label">For example</span>An author runs <code>generate-figures.mjs</code> over their dataset; each row produces one named SVG; the next-print-run is byte-identical to the first.</p>
+    </article>
+
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────────────────── -->
+
+  <p class="closing">The pattern in the top five — and the six scenarios above, and the contrast with the bottom ten — is the same idea: <strong>Glyph is for visualizations where the math, the schematic, or the composition is the durable artifact, and the SVG is its byte-stable shadow.</strong> Narrow but real. Pick the right tool for each job; this is what Glyph's tool is for.</p>
 
   <footer>
     Drawn by Glyph · Asked by you · Apache 2.0 · <a href="https://github.com/seanhanca/glyph">github.com/seanhanca/glyph</a>
