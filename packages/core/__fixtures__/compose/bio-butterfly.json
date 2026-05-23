@@ -1,0 +1,374 @@
+{
+  "compose": {
+    "viewBox": {
+      "width": 800,
+      "height": 600
+    },
+    "title": "A butterfly's wing — symmetry in scales",
+    "description": "Lepidopteran symmetry: same wing pattern reflected across the body axis. Forewing scales catch UV, hindwing eyespots scare predators. Two pairs of wings, one body, ~250,000 species worldwide.",
+    "theme": {
+      "preset": "pencil-parchment"
+    },
+    "defs": {
+      "gradients": [
+        {
+          "id": "g-wing-r",
+          "kind": "linear",
+          "x1": "0%",
+          "y1": "0%",
+          "x2": "100%",
+          "y2": "100%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#fbbf24",
+              "opacity": 0.95
+            },
+            {
+              "offset": "60%",
+              "color": "#dc2626",
+              "opacity": 0.95
+            },
+            {
+              "offset": "100%",
+              "color": "#581c87",
+              "opacity": 0.95
+            }
+          ]
+        },
+        {
+          "id": "g-wing-l",
+          "kind": "linear",
+          "x1": "100%",
+          "y1": "0%",
+          "x2": "0%",
+          "y2": "100%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#fbbf24",
+              "opacity": 0.95
+            },
+            {
+              "offset": "60%",
+              "color": "#dc2626",
+              "opacity": 0.95
+            },
+            {
+              "offset": "100%",
+              "color": "#581c87",
+              "opacity": 0.95
+            }
+          ]
+        },
+        {
+          "id": "g-hind-r",
+          "kind": "linear",
+          "x1": "0%",
+          "y1": "0%",
+          "x2": "100%",
+          "y2": "100%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#581c87",
+              "opacity": 0.95
+            },
+            {
+              "offset": "70%",
+              "color": "#1e3a8a",
+              "opacity": 0.95
+            },
+            {
+              "offset": "100%",
+              "color": "#0f172a",
+              "opacity": 0.95
+            }
+          ]
+        },
+        {
+          "id": "g-hind-l",
+          "kind": "linear",
+          "x1": "100%",
+          "y1": "0%",
+          "x2": "0%",
+          "y2": "100%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#581c87",
+              "opacity": 0.95
+            },
+            {
+              "offset": "70%",
+              "color": "#1e3a8a",
+              "opacity": 0.95
+            },
+            {
+              "offset": "100%",
+              "color": "#0f172a",
+              "opacity": 0.95
+            }
+          ]
+        }
+      ]
+    },
+    "children": [
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "polygon",
+        "polygon": {
+          "points": [[0, 10], [60, 30], [160, 80], [180, 130], [120, 160], [40, 130], [10, 60]],
+          "fill": "url(#g-hind-r)",
+          "stroke": "#3a2a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "polygon",
+        "polygon": {
+          "points": [
+            [0, 10],
+            [-60, 30],
+            [-160, 80],
+            [-180, 130],
+            [-120, 160],
+            [-40, 130],
+            [-10, 60]
+          ],
+          "fill": "url(#g-hind-l)",
+          "stroke": "#3a2a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "polygon",
+        "polygon": {
+          "points": [
+            [0, -10],
+            [70, -110],
+            [180, -120],
+            [240, -80],
+            [230, -20],
+            [180, 10],
+            [60, 20]
+          ],
+          "fill": "url(#g-wing-r)",
+          "stroke": "#3a2a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "polygon",
+        "polygon": {
+          "points": [
+            [0, -10],
+            [-70, -110],
+            [-180, -120],
+            [-240, -80],
+            [-230, -20],
+            [-180, 10],
+            [-60, 20]
+          ],
+          "fill": "url(#g-wing-l)",
+          "stroke": "#3a2a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 330
+        },
+        "mark": "ellipse",
+        "ellipse": {
+          "rx": 9,
+          "ry": 70,
+          "fill": "#1f1a14",
+          "stroke": "#7c2d12",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 262
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 9,
+          "fill": "#1f1a14",
+          "stroke": "#7c2d12",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 270
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 Q 18 -40, 36 -55",
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 270
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 Q -18 -40, -36 -55",
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 436,
+          "y": 245
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 2.5,
+          "fill": "#1f1a14"
+        }
+      },
+      {
+        "at": {
+          "x": 364,
+          "y": 245
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 2.5,
+          "fill": "#1f1a14"
+        }
+      },
+      {
+        "at": {
+          "x": 550,
+          "y": 230
+        },
+        "mark": "ellipse",
+        "ellipse": {
+          "rx": 22,
+          "ry": 16,
+          "fill": "rgba(255,255,255,.55)",
+          "stroke": "#3a2a14",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 550,
+          "y": 230
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 8,
+          "fill": "#1f1a14"
+        }
+      },
+      {
+        "at": {
+          "x": 250,
+          "y": 230
+        },
+        "mark": "ellipse",
+        "ellipse": {
+          "rx": 22,
+          "ry": 16,
+          "fill": "rgba(255,255,255,.55)",
+          "stroke": "#3a2a14",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 250,
+          "y": 230
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 8,
+          "fill": "#1f1a14"
+        }
+      },
+      {
+        "at": {
+          "x": 510,
+          "y": 400
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 14,
+          "fill": "rgba(255, 200, 80, 0.65)",
+          "stroke": "#7c2d12",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 290,
+          "y": 400
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 14,
+          "fill": "rgba(255, 200, 80, 0.65)",
+          "stroke": "#7c2d12",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 50
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Order Lepidoptera",
+          "fontSize": 18,
+          "fill": "#1f1a14",
+          "italic": true,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 560
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "bilateral symmetry · iridescent scales · two pairs of wings",
+          "fontSize": 13,
+          "fill": "#4a3f30",
+          "italic": true,
+          "anchor": "middle"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,676 @@
+{
+  "compose": {
+    "viewBox": {
+      "width": 1000,
+      "height": 700
+    },
+    "title": "A Greek temple — order in stone",
+    "description": "Doric order, the oldest of the classical Greek styles. Six columns front the cella; their proportion (height : diameter ≈ 5:1) and the triglyph-metope frieze date this to ~500 BCE. The Parthenon's blueprint, scaled down.",
+    "theme": {
+      "preset": "pencil-parchment"
+    },
+    "defs": {
+      "gradients": [
+        {
+          "id": "g-sky",
+          "kind": "linear",
+          "x1": "0%",
+          "y1": "0%",
+          "x2": "0%",
+          "y2": "100%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#7dd3fc",
+              "opacity": 1
+            },
+            {
+              "offset": "60%",
+              "color": "#fde9b0",
+              "opacity": 1
+            },
+            {
+              "offset": "100%",
+              "color": "#ebe1c4",
+              "opacity": 1
+            }
+          ]
+        },
+        {
+          "id": "g-ground",
+          "kind": "linear",
+          "x1": "0%",
+          "y1": "0%",
+          "x2": "0%",
+          "y2": "100%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#a3b18a",
+              "opacity": 1
+            },
+            {
+              "offset": "100%",
+              "color": "#6b8a4a",
+              "opacity": 1
+            }
+          ]
+        }
+      ],
+      "patterns": [
+        {
+          "id": "p-flute",
+          "width": 8,
+          "height": 8,
+          "children": [
+            {
+              "kind": "line",
+              "x1": 0,
+              "y1": 0,
+              "x2": 0,
+              "y2": 8,
+              "stroke": "#3a3a2a",
+              "strokeWidth": 0.5
+            },
+            {
+              "kind": "line",
+              "x1": 4,
+              "y1": 0,
+              "x2": 4,
+              "y2": 8,
+              "stroke": "#3a3a2a",
+              "strokeWidth": 0.3
+            }
+          ]
+        },
+        {
+          "id": "p-marble",
+          "width": 60,
+          "height": 30,
+          "children": [
+            {
+              "kind": "line",
+              "x1": 0,
+              "y1": 0,
+              "x2": 60,
+              "y2": 0,
+              "stroke": "#3a3a2a",
+              "strokeWidth": 0.3
+            },
+            {
+              "kind": "line",
+              "x1": 0,
+              "y1": 15,
+              "x2": 60,
+              "y2": 15,
+              "stroke": "#3a3a2a",
+              "strokeWidth": 0.3
+            },
+            {
+              "kind": "line",
+              "x1": 30,
+              "y1": 0,
+              "x2": 30,
+              "y2": 15,
+              "stroke": "#3a3a2a",
+              "strokeWidth": 0.3
+            },
+            {
+              "kind": "line",
+              "x1": 0,
+              "y1": 15,
+              "x2": 0,
+              "y2": 30,
+              "stroke": "#3a3a2a",
+              "strokeWidth": 0.3
+            },
+            {
+              "kind": "line",
+              "x1": 60,
+              "y1": 15,
+              "x2": 60,
+              "y2": 30,
+              "stroke": "#3a3a2a",
+              "strokeWidth": 0.3
+            }
+          ]
+        }
+      ]
+    },
+    "children": [
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 1000 0 L 1000 590 L 0 590 Z",
+          "fill": "url(#g-sky)",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 590
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 1000 0 L 1000 110 L 0 110 Z",
+          "fill": "url(#g-ground)",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 100,
+          "y": 570
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 800 0 L 790 30 L 10 30 Z",
+          "fill": "url(#p-marble)",
+          "stroke": "#3a3a2a",
+          "strokeWidth": 2
+        }
+      },
+      {
+        "at": {
+          "x": 90,
+          "y": 600
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 820 0 L 810 20 L 10 20 Z",
+          "fill": "url(#p-marble)",
+          "stroke": "#3a3a2a",
+          "strokeWidth": 2
+        }
+      },
+      {
+        "at": {
+          "x": 175,
+          "y": 280
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -25 0 L 25 0 L 29 290 L -29 290 Z",
+          "fill": "url(#p-flute)",
+          "stroke": "#3a3a2a",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 175,
+          "y": 262
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -33 0 L 33 0 L 37 12 L -37 12 Z M -37 12 L 37 12 L 37 18 L -37 18 Z",
+          "fill": "#fefce8",
+          "stroke": "#3a3a2a",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 175,
+          "y": 564
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -33 0 L 33 0 L 33 6 L -33 6 Z",
+          "fill": "#fefce8",
+          "stroke": "#3a3a2a",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 305,
+          "y": 280
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -25 0 L 25 0 L 29 290 L -29 290 Z",
+          "fill": "url(#p-flute)",
+          "stroke": "#3a3a2a",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 305,
+          "y": 262
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -33 0 L 33 0 L 37 12 L -37 12 Z M -37 12 L 37 12 L 37 18 L -37 18 Z",
+          "fill": "#fefce8",
+          "stroke": "#3a3a2a",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 305,
+          "y": 564
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -33 0 L 33 0 L 33 6 L -33 6 Z",
+          "fill": "#fefce8",
+          "stroke": "#3a3a2a",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 435,
+          "y": 280
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -25 0 L 25 0 L 29 290 L -29 290 Z",
+          "fill": "url(#p-flute)",
+          "stroke": "#3a3a2a",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 435,
+          "y": 262
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -33 0 L 33 0 L 37 12 L -37 12 Z M -37 12 L 37 12 L 37 18 L -37 18 Z",
+          "fill": "#fefce8",
+          "stroke": "#3a3a2a",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 435,
+          "y": 564
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -33 0 L 33 0 L 33 6 L -33 6 Z",
+          "fill": "#fefce8",
+          "stroke": "#3a3a2a",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 565,
+          "y": 280
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -25 0 L 25 0 L 29 290 L -29 290 Z",
+          "fill": "url(#p-flute)",
+          "stroke": "#3a3a2a",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 565,
+          "y": 262
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -33 0 L 33 0 L 37 12 L -37 12 Z M -37 12 L 37 12 L 37 18 L -37 18 Z",
+          "fill": "#fefce8",
+          "stroke": "#3a3a2a",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 565,
+          "y": 564
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -33 0 L 33 0 L 33 6 L -33 6 Z",
+          "fill": "#fefce8",
+          "stroke": "#3a3a2a",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 695,
+          "y": 280
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -25 0 L 25 0 L 29 290 L -29 290 Z",
+          "fill": "url(#p-flute)",
+          "stroke": "#3a3a2a",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 695,
+          "y": 262
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -33 0 L 33 0 L 37 12 L -37 12 Z M -37 12 L 37 12 L 37 18 L -37 18 Z",
+          "fill": "#fefce8",
+          "stroke": "#3a3a2a",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 695,
+          "y": 564
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -33 0 L 33 0 L 33 6 L -33 6 Z",
+          "fill": "#fefce8",
+          "stroke": "#3a3a2a",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 825,
+          "y": 280
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -25 0 L 25 0 L 29 290 L -29 290 Z",
+          "fill": "url(#p-flute)",
+          "stroke": "#3a3a2a",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 825,
+          "y": 262
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -33 0 L 33 0 L 37 12 L -37 12 Z M -37 12 L 37 12 L 37 18 L -37 18 Z",
+          "fill": "#fefce8",
+          "stroke": "#3a3a2a",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 825,
+          "y": 564
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -33 0 L 33 0 L 33 6 L -33 6 Z",
+          "fill": "#fefce8",
+          "stroke": "#3a3a2a",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 120,
+          "y": 252
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 760 0 L 760 12 L 0 12 Z",
+          "fill": "url(#p-marble)",
+          "stroke": "#3a3a2a",
+          "strokeWidth": 2
+        }
+      },
+      {
+        "at": {
+          "x": 120,
+          "y": 220
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 760 0 L 760 32 L 0 32 Z",
+          "fill": "#fefce8",
+          "stroke": "#3a3a2a",
+          "strokeWidth": 2
+        }
+      },
+      {
+        "at": {
+          "x": 167,
+          "y": 226
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 16 0 L 16 26 L 0 26 Z",
+          "fill": "#fefce8",
+          "stroke": "#3a3a2a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 175,
+          "y": 226
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [0, 26]],
+          "fill": "none",
+          "stroke": "#3a3a2a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 297,
+          "y": 226
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 16 0 L 16 26 L 0 26 Z",
+          "fill": "#fefce8",
+          "stroke": "#3a3a2a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 305,
+          "y": 226
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [0, 26]],
+          "fill": "none",
+          "stroke": "#3a3a2a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 427,
+          "y": 226
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 16 0 L 16 26 L 0 26 Z",
+          "fill": "#fefce8",
+          "stroke": "#3a3a2a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 435,
+          "y": 226
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [0, 26]],
+          "fill": "none",
+          "stroke": "#3a3a2a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 557,
+          "y": 226
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 16 0 L 16 26 L 0 26 Z",
+          "fill": "#fefce8",
+          "stroke": "#3a3a2a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 565,
+          "y": 226
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [0, 26]],
+          "fill": "none",
+          "stroke": "#3a3a2a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 687,
+          "y": 226
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 16 0 L 16 26 L 0 26 Z",
+          "fill": "#fefce8",
+          "stroke": "#3a3a2a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 695,
+          "y": 226
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [0, 26]],
+          "fill": "none",
+          "stroke": "#3a3a2a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 817,
+          "y": 226
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 16 0 L 16 26 L 0 26 Z",
+          "fill": "#fefce8",
+          "stroke": "#3a3a2a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 825,
+          "y": 226
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [0, 26]],
+          "fill": "none",
+          "stroke": "#3a3a2a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 110,
+          "y": 200
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 780 0 L 780 14 L 0 14 Z",
+          "fill": "url(#p-marble)",
+          "stroke": "#3a3a2a",
+          "strokeWidth": 2
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polygon",
+        "polygon": {
+          "points": [[110, 200], [890, 200], [500, 80]],
+          "fill": "url(#p-marble)",
+          "stroke": "#3a3a2a",
+          "strokeWidth": 2
+        }
+      },
+      {
+        "at": {
+          "x": 500,
+          "y": 56
+        },
+        "mark": "polygon",
+        "polygon": {
+          "points": [[-10, 24], [0, 0], [10, 24]],
+          "fill": "#fefce8",
+          "stroke": "#3a3a2a",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 500,
+          "y": 60
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Templum Doricum",
+          "fontSize": 20,
+          "fill": "#1f1a14",
+          "italic": true,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 500,
+          "y": 670
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "stylobate · column · architrave · frieze · cornice · pediment",
+          "fontSize": 13,
+          "fill": "#4a3f30",
+          "italic": true,
+          "anchor": "middle"
+        }
+      }
+    ]
+  }
+}

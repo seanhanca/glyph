@@ -1,0 +1,350 @@
+{
+  "compose": {
+    "viewBox": {
+      "width": 800,
+      "height": 1000
+    },
+    "title": "A skyscraper at dusk — the city in one column",
+    "description": "Modernist glass tower at last light. A steel skeleton sheathed in a curtain wall of windows. Sullivan's principle (1896): form follows function. Mies's gift (1958, Seagram Building): glass plus rhythm = the entire 20th century.",
+    "theme": {
+      "background": "#0c1126",
+      "foreground": "#fef3c7"
+    },
+    "defs": {
+      "gradients": [
+        {
+          "id": "g-dusk",
+          "kind": "linear",
+          "x1": "0%",
+          "y1": "0%",
+          "x2": "0%",
+          "y2": "100%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#1e3a8a",
+              "opacity": 1
+            },
+            {
+              "offset": "40%",
+              "color": "#7c2d12",
+              "opacity": 1
+            },
+            {
+              "offset": "70%",
+              "color": "#dc2626",
+              "opacity": 1
+            },
+            {
+              "offset": "100%",
+              "color": "#fed7aa",
+              "opacity": 1
+            }
+          ]
+        },
+        {
+          "id": "g-tower",
+          "kind": "linear",
+          "x1": "0%",
+          "y1": "0%",
+          "x2": "100%",
+          "y2": "0%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#0c4a6e",
+              "opacity": 1
+            },
+            {
+              "offset": "50%",
+              "color": "#1e3a8a",
+              "opacity": 1
+            },
+            {
+              "offset": "100%",
+              "color": "#0c1e3a",
+              "opacity": 1
+            }
+          ]
+        },
+        {
+          "id": "g-reflect",
+          "kind": "linear",
+          "x1": "0%",
+          "y1": "0%",
+          "x2": "100%",
+          "y2": "100%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#fbbf24",
+              "opacity": 0.45
+            },
+            {
+              "offset": "60%",
+              "color": "#dc2626",
+              "opacity": 0.15
+            },
+            {
+              "offset": "100%",
+              "color": "#fbbf24",
+              "opacity": 0
+            }
+          ]
+        },
+        {
+          "id": "g-ground",
+          "kind": "linear",
+          "x1": "0%",
+          "y1": "0%",
+          "x2": "0%",
+          "y2": "100%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#1f1a14",
+              "opacity": 1
+            },
+            {
+              "offset": "100%",
+              "color": "#0c0a08",
+              "opacity": 1
+            }
+          ]
+        }
+      ],
+      "patterns": [
+        {
+          "id": "p-windows",
+          "width": 24,
+          "height": 36,
+          "children": [
+            {
+              "kind": "rect",
+              "x": 4,
+              "y": 6,
+              "width": 7,
+              "height": 12,
+              "fill": "#fde68a"
+            },
+            {
+              "kind": "rect",
+              "x": 13,
+              "y": 6,
+              "width": 7,
+              "height": 12,
+              "fill": "#fbbf24"
+            },
+            {
+              "kind": "rect",
+              "x": 4,
+              "y": 22,
+              "width": 7,
+              "height": 12,
+              "fill": "rgba(253,230,138,.35)"
+            },
+            {
+              "kind": "rect",
+              "x": 13,
+              "y": 22,
+              "width": 7,
+              "height": 12,
+              "fill": "#fde68a"
+            }
+          ]
+        }
+      ]
+    },
+    "children": [
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 800 0 L 800 940 L 0 940 Z",
+          "fill": "url(#g-dusk)",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "starfield",
+        "starfield": {
+          "count": 30,
+          "seed": 47,
+          "region": {
+            "x": 0,
+            "y": 0,
+            "w": 800,
+            "h": 200
+          }
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 600 L 70 600 L 70 940 L 0 940 Z M 70 660 L 170 660 L 170 940 L 70 940 Z M 580 580 L 660 580 L 660 940 L 580 940 Z M 660 700 L 760 700 L 760 940 L 660 940 Z M 760 640 L 800 640 L 800 940 L 760 940 Z",
+          "fill": "#0c1126",
+          "stroke": "#1d2444",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 600 L 70 600 L 70 940 L 0 940 Z M 70 660 L 170 660 L 170 940 L 70 940 Z M 580 580 L 660 580 L 660 940 L 580 940 Z M 660 700 L 760 700 L 760 940 L 660 940 Z M 760 640 L 800 640 L 800 940 L 760 940 Z",
+          "fill": "url(#p-windows)",
+          "stroke": "none",
+          "opacity": 0.55
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 280 940 L 280 80 L 520 80 L 520 940 Z",
+          "fill": "url(#g-tower)",
+          "stroke": "#0c4a6e",
+          "strokeWidth": 2
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 288 104 L 512 104 L 512 860 L 288 860 Z",
+          "fill": "url(#p-windows)",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 288 104 L 512 104 L 512 860 L 288 860 Z",
+          "fill": "url(#g-reflect)",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 310 20 L 490 20 L 490 80 L 310 80 Z",
+          "fill": "#0c1e3a",
+          "stroke": "#0c4a6e",
+          "strokeWidth": 2
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 20
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [0, 0]],
+          "fill": "none",
+          "stroke": "#0c1126",
+          "strokeWidth": 2.5
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 24
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 3,
+          "fill": "#dc2626",
+          "stroke": "#7c2d12",
+          "strokeWidth": 0.5
+        },
+        "animation": {
+          "kind": "pulse",
+          "periodMs": 1500,
+          "scale": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 940
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 800 0 L 800 60 L 0 60 Z",
+          "fill": "url(#g-ground)",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 945
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [800, 0]],
+          "fill": "none",
+          "stroke": "#94a3b8",
+          "strokeWidth": 0.5
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 36
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "form follows function · Sullivan, 1896",
+          "fontSize": 13,
+          "fill": "#fef3c7",
+          "italic": true,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 980
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "steel frame · curtain wall · 720 lit windows at dusk",
+          "fontSize": 13,
+          "fill": "#fbbf24",
+          "italic": true,
+          "anchor": "middle"
+        }
+      }
+    ]
+  }
+}

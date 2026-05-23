@@ -1,0 +1,760 @@
+{
+  "compose": {
+    "viewBox": {
+      "width": 800,
+      "height": 600
+    },
+    "title": "An eye — the camera that learned to see",
+    "description": "Cross-section through a vertebrate eye: sclera (white), iris (the radial muscle that opens or closes the pupil), pupil (the aperture), and a catchlight reflecting whatever the eye is looking at.",
+    "theme": {
+      "background": "#1a0f0a",
+      "foreground": "#fef3c7"
+    },
+    "defs": {
+      "gradients": [
+        {
+          "id": "g-skin",
+          "kind": "radial",
+          "cx": "50%",
+          "cy": "50%",
+          "r": "60%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#fde68a",
+              "opacity": 1
+            },
+            {
+              "offset": "60%",
+              "color": "#d97706",
+              "opacity": 1
+            },
+            {
+              "offset": "100%",
+              "color": "#451a03",
+              "opacity": 1
+            }
+          ]
+        },
+        {
+          "id": "g-iris",
+          "kind": "radial",
+          "cx": "50%",
+          "cy": "50%",
+          "r": "50%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#0c4a6e",
+              "opacity": 0.95
+            },
+            {
+              "offset": "60%",
+              "color": "#0284c7",
+              "opacity": 0.95
+            },
+            {
+              "offset": "100%",
+              "color": "#7dd3fc",
+              "opacity": 0.95
+            }
+          ]
+        },
+        {
+          "id": "g-iris-base",
+          "kind": "radial",
+          "cx": "50%",
+          "cy": "50%",
+          "r": "55%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#0c4a6e",
+              "opacity": 1
+            },
+            {
+              "offset": "100%",
+              "color": "#082f49",
+              "opacity": 1
+            }
+          ]
+        },
+        {
+          "id": "g-sclera",
+          "kind": "radial",
+          "cx": "50%",
+          "cy": "40%",
+          "r": "60%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#fef3c7",
+              "opacity": 1
+            },
+            {
+              "offset": "70%",
+              "color": "#fde9b0",
+              "opacity": 1
+            },
+            {
+              "offset": "100%",
+              "color": "#d97706",
+              "opacity": 1
+            }
+          ]
+        }
+      ]
+    },
+    "children": [
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 800 0 L 800 600 L 0 600 Z",
+          "fill": "url(#g-skin)",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 180 300 Q 400 140, 620 300 Q 400 460, 180 300 Z",
+          "fill": "url(#g-sclera)",
+          "stroke": "#3a2a14",
+          "strokeWidth": 2
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 130,
+          "fill": "url(#g-iris-base)"
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[50, 0], [130, 0]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[49.24, 8.68], [124.09, 21.88]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[46.98, 17.1], [114.64, 41.73]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[43.3, 25], [112.58, 65]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[38.3, 32.14], [96.52, 80.99]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[32.14, 38.3], [78.42, 93.46]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[25, 43.3], [65, 112.58]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[17.1, 46.98], [43.09, 118.4]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[8.68, 49.24], [21.19, 120.15]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 50], [0, 130]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-8.68, 49.24], [-21.88, 124.09]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-17.1, 46.98], [-41.73, 114.64]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-25, 43.3], [-65, 112.58]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-32.14, 38.3], [-80.99, 96.52]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-38.3, 32.14], [-93.46, 78.42]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-43.3, 25], [-112.58, 65]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-46.98, 17.1], [-118.4, 43.09]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-49.24, 8.68], [-120.15, 21.19]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-50, 0], [-130, 0]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-49.24, -8.68], [-124.09, -21.88]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-46.98, -17.1], [-114.64, -41.73]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-43.3, -25], [-112.58, -65]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-38.3, -32.14], [-96.52, -80.99]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-32.14, -38.3], [-78.42, -93.46]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-25, -43.3], [-65, -112.58]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-17.1, -46.98], [-43.09, -118.4]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-8.68, -49.24], [-21.19, -120.15]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, -50], [0, -130]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[8.68, -49.24], [21.88, -124.09]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[17.1, -46.98], [41.73, -114.64]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[25, -43.3], [65, -112.58]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[32.14, -38.3], [80.99, -96.52]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[38.3, -32.14], [93.46, -78.42]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[43.3, -25], [112.58, -65]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[46.98, -17.1], [118.4, -43.09]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[49.24, -8.68], [120.15, -21.19]],
+          "fill": "none",
+          "stroke": "url(#g-iris)",
+          "strokeWidth": 1.1
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 130,
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 300
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 48,
+          "fill": "#0a0a0a"
+        }
+      },
+      {
+        "at": {
+          "x": 382,
+          "y": 282
+        },
+        "mark": "ellipse",
+        "ellipse": {
+          "rx": 14,
+          "ry": 10,
+          "fill": "rgba(255,255,255,.85)"
+        }
+      },
+      {
+        "at": {
+          "x": 408,
+          "y": 294
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 3,
+          "fill": "rgba(255,255,255,.7)"
+        }
+      },
+      {
+        "at": {
+          "x": 290,
+          "y": 170
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 Q 4 -10, 10 -22",
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 2,
+          "strokeLinecap": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 345,
+          "y": 162
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 Q 4 -10, 10 -22",
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 2,
+          "strokeLinecap": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 162
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 Q -4 -10, -10 -22",
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 2,
+          "strokeLinecap": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 455,
+          "y": 162
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 Q -4 -10, -10 -22",
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 2,
+          "strokeLinecap": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 510,
+          "y": 170
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 Q -4 -10, -10 -22",
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 2,
+          "strokeLinecap": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 60
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "iris · pupil · catchlight",
+          "fontSize": 16,
+          "fill": "#fef3c7",
+          "italic": true,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 540
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "36 radial muscle fibers · one aperture · the camera nature evolved 40 separate times",
+          "fontSize": 13,
+          "fill": "#fde68a",
+          "italic": true,
+          "anchor": "middle"
+        }
+      }
+    ]
+  }
+}

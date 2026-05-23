@@ -1,0 +1,545 @@
+{
+  "compose": {
+    "viewBox": {
+      "width": 1000,
+      "height": 500
+    },
+    "title": "A neuron firing — the cell that thinks",
+    "description": "A single pyramidal neuron. Dendrites on the left collect input; the soma integrates it; the axon on the right fires an action potential down to the synaptic terminals. Same architecture you use to read this sentence.",
+    "theme": {
+      "background": "#020617",
+      "foreground": "#f1f5fb"
+    },
+    "defs": {
+      "gradients": [
+        {
+          "id": "g-bg",
+          "kind": "radial",
+          "cx": "50%",
+          "cy": "50%",
+          "r": "75%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#0f172a",
+              "opacity": 1
+            },
+            {
+              "offset": "100%",
+              "color": "#020617",
+              "opacity": 1
+            }
+          ]
+        },
+        {
+          "id": "g-cell",
+          "kind": "linear",
+          "x1": "0%",
+          "y1": "0%",
+          "x2": "100%",
+          "y2": "0%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#a78bfa",
+              "opacity": 0.95
+            },
+            {
+              "offset": "50%",
+              "color": "#22d3ee",
+              "opacity": 0.95
+            },
+            {
+              "offset": "100%",
+              "color": "#fde68a",
+              "opacity": 0.95
+            }
+          ]
+        },
+        {
+          "id": "g-soma",
+          "kind": "radial",
+          "cx": "40%",
+          "cy": "40%",
+          "r": "60%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#fef3c7",
+              "opacity": 0.95
+            },
+            {
+              "offset": "60%",
+              "color": "#a78bfa",
+              "opacity": 0.85
+            },
+            {
+              "offset": "100%",
+              "color": "#312e81",
+              "opacity": 0.95
+            }
+          ]
+        },
+        {
+          "id": "g-pulse",
+          "kind": "radial",
+          "cx": "50%",
+          "cy": "50%",
+          "r": "50%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#fde68a",
+              "opacity": 0.9
+            },
+            {
+              "offset": "100%",
+              "color": "#fde68a",
+              "opacity": 0
+            }
+          ]
+        }
+      ]
+    },
+    "children": [
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 1000 0 L 1000 500 L 0 500 Z",
+          "fill": "url(#g-bg)",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "starfield",
+        "starfield": {
+          "count": 60,
+          "seed": 23,
+          "region": {
+            "x": 0,
+            "y": 0,
+            "w": 1000,
+            "h": 500
+          }
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 152.96 276.82 L 62.17 338.93 M 98.48 314.09 L 71.74 355.74 M 98.48 314.09 L 49.97 323.92 M 62.17 338.93 L 48.37 353.13 M 62.17 338.93 L 43.93 346.64",
+          "fill": "none",
+          "stroke": "url(#g-cell)",
+          "strokeWidth": 1.6,
+          "strokeLinecap": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 144.77 261.75 L 18.81 293.91 M 69.2 281.05 L 20.91 314.08 M 69.2 281.05 L 10.99 275.21 M 18.81 293.91 L -2.5 303.56 M 18.81 293.91 L -4.52 295.67",
+          "fill": "none",
+          "stroke": "url(#g-cell)",
+          "strokeWidth": 1.6,
+          "strokeLinecap": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 143 250 L -7 250 M 53 250 L -10.41 273.15 M 53 250 L -10.41 226.85 M -7 250 L -33.59 254.7 M -7 250 L -33.59 245.3",
+          "fill": "none",
+          "stroke": "url(#g-cell)",
+          "strokeWidth": 1.6,
+          "strokeLinecap": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 144.77 238.25 L 18.81 206.09 M 69.2 218.95 L 10.99 224.79 M 69.2 218.95 L 20.91 185.92 M 18.81 206.09 L -4.52 204.33 M 18.81 206.09 L -2.5 196.44",
+          "fill": "none",
+          "stroke": "url(#g-cell)",
+          "strokeWidth": 1.6,
+          "strokeLinecap": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 151.41 225.17 L 57.63 167.68 M 95.14 190.67 L 46.2 183.28 M 95.14 190.67 L 66.35 150.41 M 57.63 167.68 L 39.03 160.89 M 57.63 167.68 L 43.14 154.18",
+          "fill": "none",
+          "stroke": "url(#g-cell)",
+          "strokeWidth": 1.6,
+          "strokeLinecap": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 260 250 L 880 250",
+          "fill": "none",
+          "stroke": "url(#g-cell)",
+          "strokeWidth": 3,
+          "strokeLinecap": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 310,
+          "y": 250
+        },
+        "mark": "ellipse",
+        "ellipse": {
+          "rx": 26,
+          "ry": 9,
+          "fill": "rgba(255, 243, 199, 0.85)",
+          "stroke": "#b8870e",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 390,
+          "y": 250
+        },
+        "mark": "ellipse",
+        "ellipse": {
+          "rx": 26,
+          "ry": 9,
+          "fill": "rgba(255, 243, 199, 0.85)",
+          "stroke": "#b8870e",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 470,
+          "y": 250
+        },
+        "mark": "ellipse",
+        "ellipse": {
+          "rx": 26,
+          "ry": 9,
+          "fill": "rgba(255, 243, 199, 0.85)",
+          "stroke": "#b8870e",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 550,
+          "y": 250
+        },
+        "mark": "ellipse",
+        "ellipse": {
+          "rx": 26,
+          "ry": 9,
+          "fill": "rgba(255, 243, 199, 0.85)",
+          "stroke": "#b8870e",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 630,
+          "y": 250
+        },
+        "mark": "ellipse",
+        "ellipse": {
+          "rx": 26,
+          "ry": 9,
+          "fill": "rgba(255, 243, 199, 0.85)",
+          "stroke": "#b8870e",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 710,
+          "y": 250
+        },
+        "mark": "ellipse",
+        "ellipse": {
+          "rx": 26,
+          "ry": 9,
+          "fill": "rgba(255, 243, 199, 0.85)",
+          "stroke": "#b8870e",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 790,
+          "y": 250
+        },
+        "mark": "ellipse",
+        "ellipse": {
+          "rx": 26,
+          "ry": 9,
+          "fill": "rgba(255, 243, 199, 0.85)",
+          "stroke": "#b8870e",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 200,
+          "y": 250
+        },
+        "mark": "glow",
+        "glow": {
+          "radius": 130,
+          "gradientId": "g-pulse"
+        }
+      },
+      {
+        "at": {
+          "x": 200,
+          "y": 250
+        },
+        "mark": "ellipse",
+        "ellipse": {
+          "rx": 60,
+          "ry": 50,
+          "fill": "url(#g-soma)",
+          "stroke": "#a78bfa",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 192,
+          "y": 244
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 18,
+          "fill": "rgba(2,6,23,.6)",
+          "stroke": "#fde68a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 880 250 L 915.1 230.82",
+          "fill": "none",
+          "stroke": "url(#g-cell)",
+          "strokeWidth": 1.6,
+          "strokeLinecap": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 915.1,
+          "y": 230.82
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 4,
+          "fill": "#fbbf24",
+          "stroke": "#7c2d12",
+          "strokeWidth": 0.6
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 880 250 L 919.35 242.84",
+          "fill": "none",
+          "stroke": "url(#g-cell)",
+          "strokeWidth": 1.6,
+          "strokeLinecap": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 919.35,
+          "y": 242.84
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 4,
+          "fill": "#fbbf24",
+          "stroke": "#7c2d12",
+          "strokeWidth": 0.6
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 880 250 L 919.35 257.16",
+          "fill": "none",
+          "stroke": "url(#g-cell)",
+          "strokeWidth": 1.6,
+          "strokeLinecap": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 919.35,
+          "y": 257.16
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 4,
+          "fill": "#fbbf24",
+          "stroke": "#7c2d12",
+          "strokeWidth": 0.6
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 880 250 L 915.1 269.18",
+          "fill": "none",
+          "stroke": "url(#g-cell)",
+          "strokeWidth": 1.6,
+          "strokeLinecap": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 915.1,
+          "y": 269.18
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 4,
+          "fill": "#fbbf24",
+          "stroke": "#7c2d12",
+          "strokeWidth": 0.6
+        }
+      },
+      {
+        "at": {
+          "x": 880,
+          "y": 250
+        },
+        "mark": "glow",
+        "glow": {
+          "radius": 60,
+          "gradientId": "g-pulse"
+        }
+      },
+      {
+        "at": {
+          "x": 50,
+          "y": 60
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "dendrites",
+          "fontSize": 14,
+          "fill": "#a78bfa",
+          "italic": true,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 200,
+          "y": 340
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "soma",
+          "fontSize": 14,
+          "fill": "#fde68a",
+          "italic": true,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 530,
+          "y": 230
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "axon · myelin sheath",
+          "fontSize": 14,
+          "fill": "#22d3ee",
+          "italic": true,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 900,
+          "y": 320
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "synapse",
+          "fontSize": 14,
+          "fill": "#fbbf24",
+          "italic": true,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 500,
+          "y": 460
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "input · integrate · fire · transmit",
+          "fontSize": 13,
+          "fill": "#94a3b8",
+          "italic": true,
+          "anchor": "middle"
+        }
+      }
+    ]
+  }
+}

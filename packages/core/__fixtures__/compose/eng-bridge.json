@@ -1,0 +1,573 @@
+{
+  "compose": {
+    "viewBox": {
+      "width": 1200,
+      "height": 600
+    },
+    "title": "A suspension bridge — gravity solved",
+    "description": "Two towers, one main cable per side, hundreds of vertical suspenders carrying the deck. The cable hangs in a parabola because the load (the deck) is uniform per horizontal distance, not per arc length. Roebling, 1883 (Brooklyn) → Strauss, 1937 (Golden Gate).",
+    "theme": {
+      "preset": "pencil-parchment"
+    },
+    "defs": {
+      "gradients": [
+        {
+          "id": "g-sky",
+          "kind": "linear",
+          "x1": "0%",
+          "y1": "0%",
+          "x2": "0%",
+          "y2": "100%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#fef3c7",
+              "opacity": 1
+            },
+            {
+              "offset": "70%",
+              "color": "#fde9b0",
+              "opacity": 1
+            },
+            {
+              "offset": "100%",
+              "color": "#ebe1c4",
+              "opacity": 1
+            }
+          ]
+        },
+        {
+          "id": "g-water",
+          "kind": "linear",
+          "x1": "0%",
+          "y1": "0%",
+          "x2": "0%",
+          "y2": "100%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#7dd3fc",
+              "opacity": 0.85
+            },
+            {
+              "offset": "100%",
+              "color": "#0c4a6e",
+              "opacity": 0.95
+            }
+          ]
+        },
+        {
+          "id": "g-tower",
+          "kind": "linear",
+          "x1": "0%",
+          "y1": "0%",
+          "x2": "100%",
+          "y2": "0%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#7c2d12",
+              "opacity": 1
+            },
+            {
+              "offset": "50%",
+              "color": "#dc2626",
+              "opacity": 1
+            },
+            {
+              "offset": "100%",
+              "color": "#7c2d12",
+              "opacity": 1
+            }
+          ]
+        }
+      ]
+    },
+    "children": [
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 1200 0 L 1200 450 L 0 450 Z",
+          "fill": "url(#g-sky)",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 450
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 1200 0 L 1200 150 L 0 150 Z",
+          "fill": "url(#g-water)",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[80, 450], [280, 140]],
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 2.5
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[920, 140], [1120, 450]],
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 2.5
+        }
+      },
+      {
+        "at": {
+          "x": 344,
+          "y": 379.2
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [0, 38.80000000000001]],
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 376,
+          "y": 374.7
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [0, 43.30000000000001]],
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 408,
+          "y": 370.8
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [0, 47.19999999999999]],
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 440,
+          "y": 367.5
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [0, 50.5]],
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 472,
+          "y": 364.8
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [0, 53.19999999999999]],
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 504,
+          "y": 362.7
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [0, 55.30000000000001]],
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 536,
+          "y": 361.2
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [0, 56.80000000000001]],
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 568,
+          "y": 360.3
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [0, 57.69999999999999]],
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 600,
+          "y": 360
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [0, 58]],
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 632,
+          "y": 360.3
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [0, 57.69999999999999]],
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 664,
+          "y": 361.2
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [0, 56.80000000000001]],
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 696,
+          "y": 362.7
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [0, 55.30000000000001]],
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 728,
+          "y": 364.8
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [0, 53.19999999999999]],
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 760,
+          "y": 367.5
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [0, 50.5]],
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 792,
+          "y": 370.8
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [0, 47.19999999999999]],
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 824,
+          "y": 374.7
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [0, 43.30000000000001]],
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 856,
+          "y": 379.2
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [0, 38.80000000000001]],
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 280 390 L 296 387.08 L 312 384.3 L 328 381.68 L 344 379.2 L 360 376.88 L 376 374.7 L 392 372.68 L 408 370.8 L 424 369.08 L 440 367.5 L 456 366.08 L 472 364.8 L 488 363.68 L 504 362.7 L 520 361.88 L 536 361.2 L 552 360.68 L 568 360.3 L 584 360.08 L 600 360 L 616 360.08 L 632 360.3 L 648 360.68 L 664 361.2 L 680 361.88 L 696 362.7 L 712 363.68 L 728 364.8 L 744 366.08 L 760 367.5 L 776 369.08 L 792 370.8 L 808 372.68 L 824 374.7 L 840 376.88 L 856 379.2 L 872 381.68 L 888 384.3 L 904 387.08 L 920 390",
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 3,
+          "strokeLinecap": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 280,
+          "y": 120
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -11 0 L 11 0 L 17 330 L -17 330 Z",
+          "fill": "url(#g-tower)",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 920,
+          "y": 120
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -11 0 L 11 0 L 17 330 L -17 330 Z",
+          "fill": "url(#g-tower)",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 280,
+          "y": 184
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-14.6, 0], [14.6, 0]],
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 920,
+          "y": 184
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-14.6, 0], [14.6, 0]],
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 280,
+          "y": 248
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-15.2, 0], [15.2, 0]],
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 920,
+          "y": 248
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-15.2, 0], [15.2, 0]],
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 280,
+          "y": 312
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-15.8, 0], [15.8, 0]],
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 920,
+          "y": 312
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-15.8, 0], [15.8, 0]],
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 280,
+          "y": 376
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-16.4, 0], [16.4, 0]],
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 920,
+          "y": 376
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-16.4, 0], [16.4, 0]],
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 420
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 60 0 L 1140 0 L 1140 30 L 60 30 Z",
+          "fill": "#3b3a2a",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 435
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[60, 0], [1140, 0]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1,
+          "strokeDasharray": "12 8"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "annotation-leader",
+        "annotation": {
+          "from": [600, 388],
+          "to": [680, 240],
+          "text": "main cable · parabolic sag",
+          "italic": true,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "annotation-leader",
+        "annotation": {
+          "from": [920, 120],
+          "to": [1010, 90],
+          "text": "tower (~ 230 m)",
+          "italic": true,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 600,
+          "y": 565
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "two towers, one parabola, a road suspended in mid-air",
+          "fontSize": 14,
+          "fill": "#4a3f30",
+          "italic": true,
+          "anchor": "middle"
+        }
+      }
+    ]
+  }
+}

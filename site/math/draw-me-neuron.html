@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Draw me a neuron — Claude × Glyph showcase</title>
+<meta name="description" content="Draw me a neuron. A Claude × Glyph showcase: one English prompt, one compose JSON spec, one byte-locked SVG.">
+<meta property="og:title" content="Draw me a neuron — Life in Glyph">
+<meta property="og:description" content="A single pyramidal neuron. You asked Claude. Glyph drew it — from a compose spec. Dendrites on the left collect input; the soma integrates it; the axon on the right fires an action potential down to the synaptic terminals.">
+<style>
+  :root {
+    --bg-deep: #02030a;
+    --panel: #0c1126;
+    --panel-edge: #1d2444;
+    --ink: #f1f5fb;
+    --muted: #94a3b8;
+    --primary: #a78bfa;
+    --primary-soft: rgba(167,139,250,.10);
+    --primary-edge: rgba(167,139,250,.35);
+    --alt2: #22d3ee;
+    --stage-bg: #020617;
+    --font-sans: -apple-system, "Helvetica Neue", system-ui, "Segoe UI", sans-serif;
+    --font-mono: "SF Mono", "Cascadia Code", ui-monospace, monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg-deep);color:var(--ink);font-family:var(--font-sans);-webkit-font-smoothing:antialiased;line-height:1.6}
+  body{background:
+    radial-gradient(ellipse at 50% 18%, rgba(167,139,250,.10), transparent 55%),
+    radial-gradient(ellipse at 80% 80%, rgba(125,211,252,.04), transparent 55%),
+    var(--bg-deep);
+    min-height:100vh}
+  a{color:var(--primary);text-underline-offset:3px}
+  h1,h2,h3{margin:0 0 .4em;letter-spacing:-.015em;line-height:1.15}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);font-weight:800;background:linear-gradient(180deg, #ddd6fe, #a78bfa, #22d3ee);-webkit-background-clip:text;background-clip:text;color:transparent}
+  h2{font-size:clamp(1.6rem,3.5vw,2.4rem);font-weight:700;color:#c4b5fd}
+  h3{font-size:1.18rem;font-weight:600;color:var(--ink)}
+  p{margin:0 0 1em}
+  .container{max-width:1100px;margin:0 auto;padding:0 24px}
+  code{font-family:var(--font-mono);font-size:.92em;background:#1a1f3a;padding:.12em .4em;border-radius:4px;color:#ddd6fe}
+  pre{font-family:var(--font-mono);font-size:.86rem;background:#0a0f25;border:1px solid var(--panel-edge);border-radius:10px;padding:18px 20px;color:#ddd6fe;overflow-x:auto;line-height:1.55;margin:0;max-height:520px}
+  pre .k{color:#7eb6ff}
+  pre .s{color:#fda4af}
+  pre .n{color:#34d399}
+  pre .c{color:#94a3b8;font-style:italic;display:block}
+
+  .breadcrumb{padding:18px 0;font-size:.86rem;color:var(--muted);text-align:center}
+  .breadcrumb a{color:var(--muted);text-decoration:none;border-bottom:1px dashed transparent;transition:border-color .15s ease,color .15s ease}
+  .breadcrumb a:hover{color:var(--primary);border-bottom-color:var(--primary)}
+
+  .hero{padding:24px 0 24px;text-align:center}
+  .hero .kicker{display:inline-block;padding:6px 16px;border-radius:9999px;background:var(--primary-soft);color:var(--primary);font-size:.82rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:24px;border:1px solid var(--primary-edge)}
+  .hero p.lede{color:var(--muted);max-width:64ch;margin:.6em auto 0;font-size:1.12rem}
+  .hero p.lede strong{color:var(--ink)}
+  .hero p.byline{color:var(--muted);font-size:.92rem;margin-top:24px;font-style:italic}
+
+  .prompt-card{margin:32px auto 24px;max-width:760px;background:linear-gradient(180deg, rgba(167,139,250,.10), rgba(125,211,252,.03));border:1px solid var(--panel-edge);border-radius:18px;padding:28px 32px}
+  .prompt-card .label{display:inline-block;font-size:.74rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--alt2);margin-bottom:10px}
+  .prompt-card blockquote{margin:0;font-family:var(--font-mono);font-size:1.04rem;line-height:1.7;color:var(--ink);padding-left:18px;border-left:3px solid var(--primary)}
+  .prompt-card .who{margin-top:14px;font-size:.86rem;color:var(--muted)}
+
+  .stage{margin:0 auto 48px;max-width:980px;background:var(--stage-bg);border:1px solid var(--panel-edge);border-radius:22px;overflow:hidden;position:relative;padding:6px}
+  .stage img{display:block;width:100%;height:auto;border-radius:16px}
+
+  .timeline{padding:48px 0 24px}
+  .timeline h2{text-align:center}
+  .timeline > .container > p.lede{color:var(--muted);text-align:center;max-width:54ch;margin:0 auto 32px;font-size:1.02rem}
+  .timeline-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:18px;max-width:1000px;margin:0 auto}
+  @media (max-width:880px){.timeline-grid{grid-template-columns:1fr}}
+  .timeline-card{background:var(--panel);border:1px solid var(--panel-edge);border-radius:14px;padding:22px 22px 20px;transition:transform .2s ease,border-color .2s ease}
+  .timeline-card:hover{transform:translateY(-3px);border-color:var(--primary-edge)}
+  .timeline-card .phase-num{display:inline-block;font-family:var(--font-mono);font-size:.78rem;color:var(--primary);letter-spacing:.05em;margin-bottom:4px}
+  .timeline-card .ticks{font-family:var(--font-mono);font-size:.84rem;color:var(--alt2);margin-bottom:10px}
+  .timeline-card h3{margin-bottom:8px}
+  .timeline-card p{font-size:.96rem;color:var(--muted);margin:0}
+
+  .reveal{padding:48px 0;border-top:1px solid var(--panel-edge);background:linear-gradient(180deg, rgba(167,139,250,.10), transparent 40%)}
+  .reveal h2{text-align:center}
+  .reveal > .container > p.lede{color:var(--muted);text-align:center;max-width:60ch;margin:0 auto 32px;font-size:1.02rem}
+  .reveal-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;max-width:1080px;margin:0 auto}
+  @media (max-width:880px){.reveal-grid{grid-template-columns:1fr}}
+  .reveal-side h3{margin-bottom:10px;display:flex;align-items:center;gap:10px;color:#c4b5fd}
+  .reveal-side h3 .pill{font-size:.66rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:9999px;background:var(--primary-soft);color:var(--primary);border:1px solid var(--primary-edge)}
+  .reveal-side p.cap{color:var(--muted);font-size:.92rem;margin-top:10px}
+  .reveal-svg-frame{background:var(--stage-bg);border-radius:12px;padding:6px;border:1px solid var(--panel-edge)}
+  .reveal-svg-frame img{display:block;width:100%;height:auto;border-radius:8px}
+
+  .cta{text-align:center;padding:48px 24px;border-top:1px solid var(--panel-edge)}
+  .cta .btn{display:inline-block;margin:6px;padding:12px 22px;border-radius:9999px;text-decoration:none;font-weight:600;font-size:.96rem;border:1px solid transparent;transition:transform .15s ease,background .15s ease}
+  .cta .btn-primary{background:var(--primary);color:#1a1a1a}
+  .cta .btn-primary:hover{transform:translateY(-1px);background:#c4b5fd}
+  .cta .btn-ghost{border-color:#374151;color:var(--ink)}
+  .cta .btn-ghost:hover{border-color:var(--primary);color:var(--primary)}
+  footer{padding:24px 0 48px;text-align:center;color:var(--muted);font-size:.88rem}
+</style>
+</head>
+<body>
+
+<div class="breadcrumb">
+  <a href="life-in-glyph.html">← Life in Glyph</a> &nbsp;·&nbsp; <a href="joy.html">Joy of Math</a>
+</div>
+
+<header class="hero">
+  <div class="container">
+    <span class="kicker">Life in Glyph · RFC #9 · bio extension</span>
+    <h1>Draw me a neuron</h1>
+    <p class="lede">A single pyramidal neuron. <strong>You asked Claude. Glyph drew it — from a compose spec.</strong> Dendrites on the left collect input; the soma integrates it; the axon on the right fires an action potential down to the synaptic terminals.</p>
+    <p class="byline">Subject: <em>pyramidal cell</em>, the workhorse of cortex. 86 billion of them in your brain right now.</p>
+  </div>
+</header>
+
+<section class="container">
+  <div class="prompt-card">
+    <span class="label">▸ The prompt</span>
+    <blockquote>"Draw me a neuron firing. Soma in the middle with a nucleus. Dendrites branching out to the left. A long axon to the right with myelin sheaths, ending in synaptic terminals. A warm halo around the soma to suggest action-potential glow."</blockquote>
+    <p class="who">— what to say to your AI agent. Claude writes the Glyph compose spec; the compose compiler emits one byte-locked SVG.</p>
+  </div>
+</section>
+
+<section class="container">
+  <div class="stage" aria-label="Draw me a neuron">
+    <img src="bio-neuron.svg" alt="A pyramidal neuron: purple-yellow soma with a dark nucleus, five branching cyan dendrites fanning to the left, a long horizontal axon to the right wrapped in cream-yellow myelin-sheath ellipses, and four branching synaptic terminals at the far right with a soft glow." loading="lazy">
+  </div>
+</section>
+
+<section class="timeline">
+  <div class="container">
+    <h2>One scene, three primitives</h2>
+    <p class="lede">RFC #9's defs (gradients + patterns), shapes (silhouette-path, polygon, polyline, ellipse), and accents (glow, starfield, icon) compose the whole picture.</p>
+    <div class="timeline-grid">
+      <div class="timeline-card">
+        <span class="phase-num">PRIMITIVE 1</span>
+        <div class="ticks">silhouette-path × 6</div>
+        <h3>Dendrites & axon</h3>
+        <p>Five dendrite paths fan out from the soma — each one a hand-sampled branching d-string with sub-twigs at the tips. The axon is a single line; six myelin sheaths along it are ellipses.</p>
+      </div>
+      <div class="timeline-card">
+        <span class="phase-num">PRIMITIVE 2</span>
+        <div class="ticks">ellipse + radial gradient</div>
+        <h3>The cell body</h3>
+        <p>An ellipse with a 3-stop radial gradient (cream → purple → indigo). The nucleus is a smaller circle. A glow halo (radial-gradient driven) sits behind the soma at radius 130.</p>
+      </div>
+      <div class="timeline-card">
+        <span class="phase-num">PRIMITIVE 3</span>
+        <div class="ticks">starfield seed 23 + glow</div>
+        <h3>The dark + the synapse</h3>
+        <p>60 stars seeded at 23 paint the dark backdrop. A second glow halo at the axon terminal — radius 60 — is the moment the action potential reaches the synapse.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="reveal">
+  <div class="container">
+    <h2>How Glyph drew it</h2>
+    <p class="lede">Claude writes the compose JSON; Glyph's compose compiler turns it into byte-identical SVG.</p>
+    <div class="reveal-grid">
+      <div class="reveal-side">
+        <h3>The compose spec <span class="pill">JSON · excerpt</span></h3>
+        <pre>{
+  "compose": {
+    "viewBox": { "width": 1000, "height": 500 },
+    "theme": { "background": "#020617" },
+    "defs": {
+      "gradients": [
+        { "id": "g-cell", "kind": "linear",
+          "x1": "0%", "y1": "0%", "x2": "100%", "y2": "0%",
+          "stops": [
+            { "offset": "0%",  "color": "#a78bfa" },
+            { "offset": "50%", "color": "#22d3ee" },
+            { "offset": "100%","color": "#fde68a" }
+          ]
+        },
+        // ... g-soma (radial), g-pulse (radial halo), g-bg
+      ]
+    },
+    "children": [
+      <span class="c">// 1. background rect (radial gradient)</span>
+      <span class="c">// 2. starfield · 60 stars · seed 23</span>
+      <span class="c">// 3. 5 dendrite silhouette-paths</span>
+      <span class="c">// 4. axon silhouette-path (3px stroke)</span>
+      <span class="c">// 5. 6 myelin-sheath ellipses</span>
+      <span class="c">// 6. soma glow halo (radius 130)</span>
+      <span class="c">// 7. soma ellipse + nucleus circle</span>
+      <span class="c">// 8. 4 synaptic terminal paths + boutons</span>
+      <span class="c">// 9. synapse glow halo (radius 60)</span>
+      <span class="c">// 10. 5 italic labels</span>
+    ]
+  }
+}</pre>
+        <p class="cap">Generator script: <code>scripts/gen-showcase-extensions.mjs</code> · fixture: <code>packages/core/__fixtures__/compose/bio-neuron.json</code>. <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/compose/bio-neuron.json">View on GitHub</a>.</p>
+      </div>
+      <div class="reveal-side">
+        <h3>Glyph compose output <span class="pill">SVG</span></h3>
+        <div class="reveal-svg-frame">
+          <img src="bio-neuron.svg" alt="Glyph-rendered draw me a neuron, same SVG as the hero stage" loading="lazy">
+        </div>
+        <p class="cap">Byte-stable across Ubuntu / macOS / Windows × Node 20 / 22. The compose compiler resolves the gradient + pattern defs first, then walks children in z-order.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <h2 style="margin-bottom:24px">More Life in Glyph</h2>
+  <a class="btn btn-primary" href="life-in-glyph.html">See the gallery ↗</a>
+  <a class="btn btn-ghost" href="draw-me-dna.html">DNA</a>
+  <a class="btn btn-ghost" href="draw-me-heartbeat.html">Heartbeat</a>
+  <a class="btn btn-ghost" href="draw-me-jellyfish.html">Jellyfish</a>
+</section>
+
+<footer>
+  <div class="container">
+    Drawn by Glyph · Asked by you · Apache 2.0 · <a href="https://github.com/seanhanca/glyph">GitHub</a>
+  </div>
+</footer>
+
+</body>
+</html>
