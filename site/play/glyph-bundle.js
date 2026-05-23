@@ -27998,6 +27998,13 @@ function renderMark(m, interactive) {
       const r = (n) => Math.round(n * 1e4) / 1e4;
       return `<line x1="${m.x}" y1="${m.y}" x2="${r(x2)}" y2="${r(y2)}" stroke="${esc(m.stroke)}" stroke-width="${sw}" marker-end="url(#glyph-arrow)"/>`;
     }
+    case "group": {
+      const tx = m.translateX.toFixed(3);
+      const ty = m.translateY.toFixed(3);
+      const childrenSvg = m.children.map((c) => renderMark(c, interactive)).join("");
+      const anim = m.loopAnimationXml ?? "";
+      return `<g transform="translate(${tx}, ${ty})">${childrenSvg}${anim}</g>`;
+    }
   }
 }
 function renderArrowDefs(scene) {

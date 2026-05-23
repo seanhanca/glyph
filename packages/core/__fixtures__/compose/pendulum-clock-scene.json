@@ -1,0 +1,92 @@
+{
+  "compose": {
+    "viewBox": { "width": 1000, "height": 440 },
+    "theme": { "preset": "pencil-parchment", "gridPattern": "graph-paper" },
+    "children": [
+      {
+        "at": { "x": 380, "y": 60 },
+        "mark": "frame",
+        "frame": { "width": 240, "height": 320, "title": "Horologium · 1656" }
+      },
+      {
+        "at": { "x": 500, "y": 80 },
+        "mark": "pendulum",
+        "pendulum": { "length": 225, "bobRadius": 22, "markerKind": "cross" },
+        "animation": { "kind": "swing", "amplitudeDeg": 32, "periodMs": 6280 }
+      },
+      {
+        "at": { "x": 710, "y": 250 },
+        "mark": "gear",
+        "gear": { "radius": 40, "teeth": 30, "toothLength": 8, "hubRadius": 6 },
+        "animation": { "kind": "rotate-loop", "periodMs": 60000, "direction": "ccw" }
+      },
+      {
+        "at": { "x": 0, "y": 0 },
+        "mark": "annotation-leader",
+        "annotation": {
+          "from": [510, 80],
+          "to": [560, 56],
+          "text": "pivot",
+          "italic": true,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": { "x": 0, "y": 0 },
+        "mark": "annotation-leader",
+        "annotation": {
+          "from": [524, 305],
+          "to": [580, 335],
+          "text": "bob",
+          "italic": true,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": { "x": 0, "y": 0 },
+        "mark": "annotation-leader",
+        "annotation": {
+          "from": [665, 215],
+          "to": [625, 180],
+          "text": "escapement gear · 30 teeth",
+          "italic": true,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": { "x": 80, "y": 380 },
+        "size": { "w": 840, "h": 50 },
+        "mark": "chart",
+        "chart": {
+          "version": "glyph/0.1",
+          "data": {
+            "trajectory": {
+              "shape": "trajectory",
+              "dxdt": "y",
+              "dydt": "-x - 0.02*y",
+              "initial": { "x": 0.6, "y": 0 },
+              "time": { "min": 0, "max": 60, "samples": 1200 }
+            }
+          },
+          "layers": [
+            {
+              "mark": "line",
+              "encoding": {
+                "x": {
+                  "field": "t",
+                  "type": "quantitative",
+                  "scale": { "domain": [0, 60] }
+                },
+                "y": {
+                  "field": "x",
+                  "type": "quantitative",
+                  "scale": { "domain": [-0.7, 0.7] }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

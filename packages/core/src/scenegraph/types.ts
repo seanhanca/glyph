@@ -175,6 +175,34 @@ export type SceneMark =
       readonly angle: number;
       readonly stroke: string;
       readonly strokeWidth?: number;
+    }
+  | {
+      /**
+       * RFC #5 — `group` mark for scene composition. A group wraps a
+       * sequence of child marks and an optional translate + optional
+       * looping animation. The renderer emits this as a `<g transform=
+       * "translate(...)">…children…<animateTransform .../></g>`. Used
+       * by `compileCompose` (one group per scene child) so each child
+       * can carry its own animation independently of its siblings.
+       */
+      readonly type: "group";
+      readonly translateX: number;
+      readonly translateY: number;
+      /**
+       * Optional uniform / per-axis scale applied AFTER translate
+       * (so the children are scaled about the group's local origin,
+       * not the parent's). Used to embed a nested chart at a custom
+       * size while preserving the chart's internal scale resolution.
+       */
+      readonly scaleX?: number;
+      readonly scaleY?: number;
+      readonly children: ReadonlyArray<SceneMark>;
+      /**
+       * Pre-rendered SMIL XML (the output of one of the emitters in
+       * `src/animation/loops.ts`). Inserted verbatim inside the `<g>`
+       * so SVG viewers run the animation. Undefined for static groups.
+       */
+      readonly loopAnimationXml?: string;
     };
 
 /**

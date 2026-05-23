@@ -287,6 +287,27 @@ function renderMark(m: SceneMark, interactive: boolean): string {
         m.stroke,
       )}" stroke-width="${sw}" marker-end="url(#glyph-arrow)"/>`;
     }
+    case "group": {
+      // RFC #5 — compose group. Render the children recursively
+      // inside a `<g transform="translate(...) [scale(...)]">`
+      // wrapper; if the group has a loop animation, append the
+      // pre-rendered SMIL XML after the children. The translate
+      // places the group on the parent canvas; the optional scale
+      // sizes embedded nested charts; the SMIL `additive="sum"`
+      // rotation / scale layers on top, animating the contents
+      // about their local origin.
+      const tx = m.translateX.toFixed(3);
+      const ty = m.translateY.toFixed(3);
+      let transform = `translate(${tx}, ${ty})`;
+      if (m.scaleX !== undefined || m.scaleY !== undefined) {
+        const sx = (m.scaleX ?? 1).toFixed(6);
+        const sy = (m.scaleY ?? m.scaleX ?? 1).toFixed(6);
+        transform += ` scale(${sx}, ${sy})`;
+      }
+      const childrenSvg = m.children.map((c) => renderMark(c, interactive)).join("");
+      const anim = m.loopAnimationXml ?? "";
+      return `<g transform="${transform}">${childrenSvg}${anim}</g>`;
+    }
   }
 }
 

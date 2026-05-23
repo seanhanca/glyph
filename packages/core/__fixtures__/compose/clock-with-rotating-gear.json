@@ -1,0 +1,47 @@
+{
+  "compose": {
+    "viewBox": { "width": 600, "height": 400 },
+    "theme": { "preset": "pencil-parchment", "gridPattern": "graph-paper" },
+    "children": [
+      {
+        "at": { "x": 100, "y": 50 },
+        "mark": "frame",
+        "frame": { "width": 400, "height": 300, "title": "RFC #5–#8 capstone" }
+      },
+      {
+        "at": { "x": 300, "y": 200 },
+        "mark": "gear",
+        "gear": { "radius": 60, "teeth": 24, "toothLength": 8 },
+        "animation": { "kind": "rotate-loop", "periodMs": 20000, "direction": "cw" }
+      },
+      {
+        "at": { "x": 300, "y": 90 },
+        "mark": "pendulum",
+        "pendulum": { "length": 90, "bobRadius": 16, "markerKind": "cross" },
+        "animation": { "kind": "swing", "amplitudeDeg": 28, "periodMs": 4000 }
+      },
+      {
+        "at": { "x": 0, "y": 0 },
+        "mark": "annotation-leader",
+        "annotation": {
+          "from": [360, 200],
+          "to": [430, 180],
+          "text": "gear · 24 teeth",
+          "italic": true,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": { "x": 0, "y": 0 },
+        "mark": "annotation-leader",
+        "annotation": {
+          "from": [300, 180],
+          "to": [220, 160],
+          "text": "swinging pendulum",
+          "italic": true,
+          "anchor": "end"
+        }
+      }
+    ]
+  }
+}
