@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Extended Cases — Glyph-shaped versions of harder demos</title>
+<meta name="description" content="Glyph is a 2D SVG renderer. Four targets — Physarum, particle-love, NASA Eyes, ISS — live across a rendering-paradigm wall. Here's what Glyph CAN do for each, adjacent to the impossible: the math, the trajectories, the schematic.">
+<meta property="og:title" content="Extended Cases — Life in Glyph">
+<meta property="og:description" content="What Glyph can do that's adjacent to the impossible.">
+<style>
+  :root {
+    --bg-deep: #02030a;
+    --panel: #0c1126;
+    --panel-edge: #1d2444;
+    --ink: #f1f5fb;
+    --muted: #94a3b8;
+    --accent: #a78bfa;
+    --accent-soft: rgba(167,139,250,.10);
+    --accent-edge: rgba(167,139,250,.35);
+    --warn: #fbbf24;
+    --good: #34d399;
+    --font-sans: -apple-system, "Helvetica Neue", system-ui, "Segoe UI", sans-serif;
+    --font-mono: "SF Mono", "Cascadia Code", ui-monospace, monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg-deep);color:var(--ink);font-family:var(--font-sans);-webkit-font-smoothing:antialiased;line-height:1.6}
+  body{background:
+    radial-gradient(ellipse at 50% 18%, rgba(167,139,250,.10), transparent 55%),
+    radial-gradient(ellipse at 25% 75%, rgba(34,211,238,.05), transparent 55%),
+    radial-gradient(ellipse at 75% 75%, rgba(251,191,36,.05), transparent 55%),
+    var(--bg-deep);
+    min-height:100vh}
+  a{color:var(--accent);text-underline-offset:3px}
+  h1,h2,h3{margin:0 0 .4em;letter-spacing:-.015em;line-height:1.15}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);font-weight:800;background:linear-gradient(180deg,#ddd6fe,#a78bfa,#22d3ee);-webkit-background-clip:text;background-clip:text;color:transparent}
+  h2{font-size:clamp(1.6rem,3.5vw,2.4rem);font-weight:700;color:#c4b5fd}
+  h3{font-size:1.2rem;font-weight:600;color:var(--ink)}
+  p{margin:0 0 1em}
+  .container{max-width:1180px;margin:0 auto;padding:0 24px}
+  code{font-family:var(--font-mono);font-size:.9em;background:#1a1f3a;padding:.12em .4em;border-radius:4px;color:#ddd6fe}
+
+  .breadcrumb{padding:18px 0;font-size:.86rem;color:var(--muted);text-align:center}
+  .breadcrumb a{color:var(--muted);text-decoration:none;border-bottom:1px dashed transparent;transition:border-color .15s ease,color .15s ease}
+  .breadcrumb a:hover{color:var(--accent);border-bottom-color:var(--accent)}
+
+  .hero{padding:32px 0 16px;text-align:center}
+  .hero .kicker{display:inline-block;padding:6px 16px;border-radius:9999px;background:var(--accent-soft);color:var(--accent);font-size:.82rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:24px;border:1px solid var(--accent-edge)}
+  .hero p.lede{color:var(--muted);max-width:70ch;margin:.6em auto 0;font-size:1.14rem}
+  .hero p.lede strong{color:var(--ink)}
+
+  .intro{padding:24px 0 48px;max-width:780px;margin:0 auto}
+  .intro p{color:var(--muted);font-size:1.02rem}
+  .intro .wall{margin-top:32px;border:1px solid var(--panel-edge);border-radius:16px;background:linear-gradient(180deg, rgba(167,139,250,.04), rgba(34,211,238,.03));padding:24px 28px}
+  .intro .wall h3{margin-bottom:14px;color:#c4b5fd;font-size:1.06rem}
+  .intro .wall ul{list-style:none;padding:0;margin:0;color:var(--ink);font-size:.95rem}
+  .intro .wall li{padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;gap:24px}
+  .intro .wall li:last-child{border:none}
+  .intro .wall li span:first-child{color:#fbcfe8;flex:0 0 280px}
+  .intro .wall li span:last-child{color:var(--muted);text-align:right}
+
+  .case{padding:64px 0;border-top:1px solid var(--panel-edge)}
+  .case .badge{display:inline-block;font-family:var(--font-mono);font-size:.74rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:5px 12px;border-radius:9999px;margin-bottom:12px}
+  .case .badge.bio{background:rgba(34,211,238,.12);color:#7dd3fc;border:1px solid rgba(125,211,252,.3)}
+  .case .badge.physics{background:rgba(167,139,250,.12);color:#c4b5fd;border:1px solid rgba(167,139,250,.3)}
+  .case .badge.space{background:rgba(251,191,36,.12);color:#fde68a;border:1px solid rgba(251,191,36,.3)}
+  .case .badge.eng{background:rgba(94,234,212,.12);color:#5eead4;border:1px solid rgba(94,234,212,.3)}
+  .case h2{color:#ddd6fe;margin-top:8px}
+  .case .target{color:var(--muted);font-size:.92rem;font-style:italic;margin:6px 0 16px}
+  .case .target a{color:var(--accent)}
+  .case .lede{color:var(--muted);font-size:1.04rem;max-width:60ch}
+  .stage{margin:32px auto;max-width:1100px;background:#020617;border:1px solid var(--panel-edge);border-radius:18px;overflow:hidden;padding:8px}
+  .stage img{display:block;width:100%;height:auto;border-radius:12px}
+  .stage.parchment{background:#f5edd9}
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:24px}
+  @media (max-width:880px){.compare{grid-template-columns:1fr}}
+  .compare > div{background:var(--panel);border:1px solid var(--panel-edge);border-radius:14px;padding:20px 22px}
+  .compare h3{margin-bottom:10px;font-size:1rem}
+  .compare h3 .pill{font-size:.66rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:9999px;margin-left:8px}
+  .compare h3 .pill.glyph{background:rgba(34,211,238,.12);color:#7dd3fc;border:1px solid rgba(125,211,252,.3)}
+  .compare h3 .pill.gpu{background:rgba(251,113,133,.12);color:#fda4af;border:1px solid rgba(251,113,133,.3)}
+  .compare p{color:var(--muted);font-size:.94rem;margin:0}
+  .compare ul{margin:8px 0 0;padding-left:20px;color:var(--muted);font-size:.92rem}
+  .compare li{padding:3px 0}
+
+  .footer-cta{text-align:center;padding:64px 24px;border-top:1px solid var(--panel-edge)}
+  .footer-cta .btn{display:inline-block;margin:6px;padding:12px 22px;border-radius:9999px;text-decoration:none;font-weight:600;font-size:.96rem;border:1px solid transparent;transition:transform .15s ease,background .15s ease}
+  .footer-cta .btn-primary{background:var(--accent);color:#1a1a1a}
+  .footer-cta .btn-primary:hover{transform:translateY(-1px);background:#c4b5fd}
+  .footer-cta .btn-ghost{border-color:#374151;color:var(--ink)}
+  .footer-cta .btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+  footer{padding:24px 0 48px;text-align:center;color:var(--muted);font-size:.88rem}
+</style>
+</head>
+<body>
+
+<div class="breadcrumb">
+  <a href="life-in-glyph.html">← Life in Glyph</a> &nbsp;·&nbsp; <a href="joy.html">Joy of Math</a>
+</div>
+
+<header class="hero">
+  <div class="container">
+    <span class="kicker">Extended Cases · adjacent to the impossible</span>
+    <h1>What Glyph can do<br>that's adjacent to the impossible</h1>
+    <p class="lede">Asked: <em>"Can Glyph render Physarum slime molds, particle-love clouds, NASA Eyes Solar System, or the ISS in 3D?"</em> <strong>Honest answer: no — those need WebGL, GPU compute, real-time loops, 3D cameras.</strong> But the math, the trajectories, the schematic — those Glyph CAN do, and the result is its own kind of beautiful.</p>
+  </div>
+</header>
+
+<section class="container intro">
+  <p>Glyph compiles a JSON spec to a byte-stable SVG. That trade — declarative + deterministic + 2D — is the wrong shape for a million-particle GPU simulation. But the same trade <em>is</em> the right shape for: <strong>the math underneath</strong> the simulation, <strong>a static snapshot</strong> of the trajectory, <strong>a 2D top-down schematic</strong> instead of a 3D orbital camera, <strong>an engineering elevation</strong> instead of a 3D model. Four examples, below, each pairing the Glyph version with what the GPU-native original does.</p>
+
+  <div class="wall">
+    <h3>The rendering-paradigm wall — why these need different tools</h3>
+    <ul>
+      <li><span>Render target</span><span>Glyph: SVG · others: WebGL / WebGPU</span></li>
+      <li><span>Runtime model</span><span>Glyph: compile once · others: 60 fps render loop</span></li>
+      <li><span>3D camera + lighting</span><span>Glyph: none · others: full perspective + shaders</span></li>
+      <li><span>Interactivity</span><span>Glyph: declarative · others: mouse / touch → state</span></li>
+      <li><span>Element ceiling</span><span>Glyph: ~10k SVG nodes · others: millions of particles</span></li>
+      <li><span>Texture / image fills</span><span>Glyph: gradients + patterns · others: textures + normal maps</span></li>
+    </ul>
+  </div>
+</section>
+
+<section class="case">
+  <div class="container">
+    <span class="badge physics">Physarum chemistry</span>
+    <h2>Physarum slime — the math, drawn</h2>
+    <p class="target">Original: <a href="https://domenicobrz.github.io/webgl/projects/Physarum-fluid-2/" rel="noopener">Physarum-fluid-2 by Domenico Brzezinski</a> — real-time WebGL with millions of GPU particles + diffuse + react + advect, mouse-injected.</p>
+    <p class="lede">Real Physarum slime mold lays down chemical trails that diffuse + react with another chemical, and the slime body responds to the gradient. The chemistry is exactly the Gray-Scott reaction-diffusion PDE. Glyph's <code>data.shape: "pde-solve"</code> integrates that equation deterministically and renders the steady state as one byte-locked SVG.</p>
+    <div class="stage">
+      <img src="ext-physarum.svg" alt="Gray-Scott reaction-diffusion pattern computed by Glyph from a JSON spec. A 28×28 grid showing the developing labyrinthine pattern of U/V concentration, dark blue where U dominates, lighter where V dominates." loading="lazy">
+    </div>
+    <div class="container">
+      <div class="compare">
+        <div>
+          <h3>The Glyph piece <span class="pill glyph">SVG · deterministic</span></h3>
+          <p>One pde-solve data shape. 28×28 grid. Gray-Scott with F=0.025, k=0.056 — labyrinth regime. 1000 steps. Heatmap layer over the U-concentration field. Byte-identical across CI runs.</p>
+        </div>
+        <div>
+          <h3>The original Physarum-fluid demo <span class="pill gpu">WebGL · real-time</span></h3>
+          <p>The same equation, but coupled with an advected slime-particle population, run on the GPU at 60 fps with mouse interaction. Millions of particles deposit chemicals, the field diffuses + reacts, the particles re-orient toward the gradient.</p>
+          <ul>
+            <li>Glyph has the chemistry, not the particles or the loop</li>
+            <li>To match the demo you'd need WebGL output + ping-pong textures</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="case">
+  <div class="container">
+    <span class="badge physics">Particle field</span>
+    <h2>Particle field — the physics, frozen</h2>
+    <p class="target">Original: <a href="https://particle-love.com/" rel="noopener">particle-love.com</a> — real-time WebGL particle systems, millions of particles, additive blending, motion blur, mouse interaction.</p>
+    <p class="lede">Particle-love's signature look is a million particles tracing the streamlines of a vector field. Glyph's <code>data.shape: "streamline"</code> integrates the same vector field from a grid of seed points using RK4 and renders each trajectory as a colored path. 64 trajectories, not a million — but the same physics, drawn deterministically.</p>
+    <div class="stage">
+      <img src="ext-particles.svg" alt="Streamline visualization computed by Glyph from a JSON spec. Two counter-rotating Gaussian vortices. 64 trajectories spiral inward to or outward from the vortex centers, each path colored by the local flow angle." loading="lazy">
+    </div>
+    <div class="container">
+      <div class="compare">
+        <div>
+          <h3>The Glyph piece <span class="pill glyph">SVG · deterministic</span></h3>
+          <p>One streamline data shape with a double-vortex vector field. 8×8 seed grid → 64 RK4-integrated trajectories. colorBy: <code>angle</code> tints each segment by the local flow direction. The signature visual of a million-particle GPU demo, drawn from the underlying physics alone.</p>
+        </div>
+        <div>
+          <h3>The particle-love demo <span class="pill gpu">WebGL · real-time</span></h3>
+          <p>Millions of particles advected by the same kind of vector field at 60 fps. Additive blending creates the soft-glow trails; motion blur smears the path across frames. Mouse drag injects force.</p>
+          <ul>
+            <li>Glyph has the trajectories, not the additive blending or the loop</li>
+            <li>To match, you'd need a particle renderer with additive shaders</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="case">
+  <div class="container">
+    <span class="badge space">Solar system</span>
+    <h2>Solar system — top-down, animated</h2>
+    <p class="target">Original: <a href="https://eyes.nasa.gov/apps/solar-system/" rel="noopener">eyes.nasa.gov · Solar System</a> — full 3D rendering, JPL Horizons ephemeris, planet textures, spacecraft models, time scrubbing, orbital camera.</p>
+    <p class="lede">What NASA Eyes does in 3D, Glyph does as a flat orrery — the same instrument 17th-century clockmakers used to teach planetary motion. Concentric orbits + planet circles + a SMIL <code>rotate-loop</code> on each planet with periodMs scaled by the real orbital year. Mercury whips around in ~1.9 seconds; Saturn takes nearly 4 minutes.</p>
+    <div class="stage">
+      <img src="ext-orrery.svg" alt="A top-down orrery of the solar system rendered by Glyph. Six planets (Mercury, Venus, Earth, Mars, Jupiter, Saturn) on concentric orbital ellipses centered on a glowing yellow Sun. Asteroid belt between Mars and Jupiter shown as scattered dots. Saturn has a co-rotating ring. Deep blue starfield background." loading="lazy">
+    </div>
+    <div class="container">
+      <div class="compare">
+        <div>
+          <h3>The Glyph piece <span class="pill glyph">SVG · animated</span></h3>
+          <p>Pure compose grammar — no data.shape. 6 planet bodies + Saturn rings, each a silhouette-path with its own rotate-loop animation. Periods scaled so Earth = 8 s. Asteroid belt is 80 deterministically-placed dots in a ring (seed 33).</p>
+        </div>
+        <div>
+          <h3>NASA Eyes Solar System <span class="pill gpu">WebGL · interactive 3D</span></h3>
+          <p>True 3D Three.js scene with JPL Horizons ephemeris feeding planet positions at any date. Camera orbits, zooms, and follows objects. Planet textures from real telescopic imagery. Spacecraft 3D models. Time scrub from -3000 BCE to 3000 CE.</p>
+          <ul>
+            <li>Glyph has the orbital topology, not the 3D + ephemeris + camera</li>
+            <li>To match, you'd need WebGL + a 3D camera + ephemeris ingest</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="case">
+  <div class="container">
+    <span class="badge eng">ISS engineering schematic</span>
+    <h2>The International Space Station — elevation, side view</h2>
+    <p class="target">Inspiration: NASA's official ISS 3D models — interactive walk-around, real-time TLE-fed orbital position, sunlight + Earth-shine lighting.</p>
+    <p class="lede">The ISS is too useful as an engineering drawing to skip. Glyph renders it as a pencil-on-parchment <em>side elevation</em> — the same kind of drawing the engineers at Boeing, Roscosmos, JAXA, and ESA shipped to the assembly crew. Truss + solar arrays + modules + radiators + Cupola, all labeled, all to scale.</p>
+    <div class="stage">
+      <img src="ext-iss.svg" alt="Side-elevation engineering schematic of the International Space Station. Horizontal Integrated Truss Structure as the spine, 8 solar arrays (4 pairs) extending up and down with photovoltaic cell grid lines visible, 6 pressurized modules in cream along the central axis with docking-port dots on each end, a small Cupola dome below the central modules with 5 window dots, 3 white radiator panels perpendicular to the truss. Annotation labels for the solar arrays, truss, and Destiny/Harmony modules. Starfield in dark space, Earth's curved limb arcing across the bottom in blue." loading="lazy">
+    </div>
+    <div class="container">
+      <div class="compare">
+        <div>
+          <h3>The Glyph piece <span class="pill glyph">SVG · deterministic</span></h3>
+          <p>Pure compose grammar. Truss as a long silhouette with X-bracing. 8 solar arrays as pattern-detailed rectangles with grid lines. 6 modules + Cupola as silhouette paths with docking ports. 3 radiators. 4 annotation-leaders. Earth limb as a giant arc + atmospheric glow band.</p>
+        </div>
+        <div>
+          <h3>NASA's interactive ISS 3D <span class="pill gpu">WebGL · real-time</span></h3>
+          <p>Full 3D model with textures, orbital lighting (sunward face lit, anti-sunward in Earth-shine), live TLE-fed ground track, walk-around camera. Same hardware, very different rendering.</p>
+          <ul>
+            <li>Glyph has the schematic, not the 3D walk-around</li>
+            <li>The engineering elevation IS more useful than 3D for understanding the structure</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="footer-cta">
+  <h2 style="margin-bottom:24px">What Glyph is for</h2>
+  <p style="color:var(--muted);max-width:60ch;margin:0 auto 32px">Declarative, deterministic, 2D SVG. One English prompt → one JSON spec → byte-identical SVG, every CI run, every platform. Excellent for diagrams, charts, engineering schematics, mathematical visualizations. Not the right tool for real-time GPU graphics — but adjacent to them in interesting ways.</p>
+  <a class="btn btn-primary" href="life-in-glyph.html">Back to the gallery ↗</a>
+  <a class="btn btn-ghost" href="draw-me-bridge.html">A suspension bridge</a>
+  <a class="btn btn-ghost" href="draw-me-locomotive.html">A steam locomotive</a>
+  <a class="btn btn-ghost" href="draw-me-circulation.html">Heart + circulation</a>
+</section>
+
+<footer>
+  <div class="container">
+    Drawn by Glyph · Asked by you · Apache 2.0 · <a href="https://github.com/seanhanca/glyph">GitHub</a>
+  </div>
+</footer>
+
+</body>
+</html>

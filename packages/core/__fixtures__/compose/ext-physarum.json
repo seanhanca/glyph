@@ -1,0 +1,145 @@
+{
+  "compose": {
+    "viewBox": {
+      "width": 900,
+      "height": 700
+    },
+    "title": "Physarum chemistry — the math, drawn",
+    "description": "The Gray-Scott reaction-diffusion equation drives Physarum slime-mold pattern formation chemically. Two species U + V diffuse and react; for F=0.025, k=0.056 the pattern develops labyrinthine stripes — the same topology a real slime mold paints with its body. Snapshot at step 1000.",
+    "theme": {
+      "background": "#020617",
+      "foreground": "#fef3c7"
+    },
+    "defs": {
+      "gradients": [
+        {
+          "id": "g-bg",
+          "kind": "radial",
+          "cx": "50%",
+          "cy": "50%",
+          "r": "75%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#0c0a25",
+              "opacity": 1
+            },
+            {
+              "offset": "100%",
+              "color": "#020617",
+              "opacity": 1
+            }
+          ]
+        }
+      ]
+    },
+    "children": [
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 900 0 L 900 700 L 0 700 Z",
+          "fill": "url(#g-bg)",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 100,
+          "y": 90
+        },
+        "size": {
+          "w": 700,
+          "h": 540
+        },
+        "mark": "chart",
+        "chart": {
+          "version": "glyph/0.1",
+          "title": "Gray-Scott · F=0.025 · k=0.056 · labyrinth regime",
+          "data": {
+            "pde_solve": {
+              "shape": "pde-solve",
+              "kind": "reaction-diffusion",
+              "domain": {
+                "x": [-1, 1],
+                "y": [-1, 1]
+              },
+              "grid": {
+                "rows": 28,
+                "cols": 28
+              },
+              "initial": "0",
+              "initial_U": "1",
+              "initial_V": "exp(-25*(x*x + y*y))*0.5 + exp(-25*((x-0.5)*(x-0.5) + (y+0.4)*(y+0.4)))*0.5",
+              "params": {
+                "Du": 1,
+                "Dv": 0.5,
+                "F": 0.025,
+                "k": 0.056
+              },
+              "boundary": "periodic",
+              "steps": 1000,
+              "dt": 0.0012
+            }
+          },
+          "layers": [
+            {
+              "mark": "heatmap",
+              "encoding": {
+                "x": {
+                  "field": "x",
+                  "type": "quantitative",
+                  "scale": {
+                    "domain": [-1, 1]
+                  }
+                },
+                "y": {
+                  "field": "y",
+                  "type": "quantitative",
+                  "scale": {
+                    "domain": [-1, 1]
+                  }
+                },
+                "color": {
+                  "field": "u",
+                  "type": "quantitative"
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 50
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Physarum polycephalum — the chemistry",
+          "fontSize": 20,
+          "fill": "#fef3c7",
+          "italic": true,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 670
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "data.shape: 'pde-solve' · kind: 'reaction-diffusion' · 28×28 grid · 1000 steps · static SVG",
+          "fontSize": 12,
+          "fill": "#94a3b8",
+          "italic": true,
+          "anchor": "middle"
+        }
+      }
+    ]
+  }
+}
