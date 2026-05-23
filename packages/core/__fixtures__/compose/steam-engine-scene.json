@@ -1,0 +1,62 @@
+{
+  "compose": {
+    "viewBox": { "width": 1000, "height": 440 },
+    "theme": { "preset": "pencil-parchment", "gridPattern": "graph-paper" },
+    "children": [
+      {
+        "at": { "x": 200, "y": 220 },
+        "mark": "slider-crank",
+        "sliderCrank": { "crankRadius": 60, "rodLength": 180 }
+      },
+      {
+        "at": { "x": 200, "y": 350 },
+        "mark": "text",
+        "textMark": {
+          "text": "slider-crank · Watt 1769",
+          "fontSize": 12,
+          "fill": "#4a3f30",
+          "italic": true
+        }
+      },
+      {
+        "at": { "x": 540, "y": 60 },
+        "size": { "w": 420, "h": 320 },
+        "mark": "chart",
+        "chart": {
+          "version": "glyph/0.1",
+          "data": {
+            "function": {
+              "shape": "function",
+              "parameter": { "name": "t", "min": 0, "max": 6.283185307179586, "samples": 360 },
+              "xExpr": "t",
+              "yExpr": "cos(t) + sqrt(9 - sin(t)*sin(t))"
+            }
+          },
+          "layers": [
+            {
+              "mark": "line",
+              "encoding": {
+                "x": {
+                  "field": "x",
+                  "type": "quantitative",
+                  "scale": { "domain": [0, 6.283185307179586] }
+                },
+                "y": { "field": "y", "type": "quantitative", "scale": { "domain": [1, 4.2] } }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "at": { "x": 750, "y": 30 },
+        "mark": "text",
+        "textMark": {
+          "text": "x_piston(θ) = cos θ + √(9 − sin² θ)",
+          "fontSize": 13,
+          "fill": "#1f1a14",
+          "italic": true
+        }
+      }
+    ]
+  }
+}

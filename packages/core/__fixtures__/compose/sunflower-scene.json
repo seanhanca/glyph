@@ -1,0 +1,57 @@
+{
+  "compose": {
+    "viewBox": { "width": 1000, "height": 440 },
+    "theme": { "preset": "pencil-parchment", "gridPattern": "graph-paper" },
+    "children": [
+      {
+        "at": { "x": 500, "y": 230 },
+        "mark": "circle",
+        "circle": { "radius": 200, "fill": "#facc15", "stroke": "#d97706", "strokeWidth": 2 }
+      },
+      {
+        "at": { "x": 500, "y": 230 },
+        "mark": "circle",
+        "circle": { "radius": 130, "fill": "#3f2a0a", "stroke": "#1f1a14", "strokeWidth": 1.5 }
+      },
+      {
+        "at": { "x": 240, "y": 80 },
+        "size": { "w": 520, "h": 300 },
+        "mark": "chart",
+        "chart": {
+          "version": "glyph/0.1",
+          "data": {
+            "recurrence": {
+              "shape": "recurrence",
+              "state": ["x", "y"],
+              "initial": { "x": 0, "y": 0 },
+              "step": {
+                "x": "sqrt(n + 1) * cos((n + 1) * 2.39996322972865332)",
+                "y": "sqrt(n + 1) * sin((n + 1) * 2.39996322972865332)"
+              },
+              "steps": 800
+            }
+          },
+          "layers": [
+            {
+              "mark": "point",
+              "encoding": {
+                "x": { "field": "x", "type": "quantitative", "scale": { "domain": [-32, 32] } },
+                "y": { "field": "y", "type": "quantitative", "scale": { "domain": [-32, 32] } }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "at": { "x": 500, "y": 420 },
+        "mark": "text",
+        "textMark": {
+          "text": "800 seeds at the golden angle 137.5° — Vogel 1979",
+          "fontSize": 13,
+          "fill": "#1f1a14",
+          "italic": true
+        }
+      }
+    ]
+  }
+}

@@ -13,11 +13,16 @@ import { emitLoopAnimation } from "../animation/loops.js";
 import type { Scene, SceneMark } from "../scenegraph/types.js";
 import type {
   AnnotationMarkConfig,
+  CircleMarkConfig,
   ComposeChild,
   ComposeSpec,
   FrameMarkConfig,
   GearMarkConfig,
+  HeartIconConfig,
   PendulumMarkConfig,
+  SliderCrankConfig,
+  TextMarkConfig,
+  WankelRotorConfig,
 } from "../spec/compose-schema.js";
 import { parseSpec } from "../spec/parse.js";
 import type { CompileFieldInfo } from "./compile.js";
@@ -91,6 +96,13 @@ function compileChild(child: ComposeChild): SceneMark[] {
     return compileAnnotationLeader(child.annotation, child.at.x, child.at.y);
   if (child.mark === "chart" && child.chart && child.size)
     return compileChart(child.chart, child.size);
+  if (child.mark === "circle" && child.circle) return compileCircle(child.circle);
+  if (child.mark === "text" && child.textMark) return compileText(child.textMark);
+  if (child.mark === "heart-icon" && child.heartIcon) return compileHeartIcon(child.heartIcon);
+  if (child.mark === "slider-crank" && child.sliderCrank)
+    return compileSliderCrank(child.sliderCrank);
+  if (child.mark === "wankel-rotor" && child.wankelRotor)
+    return compileWankelRotor(child.wankelRotor);
   return [];
 }
 
@@ -396,4 +408,215 @@ function pushGraphPaperGrid(marks: SceneMark[], width: number, height: number): 
       strokeWidth: 1,
     });
   }
+}
+
+/* ----------------------------------------------------------------
+ *  Subject-specific schematic marks (RFC #7 extended set)
+ * ---------------------------------------------------------------- */
+
+/** Decorative circle at local origin. */
+export function compileCircle(cfg: CircleMarkConfig): SceneMark[] {
+  if (cfg.stroke !== undefined) {
+    const sw = cfg.strokeWidth ?? 1;
+    return [
+      {
+        type: "circle",
+        cx: 0,
+        cy: 0,
+        r: cfg.radius,
+        fill: cfg.fill,
+        stroke: cfg.stroke,
+        strokeWidth: sw,
+      },
+    ];
+  }
+  return [{ type: "circle", cx: 0, cy: 0, r: cfg.radius, fill: cfg.fill }];
+}
+
+/** Decorative text label at local origin. */
+export function compileText(cfg: TextMarkConfig): SceneMark[] {
+  return [
+    {
+      type: "text",
+      x: 0,
+      y: 0,
+      text: cfg.text,
+      fontSize: cfg.fontSize,
+      fill: cfg.fill,
+      anchor: cfg.anchor,
+      baseline: "middle",
+    },
+  ];
+}
+
+/**
+ * Heart-icon: a stylized heart shape centered at local origin.
+ * Built as one filled SVG path; the classic two-arc / triangle-tip
+ * heart silhouette. `size` scales the whole icon — at size=40 the
+ * heart is about 40 px wide / 36 px tall.
+ *
+ * Pairs naturally with `animation.kind: "pulse"` on the same child
+ * — the pulse transform scales the icon at the rhythm of a heart.
+ */
+export function compileHeartIcon(cfg: HeartIconConfig): SceneMark[] {
+  // Path is in a [-s/2, +s/2] coordinate space where s = cfg.size.
+  // Two cubic Bezier curves form the upper lobes; lines drop to the
+  // bottom tip; closed with Z. Tuned visually.
+  const s = cfg.size;
+  const h = s * 0.9;
+  const d = `M 0 ${(h * 0.32).toFixed(3)}
+             C ${(-s * 0.42).toFixed(3)} ${(h * 0.06).toFixed(3)}, ${(-s * 0.65).toFixed(3)} ${(-h * 0.18).toFixed(3)}, ${(-s * 0.42).toFixed(3)} ${(-h * 0.4).toFixed(3)}
+             C ${(-s * 0.2).toFixed(3)} ${(-h * 0.58).toFixed(3)}, 0 ${(-h * 0.42).toFixed(3)}, 0 ${(-h * 0.24).toFixed(3)}
+             C 0 ${(-h * 0.42).toFixed(3)}, ${(s * 0.2).toFixed(3)} ${(-h * 0.58).toFixed(3)}, ${(s * 0.42).toFixed(3)} ${(-h * 0.4).toFixed(3)}
+             C ${(s * 0.65).toFixed(3)} ${(-h * 0.18).toFixed(3)}, ${(s * 0.42).toFixed(3)} ${(h * 0.06).toFixed(3)}, 0 ${(h * 0.32).toFixed(3)} Z`;
+  return [
+    {
+      type: "path",
+      d: d.replace(/\s+/g, " ").trim(),
+      fill: cfg.fill,
+      stroke: cfg.stroke,
+      strokeWidth: 0.8,
+    },
+  ];
+}
+
+/**
+ * Slider-crank mechanism schematic for Watt's steam engine. Crank
+ * wheel at local origin, connecting rod tilted slightly upward to
+ * the right (mid-stroke pose), piston sliding inside an open
+ * cylinder further to the right. Frozen in pose — for a live moving
+ * version, render this scene + JS animation in the wrapping page.
+ *
+ * The angle = 30° past TDC. With crankRadius r and rodLength l:
+ *   pinX  =  r·cos(30°) ≈ 0.866 r
+ *   pinY  = -r·sin(30°) = -0.5 r       (above center in SVG y-down)
+ *   pistonX = r·cos(30°) + √(l² − r²·sin²(30°))
+ *           = r·cos(30°) + √(l² − r²/4)
+ */
+export function compileSliderCrank(cfg: SliderCrankConfig): SceneMark[] {
+  const marks: SceneMark[] = [];
+  const r = cfg.crankRadius;
+  const l = cfg.rodLength;
+  const theta = Math.PI / 6; // 30° past TDC
+  const pinX = r * Math.cos(theta);
+  const pinY = -r * Math.sin(theta);
+  const pistonX = pinX + Math.sqrt(l * l - r * r * Math.sin(theta) * Math.sin(theta));
+  // Crank wheel
+  marks.push({
+    type: "circle",
+    cx: 0,
+    cy: 0,
+    r,
+    fill: "#fdf8ea",
+    stroke: "#1f1a14",
+    strokeWidth: 1.5,
+  });
+  // Spokes
+  marks.push({ type: "line", x1: -r, y1: 0, x2: r, y2: 0, stroke: "#4a3f30", strokeWidth: 0.6 });
+  marks.push({ type: "line", x1: 0, y1: -r, x2: 0, y2: r, stroke: "#4a3f30", strokeWidth: 0.6 });
+  // Crank hub
+  marks.push({ type: "circle", cx: 0, cy: 0, r: 4, fill: "#1f1a14" });
+  // Crank pin (where the connecting rod attaches)
+  marks.push({
+    type: "circle",
+    cx: pinX,
+    cy: pinY,
+    r: 3,
+    fill: "#8b3a1c",
+    stroke: "#1f1a14",
+    strokeWidth: 0.8,
+  });
+  // Connecting rod (pin → piston)
+  marks.push({
+    type: "line",
+    x1: pinX,
+    y1: pinY,
+    x2: pistonX,
+    y2: 0,
+    stroke: "#1f1a14",
+    strokeWidth: 2.5,
+  });
+  // Cylinder bore — leftmost edge at (pistonX - r - 10), rightmost
+  // edge at (pistonX + l/2). Drawn as open rect, hatched right wall.
+  const cylLeft = pistonX - r - 10;
+  const cylRight = pistonX + l * 0.5;
+  marks.push({
+    type: "rect",
+    x: cylLeft,
+    y: -r - 4,
+    width: cylRight - cylLeft,
+    height: 2 * r + 8,
+    fill: "none",
+    stroke: "#1f1a14",
+    strokeWidth: 1.5,
+  });
+  // Piston rect (centered on pistonX, 30 px wide)
+  marks.push({
+    type: "rect",
+    x: pistonX - 15,
+    y: -r,
+    width: 30,
+    height: 2 * r,
+    fill: "#fdf8ea",
+    stroke: "#1f1a14",
+    strokeWidth: 1.5,
+  });
+  return marks;
+}
+
+/**
+ * Wankel triangular rotor — equilateral triangle with three apex
+ * markers, in the schematic style used in textbooks. Local origin
+ * is the rotor's center; apex 0 is on the +x axis (3-o'clock at
+ * body angle 0).
+ */
+export function compileWankelRotor(cfg: WankelRotorConfig): SceneMark[] {
+  const R = cfg.apexRadius;
+  // Three apex world positions in rotor's body frame
+  const ax0 = R;
+  const ay0 = 0;
+  const ax1 = -R * 0.5;
+  const ay1 = R * Math.sin((Math.PI * 2) / 3);
+  const ax2 = -R * 0.5;
+  const ay2 = -R * Math.sin((Math.PI * 2) / 3);
+  // Filled triangle path (straight sides)
+  const d = `M ${ax0.toFixed(3)} ${ay0.toFixed(3)} L ${ax1.toFixed(3)} ${ay1.toFixed(3)} L ${ax2.toFixed(3)} ${ay2.toFixed(3)} Z`;
+  return [
+    {
+      type: "path",
+      d,
+      fill: "rgba(31,26,20,.06)",
+      stroke: "#1f1a14",
+      strokeWidth: 2,
+    },
+    {
+      type: "circle",
+      cx: ax0,
+      cy: ay0,
+      r: 4,
+      fill: "#8b3a1c",
+      stroke: "#1f1a14",
+      strokeWidth: 0.8,
+    },
+    {
+      type: "circle",
+      cx: ax1,
+      cy: ay1,
+      r: 4,
+      fill: "#8b3a1c",
+      stroke: "#1f1a14",
+      strokeWidth: 0.8,
+    },
+    {
+      type: "circle",
+      cx: ax2,
+      cy: ay2,
+      r: 4,
+      fill: "#8b3a1c",
+      stroke: "#1f1a14",
+      strokeWidth: 0.8,
+    },
+    // Rotor bearing center
+    { type: "circle", cx: 0, cy: 0, r: 4, fill: "#4a3f30" },
+  ];
 }

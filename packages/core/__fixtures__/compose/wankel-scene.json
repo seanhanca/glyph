@@ -1,0 +1,49 @@
+{
+  "compose": {
+    "viewBox": { "width": 1000, "height": 440 },
+    "theme": { "preset": "pencil-parchment", "gridPattern": "graph-paper" },
+    "children": [
+      {
+        "at": { "x": 500, "y": 220 },
+        "size": { "w": 520, "h": 360 },
+        "mark": "chart",
+        "chart": {
+          "version": "glyph/0.1",
+          "data": {
+            "function": {
+              "shape": "function",
+              "parameter": { "name": "t", "min": 0, "max": 6.283185307179586, "samples": 400 },
+              "xExpr": "4*cos(t) + cos(3*t)",
+              "yExpr": "4*sin(t) + sin(3*t)"
+            }
+          },
+          "layers": [
+            {
+              "mark": "line",
+              "encoding": {
+                "x": { "field": "x", "type": "quantitative", "scale": { "domain": [-5.5, 5.5] } },
+                "y": { "field": "y", "type": "quantitative", "scale": { "domain": [-5.5, 5.5] } }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "at": { "x": 500, "y": 220 },
+        "mark": "wankel-rotor",
+        "wankelRotor": { "apexRadius": 75 },
+        "animation": { "kind": "rotate-loop", "periodMs": 24000, "direction": "cw" }
+      },
+      {
+        "at": { "x": 500, "y": 410 },
+        "mark": "text",
+        "textMark": {
+          "text": "epitrochoid housing · 1:3 frequency · Wankel 1957",
+          "fontSize": 13,
+          "fill": "#1f1a14",
+          "italic": true
+        }
+      }
+    ]
+  }
+}
