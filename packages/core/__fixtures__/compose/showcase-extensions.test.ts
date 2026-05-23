@@ -81,7 +81,7 @@ const scenes: Scene[] = [
       'id="g-smoke"',
       'id="g-wheel"',
       '<animateTransform attributeName="transform" type="rotate"',
-      "connecting rods",
+      "Mallard",
     ],
   },
   {
