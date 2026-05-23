@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Life in Glyph — what AI + Glyph can render from English</title>
+<meta name="description" content="Four hand-crafted Claude × Glyph showcases. Orion's journey, a human heartbeat, a leopard's spots, a sunflower's seeds. Each one: a prompt, an animation, the Glyph spec, prompt templates to try.">
+<meta property="og:title" content="Life in Glyph — four AI × Glyph showcases">
+<meta property="og:description" content="Four English prompts. Four byte-locked Glyph specs. Four animations a 5-year-old and a 70-year-old can both enjoy.">
+<style>
+  :root {
+    --bg-deep: #02030a;
+    --panel: #0c1126;
+    --panel-edge: #1d2444;
+    --ink: #f1f5fb;
+    --muted: #94a3b8;
+    --orion: #fde68a;
+    --orion-bg: rgba(251,191,36,.08);
+    --orion-edge: rgba(251,191,36,.35);
+    --heart: #f87171;
+    --heart-bg: rgba(248,113,113,.08);
+    --heart-edge: rgba(248,113,113,.35);
+    --leopard: #d97706;
+    --leopard-bg: rgba(217,119,6,.08);
+    --leopard-edge: rgba(217,119,6,.35);
+    --sun: #facc15;
+    --sun-bg: rgba(250,204,21,.08);
+    --sun-edge: rgba(250,204,21,.35);
+    --font-sans: -apple-system, "Helvetica Neue", system-ui, "Segoe UI", sans-serif;
+    --font-mono: "SF Mono", "Cascadia Code", ui-monospace, monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg-deep);color:var(--ink);font-family:var(--font-sans);-webkit-font-smoothing:antialiased;line-height:1.6}
+  body{background:
+    radial-gradient(ellipse at 25% 10%, rgba(251,191,36,.06), transparent 50%),
+    radial-gradient(ellipse at 75% 25%, rgba(248,113,113,.06), transparent 50%),
+    radial-gradient(ellipse at 25% 70%, rgba(217,119,6,.05), transparent 50%),
+    radial-gradient(ellipse at 75% 85%, rgba(250,204,21,.06), transparent 50%),
+    var(--bg-deep);
+    min-height:100vh}
+  a{color:var(--orion);text-underline-offset:3px}
+  h1,h2,h3{margin:0 0 .4em;letter-spacing:-.015em;line-height:1.15}
+  h1{font-size:clamp(2.6rem,6vw,4.4rem);font-weight:800;background:linear-gradient(90deg, #fef3c7, #f87171, #d97706, #facc15);-webkit-background-clip:text;background-clip:text;color:transparent}
+  h2{font-size:clamp(1.5rem,3vw,2rem);font-weight:700}
+  h3{font-size:1.4rem;font-weight:700;color:var(--ink)}
+  p{margin:0 0 1em}
+  .container{max-width:1180px;margin:0 auto;padding:0 24px}
+  code{font-family:var(--font-mono);font-size:.92em;background:#13193a;padding:.12em .4em;border-radius:4px;color:#fef3c7}
+
+  .breadcrumb{padding:18px 0;font-size:.86rem;color:var(--muted);text-align:center}
+  .breadcrumb a{color:var(--muted);text-decoration:none;border-bottom:1px dashed transparent;transition:border-color .15s ease,color .15s ease}
+  .breadcrumb a:hover{color:var(--ink);border-bottom-color:var(--ink)}
+
+  .hero{padding:48px 0 32px;text-align:center}
+  .hero .kicker{display:inline-block;padding:6px 16px;border-radius:9999px;background:rgba(255,255,255,.05);color:var(--muted);font-size:.82rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:24px;border:1px solid var(--panel-edge)}
+  .hero p.lede{color:var(--muted);max-width:66ch;margin:1em auto 0;font-size:1.14rem}
+  .hero p.lede strong{color:var(--ink)}
+
+  /* Gallery grid — 2×2 on wide, 1-col on narrow. Each card a
+     subject-tinted teaser that links to a full draw-me page. */
+  .gallery{padding:40px 0 64px}
+  .gallery-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:1100px;margin:0 auto}
+  @media (max-width:880px){.gallery-grid{grid-template-columns:1fr}}
+  .card{display:block;background:var(--panel);border:1px solid var(--panel-edge);border-radius:18px;padding:0;text-decoration:none;color:var(--ink);overflow:hidden;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease;position:relative}
+  .card:hover{transform:translateY(-4px);box-shadow:0 22px 40px rgba(0,0,0,.35)}
+  .card.orion:hover{border-color:var(--orion-edge);box-shadow:0 22px 40px rgba(251,191,36,.15)}
+  .card.heart:hover{border-color:var(--heart-edge);box-shadow:0 22px 40px rgba(248,113,113,.15)}
+  .card.leopard:hover{border-color:var(--leopard-edge);box-shadow:0 22px 40px rgba(217,119,6,.15)}
+  .card.sunflower:hover{border-color:var(--sun-edge);box-shadow:0 22px 40px rgba(250,204,21,.15)}
+  .card-thumb{aspect-ratio:16/10;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .card-thumb img{display:block;width:100%;height:100%;object-fit:contain;background:#fff}
+  .card-body{padding:24px 26px}
+  .card-meta{display:flex;align-items:center;gap:10px;font-family:var(--font-mono);font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px}
+  .card.orion .card-meta{color:var(--orion)}
+  .card.heart .card-meta{color:var(--heart)}
+  .card.leopard .card-meta{color:var(--leopard)}
+  .card.sunflower .card-meta{color:var(--sun)}
+  .card-meta .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor}
+  .card h3{margin-bottom:8px;font-size:1.45rem;letter-spacing:-0.015em}
+  .card p.tagline{color:var(--muted);font-size:.97rem;margin-bottom:14px}
+  .card .prompt-preview{font-family:var(--font-mono);font-size:.83rem;color:var(--ink);background:rgba(0,0,0,.32);border:1px solid var(--panel-edge);border-radius:8px;padding:12px 14px;line-height:1.6;margin-bottom:14px}
+  .card .prompt-preview .quote{color:var(--muted);font-weight:600;letter-spacing:.04em;font-size:.72rem;text-transform:uppercase;display:block;margin-bottom:6px}
+  .card .card-foot{display:flex;align-items:center;justify-content:space-between;font-size:.86rem;color:var(--muted)}
+  .card .card-foot .arrow{color:var(--ink);font-weight:600;letter-spacing:.04em}
+
+  /* About the series */
+  .about{padding:64px 0;border-top:1px solid var(--panel-edge);background:linear-gradient(180deg, rgba(255,255,255,.02), transparent 60%)}
+  .about .container{max-width:780px}
+  .about h2{text-align:center;margin-bottom:18px}
+  .about p{color:var(--muted);font-size:1.02rem}
+  .about p strong{color:var(--ink)}
+
+  /* Grammar map — small table-like row showing which Glyph shape
+     each page exercises. */
+  .map{padding:40px 0 24px}
+  .map .container{max-width:880px}
+  .map h2{text-align:center;font-size:1.4rem;margin-bottom:18px;color:var(--muted)}
+  .map-table{width:100%;border-collapse:separate;border-spacing:0;font-size:.92rem}
+  .map-table th, .map-table td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--panel-edge);vertical-align:top}
+  .map-table th{font-weight:600;font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  .map-table td code{font-size:.84rem}
+  .map-table .swatch{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;vertical-align:middle}
+
+  .cta{text-align:center;padding:64px 24px;border-top:1px solid var(--panel-edge)}
+  .cta .btn{display:inline-block;margin:6px;padding:12px 22px;border-radius:9999px;text-decoration:none;font-weight:600;font-size:.96rem;border:1px solid transparent;transition:transform .15s ease,background .15s ease}
+  .cta .btn-primary{background:var(--ink);color:var(--bg-deep)}
+  .cta .btn-primary:hover{transform:translateY(-1px);background:#fff}
+  .cta .btn-ghost{border-color:var(--panel-edge);color:var(--ink)}
+  .cta .btn-ghost:hover{border-color:var(--ink);color:var(--ink)}
+  footer{padding:24px 0 48px;text-align:center;color:var(--muted);font-size:.88rem}
+</style>
+</head>
+<body>
+
+<div class="breadcrumb">
+  <a href="joy.html">← Joy of Math</a> &nbsp;·&nbsp; <a href="/glyph/">Glyph</a>
+</div>
+
+<header class="hero">
+  <div class="container">
+    <span class="kicker">Claude × Glyph showcases</span>
+    <h1>Life in Glyph</h1>
+    <p class="lede">Four hand-crafted demonstrations of what one English prompt to an AI agent can produce when the AI knows how to write Glyph. Each page picks a subject anyone can recognize — a NASA mission, a heartbeat, a leopard, a sunflower — and shows the full chain: <strong>prompt → JSON spec → byte-locked SVG → page</strong>. Designed to be enjoyed by a 5-year-old and a 70-year-old in the same sitting.</p>
+  </div>
+</header>
+
+<section class="gallery">
+  <div class="container">
+    <div class="gallery-grid">
+      <a class="card orion" href="draw-me.html">
+        <div class="card-thumb"><img src="orion-journey.svg" alt="Orion mission path" loading="lazy"></div>
+        <div class="card-body">
+          <div class="card-meta"><span class="dot"></span>1 of 4 · space history</div>
+          <h3>Orion's journey to the Moon</h3>
+          <p class="tagline">NASA's Artemis I, 25 days, three phases. Earth → outbound transit → distant retrograde orbit → return → splashdown.</p>
+          <div class="prompt-preview">
+            <span class="quote">▸ Prompt</span>
+            "Draw me NASA's Artemis I Orion spacecraft journey to the Moon and back. Show the outbound transit, a wide retrograde orbit, and the return arc. Beautiful for a 5-year-old, meaningful to a 70-year-old."
+          </div>
+          <div class="card-foot">
+            <span><code>data.shape: "function"</code></span>
+            <span class="arrow">Read →</span>
+          </div>
+        </div>
+      </a>
+
+      <a class="card heart" href="draw-me-heartbeat.html">
+        <div class="card-thumb"><img src="heartbeat.svg" alt="Heartbeat ECG trace" loading="lazy"></div>
+        <div class="card-body">
+          <div class="card-meta"><span class="dot"></span>2 of 4 · human biology</div>
+          <h3>A heartbeat at rest</h3>
+          <p class="tagline">FitzHugh-Nagumo (1961) — the relaxation oscillator that produces the spike-and-recover rhythm. 60 BPM. Lub-dub.</p>
+          <div class="prompt-preview">
+            <span class="quote">▸ Prompt</span>
+            "Draw me a heartbeat — a resting human heart at 60 BPM. Use FitzHugh-Nagumo so the trace has the real spike-and-recover rhythm. Beautiful for a child, meaningful for a grandparent."
+          </div>
+          <div class="card-foot">
+            <span><code>data.shape: "trajectory"</code></span>
+            <span class="arrow">Read →</span>
+          </div>
+        </div>
+      </a>
+
+      <a class="card leopard" href="draw-me-leopard.html">
+        <div class="card-thumb"><img src="leopard-spots.svg" alt="Gray-Scott leopard-spot pattern" loading="lazy"></div>
+        <div class="card-body">
+          <div class="card-meta"><span class="dot"></span>3 of 4 · pattern formation</div>
+          <h3>How the leopard got his spots</h3>
+          <p class="tagline">Kipling's 1902 just-so story, Turing's 1952 chemistry. A single seed in a uniform field, the Gray-Scott PDE, and 400 steps later: spots.</p>
+          <div class="prompt-preview">
+            <span class="quote">▸ Prompt</span>
+            "Draw me how the leopard got his spots. Use Gray-Scott reaction-diffusion at F = k = 0.062 — the leopard-spots regime. Start from a single seed, run 400 steps, let the pattern emerge."
+          </div>
+          <div class="card-foot">
+            <span><code>data.shape: "pde-solve"</code></span>
+            <span class="arrow">Read →</span>
+          </div>
+        </div>
+      </a>
+
+      <a class="card sunflower" href="draw-me-sunflower.html">
+        <div class="card-thumb"><img src="sunflower-seeds.svg" alt="Sunflower phyllotaxis pattern" loading="lazy"></div>
+        <div class="card-body">
+          <div class="card-meta"><span class="dot"></span>4 of 4 · math in nature</div>
+          <h3>A sunflower's secret math</h3>
+          <p class="tagline">Vogel's 1979 model — every seed placed at √n and n × 137.5°. The only angle that fills a disc without leaving gaps.</p>
+          <div class="prompt-preview">
+            <span class="quote">▸ Prompt</span>
+            "Draw me how a sunflower packs its seeds. Each seed n at radius √n, angle n × 137.5° (the golden angle). 200 seeds. Show why this angle and only this angle works."
+          </div>
+          <div class="card-foot">
+            <span><code>data.shape: "recurrence"</code></span>
+            <span class="arrow">Read →</span>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="map">
+  <div class="container">
+    <h2>The grammar tour</h2>
+    <table class="map-table">
+      <thead>
+        <tr>
+          <th>Page</th>
+          <th>Glyph shape</th>
+          <th>Math</th>
+          <th>Year</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="swatch" style="background:#fbbf24"></span><a href="draw-me.html">Orion</a></td>
+          <td><code>function</code> (parametric)</td>
+          <td>Three-phase ternary x(t), y(t)</td>
+          <td>2022</td>
+        </tr>
+        <tr>
+          <td><span class="swatch" style="background:#f87171"></span><a href="draw-me-heartbeat.html">Heartbeat</a></td>
+          <td><code>trajectory</code> (ODE)</td>
+          <td>FitzHugh-Nagumo coupled differential equations</td>
+          <td>1961</td>
+        </tr>
+        <tr>
+          <td><span class="swatch" style="background:#d97706"></span><a href="draw-me-leopard.html">Leopard</a></td>
+          <td><code>pde-solve</code> (RD)</td>
+          <td>Gray-Scott reaction-diffusion on a 32×32 grid</td>
+          <td>1952 / 1993</td>
+        </tr>
+        <tr>
+          <td><span class="swatch" style="background:#facc15"></span><a href="draw-me-sunflower.html">Sunflower</a></td>
+          <td><code>recurrence</code> (discrete iteration)</td>
+          <td>Vogel's golden-angle phyllotaxis</td>
+          <td>1979</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="text-align:center;color:var(--muted);font-size:.88rem;margin-top:20px">Four pages exercise four of Glyph's six data shapes. <code>geodesic</code> (light bending around mass) and <code>streamline</code> (vector fields) live in <a href="joy.html">Joy of Math</a>.</p>
+  </div>
+</section>
+
+<section class="about">
+  <div class="container">
+    <h2>Why we made this</h2>
+    <p>Most viz grammars are designed for charts — bars, lines, scatter plots. They handle survey data and revenue dashboards beautifully and stop there.</p>
+    <p><strong>Glyph is designed to handle math, physics, and biology too.</strong> The same JSON grammar that draws a bar chart can also integrate an ODE, solve a PDE, walk a recurrence, or trace a photon through curved spacetime. The output is always the same kind of object: a byte-stable SVG that an AI agent can author from English.</p>
+    <p>"Life in Glyph" is four hand-crafted proofs of concept. Each page picks a familiar subject and walks the reader through: <strong>the English prompt</strong> a user might give Claude → <strong>the JSON spec</strong> Claude writes in response → <strong>the SVG</strong> the Glyph compiler produces → <strong>the animated page</strong> the user sees.</p>
+    <p>None of these required code from the user. All of them are deterministic — same prompt, same render, every platform, every time. That's the contract this grammar makes.</p>
+  </div>
+</section>
+
+<section class="cta">
+  <h2 style="margin-bottom:24px">Explore Glyph</h2>
+  <a class="btn btn-primary" href="https://github.com/seanhanca/glyph">⭐ Star on GitHub</a>
+  <a class="btn btn-ghost" href="joy.html">Joy of Math · 9 demos</a>
+  <a class="btn btn-ghost" href="/glyph/play/">Open the playground</a>
+  <a class="btn btn-ghost" href="https://github.com/seanhanca/glyph/blob/main/docs/LEARN.md">Learn the grammar</a>
+</section>
+
+<footer>
+  <div class="container">
+    Life in Glyph · drawn by Glyph · asked by you · Apache 2.0 · <a href="https://github.com/seanhanca/glyph">GitHub</a>
+  </div>
+</footer>
+
+</body>
+</html>

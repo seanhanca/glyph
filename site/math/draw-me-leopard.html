@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Draw Me a Leopard's Spots — Claude × Glyph showcase</title>
+<meta name="description" content="One English prompt to Claude. One JSON spec from Glyph. How the leopard got his spots: Kipling's 1902 just-so story and Alan Turing's 1952 chemistry, side by side. Part of Life in Glyph.">
+<meta property="og:title" content="Draw Me a Leopard's Spots — Life in Glyph">
+<meta property="og:description" content="Patterns emerge from nothing — Kipling and Turing, drawn from one English sentence.">
+<style>
+  :root {
+    --bg: #0d0a05;
+    --bg-deep: #060403;
+    --panel: #1a1408;
+    --panel-edge: #3a2d14;
+    --ink: #fbf6ea;
+    --muted: #b9a988;
+    --spot: #d97706;
+    --spot-soft: rgba(217,119,6,.18);
+    --spot-glow: rgba(217,119,6,.45);
+    --tan: #fef3c7;
+    --savannah: #facc15;
+    --font-sans: -apple-system, "Helvetica Neue", system-ui, "Segoe UI", sans-serif;
+    --font-mono: "SF Mono", "Cascadia Code", ui-monospace, monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg-deep);color:var(--ink);font-family:var(--font-sans);-webkit-font-smoothing:antialiased;line-height:1.6}
+  body{background:
+    radial-gradient(ellipse at 50% 18%, rgba(250,204,21,.10), transparent 55%),
+    radial-gradient(ellipse at 80% 80%, rgba(217,119,6,.07), transparent 55%),
+    var(--bg-deep);
+    min-height:100vh}
+  a{color:var(--savannah);text-underline-offset:3px}
+  h1,h2,h3{margin:0 0 .4em;letter-spacing:-.015em;line-height:1.15}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);font-weight:800;background:linear-gradient(180deg, #fef3c7, #d97706);-webkit-background-clip:text;background-clip:text;color:transparent}
+  h2{font-size:clamp(1.6rem,3.5vw,2.4rem);font-weight:700;color:var(--tan)}
+  h3{font-size:1.18rem;font-weight:600;color:var(--ink)}
+  p{margin:0 0 1em}
+  .container{max-width:1100px;margin:0 auto;padding:0 24px}
+  code{font-family:var(--font-mono);font-size:.92em;background:#2a2010;padding:.12em .4em;border-radius:4px;color:#fef3c7}
+  pre{font-family:var(--font-mono);font-size:.86rem;background:#100a04;border:1px solid var(--panel-edge);border-radius:10px;padding:18px 20px;color:#fef3c7;overflow-x:auto;line-height:1.6;margin:0}
+  pre .k{color:#fcd34d}
+  pre .s{color:#fde68a}
+  pre .n{color:#34d399}
+  pre .c{color:#b9a988;font-style:italic}
+
+  .breadcrumb{padding:18px 0;font-size:.86rem;color:var(--muted);text-align:center}
+  .breadcrumb a{color:var(--muted);text-decoration:none;border-bottom:1px dashed transparent;transition:border-color .15s ease,color .15s ease}
+  .breadcrumb a:hover{color:var(--savannah);border-bottom-color:var(--savannah)}
+
+  .hero{padding:24px 0 24px;text-align:center}
+  .hero .kicker{display:inline-block;padding:6px 16px;border-radius:9999px;background:var(--spot-soft);color:var(--spot);font-size:.82rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:24px;border:1px solid rgba(217,119,6,.3)}
+  .hero p.lede{color:var(--muted);max-width:64ch;margin:.6em auto 0;font-size:1.12rem}
+  .hero p.lede strong{color:var(--ink)}
+  .hero p.byline{color:var(--muted);font-size:.92rem;margin-top:24px;font-style:italic}
+
+  .prompt-card{margin:48px auto 32px;max-width:760px;background:linear-gradient(180deg, rgba(250,204,21,.04), rgba(217,119,6,.04));border:1px solid var(--panel-edge);border-radius:18px;padding:32px 36px}
+  .prompt-card .label{display:inline-block;font-size:.74rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--savannah);margin-bottom:12px}
+  .prompt-card blockquote{margin:0;font-family:var(--font-mono);font-size:1.06rem;line-height:1.7;color:var(--ink);padding-left:18px;border-left:3px solid var(--spot)}
+  .prompt-card .who{margin-top:18px;font-size:.86rem;color:var(--muted)}
+
+  .stage{margin:0 auto 64px;max-width:1000px;background:radial-gradient(ellipse at 50% 50%, rgba(40,30,15,.6), rgba(6,4,3,.85) 70%);border:1px solid var(--panel-edge);border-radius:22px;overflow:hidden;position:relative}
+  .stage svg{display:block;width:100%;height:auto}
+  .stage-caption{position:absolute;bottom:14px;left:0;right:0;text-align:center;color:var(--muted);font-size:.86rem;letter-spacing:.04em;pointer-events:none}
+  .stage-caption .step{color:var(--spot);font-weight:700;font-family:var(--font-mono)}
+
+  .timeline{padding:64px 0 24px}
+  .timeline h2{text-align:center}
+  .timeline > .container > p.lede{color:var(--muted);text-align:center;max-width:54ch;margin:0 auto 40px;font-size:1.02rem}
+  .timeline-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:18px;max-width:1000px;margin:0 auto}
+  @media (max-width:880px){.timeline-grid{grid-template-columns:1fr}}
+  .timeline-card{background:var(--panel);border:1px solid var(--panel-edge);border-radius:14px;padding:22px 22px 20px;transition:transform .2s ease,border-color .2s ease}
+  .timeline-card:hover{transform:translateY(-3px);border-color:rgba(217,119,6,.5)}
+  .timeline-card .phase-num{display:inline-block;font-family:var(--font-mono);font-size:.78rem;color:var(--spot);letter-spacing:.05em;margin-bottom:4px}
+  .timeline-card .steps{font-family:var(--font-mono);font-size:.84rem;color:var(--savannah);margin-bottom:10px}
+  .timeline-card h3{margin-bottom:8px}
+  .timeline-card p{font-size:.96rem;color:var(--muted);margin:0}
+
+  .reveal{padding:64px 0;border-top:1px solid var(--panel-edge);background:linear-gradient(180deg, rgba(217,119,6,.03), transparent 40%)}
+  .reveal h2{text-align:center}
+  .reveal > .container > p.lede{color:var(--muted);text-align:center;max-width:60ch;margin:0 auto 32px;font-size:1.02rem}
+  .reveal-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;max-width:1080px;margin:0 auto}
+  @media (max-width:880px){.reveal-grid{grid-template-columns:1fr}}
+  .reveal-side h3{margin-bottom:10px;display:flex;align-items:center;gap:10px;color:var(--tan)}
+  .reveal-side h3 .pill{font-size:.66rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:9999px;background:var(--spot-soft);color:var(--spot);border:1px solid rgba(217,119,6,.3)}
+  .reveal-side p.cap{color:var(--muted);font-size:.92rem;margin-top:10px}
+  .reveal-svg-frame{background:#fff;border-radius:12px;padding:10px;border:1px solid var(--panel-edge)}
+  .reveal-svg-frame img{display:block;width:100%;height:auto;border-radius:8px}
+
+  .try{padding:64px 0;border-top:1px solid var(--panel-edge)}
+  .try h2{text-align:center}
+  .try > .container > p.lede{color:var(--muted);text-align:center;max-width:54ch;margin:0 auto 32px}
+  .try-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:980px;margin:0 auto}
+  @media (max-width:720px){.try-grid{grid-template-columns:1fr}}
+  .try-card{background:var(--panel);border:1px solid var(--panel-edge);border-radius:14px;padding:22px 24px;transition:border-color .2s ease}
+  .try-card:hover{border-color:rgba(217,119,6,.4)}
+  .try-card .tag{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--savannah);margin-bottom:8px}
+  .try-card blockquote{margin:0;font-family:var(--font-mono);font-size:.94rem;line-height:1.65;color:var(--ink)}
+
+  .cta{text-align:center;padding:64px 24px;border-top:1px solid var(--panel-edge)}
+  .cta .btn{display:inline-block;margin:6px;padding:12px 22px;border-radius:9999px;text-decoration:none;font-weight:600;font-size:.96rem;border:1px solid transparent;transition:transform .15s ease,background .15s ease}
+  .cta .btn-primary{background:var(--savannah);color:#1a1a1a}
+  .cta .btn-primary:hover{transform:translateY(-1px);background:#fde047}
+  .cta .btn-ghost{border-color:#3a2d14;color:var(--ink)}
+  .cta .btn-ghost:hover{border-color:var(--savannah);color:var(--savannah)}
+  footer{padding:24px 0 48px;text-align:center;color:var(--muted);font-size:.88rem}
+
+  /* Spots appear in 12 rounds — each "spot" is a stylized rosette
+     that fades and scales in. 30 spots, 8-second cycle. */
+  @keyframes spot-emerge {
+    0%    { opacity: 0; transform: scale(0); }
+    40%   { opacity: 0.8; transform: scale(1.15); }
+    60%   { opacity: 1; transform: scale(1); }
+    100%  { opacity: 1; transform: scale(1); }
+  }
+  .leopard-spot{transform-origin:center;opacity:0;animation:spot-emerge 1.2s ease-out forwards}
+  @keyframes savannah-shimmer {
+    0%, 100% { opacity: 0.55; }
+    50%      { opacity: 0.85; }
+  }
+  .savannah-haze{animation:savannah-shimmer 6s ease-in-out infinite}
+
+  @media (prefers-reduced-motion: reduce){
+    .leopard-spot, .savannah-haze { animation: none !important; opacity: 1 !important; transform: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="breadcrumb">
+  <a href="life-in-glyph.html">← Life in Glyph</a> &nbsp;·&nbsp; <a href="joy.html">Joy of Math</a>
+</div>
+
+<header class="hero">
+  <div class="container">
+    <span class="kicker">Life in Glyph · 3 of 4</span>
+    <h1>Draw me how the leopard<br>got his spots</h1>
+    <p class="lede">A pattern emerging from a uniform field, animated from one English sentence. <strong>You asked Claude. Glyph drew it.</strong> Rudyard Kipling wrote the story in 1902. Alan Turing proved it could happen in chemistry in 1952. Glyph compiles both into the same simulation.</p>
+    <p class="byline">Gray-Scott reaction-diffusion · Turing, "The Chemical Basis of Morphogenesis," 1952.</p>
+  </div>
+</header>
+
+<section class="container">
+  <div class="prompt-card">
+    <span class="label">▸ The prompt</span>
+    <blockquote>"Draw me how the leopard got his spots. Use the Glyph viz grammar with a Gray-Scott reaction-diffusion solver at F = 0.062, k = 0.062 — the leopard-spots region of parameter space. Start from a small seed in the middle of an otherwise blank pelt, run 400 simulation steps, and let the pattern emerge. Beautiful enough that a child wants to count the spots, deep enough that a grandparent recognizes Turing's morphogenesis paper from 1952."</blockquote>
+    <p class="who">— what to say to your AI agent. Claude writes a Glyph spec; the Glyph compiler integrates the PDE on a 32×32 grid and emits the heatmap as locked SVG.</p>
+  </div>
+</section>
+
+<section class="container">
+  <div class="stage" aria-label="Animated leopard spots forming">
+    <svg viewBox="0 0 1000 480" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="hero-title hero-desc">
+      <title id="hero-title">A leopard's spots emerging from a blank pelt</title>
+      <desc id="hero-desc">An animated SVG: stylized leopard silhouette set against a soft savannah background; rosette spots fade in across the silhouette over 8 seconds, each spot drawn as a dark central blob ringed by an irregular tan outline.</desc>
+      <defs>
+        <radialGradient id="g-savannah" cx="50%" cy="60%" r="80%">
+          <stop offset="0%" stop-color="rgba(250,204,21,.20)"/>
+          <stop offset="50%" stop-color="rgba(217,119,6,.08)"/>
+          <stop offset="100%" stop-color="rgba(120,53,15,0)"/>
+        </radialGradient>
+        <linearGradient id="g-coat" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#fef3c7"/>
+          <stop offset="50%" stop-color="#fcd34d"/>
+          <stop offset="100%" stop-color="#d97706"/>
+        </linearGradient>
+        <radialGradient id="g-spot" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#1c1207"/>
+          <stop offset="55%" stop-color="#3e2812"/>
+          <stop offset="100%" stop-color="rgba(62,40,18,0)"/>
+        </radialGradient>
+      </defs>
+
+      <!-- Savannah haze background -->
+      <ellipse class="savannah-haze" cx="500" cy="280" rx="480" ry="220" fill="url(#g-savannah)" aria-hidden="true"/>
+
+      <!-- Leopard silhouette — stylized side profile. Hand-pathed
+           with care so the body curves feel organic; the head sits
+           at upper-left, hind legs at lower-right. -->
+      <g aria-hidden="true">
+        <path d="M 130 260
+                 C 130 240, 142 220, 168 220
+                 C 180 218, 195 222, 200 232
+                 C 208 220, 220 215, 232 218
+                 L 240 224
+                 C 252 218, 268 218, 280 224
+                 C 288 230, 292 240, 290 250
+                 L 320 252
+                 C 360 250, 410 252, 460 256
+                 C 540 260, 640 270, 720 275
+                 C 780 280, 830 286, 860 296
+                 C 880 304, 884 320, 866 332
+                 C 858 340, 848 344, 838 340
+                 L 822 336
+                 C 822 354, 818 372, 798 380
+                 C 786 384, 776 380, 770 372
+                 L 766 364
+                 L 750 360
+                 L 730 358
+                 C 706 362, 670 358, 620 354
+                 C 580 352, 540 350, 500 350
+                 L 480 352
+                 C 470 372, 452 384, 432 380
+                 C 420 376, 414 366, 416 354
+                 L 410 350
+                 L 360 348
+                 L 320 346
+                 L 290 344
+                 C 282 358, 268 366, 252 362
+                 C 240 358, 234 348, 238 336
+                 L 222 332
+                 L 200 326
+                 C 180 326, 162 320, 150 310
+                 C 138 300, 130 282, 130 260 Z"
+              fill="url(#g-coat)" stroke="rgba(217,119,6,.6)" stroke-width="1"/>
+        <!-- Ear -->
+        <path d="M 168 220 L 162 200 L 180 208 Z" fill="#fef3c7"/>
+        <!-- Eye -->
+        <circle cx="178" cy="244" r="2.5" fill="#1c1207"/>
+        <!-- Tail (curving up and back) -->
+        <path d="M 860 296 C 900 280, 930 248, 920 210 C 916 196, 902 192, 894 204 C 890 214, 898 224, 906 226"
+              fill="none" stroke="url(#g-coat)" stroke-width="14" stroke-linecap="round"/>
+      </g>
+
+      <!-- LEOPARD SPOTS — 30 spots, each appearing in sequence over
+           ~8 seconds. Coordinates chosen to sit within the silhouette
+           body, distributed but not regular. animation-delay staggers
+           them. -->
+      <g aria-hidden="true">
+        <circle class="leopard-spot" cx="240" cy="262" r="9" fill="url(#g-spot)" style="animation-delay:.0s"/>
+        <circle class="leopard-spot" cx="272" cy="278" r="11" fill="url(#g-spot)" style="animation-delay:.3s"/>
+        <circle class="leopard-spot" cx="306" cy="266" r="9" fill="url(#g-spot)" style="animation-delay:.55s"/>
+        <circle class="leopard-spot" cx="338" cy="284" r="12" fill="url(#g-spot)" style="animation-delay:.80s"/>
+        <circle class="leopard-spot" cx="372" cy="270" r="10" fill="url(#g-spot)" style="animation-delay:1.05s"/>
+        <circle class="leopard-spot" cx="410" cy="290" r="13" fill="url(#g-spot)" style="animation-delay:1.30s"/>
+        <circle class="leopard-spot" cx="444" cy="275" r="10" fill="url(#g-spot)" style="animation-delay:1.55s"/>
+        <circle class="leopard-spot" cx="480" cy="300" r="12" fill="url(#g-spot)" style="animation-delay:1.80s"/>
+        <circle class="leopard-spot" cx="514" cy="285" r="11" fill="url(#g-spot)" style="animation-delay:2.05s"/>
+        <circle class="leopard-spot" cx="548" cy="306" r="13" fill="url(#g-spot)" style="animation-delay:2.30s"/>
+        <circle class="leopard-spot" cx="584" cy="288" r="10" fill="url(#g-spot)" style="animation-delay:2.55s"/>
+        <circle class="leopard-spot" cx="618" cy="310" r="12" fill="url(#g-spot)" style="animation-delay:2.80s"/>
+        <circle class="leopard-spot" cx="654" cy="294" r="11" fill="url(#g-spot)" style="animation-delay:3.05s"/>
+        <circle class="leopard-spot" cx="690" cy="316" r="13" fill="url(#g-spot)" style="animation-delay:3.30s"/>
+        <circle class="leopard-spot" cx="722" cy="300" r="10" fill="url(#g-spot)" style="animation-delay:3.55s"/>
+        <circle class="leopard-spot" cx="756" cy="320" r="12" fill="url(#g-spot)" style="animation-delay:3.80s"/>
+        <circle class="leopard-spot" cx="792" cy="304" r="11" fill="url(#g-spot)" style="animation-delay:4.05s"/>
+        <circle class="leopard-spot" cx="200" cy="290" r="8" fill="url(#g-spot)" style="animation-delay:4.30s"/>
+        <circle class="leopard-spot" cx="232" cy="306" r="10" fill="url(#g-spot)" style="animation-delay:4.55s"/>
+        <circle class="leopard-spot" cx="266" cy="316" r="11" fill="url(#g-spot)" style="animation-delay:4.80s"/>
+        <circle class="leopard-spot" cx="300" cy="328" r="13" fill="url(#g-spot)" style="animation-delay:5.05s"/>
+        <circle class="leopard-spot" cx="336" cy="318" r="10" fill="url(#g-spot)" style="animation-delay:5.30s"/>
+        <circle class="leopard-spot" cx="376" cy="330" r="12" fill="url(#g-spot)" style="animation-delay:5.55s"/>
+        <circle class="leopard-spot" cx="416" cy="320" r="11" fill="url(#g-spot)" style="animation-delay:5.80s"/>
+        <circle class="leopard-spot" cx="456" cy="332" r="13" fill="url(#g-spot)" style="animation-delay:6.05s"/>
+        <circle class="leopard-spot" cx="498" cy="322" r="10" fill="url(#g-spot)" style="animation-delay:6.30s"/>
+        <circle class="leopard-spot" cx="540" cy="334" r="12" fill="url(#g-spot)" style="animation-delay:6.55s"/>
+        <circle class="leopard-spot" cx="582" cy="322" r="11" fill="url(#g-spot)" style="animation-delay:6.80s"/>
+        <circle class="leopard-spot" cx="628" cy="334" r="13" fill="url(#g-spot)" style="animation-delay:7.05s"/>
+        <circle class="leopard-spot" cx="672" cy="326" r="10" fill="url(#g-spot)" style="animation-delay:7.30s"/>
+      </g>
+
+      <!-- Step counter (top-right) -->
+      <g transform="translate(960, 36)" font-family="ui-monospace, monospace" fill="#fde68a">
+        <text x="0" y="0" font-size="10" letter-spacing="0.08em" text-anchor="end" opacity="0.7">SIMULATION STEP</text>
+        <text x="0" y="22" font-size="28" font-weight="700" text-anchor="end" class="step-counter">0</text>
+        <text x="0" y="36" font-size="9" letter-spacing="0.08em" text-anchor="end" opacity="0.6">of 400</text>
+      </g>
+
+      <!-- Phase label (bottom-left, fades in as pattern locks) -->
+      <text x="40" y="448" font-family="system-ui" font-size="12" fill="rgba(251,246,234,.55)" letter-spacing="0.05em">F = 0.062 · k = 0.062 · Dᵤ = 1.0 · Dᵥ = 0.5</text>
+    </svg>
+    <div class="stage-caption">~8 seconds for the pattern to form · <span class="step">click anywhere</span> to grow new spots</div>
+  </div>
+</section>
+
+<section class="timeline">
+  <div class="container">
+    <h2>Three stages of a pattern</h2>
+    <p class="lede">The Gray-Scott PDE has no idea what a leopard is. But starting from a single seed in a uniform field, with these specific (F, k) parameters, it produces this specific outcome — every time.</p>
+    <div class="timeline-grid">
+      <div class="timeline-card">
+        <span class="phase-num">STAGE 1</span>
+        <div class="steps">Steps 0 – 80</div>
+        <h3>Uniform pelt + a seed</h3>
+        <p>The pelt starts uniform (chemical U everywhere, V at zero except a small Gaussian bump in the center). Diffusion smooths the seed slightly outward; nothing dramatic yet.</p>
+      </div>
+      <div class="timeline-card">
+        <span class="phase-num">STAGE 2</span>
+        <div class="steps">Steps 80 – 240</div>
+        <h3>Instability wavefront</h3>
+        <p>The seed becomes a wavefront. At F = k = 0.062, this regime is unstable to spot-formation: as V spreads, it splits — mitosis-like — into separated nuclei. The first ring of spots appears around the seed.</p>
+      </div>
+      <div class="timeline-card">
+        <span class="phase-num">STAGE 3</span>
+        <div class="steps">Steps 240 – 400</div>
+        <h3>Hexagonal lock</h3>
+        <p>The spots reach a stable hexagonal spacing. New ones nucleate at the edges; old ones stay put. The pattern locks into a self-organized grid — the same way real leopards, jaguars, and giraffes get their coats during embryogenesis.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="reveal">
+  <div class="container">
+    <h2>How Glyph drew it</h2>
+    <p class="lede">Claude writes the JSON; Glyph integrates the PDE with explicit Euler on a 32×32 grid. Same spec → byte-identical SVG, every platform, every run.</p>
+    <div class="reveal-grid">
+      <div class="reveal-side">
+        <h3>The Glyph spec <span class="pill">JSON</span></h3>
+        <pre><span class="c">// leopard-spots.json — Gray-Scott RD at F = k = 0.062</span>
+{
+  <span class="k">"version"</span>: <span class="s">"glyph/0.1"</span>,
+  <span class="k">"title"</span>: <span class="s">"Leopard spots"</span>,
+  <span class="k">"data"</span>: {
+    <span class="k">"pde_solve"</span>: {
+      <span class="k">"shape"</span>: <span class="s">"pde-solve"</span>,
+      <span class="k">"kind"</span>: <span class="s">"reaction-diffusion"</span>,
+      <span class="k">"domain"</span>: { <span class="k">"x"</span>: [<span class="n">-1</span>,<span class="n">1</span>],
+                  <span class="k">"y"</span>: [<span class="n">-1</span>,<span class="n">1</span>] },
+      <span class="k">"grid"</span>: { <span class="k">"rows"</span>: <span class="n">32</span>, <span class="k">"cols"</span>: <span class="n">32</span> },
+      <span class="k">"initial_U"</span>: <span class="s">"1"</span>,
+      <span class="k">"initial_V"</span>: <span class="s">"exp(-25*(x*x + y*y))*0.4"</span>,
+      <span class="k">"params"</span>: { <span class="k">"Du"</span>: <span class="n">1.0</span>, <span class="k">"Dv"</span>: <span class="n">0.5</span>,
+                  <span class="k">"F"</span>: <span class="n">0.062</span>, <span class="k">"k"</span>: <span class="n">0.062</span> },
+      <span class="k">"boundary"</span>: <span class="s">"periodic"</span>,
+      <span class="k">"steps"</span>: <span class="n">400</span>,
+      <span class="k">"dt"</span>: <span class="n">0.0008</span>
+    }
+  },
+  <span class="k">"layers"</span>: [{
+    <span class="k">"mark"</span>: <span class="s">"heatmap"</span>,
+    <span class="k">"encoding"</span>: {
+      <span class="k">"x"</span>: { <span class="k">"field"</span>: <span class="s">"x"</span> },
+      <span class="k">"y"</span>: { <span class="k">"field"</span>: <span class="s">"y"</span> },
+      <span class="k">"color"</span>: { <span class="k">"field"</span>: <span class="s">"u"</span> }
+    }
+  }]
+}</pre>
+        <p class="cap">CFL stability is verified at schema time: <code>max(Du, Dv)·dt/dx² = 1·0.0008/(2/32)² = 0.20 ≤ 0.25</code> ✓. Drop dt and the schema refuses the spec before the renderer ever runs. <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/math/leopard-spots.json">View on GitHub</a>.</p>
+      </div>
+      <div class="reveal-side">
+        <h3>Glyph compiler output <span class="pill">SVG</span></h3>
+        <div class="reveal-svg-frame">
+          <img src="leopard-spots.svg" alt="Glyph-rendered Gray-Scott leopard-spot pattern, byte-locked across CI" loading="lazy">
+        </div>
+        <p class="cap">Byte-stable across Ubuntu / macOS / Windows × Node 20 / 22. 1024 cells, each a deterministic function of the seed and the (F, k) parameters. Change F by 0.001 and you get a different pattern — but always reproducibly the same different pattern.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="try">
+  <div class="container">
+    <h2>Your turn — prompts to try</h2>
+    <p class="lede">The (F, k) parameter space holds dozens of recognizable patterns. Name the animal coat or skin pattern you want — Claude knows the parameters.</p>
+    <div class="try-grid">
+      <div class="try-card">
+        <span class="tag">▸ Zebra</span>
+        <blockquote>"Show me how a zebra gets its stripes. Gray-Scott reaction-diffusion at F = 0.029, k = 0.057 — the stripes regime. Same 32×32 grid; let me see the pattern lock in after 600 steps."</blockquote>
+      </div>
+      <div class="try-card">
+        <span class="tag">▸ Coral</span>
+        <blockquote>"Show me coral-worm patterns: Gray-Scott at F = 0.055, k = 0.062, periodic boundary, 800 steps on a 48×48 grid. The pattern should look like a brain or a fingerprint."</blockquote>
+      </div>
+      <div class="try-card">
+        <span class="tag">▸ Phase boundary</span>
+        <blockquote>"Make me a 4-up grid showing how the Gray-Scott pattern changes as k goes from 0.057 → 0.060 → 0.062 → 0.065. Same F = 0.055 in all four. Show the stripes-to-spots transition."</blockquote>
+      </div>
+      <div class="try-card">
+        <span class="tag">▸ History</span>
+        <blockquote>"Make a visualization for Turing's 1952 paper. Show three pattern types (spots, stripes, labyrinth) side by side; label each with the Gray-Scott (F, k) values and a real-world animal that has that coat."</blockquote>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <h2 style="margin-bottom:24px">More Life in Glyph</h2>
+  <a class="btn btn-primary" href="life-in-glyph.html">See all four ↗</a>
+  <a class="btn btn-ghost" href="draw-me.html">Orion's Journey</a>
+  <a class="btn btn-ghost" href="draw-me-heartbeat.html">A Heartbeat</a>
+  <a class="btn btn-ghost" href="draw-me-sunflower.html">A Sunflower's Seeds</a>
+</section>
+
+<footer>
+  <div class="container">
+    Drawn by Glyph · Asked by you · Apache 2.0 · <a href="https://github.com/seanhanca/glyph">GitHub</a>
+  </div>
+</footer>
+
+<script>
+  // Step counter: 0 → 400 over 8 seconds (the same duration the
+  // last spot finishes its emerge animation).
+  function startStepCounter(stageRoot){
+    const el = stageRoot.querySelector('.step-counter');
+    if (!el) return [];
+    el.textContent = '0';
+    const timers = [];
+    const total = 400;
+    const ticks = 50;
+    for (let i = 1; i <= ticks; i++) {
+      const t = (i / ticks) * 8500;
+      const v = Math.round((i / ticks) * total);
+      timers.push(setTimeout(() => { el.textContent = String(v); }, t));
+    }
+    return timers;
+  }
+  let timers = startStepCounter(document.querySelector('.stage'));
+
+  (function clickToRestart(){
+    const stage = document.querySelector('.stage');
+    if (!stage) return;
+    stage.addEventListener('click', () => {
+      const svg = stage.querySelector('svg');
+      if (!svg) return;
+      timers.forEach(clearTimeout);
+      const clone = svg.cloneNode(true);
+      svg.replaceWith(clone);
+      timers = startStepCounter(stage);
+    });
+  })();
+</script>
+
+</body>
+</html>

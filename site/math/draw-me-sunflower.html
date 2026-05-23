@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Draw Me a Sunflower's Seeds — Claude × Glyph showcase</title>
+<meta name="description" content="One English prompt to Claude. One JSON spec from Glyph. How a sunflower packs its seeds — the golden angle, Fibonacci numbers, and nature's favorite mathematics. Part of Life in Glyph.">
+<meta property="og:title" content="Draw Me a Sunflower's Seeds — Life in Glyph">
+<meta property="og:description" content="The golden angle, hidden in every sunflower. Drawn from one English sentence.">
+<style>
+  :root {
+    --bg: #0a0d05;
+    --bg-deep: #050702;
+    --panel: #131906;
+    --panel-edge: #2a3a14;
+    --ink: #f5fbe2;
+    --muted: #b1c08a;
+    --petal: #facc15;
+    --petal-soft: rgba(250,204,21,.18);
+    --petal-glow: rgba(250,204,21,.4);
+    --leaf: #65a30d;
+    --seed: #78350f;
+    --font-sans: -apple-system, "Helvetica Neue", system-ui, "Segoe UI", sans-serif;
+    --font-mono: "SF Mono", "Cascadia Code", ui-monospace, monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg-deep);color:var(--ink);font-family:var(--font-sans);-webkit-font-smoothing:antialiased;line-height:1.6}
+  body{background:
+    radial-gradient(ellipse at 50% 18%, rgba(250,204,21,.12), transparent 55%),
+    radial-gradient(ellipse at 20% 80%, rgba(101,163,13,.07), transparent 55%),
+    var(--bg-deep);
+    min-height:100vh}
+  a{color:var(--petal);text-underline-offset:3px}
+  h1,h2,h3{margin:0 0 .4em;letter-spacing:-.015em;line-height:1.15}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);font-weight:800;background:linear-gradient(180deg, #fef9c3, #facc15);-webkit-background-clip:text;background-clip:text;color:transparent}
+  h2{font-size:clamp(1.6rem,3.5vw,2.4rem);font-weight:700;color:#fef9c3}
+  h3{font-size:1.18rem;font-weight:600;color:var(--ink)}
+  p{margin:0 0 1em}
+  .container{max-width:1100px;margin:0 auto;padding:0 24px}
+  code{font-family:var(--font-mono);font-size:.92em;background:#1c2410;padding:.12em .4em;border-radius:4px;color:#fef9c3}
+  pre{font-family:var(--font-mono);font-size:.86rem;background:#0a0e04;border:1px solid var(--panel-edge);border-radius:10px;padding:18px 20px;color:#fef9c3;overflow-x:auto;line-height:1.6;margin:0}
+  pre .k{color:#a3e635}
+  pre .s{color:#fde68a}
+  pre .n{color:#fcd34d}
+  pre .c{color:#b1c08a;font-style:italic}
+
+  .breadcrumb{padding:18px 0;font-size:.86rem;color:var(--muted);text-align:center}
+  .breadcrumb a{color:var(--muted);text-decoration:none;border-bottom:1px dashed transparent;transition:border-color .15s ease,color .15s ease}
+  .breadcrumb a:hover{color:var(--petal);border-bottom-color:var(--petal)}
+
+  .hero{padding:24px 0 24px;text-align:center}
+  .hero .kicker{display:inline-block;padding:6px 16px;border-radius:9999px;background:var(--petal-soft);color:var(--petal);font-size:.82rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:24px;border:1px solid rgba(250,204,21,.3)}
+  .hero p.lede{color:var(--muted);max-width:64ch;margin:.6em auto 0;font-size:1.12rem}
+  .hero p.lede strong{color:var(--ink)}
+  .hero p.byline{color:var(--muted);font-size:.92rem;margin-top:24px;font-style:italic}
+
+  .prompt-card{margin:48px auto 32px;max-width:760px;background:linear-gradient(180deg, rgba(250,204,21,.04), rgba(101,163,13,.04));border:1px solid var(--panel-edge);border-radius:18px;padding:32px 36px}
+  .prompt-card .label{display:inline-block;font-size:.74rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--leaf);margin-bottom:12px}
+  .prompt-card blockquote{margin:0;font-family:var(--font-mono);font-size:1.06rem;line-height:1.7;color:var(--ink);padding-left:18px;border-left:3px solid var(--petal)}
+  .prompt-card .who{margin-top:18px;font-size:.86rem;color:var(--muted)}
+
+  .stage{margin:0 auto 64px;max-width:1000px;background:radial-gradient(ellipse at 50% 50%, rgba(20,30,8,.6), rgba(5,7,2,.85) 70%);border:1px solid var(--panel-edge);border-radius:22px;overflow:hidden;position:relative}
+  .stage svg{display:block;width:100%;height:auto}
+  .stage-caption{position:absolute;bottom:14px;left:0;right:0;text-align:center;color:var(--muted);font-size:.86rem;letter-spacing:.04em;pointer-events:none}
+  .stage-caption .seed-num{color:var(--petal);font-weight:700;font-family:var(--font-mono)}
+
+  .timeline{padding:64px 0 24px}
+  .timeline h2{text-align:center}
+  .timeline > .container > p.lede{color:var(--muted);text-align:center;max-width:54ch;margin:0 auto 40px;font-size:1.02rem}
+  .timeline-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:18px;max-width:1000px;margin:0 auto}
+  @media (max-width:880px){.timeline-grid{grid-template-columns:1fr}}
+  .timeline-card{background:var(--panel);border:1px solid var(--panel-edge);border-radius:14px;padding:22px 22px 20px;transition:transform .2s ease,border-color .2s ease}
+  .timeline-card:hover{transform:translateY(-3px);border-color:rgba(250,204,21,.5)}
+  .timeline-card .phase-num{display:inline-block;font-family:var(--font-mono);font-size:.78rem;color:var(--petal);letter-spacing:.05em;margin-bottom:4px}
+  .timeline-card .nseeds{font-family:var(--font-mono);font-size:.84rem;color:var(--leaf);margin-bottom:10px}
+  .timeline-card h3{margin-bottom:8px}
+  .timeline-card p{font-size:.96rem;color:var(--muted);margin:0}
+
+  .reveal{padding:64px 0;border-top:1px solid var(--panel-edge);background:linear-gradient(180deg, rgba(250,204,21,.03), transparent 40%)}
+  .reveal h2{text-align:center}
+  .reveal > .container > p.lede{color:var(--muted);text-align:center;max-width:60ch;margin:0 auto 32px;font-size:1.02rem}
+  .reveal-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;max-width:1080px;margin:0 auto}
+  @media (max-width:880px){.reveal-grid{grid-template-columns:1fr}}
+  .reveal-side h3{margin-bottom:10px;display:flex;align-items:center;gap:10px;color:#fef9c3}
+  .reveal-side h3 .pill{font-size:.66rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:9999px;background:var(--petal-soft);color:var(--petal);border:1px solid rgba(250,204,21,.3)}
+  .reveal-side p.cap{color:var(--muted);font-size:.92rem;margin-top:10px}
+  .reveal-svg-frame{background:#fff;border-radius:12px;padding:10px;border:1px solid var(--panel-edge)}
+  .reveal-svg-frame img{display:block;width:100%;height:auto;border-radius:8px}
+
+  .try{padding:64px 0;border-top:1px solid var(--panel-edge)}
+  .try h2{text-align:center}
+  .try > .container > p.lede{color:var(--muted);text-align:center;max-width:54ch;margin:0 auto 32px}
+  .try-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:980px;margin:0 auto}
+  @media (max-width:720px){.try-grid{grid-template-columns:1fr}}
+  .try-card{background:var(--panel);border:1px solid var(--panel-edge);border-radius:14px;padding:22px 24px;transition:border-color .2s ease}
+  .try-card:hover{border-color:rgba(250,204,21,.4)}
+  .try-card .tag{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--leaf);margin-bottom:8px}
+  .try-card blockquote{margin:0;font-family:var(--font-mono);font-size:.94rem;line-height:1.65;color:var(--ink)}
+
+  .cta{text-align:center;padding:64px 24px;border-top:1px solid var(--panel-edge)}
+  .cta .btn{display:inline-block;margin:6px;padding:12px 22px;border-radius:9999px;text-decoration:none;font-weight:600;font-size:.96rem;border:1px solid transparent;transition:transform .15s ease,background .15s ease}
+  .cta .btn-primary{background:var(--petal);color:#1a1a1a}
+  .cta .btn-primary:hover{transform:translateY(-1px);background:#fde047}
+  .cta .btn-ghost{border-color:#2a3a14;color:var(--ink)}
+  .cta .btn-ghost:hover{border-color:var(--petal);color:var(--petal)}
+  footer{padding:24px 0 48px;text-align:center;color:var(--muted);font-size:.88rem}
+
+  /* Seeds appear one by one, scaling in. With 200 seeds and an
+     8-second cycle, each gets ~40 ms of staggered delay applied
+     via inline animation-delay in the SVG markup below. */
+  @keyframes seed-bloom {
+    0%   { opacity: 0; transform: scale(0); }
+    60%  { opacity: 1; transform: scale(1.2); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  .seed{transform-origin:center;opacity:0;animation:seed-bloom .5s ease-out forwards}
+  @keyframes petal-sway {
+    0%, 100% { transform: rotate(0deg); }
+    50%      { transform: rotate(1.5deg); }
+  }
+  .petals{transform-origin:500px 240px;animation:petal-sway 7s ease-in-out infinite}
+
+  @media (prefers-reduced-motion: reduce){
+    .seed, .petals { animation: none !important; opacity: 1 !important; transform: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="breadcrumb">
+  <a href="life-in-glyph.html">← Life in Glyph</a> &nbsp;·&nbsp; <a href="joy.html">Joy of Math</a>
+</div>
+
+<header class="hero">
+  <div class="container">
+    <span class="kicker">Life in Glyph · 4 of 4</span>
+    <h1>Draw me a sunflower's<br>secret math</h1>
+    <p class="lede">200 seeds packed at the golden angle, animated from one English sentence. <strong>You asked Claude. Glyph drew it.</strong> Every sunflower, every pine cone, every aloe rosette uses the exact same 137.50776° — the only angle that fills a disc without leaving gaps or making stripes.</p>
+    <p class="byline">Vogel's phyllotaxis model · published <em>Mathematical Biosciences</em>, 1979.</p>
+  </div>
+</header>
+
+<section class="container">
+  <div class="prompt-card">
+    <span class="label">▸ The prompt</span>
+    <blockquote>"Draw me how a sunflower packs its seeds. Use the Glyph viz grammar with a recurrence shape — each seed n placed at radius √n, angle n × 137.5° (the golden angle). 200 seeds. Beautiful enough that a child sees the spiral, deep enough that a grandparent recognizes the Fibonacci connection."</blockquote>
+    <p class="who">— what to say to your AI agent. Claude writes a Glyph spec; the Glyph compiler iterates the recurrence and emits one circle per seed.</p>
+  </div>
+</section>
+
+<section class="container">
+  <div class="stage" aria-label="Animated sunflower seed packing">
+    <svg viewBox="0 0 1000 480" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="hero-title hero-desc">
+      <title id="hero-title">A sunflower's seeds packing at the golden angle</title>
+      <desc id="hero-desc">An animated SVG: stylized sunflower silhouette with golden-yellow petals around a central seed head; 200 seeds emerge one by one, each placed at the next golden-angle position, building up the characteristic interlocking spiral pattern.</desc>
+      <defs>
+        <radialGradient id="g-head" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#3f2a0a"/>
+          <stop offset="80%" stop-color="#1f1605"/>
+          <stop offset="100%" stop-color="#100a02"/>
+        </radialGradient>
+        <linearGradient id="g-petal" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#fef9c3"/>
+          <stop offset="50%" stop-color="#facc15"/>
+          <stop offset="100%" stop-color="#d97706"/>
+        </linearGradient>
+        <radialGradient id="g-seed" cx="40%" cy="40%" r="60%">
+          <stop offset="0%" stop-color="#a16207"/>
+          <stop offset="60%" stop-color="#451a03"/>
+          <stop offset="100%" stop-color="#1a0f02"/>
+        </radialGradient>
+        <linearGradient id="g-stem" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#65a30d"/>
+          <stop offset="100%" stop-color="#365314"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Stem and leaves -->
+      <g aria-hidden="true">
+        <rect x="495" y="240" width="10" height="240" fill="url(#g-stem)" rx="5"/>
+        <path d="M 500 360 Q 580 340, 620 380 Q 580 386, 500 376 Z" fill="url(#g-stem)" opacity="0.85"/>
+        <path d="M 500 410 Q 420 390, 380 430 Q 420 436, 500 426 Z" fill="url(#g-stem)" opacity="0.85"/>
+      </g>
+
+      <!-- Petals — 18 of them around the central head -->
+      <g class="petals" aria-hidden="true">
+        <!-- Drawn as elongated ellipses rotated around (500, 240). -->
+        <g transform="translate(500 240)">
+          <g><ellipse rx="14" ry="60" cy="-95" fill="url(#g-petal)" stroke="rgba(217,119,6,.5)" stroke-width=".8"/></g>
+          <g transform="rotate(20)"><ellipse rx="14" ry="60" cy="-95" fill="url(#g-petal)" stroke="rgba(217,119,6,.5)" stroke-width=".8"/></g>
+          <g transform="rotate(40)"><ellipse rx="14" ry="60" cy="-95" fill="url(#g-petal)" stroke="rgba(217,119,6,.5)" stroke-width=".8"/></g>
+          <g transform="rotate(60)"><ellipse rx="14" ry="60" cy="-95" fill="url(#g-petal)" stroke="rgba(217,119,6,.5)" stroke-width=".8"/></g>
+          <g transform="rotate(80)"><ellipse rx="14" ry="60" cy="-95" fill="url(#g-petal)" stroke="rgba(217,119,6,.5)" stroke-width=".8"/></g>
+          <g transform="rotate(100)"><ellipse rx="14" ry="60" cy="-95" fill="url(#g-petal)" stroke="rgba(217,119,6,.5)" stroke-width=".8"/></g>
+          <g transform="rotate(120)"><ellipse rx="14" ry="60" cy="-95" fill="url(#g-petal)" stroke="rgba(217,119,6,.5)" stroke-width=".8"/></g>
+          <g transform="rotate(140)"><ellipse rx="14" ry="60" cy="-95" fill="url(#g-petal)" stroke="rgba(217,119,6,.5)" stroke-width=".8"/></g>
+          <g transform="rotate(160)"><ellipse rx="14" ry="60" cy="-95" fill="url(#g-petal)" stroke="rgba(217,119,6,.5)" stroke-width=".8"/></g>
+          <g transform="rotate(180)"><ellipse rx="14" ry="60" cy="-95" fill="url(#g-petal)" stroke="rgba(217,119,6,.5)" stroke-width=".8"/></g>
+          <g transform="rotate(200)"><ellipse rx="14" ry="60" cy="-95" fill="url(#g-petal)" stroke="rgba(217,119,6,.5)" stroke-width=".8"/></g>
+          <g transform="rotate(220)"><ellipse rx="14" ry="60" cy="-95" fill="url(#g-petal)" stroke="rgba(217,119,6,.5)" stroke-width=".8"/></g>
+          <g transform="rotate(240)"><ellipse rx="14" ry="60" cy="-95" fill="url(#g-petal)" stroke="rgba(217,119,6,.5)" stroke-width=".8"/></g>
+          <g transform="rotate(260)"><ellipse rx="14" ry="60" cy="-95" fill="url(#g-petal)" stroke="rgba(217,119,6,.5)" stroke-width=".8"/></g>
+          <g transform="rotate(280)"><ellipse rx="14" ry="60" cy="-95" fill="url(#g-petal)" stroke="rgba(217,119,6,.5)" stroke-width=".8"/></g>
+          <g transform="rotate(300)"><ellipse rx="14" ry="60" cy="-95" fill="url(#g-petal)" stroke="rgba(217,119,6,.5)" stroke-width=".8"/></g>
+          <g transform="rotate(320)"><ellipse rx="14" ry="60" cy="-95" fill="url(#g-petal)" stroke="rgba(217,119,6,.5)" stroke-width=".8"/></g>
+          <g transform="rotate(340)"><ellipse rx="14" ry="60" cy="-95" fill="url(#g-petal)" stroke="rgba(217,119,6,.5)" stroke-width=".8"/></g>
+        </g>
+      </g>
+
+      <!-- Central seed head (dark disc) -->
+      <circle cx="500" cy="240" r="100" fill="url(#g-head)" stroke="rgba(217,119,6,.6)" stroke-width="2"/>
+
+      <!-- SEEDS — 200 of them, placed at (500 + 6*sqrt(n)*cos(n*137.5°),
+           240 + 6*sqrt(n)*sin(n*137.5°)) for n in [1, 200]. Generated
+           in a build step (script tag below could replace this list).
+           Each seed has its own animation-delay (n × 35 ms). -->
+      <g class="seeds" id="seeds-group" aria-hidden="true">
+        <!-- seeds injected by JS at load time, so the spec
+             (sqrt(n) * golden_angle) is the single source of truth -->
+      </g>
+
+      <!-- Seed counter (top-right) -->
+      <g transform="translate(960, 36)" font-family="ui-monospace, monospace" fill="#fde68a">
+        <text x="0" y="0" font-size="10" letter-spacing="0.08em" text-anchor="end" opacity="0.7">SEED</text>
+        <text x="0" y="22" font-size="28" font-weight="700" text-anchor="end" class="seed-counter">0</text>
+        <text x="0" y="36" font-size="9" letter-spacing="0.08em" text-anchor="end" opacity="0.6">of 200</text>
+      </g>
+
+      <!-- Angle label -->
+      <text x="40" y="448" font-family="system-ui" font-size="12" fill="rgba(245,251,226,.55)" letter-spacing="0.05em">golden angle = π·(3 − √5) ≈ 137.50776°</text>
+    </svg>
+    <div class="stage-caption">~8 seconds to lock in the spiral · <span class="seed-num">click anywhere</span> to grow a new flower</div>
+  </div>
+</section>
+
+<section class="timeline">
+  <div class="container">
+    <h2>The same angle, every time</h2>
+    <p class="lede">Watch what happens as the seed count grows. The spiral arms reveal themselves not from any extra rule, but purely from the same fixed angle, applied 200 times.</p>
+    <div class="timeline-grid">
+      <div class="timeline-card">
+        <span class="phase-num">STAGE 1</span>
+        <div class="nseeds">Seeds 1 – 13</div>
+        <h3>The first arc</h3>
+        <p>The first dozen or so seeds spiral outward in a single arc — no pattern visible yet. Each seed sits just outside its predecessor at exactly 137.5° around.</p>
+      </div>
+      <div class="timeline-card">
+        <span class="phase-num">STAGE 2</span>
+        <div class="nseeds">Seeds 13 – 55</div>
+        <h3>Spirals appear</h3>
+        <p>Counting clockwise spirals, you'll find 13. Counterclockwise: 8. Both are Fibonacci numbers. This isn't a choice — it's forced by the angle. Any other angle gives stripes, gaps, or radial spokes.</p>
+      </div>
+      <div class="timeline-card">
+        <span class="phase-num">STAGE 3</span>
+        <div class="nseeds">Seeds 55 – 200</div>
+        <h3>Hexagonal lock</h3>
+        <p>At higher counts the spirals refine. Each seed sits with six near-equal-distance neighbors — the same hexagonal packing real sunflower seeds settle into. The pattern is identical for 200 seeds or for 2,000.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="reveal">
+  <div class="container">
+    <h2>How Glyph drew it</h2>
+    <p class="lede">Claude writes the JSON; Glyph iterates the recurrence 200 times and emits one row per seed. Same spec → byte-identical SVG, every platform, every run.</p>
+    <div class="reveal-grid">
+      <div class="reveal-side">
+        <h3>The Glyph spec <span class="pill">JSON</span></h3>
+        <pre><span class="c">// sunflower-seeds.json — Vogel's phyllotaxis at the golden angle</span>
+{
+  <span class="k">"version"</span>: <span class="s">"glyph/0.1"</span>,
+  <span class="k">"title"</span>: <span class="s">"Sunflower seeds"</span>,
+  <span class="k">"data"</span>: {
+    <span class="k">"recurrence"</span>: {
+      <span class="k">"shape"</span>: <span class="s">"recurrence"</span>,
+      <span class="k">"state"</span>: [<span class="s">"x"</span>, <span class="s">"y"</span>],
+      <span class="k">"initial"</span>: { <span class="k">"x"</span>: <span class="n">0</span>, <span class="k">"y"</span>: <span class="n">0</span> },
+      <span class="c">// seed n placed at radius √n, angle n·golden_angle</span>
+      <span class="c">// golden_angle = π·(3 − √5) ≈ 2.39996322972865 rad</span>
+      <span class="k">"step"</span>: {
+        <span class="k">"x"</span>: <span class="s">"sqrt(n + 1) * cos((n + 1) * 2.39996322972865332)"</span>,
+        <span class="k">"y"</span>: <span class="s">"sqrt(n + 1) * sin((n + 1) * 2.39996322972865332)"</span>
+      },
+      <span class="k">"steps"</span>: <span class="n">800</span>
+    }
+  },
+  <span class="k">"layers"</span>: [{
+    <span class="k">"mark"</span>: <span class="s">"point"</span>,
+    <span class="k">"encoding"</span>: {
+      <span class="k">"x"</span>: { <span class="k">"field"</span>: <span class="s">"x"</span> },
+      <span class="k">"y"</span>: { <span class="k">"field"</span>: <span class="s">"y"</span> }
+    }
+  }]
+}</pre>
+        <p class="cap">Try changing 2.39996 to 2.0 (you'll get stripes) or to π (radial spokes), then change it back. The pattern collapses everywhere except the golden angle — that's the proof. <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/math/sunflower-seeds.json">View on GitHub</a>.</p>
+      </div>
+      <div class="reveal-side">
+        <h3>Glyph compiler output <span class="pill">SVG</span></h3>
+        <div class="reveal-svg-frame">
+          <img src="sunflower-seeds.svg" alt="Glyph-rendered golden-angle phyllotaxis pattern with 800 seeds, byte-locked across CI" loading="lazy">
+        </div>
+        <p class="cap">Byte-stable across Ubuntu / macOS / Windows × Node 20 / 22. 800 seeds emitted as 800 circles. cos and sin precision-clamped to 12 significant figures so libm drift never reaches the SVG.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="try">
+  <div class="container">
+    <h2>Your turn — prompts to try</h2>
+    <p class="lede">Phyllotaxis is everywhere in nature. Name the plant or the angle, and Claude can ask for the right variation.</p>
+    <div class="try-grid">
+      <div class="try-card">
+        <span class="tag">▸ Bad angles</span>
+        <blockquote>"Show me three sunflowers side by side. Seed angles of 137.5° (golden), 90°, and 137.4°. Same number of seeds. Highlight how only 137.5° packs without gaps."</blockquote>
+      </div>
+      <div class="try-card">
+        <span class="tag">▸ Pine cone</span>
+        <blockquote>"Draw me a pine cone. Same recurrence as a sunflower but seeded outward in 3D — show me the top-down view where the Fibonacci spirals (5 + 8 = 13) are clearest."</blockquote>
+      </div>
+      <div class="try-card">
+        <span class="tag">▸ Sea shell</span>
+        <blockquote>"Show me a Fibonacci spiral overlaid on a Nautilus shell cross-section. Use a recurrence where each new arc's radius is the sum of the previous two."</blockquote>
+      </div>
+      <div class="try-card">
+        <span class="tag">▸ Bee dance</span>
+        <blockquote>"Plot a honeybee's waggle-dance figure-eight. Use a parametric trajectory; label the angle of the waggle line and how it encodes direction to the food source relative to the sun."</blockquote>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <h2 style="margin-bottom:24px">More Life in Glyph</h2>
+  <a class="btn btn-primary" href="life-in-glyph.html">See all four ↗</a>
+  <a class="btn btn-ghost" href="draw-me.html">Orion's Journey</a>
+  <a class="btn btn-ghost" href="draw-me-heartbeat.html">A Heartbeat</a>
+  <a class="btn btn-ghost" href="draw-me-leopard.html">A Leopard's Spots</a>
+</section>
+
+<footer>
+  <div class="container">
+    Drawn by Glyph · Asked by you · Apache 2.0 · <a href="https://github.com/seanhanca/glyph">GitHub</a>
+  </div>
+</footer>
+
+<script>
+  // Generate 200 seeds via the SAME formula the Glyph spec uses, so
+  // the hero animation and the byte-locked spec are exactly aligned.
+  // Each seed gets a stagger delay so they bloom in order.
+  function generateSeeds(group){
+    if (!group) return;
+    group.replaceChildren();
+    const cx = 500, cy = 240;
+    const goldenAngle = Math.PI * (3 - Math.sqrt(5));  // ≈ 2.39996322972865
+    const scale = 6;   // px per unit-radius
+    const N = 200;
+    for (let n = 1; n <= N; n++) {
+      const r = Math.sqrt(n);
+      const theta = n * goldenAngle;
+      const x = cx + r * scale * Math.cos(theta);
+      const y = cy + r * scale * Math.sin(theta);
+      const radius = 3.4 - Math.min(2, n / 90);  // outer seeds slightly smaller
+      const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      c.setAttribute('cx', String(x.toFixed(2)));
+      c.setAttribute('cy', String(y.toFixed(2)));
+      c.setAttribute('r', String(radius.toFixed(2)));
+      c.setAttribute('fill', 'url(#g-seed)');
+      c.classList.add('seed');
+      c.style.animationDelay = (n * 40) + 'ms';
+      group.appendChild(c);
+    }
+  }
+  generateSeeds(document.querySelector('#seeds-group'));
+
+  // Seed counter ticks 0 → 200 in lockstep with the bloom.
+  function startSeedCounter(stageRoot){
+    const el = stageRoot.querySelector('.seed-counter');
+    if (!el) return [];
+    el.textContent = '0';
+    const timers = [];
+    const total = 200;
+    for (let n = 1; n <= total; n++) {
+      timers.push(setTimeout(() => { el.textContent = String(n); }, n * 40 + 400));
+    }
+    return timers;
+  }
+  let timers = startSeedCounter(document.querySelector('.stage'));
+
+  (function clickToRestart(){
+    const stage = document.querySelector('.stage');
+    if (!stage) return;
+    stage.addEventListener('click', () => {
+      const svg = stage.querySelector('svg');
+      if (!svg) return;
+      timers.forEach(clearTimeout);
+      const clone = svg.cloneNode(true);
+      svg.replaceWith(clone);
+      generateSeeds(clone.querySelector('#seeds-group'));
+      timers = startSeedCounter(stage);
+    });
+  })();
+</script>
+
+</body>
+</html>
