@@ -1,11 +1,11 @@
 {
   "compose": {
     "viewBox": {
-      "width": 1300,
-      "height": 620
+      "width": 1500,
+      "height": 700
     },
-    "title": "Steam locomotive — fire on wheels",
-    "description": "Stevenson's Rocket (1829) → Mallard (1938, 203 km/h). Coal in the firebox boils water in the boiler; steam expands through cylinders; connecting rods turn the drivers; the whole thing rolls on steel rails.",
+    "title": "4-6-2 Pacific — fire on wheels, in detail",
+    "description": "American Type 'Pacific' steam locomotive (4-6-2 wheel arrangement) in profile, drawn in the style of a 1930s shop drawing. A 2-axle pilot truck up front, three coupled drivers under the boiler, a single trailing axle under the firebox, and a 4-axle tender behind. Steam dome, sand dome, bell, headlight, brass boiler bands, side + main connecting rods, riveted plating. Stephenson's Rocket (1829) → Mallard (1938, 203 km/h world record).",
     "theme": {
       "preset": "pencil-parchment"
     },
@@ -45,8 +45,13 @@
               "opacity": 1
             },
             {
-              "offset": "50%",
-              "color": "#3a3a2a",
+              "offset": "30%",
+              "color": "#4a4a3a",
+              "opacity": 1
+            },
+            {
+              "offset": "70%",
+              "color": "#2a2a1a",
               "opacity": 1
             },
             {
@@ -66,36 +71,17 @@
             {
               "offset": "0%",
               "color": "#e2e8f0",
-              "opacity": 0.85
+              "opacity": 0.9
             },
             {
-              "offset": "60%",
+              "offset": "50%",
               "color": "#94a3b8",
-              "opacity": 0.5
+              "opacity": 0.6
             },
             {
               "offset": "100%",
               "color": "#94a3b8",
               "opacity": 0
-            }
-          ]
-        },
-        {
-          "id": "g-wheel",
-          "kind": "radial",
-          "cx": "50%",
-          "cy": "50%",
-          "r": "50%",
-          "stops": [
-            {
-              "offset": "0%",
-              "color": "#1f1a14",
-              "opacity": 1
-            },
-            {
-              "offset": "100%",
-              "color": "#0a0a0a",
-              "opacity": 1
             }
           ]
         },
@@ -109,6 +95,11 @@
           "stops": [
             {
               "offset": "0%",
+              "color": "#7c2d12",
+              "opacity": 1
+            },
+            {
+              "offset": "50%",
               "color": "#dc2626",
               "opacity": 1
             },
@@ -116,6 +107,44 @@
               "offset": "100%",
               "color": "#7c2d12",
               "opacity": 1
+            }
+          ]
+        },
+        {
+          "id": "g-wheel",
+          "kind": "radial",
+          "cx": "50%",
+          "cy": "50%",
+          "r": "50%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#2a2a1a",
+              "opacity": 1
+            },
+            {
+              "offset": "100%",
+              "color": "#0a0a0a",
+              "opacity": 1
+            }
+          ]
+        },
+        {
+          "id": "g-headlamp",
+          "kind": "radial",
+          "cx": "50%",
+          "cy": "50%",
+          "r": "50%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#fef9c3",
+              "opacity": 1
+            },
+            {
+              "offset": "100%",
+              "color": "#fbbf24",
+              "opacity": 0.85
             }
           ]
         }
@@ -129,7 +158,7 @@
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 0 0 L 1300 0 L 1300 500 L 0 500 Z",
+          "d": "M 0 0 L 1500 0 L 1500 560 L 0 560 Z",
           "fill": "url(#g-sky)",
           "stroke": "none"
         }
@@ -141,7 +170,7 @@
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 0 380 L 80 320 L 160 350 L 240 290 L 350 320 L 480 280 L 600 310 L 740 290 L 880 320 L 1020 285 L 1170 310 L 1300 290 L 1300 460 L 0 460 Z",
+          "d": "M 0 460 L 100 410 L 200 440 L 320 380 L 440 410 L 580 370 L 720 400 L 880 365 L 1040 395 L 1200 370 L 1360 400 L 1500 380 L 1500 540 L 0 540 Z",
           "fill": "rgba(107,138,74,.35)",
           "stroke": "none"
         }
@@ -149,100 +178,105 @@
       {
         "at": {
           "x": 0,
-          "y": 518
+          "y": 0
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 0 0 L 1300 0 L 1300 102 L 0 102 Z",
+          "d": "M 60 510 L 60 380 M 50 390 L 70 390 M 1450 510 L 1450 380 M 1440 390 L 1460 390",
+          "fill": "none",
+          "stroke": "rgba(58,42,20,.6)",
+          "strokeWidth": 1.2
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 574
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 1500 0 L 1500 126 L 0 126 Z",
           "fill": "#a3b18a",
           "stroke": "none"
         }
       },
       {
         "at": {
-          "x": 480,
-          "y": 130
+          "x": 270,
+          "y": 140
         },
         "mark": "circle",
         "circle": {
-          "radius": 36,
+          "radius": 30,
           "fill": "url(#g-smoke)"
         }
       },
       {
         "at": {
-          "x": 534,
+          "x": 311,
           "y": 106
         },
         "mark": "circle",
         "circle": {
-          "radius": 48,
+          "radius": 44,
           "fill": "url(#g-smoke)"
         }
       },
       {
         "at": {
-          "x": 564,
-          "y": 82
+          "x": 322,
+          "y": 72
         },
         "mark": "circle",
         "circle": {
-          "radius": 60,
+          "radius": 58,
           "fill": "url(#g-smoke)"
         }
       },
       {
         "at": {
-          "x": 602,
-          "y": 58
+          "x": 351,
+          "y": 38
         },
         "mark": "circle",
         "circle": {
-          "radius": 48,
+          "radius": 54,
           "fill": "url(#g-smoke)"
         }
       },
       {
         "at": {
-          "x": 616,
-          "y": 34
+          "x": 350,
+          "y": 4
         },
         "mark": "circle",
         "circle": {
-          "radius": 60,
+          "radius": 68,
           "fill": "url(#g-smoke)"
         }
       },
       {
         "at": {
-          "x": 638,
-          "y": 10
-        },
-        "mark": "circle",
-        "circle": {
-          "radius": 72,
-          "fill": "url(#g-smoke)"
-        }
-      },
-      {
-        "at": {
-          "x": 636,
-          "y": -14
-        },
-        "mark": "circle",
-        "circle": {
-          "radius": 60,
-          "fill": "url(#g-smoke)"
-        }
-      },
-      {
-        "at": {
-          "x": 340,
-          "y": 280
+          "x": 0,
+          "y": 0
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 0 0 L 560 0 L 560 120 L 0 120 Z",
+          "d": "M 50 550 L 110 300 L 110 550 Z M 50 550 L 110 550 M 60 530 L 110 530 M 70 510 L 110 510",
+          "fill": "#1f1a14",
+          "stroke": "#fde68a",
+          "strokeWidth": 1.4,
+          "strokeLinejoin": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 110 210 L 230 210 L 230 430 L 110 430 Z",
           "fill": "url(#g-boiler)",
           "stroke": "#1f1a14",
           "strokeWidth": 2
@@ -250,104 +284,126 @@
       },
       {
         "at": {
-          "x": 340,
-          "y": 300
+          "x": 110,
+          "y": 320
         },
-        "mark": "polyline",
-        "polyline": {
-          "points": [[0, 0], [560, 0]],
-          "fill": "none",
-          "stroke": "#fde68a",
-          "strokeWidth": 1.4
-        }
-      },
-      {
-        "at": {
-          "x": 340,
-          "y": 330
-        },
-        "mark": "polyline",
-        "polyline": {
-          "points": [[0, 0], [560, 0]],
-          "fill": "none",
-          "stroke": "#fde68a",
-          "strokeWidth": 1.4
-        }
-      },
-      {
-        "at": {
-          "x": 340,
-          "y": 360
-        },
-        "mark": "polyline",
-        "polyline": {
-          "points": [[0, 0], [560, 0]],
-          "fill": "none",
-          "stroke": "#fde68a",
-          "strokeWidth": 1.4
-        }
-      },
-      {
-        "at": {
-          "x": 340,
-          "y": 390
-        },
-        "mark": "polyline",
-        "polyline": {
-          "points": [[0, 0], [560, 0]],
-          "fill": "none",
-          "stroke": "#fde68a",
-          "strokeWidth": 1.4
-        }
-      },
-      {
-        "at": {
-          "x": 330,
-          "y": 340
-        },
-        "mark": "circle",
-        "circle": {
-          "radius": 68,
+        "mark": "ellipse",
+        "ellipse": {
+          "rx": 14,
+          "ry": 110,
           "fill": "#1f1a14",
           "stroke": "#fde68a",
-          "strokeWidth": 2.5
+          "strokeWidth": 2
         }
       },
       {
         "at": {
-          "x": 330,
-          "y": 340
+          "x": 118,
+          "y": 320
         },
         "mark": "circle",
         "circle": {
-          "radius": 50,
-          "fill": "none",
+          "radius": 90,
+          "fill": "#0a0a0a",
           "stroke": "#fde68a",
           "strokeWidth": 1.4
         }
       },
       {
         "at": {
-          "x": 280,
-          "y": 340
+          "x": 208,
+          "y": 320
         },
         "mark": "circle",
         "circle": {
-          "radius": 18,
-          "fill": "#fef3c7",
-          "stroke": "#1f1a14",
-          "strokeWidth": 1.5
+          "radius": 1.6,
+          "fill": "#fde68a"
         }
       },
       {
         "at": {
-          "x": 280,
-          "y": 340
+          "x": 118.07,
+          "y": 410
         },
         "mark": "circle",
         "circle": {
-          "radius": 10,
+          "radius": 1.6,
           "fill": "#fde68a"
+        }
+      },
+      {
+        "at": {
+          "x": 28,
+          "y": 320.14
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 1.6,
+          "fill": "#fde68a"
+        }
+      },
+      {
+        "at": {
+          "x": 117.78,
+          "y": 230
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 1.6,
+          "fill": "#fde68a"
+        }
+      },
+      {
+        "at": {
+          "x": 140,
+          "y": 308
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 60 0 L 60 24 L 0 24 Z",
+          "fill": "#fde68a",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.2
+        }
+      },
+      {
+        "at": {
+          "x": 170,
+          "y": 324
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "4-6-2",
+          "fontSize": 12,
+          "fill": "#1f1a14",
+          "italic": true,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 104,
+          "y": 190
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 30 0 L 36 20 L -6 20 Z",
+          "fill": "#1f1a14",
+          "stroke": "#fde68a",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 119,
+          "y": 206
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 9,
+          "fill": "url(#g-headlamp)",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1
         }
       },
       {
@@ -357,47 +413,163 @@
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 260 490 L 330 390 L 330 490 Z",
-          "fill": "#1f1a14",
-          "stroke": "#fde68a",
-          "strokeWidth": 1.4
+          "d": "M 230 220 L 880 220 L 880 420 L 230 420 Z",
+          "fill": "url(#g-boiler)",
+          "stroke": "#1f1a14",
+          "strokeWidth": 2
         }
       },
       {
         "at": {
-          "x": 420,
-          "y": 215
+          "x": 280,
+          "y": 0
         },
-        "mark": "silhouette-path",
-        "silhouettePath": {
-          "d": "M 0 0 L 60 0 L 70 65 L -10 65 Z",
-          "fill": "#1f1a14",
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 218], [0, 422]],
+          "fill": "none",
           "stroke": "#fde68a",
-          "strokeWidth": 1.5
+          "strokeWidth": 2.2
+        }
+      },
+      {
+        "at": {
+          "x": 380,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 218], [0, 422]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 2.2
+        }
+      },
+      {
+        "at": {
+          "x": 480,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 218], [0, 422]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 2.2
         }
       },
       {
         "at": {
           "x": 580,
-          "y": 260
+          "y": 0
         },
-        "mark": "ellipse",
-        "ellipse": {
-          "rx": 32,
-          "ry": 22,
-          "fill": "#1f1a14",
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 218], [0, 422]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 2.2
+        }
+      },
+      {
+        "at": {
+          "x": 680,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 218], [0, 422]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 2.2
+        }
+      },
+      {
+        "at": {
+          "x": 780,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 218], [0, 422]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 2.2
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[230, 236], [880, 236]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 270,
+          "y": 170
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -22 0 L -28 -10 L 28 -10 L 22 0 L 18 50 L -18 50 Z",
+          "fill": "#0a0a0a",
           "stroke": "#fde68a",
           "strokeWidth": 1.5
         }
       },
       {
         "at": {
-          "x": 650,
-          "y": 272
+          "x": 480,
+          "y": 220
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 0 0 L 8 0 L 8 -22 L 0 -22 Z",
+          "d": "M -36 0 L -38 -10 Q -38 -36, 0 -38 Q 38 -36, 38 -10 L 36 0 Z",
+          "fill": "#1f1a14",
+          "stroke": "#fde68a",
+          "strokeWidth": 1.8
+        }
+      },
+      {
+        "at": {
+          "x": 640,
+          "y": 220
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -26 0 L -28 -6 Q -28 -26, 0 -28 Q 28 -26, 28 -6 L 26 0 Z",
+          "fill": "#1f1a14",
+          "stroke": "#fde68a",
+          "strokeWidth": 1.6
+        }
+      },
+      {
+        "at": {
+          "x": 560,
+          "y": 212
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -8 0 L -10 -6 L -6 -16 L 6 -16 L 10 -6 L 8 0 Z",
+          "fill": "#fde68a",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.2
+        }
+      },
+      {
+        "at": {
+          "x": 720,
+          "y": 216
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 6 0 L 6 -22 L 0 -22 Z",
           "fill": "#fde68a",
           "stroke": "#1f1a14",
           "strokeWidth": 1
@@ -405,12 +577,25 @@
       },
       {
         "at": {
-          "x": 900,
-          "y": 190
+          "x": 0,
+          "y": 0
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 0 0 L 160 0 L 160 210 L 0 210 Z",
+          "d": "M 150 514 L 210 514 L 210 574 L 150 574 Z",
+          "fill": "#1f1a14",
+          "stroke": "#fde68a",
+          "strokeWidth": 1.6
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 880 170 L 1080 170 L 1080 554 L 880 554 Z",
           "fill": "url(#g-cab)",
           "stroke": "#1f1a14",
           "strokeWidth": 2
@@ -418,12 +603,12 @@
       },
       {
         "at": {
-          "x": 888,
-          "y": 185
+          "x": 0,
+          "y": 0
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 0 0 L 184 0 L 184 10 L 0 10 Z",
+          "d": "M 872 164 L 1088 164 L 1088 174 L 872 174 Z",
           "fill": "#1f1a14",
           "stroke": "none"
         }
@@ -431,11 +616,11 @@
       {
         "at": {
           "x": 920,
-          "y": 210
+          "y": 188
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 0 0 L 60 0 L 60 55 L 0 55 Z",
+          "d": "M 0 0 L 30 0 L 30 38 L 0 38 Z",
           "fill": "#fef3c7",
           "stroke": "#1f1a14",
           "strokeWidth": 1.4
@@ -443,28 +628,28 @@
       },
       {
         "at": {
-          "x": 1060,
-          "y": 260
+          "x": 970,
+          "y": 188
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 0 0 L 180 0 L 180 140 L 0 140 Z",
-          "fill": "#3a2a14",
+          "d": "M 0 0 L 30 0 L 30 38 L 0 38 Z",
+          "fill": "#fef3c7",
           "stroke": "#1f1a14",
-          "strokeWidth": 2
+          "strokeWidth": 1.4
         }
       },
       {
         "at": {
-          "x": 1070,
-          "y": 250
+          "x": 1020,
+          "y": 188
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 0 0 L 160 0 L 160 12 L 80 5 L 0 12 Z",
-          "fill": "#0a0a0a",
+          "d": "M 0 0 L 30 0 L 30 38 L 0 38 Z",
+          "fill": "#fef3c7",
           "stroke": "#1f1a14",
-          "strokeWidth": 1
+          "strokeWidth": 1.4
         }
       },
       {
@@ -474,132 +659,91 @@
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 460 492 L 780 492",
+          "d": "M 1090 280 L 1440 280 L 1440 554 L 1090 554 Z",
+          "fill": "#3a2a14",
+          "stroke": "#1f1a14",
+          "strokeWidth": 2
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 1100 270 L 1280 250 L 1430 270 L 1430 282 L 1100 282 Z",
+          "fill": "#0a0a0a",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[110, 530], [1080, 530]],
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 3
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 380 562 L 720 562",
           "fill": "none",
           "stroke": "#fde68a",
-          "strokeWidth": 6,
+          "strokeWidth": 7,
           "strokeLinecap": "round"
         }
       },
       {
         "at": {
-          "x": 320,
-          "y": 492
-        },
-        "mark": "circle",
-        "circle": {
-          "radius": 38,
-          "fill": "url(#g-wheel)",
-          "stroke": "#fde68a",
-          "strokeWidth": 2.5
-        },
-        "animation": {
-          "kind": "rotate-loop",
-          "periodMs": 3500,
-          "direction": "cw"
-        }
-      },
-      {
-        "at": {
-          "x": 460,
-          "y": 492
-        },
-        "mark": "circle",
-        "circle": {
-          "radius": 60,
-          "fill": "url(#g-wheel)",
-          "stroke": "#fde68a",
-          "strokeWidth": 2.5
-        },
-        "animation": {
-          "kind": "rotate-loop",
-          "periodMs": 3500,
-          "direction": "cw"
-        }
-      },
-      {
-        "at": {
-          "x": 620,
-          "y": 492
-        },
-        "mark": "circle",
-        "circle": {
-          "radius": 60,
-          "fill": "url(#g-wheel)",
-          "stroke": "#fde68a",
-          "strokeWidth": 2.5
-        },
-        "animation": {
-          "kind": "rotate-loop",
-          "periodMs": 3500,
-          "direction": "cw"
-        }
-      },
-      {
-        "at": {
-          "x": 780,
-          "y": 492
-        },
-        "mark": "circle",
-        "circle": {
-          "radius": 60,
-          "fill": "url(#g-wheel)",
-          "stroke": "#fde68a",
-          "strokeWidth": 2.5
-        },
-        "animation": {
-          "kind": "rotate-loop",
-          "periodMs": 3500,
-          "direction": "cw"
-        }
-      },
-      {
-        "at": {
-          "x": 320,
-          "y": 492
+          "x": 0,
+          "y": 0
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 8 0 L 34 0 M 5.66 5.66 L 24.04 24.04 M 0 8 L 0 34 M -5.66 5.66 L -24.04 24.04 M -8 0 L -34 0 M -5.66 -5.66 L -24.04 -24.04 M 0 -8 L 0 -34 M 5.66 -5.66 L 24.04 -24.04",
+          "d": "M 180 534 L 720 562",
           "fill": "none",
           "stroke": "#fde68a",
-          "strokeWidth": 2.2
-        },
-        "animation": {
-          "kind": "rotate-loop",
-          "periodMs": 3500,
-          "direction": "cw"
+          "strokeWidth": 5,
+          "strokeLinecap": "round"
         }
       },
       {
         "at": {
-          "x": 460,
-          "y": 492
+          "x": 210,
+          "y": 528
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 8 0 L 56 0 M 5.66 5.66 L 39.6 39.6 M 0 8 L 0 56 M -5.66 5.66 L -39.6 39.6 M -8 0 L -56 0 M -5.66 -5.66 L -39.6 -39.6 M 0 -8 L 0 -56 M 5.66 -5.66 L 39.6 -39.6",
-          "fill": "none",
-          "stroke": "#fde68a",
-          "strokeWidth": 2.2
-        },
-        "animation": {
-          "kind": "rotate-loop",
-          "periodMs": 3500,
-          "direction": "cw"
+          "d": "M 0 0 L 30 0 L 30 12 L 0 12 Z",
+          "fill": "#fde68a",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.4
         }
       },
       {
         "at": {
-          "x": 620,
-          "y": 492
+          "x": 380,
+          "y": 554
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 8 0 L 56 0 M 5.66 5.66 L 39.6 39.6 M 0 8 L 0 56 M -5.66 5.66 L -39.6 39.6 M -8 0 L -56 0 M -5.66 -5.66 L -39.6 -39.6 M 0 -8 L 0 -56 M 5.66 -5.66 L 39.6 -39.6",
-          "fill": "none",
+          "d": "M -75 0 A 75 75 0 1 0 75 0 A 75 75 0 1 0 -75 0 M -69 0 A 69 69 0 1 0 69 0 A 69 69 0 1 0 -69 0 M -12 0 A 12 12 0 1 0 12 0 A 12 12 0 1 0 -12 0 M 12 1.6 L 69 1.6 L 69 -1.6 L 12 -1.6 Z M 8.77 8.35 L 54.88 41.85 L 56.76 39.26 L 10.65 5.76 Z M 2.19 11.91 L 19.8 66.12 L 22.84 65.13 L 5.23 10.92 Z M -5.23 10.92 L -22.84 65.13 L -19.8 66.12 L -2.19 11.91 Z M -10.65 5.76 L -56.76 39.26 L -54.88 41.85 L -8.77 8.35 Z M -12 -1.6 L -69 -1.6 L -69 1.6 L -12 1.6 Z M -8.77 -8.35 L -54.88 -41.85 L -56.76 -39.26 L -10.65 -5.76 Z M -2.19 -11.91 L -19.8 -66.12 L -22.84 -65.13 L -5.23 -10.92 Z M 5.23 -10.92 L 22.84 -65.13 L 19.8 -66.12 L 2.19 -11.91 Z M 10.65 -5.76 L 56.76 -39.26 L 54.88 -41.85 L 8.77 -8.35 Z",
+          "fill": "url(#g-wheel)",
           "stroke": "#fde68a",
-          "strokeWidth": 2.2
+          "strokeWidth": 2,
+          "strokeLinejoin": "round"
         },
         "animation": {
           "kind": "rotate-loop",
@@ -609,15 +753,16 @@
       },
       {
         "at": {
-          "x": 780,
-          "y": 492
+          "x": 550,
+          "y": 554
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 8 0 L 56 0 M 5.66 5.66 L 39.6 39.6 M 0 8 L 0 56 M -5.66 5.66 L -39.6 39.6 M -8 0 L -56 0 M -5.66 -5.66 L -39.6 -39.6 M 0 -8 L 0 -56 M 5.66 -5.66 L 39.6 -39.6",
-          "fill": "none",
+          "d": "M -75 0 A 75 75 0 1 0 75 0 A 75 75 0 1 0 -75 0 M -69 0 A 69 69 0 1 0 69 0 A 69 69 0 1 0 -69 0 M -12 0 A 12 12 0 1 0 12 0 A 12 12 0 1 0 -12 0 M 12 1.6 L 69 1.6 L 69 -1.6 L 12 -1.6 Z M 8.77 8.35 L 54.88 41.85 L 56.76 39.26 L 10.65 5.76 Z M 2.19 11.91 L 19.8 66.12 L 22.84 65.13 L 5.23 10.92 Z M -5.23 10.92 L -22.84 65.13 L -19.8 66.12 L -2.19 11.91 Z M -10.65 5.76 L -56.76 39.26 L -54.88 41.85 L -8.77 8.35 Z M -12 -1.6 L -69 -1.6 L -69 1.6 L -12 1.6 Z M -8.77 -8.35 L -54.88 -41.85 L -56.76 -39.26 L -10.65 -5.76 Z M -2.19 -11.91 L -19.8 -66.12 L -22.84 -65.13 L -5.23 -10.92 Z M 5.23 -10.92 L 22.84 -65.13 L 19.8 -66.12 L 2.19 -11.91 Z M 10.65 -5.76 L 56.76 -39.26 L 54.88 -41.85 L 8.77 -8.35 Z",
+          "fill": "url(#g-wheel)",
           "stroke": "#fde68a",
-          "strokeWidth": 2.2
+          "strokeWidth": 2,
+          "strokeLinejoin": "round"
         },
         "animation": {
           "kind": "rotate-loop",
@@ -627,64 +772,164 @@
       },
       {
         "at": {
-          "x": 320,
-          "y": 492
+          "x": 720,
+          "y": 554
         },
-        "mark": "circle",
-        "circle": {
-          "radius": 6,
-          "fill": "#fde68a",
-          "stroke": "#1f1a14",
-          "strokeWidth": 1
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -75 0 A 75 75 0 1 0 75 0 A 75 75 0 1 0 -75 0 M -69 0 A 69 69 0 1 0 69 0 A 69 69 0 1 0 -69 0 M -12 0 A 12 12 0 1 0 12 0 A 12 12 0 1 0 -12 0 M 12 1.6 L 69 1.6 L 69 -1.6 L 12 -1.6 Z M 8.77 8.35 L 54.88 41.85 L 56.76 39.26 L 10.65 5.76 Z M 2.19 11.91 L 19.8 66.12 L 22.84 65.13 L 5.23 10.92 Z M -5.23 10.92 L -22.84 65.13 L -19.8 66.12 L -2.19 11.91 Z M -10.65 5.76 L -56.76 39.26 L -54.88 41.85 L -8.77 8.35 Z M -12 -1.6 L -69 -1.6 L -69 1.6 L -12 1.6 Z M -8.77 -8.35 L -54.88 -41.85 L -56.76 -39.26 L -10.65 -5.76 Z M -2.19 -11.91 L -19.8 -66.12 L -22.84 -65.13 L -5.23 -10.92 Z M 5.23 -10.92 L 22.84 -65.13 L 19.8 -66.12 L 2.19 -11.91 Z M 10.65 -5.76 L 56.76 -39.26 L 54.88 -41.85 L 8.77 -8.35 Z",
+          "fill": "url(#g-wheel)",
+          "stroke": "#fde68a",
+          "strokeWidth": 2,
+          "strokeLinejoin": "round"
+        },
+        "animation": {
+          "kind": "rotate-loop",
+          "periodMs": 3500,
+          "direction": "cw"
         }
       },
       {
         "at": {
-          "x": 460,
-          "y": 492
+          "x": 220,
+          "y": 554
         },
-        "mark": "circle",
-        "circle": {
-          "radius": 6,
-          "fill": "#fde68a",
-          "stroke": "#1f1a14",
-          "strokeWidth": 1
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -32 0 A 32 32 0 1 0 32 0 A 32 32 0 1 0 -32 0 M -26 0 A 26 26 0 1 0 26 0 A 26 26 0 1 0 -26 0 M -6 0 A 6 6 0 1 0 6 0 A 6 6 0 1 0 -6 0 M 6 1.6 L 26 1.6 L 26 -1.6 L 6 -1.6 Z M 3.11 5.37 L 17.25 19.52 L 19.52 17.25 L 5.37 3.11 Z M -1.6 6 L -1.6 26 L 1.6 26 L 1.6 6 Z M -5.37 3.11 L -19.52 17.25 L -17.25 19.52 L -3.11 5.37 Z M -6 -1.6 L -26 -1.6 L -26 1.6 L -6 1.6 Z M -3.11 -5.37 L -17.25 -19.52 L -19.52 -17.25 L -5.37 -3.11 Z M 1.6 -6 L 1.6 -26 L -1.6 -26 L -1.6 -6 Z M 5.37 -3.11 L 19.52 -17.25 L 17.25 -19.52 L 3.11 -5.37 Z",
+          "fill": "url(#g-wheel)",
+          "stroke": "#fde68a",
+          "strokeWidth": 1.6,
+          "strokeLinejoin": "round"
+        },
+        "animation": {
+          "kind": "rotate-loop",
+          "periodMs": 1500,
+          "direction": "cw"
         }
       },
       {
         "at": {
-          "x": 620,
-          "y": 492
+          "x": 290,
+          "y": 554
         },
-        "mark": "circle",
-        "circle": {
-          "radius": 6,
-          "fill": "#fde68a",
-          "stroke": "#1f1a14",
-          "strokeWidth": 1
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -32 0 A 32 32 0 1 0 32 0 A 32 32 0 1 0 -32 0 M -26 0 A 26 26 0 1 0 26 0 A 26 26 0 1 0 -26 0 M -6 0 A 6 6 0 1 0 6 0 A 6 6 0 1 0 -6 0 M 6 1.6 L 26 1.6 L 26 -1.6 L 6 -1.6 Z M 3.11 5.37 L 17.25 19.52 L 19.52 17.25 L 5.37 3.11 Z M -1.6 6 L -1.6 26 L 1.6 26 L 1.6 6 Z M -5.37 3.11 L -19.52 17.25 L -17.25 19.52 L -3.11 5.37 Z M -6 -1.6 L -26 -1.6 L -26 1.6 L -6 1.6 Z M -3.11 -5.37 L -17.25 -19.52 L -19.52 -17.25 L -5.37 -3.11 Z M 1.6 -6 L 1.6 -26 L -1.6 -26 L -1.6 -6 Z M 5.37 -3.11 L 19.52 -17.25 L 17.25 -19.52 L 3.11 -5.37 Z",
+          "fill": "url(#g-wheel)",
+          "stroke": "#fde68a",
+          "strokeWidth": 1.6,
+          "strokeLinejoin": "round"
+        },
+        "animation": {
+          "kind": "rotate-loop",
+          "periodMs": 1500,
+          "direction": "cw"
         }
       },
       {
         "at": {
-          "x": 780,
-          "y": 492
+          "x": 830,
+          "y": 554
         },
-        "mark": "circle",
-        "circle": {
-          "radius": 6,
-          "fill": "#fde68a",
-          "stroke": "#1f1a14",
-          "strokeWidth": 1
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -42 0 A 42 42 0 1 0 42 0 A 42 42 0 1 0 -42 0 M -36 0 A 36 36 0 1 0 36 0 A 36 36 0 1 0 -36 0 M -6.72 0 A 6.72 6.72 0 1 0 6.72 0 A 6.72 6.72 0 1 0 -6.72 0 M 6.72 1.6 L 36 1.6 L 36 -1.6 L 6.72 -1.6 Z M 4.5 5.24 L 28.18 22.45 L 30.07 19.87 L 6.38 2.66 Z M 0.55 6.89 L 9.6 34.73 L 12.65 33.74 L 3.6 5.9 Z M -3.6 5.9 L -12.65 33.74 L -9.6 34.73 L -0.55 6.89 Z M -6.38 2.66 L -30.07 19.87 L -28.18 22.45 L -4.5 5.24 Z M -6.72 -1.6 L -36 -1.6 L -36 1.6 L -6.72 1.6 Z M -4.5 -5.24 L -28.18 -22.45 L -30.07 -19.87 L -6.38 -2.66 Z M -0.55 -6.89 L -9.6 -34.73 L -12.65 -33.74 L -3.6 -5.9 Z M 3.6 -5.9 L 12.65 -33.74 L 9.6 -34.73 L 0.55 -6.89 Z M 6.38 -2.66 L 30.07 -19.87 L 28.18 -22.45 L 4.5 -5.24 Z",
+          "fill": "url(#g-wheel)",
+          "stroke": "#fde68a",
+          "strokeWidth": 1.8,
+          "strokeLinejoin": "round"
+        },
+        "animation": {
+          "kind": "rotate-loop",
+          "periodMs": 2000,
+          "direction": "cw"
+        }
+      },
+      {
+        "at": {
+          "x": 1140,
+          "y": 554
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -38 0 A 38 38 0 1 0 38 0 A 38 38 0 1 0 -38 0 M -32 0 A 32 32 0 1 0 32 0 A 32 32 0 1 0 -32 0 M -6.08 0 A 6.08 6.08 0 1 0 6.08 0 A 6.08 6.08 0 1 0 -6.08 0 M 6.08 1.6 L 32 1.6 L 32 -1.6 L 6.08 -1.6 Z M 3.17 5.43 L 21.5 23.76 L 23.76 21.5 L 5.43 3.17 Z M -1.6 6.08 L -1.6 32 L 1.6 32 L 1.6 6.08 Z M -5.43 3.17 L -23.76 21.5 L -21.5 23.76 L -3.17 5.43 Z M -6.08 -1.6 L -32 -1.6 L -32 1.6 L -6.08 1.6 Z M -3.17 -5.43 L -21.5 -23.76 L -23.76 -21.5 L -5.43 -3.17 Z M 1.6 -6.08 L 1.6 -32 L -1.6 -32 L -1.6 -6.08 Z M 5.43 -3.17 L 23.76 -21.5 L 21.5 -23.76 L 3.17 -5.43 Z",
+          "fill": "url(#g-wheel)",
+          "stroke": "#fde68a",
+          "strokeWidth": 1.6,
+          "strokeLinejoin": "round"
+        },
+        "animation": {
+          "kind": "rotate-loop",
+          "periodMs": 1800,
+          "direction": "cw"
+        }
+      },
+      {
+        "at": {
+          "x": 1220,
+          "y": 554
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -38 0 A 38 38 0 1 0 38 0 A 38 38 0 1 0 -38 0 M -32 0 A 32 32 0 1 0 32 0 A 32 32 0 1 0 -32 0 M -6.08 0 A 6.08 6.08 0 1 0 6.08 0 A 6.08 6.08 0 1 0 -6.08 0 M 6.08 1.6 L 32 1.6 L 32 -1.6 L 6.08 -1.6 Z M 3.17 5.43 L 21.5 23.76 L 23.76 21.5 L 5.43 3.17 Z M -1.6 6.08 L -1.6 32 L 1.6 32 L 1.6 6.08 Z M -5.43 3.17 L -23.76 21.5 L -21.5 23.76 L -3.17 5.43 Z M -6.08 -1.6 L -32 -1.6 L -32 1.6 L -6.08 1.6 Z M -3.17 -5.43 L -21.5 -23.76 L -23.76 -21.5 L -5.43 -3.17 Z M 1.6 -6.08 L 1.6 -32 L -1.6 -32 L -1.6 -6.08 Z M 5.43 -3.17 L 23.76 -21.5 L 21.5 -23.76 L 3.17 -5.43 Z",
+          "fill": "url(#g-wheel)",
+          "stroke": "#fde68a",
+          "strokeWidth": 1.6,
+          "strokeLinejoin": "round"
+        },
+        "animation": {
+          "kind": "rotate-loop",
+          "periodMs": 1800,
+          "direction": "cw"
+        }
+      },
+      {
+        "at": {
+          "x": 1300,
+          "y": 554
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -38 0 A 38 38 0 1 0 38 0 A 38 38 0 1 0 -38 0 M -32 0 A 32 32 0 1 0 32 0 A 32 32 0 1 0 -32 0 M -6.08 0 A 6.08 6.08 0 1 0 6.08 0 A 6.08 6.08 0 1 0 -6.08 0 M 6.08 1.6 L 32 1.6 L 32 -1.6 L 6.08 -1.6 Z M 3.17 5.43 L 21.5 23.76 L 23.76 21.5 L 5.43 3.17 Z M -1.6 6.08 L -1.6 32 L 1.6 32 L 1.6 6.08 Z M -5.43 3.17 L -23.76 21.5 L -21.5 23.76 L -3.17 5.43 Z M -6.08 -1.6 L -32 -1.6 L -32 1.6 L -6.08 1.6 Z M -3.17 -5.43 L -21.5 -23.76 L -23.76 -21.5 L -5.43 -3.17 Z M 1.6 -6.08 L 1.6 -32 L -1.6 -32 L -1.6 -6.08 Z M 5.43 -3.17 L 23.76 -21.5 L 21.5 -23.76 L 3.17 -5.43 Z",
+          "fill": "url(#g-wheel)",
+          "stroke": "#fde68a",
+          "strokeWidth": 1.6,
+          "strokeLinejoin": "round"
+        },
+        "animation": {
+          "kind": "rotate-loop",
+          "periodMs": 1800,
+          "direction": "cw"
+        }
+      },
+      {
+        "at": {
+          "x": 1380,
+          "y": 554
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -38 0 A 38 38 0 1 0 38 0 A 38 38 0 1 0 -38 0 M -32 0 A 32 32 0 1 0 32 0 A 32 32 0 1 0 -32 0 M -6.08 0 A 6.08 6.08 0 1 0 6.08 0 A 6.08 6.08 0 1 0 -6.08 0 M 6.08 1.6 L 32 1.6 L 32 -1.6 L 6.08 -1.6 Z M 3.17 5.43 L 21.5 23.76 L 23.76 21.5 L 5.43 3.17 Z M -1.6 6.08 L -1.6 32 L 1.6 32 L 1.6 6.08 Z M -5.43 3.17 L -23.76 21.5 L -21.5 23.76 L -3.17 5.43 Z M -6.08 -1.6 L -32 -1.6 L -32 1.6 L -6.08 1.6 Z M -3.17 -5.43 L -21.5 -23.76 L -23.76 -21.5 L -5.43 -3.17 Z M 1.6 -6.08 L 1.6 -32 L -1.6 -32 L -1.6 -6.08 Z M 5.43 -3.17 L 23.76 -21.5 L 21.5 -23.76 L 3.17 -5.43 Z",
+          "fill": "url(#g-wheel)",
+          "stroke": "#fde68a",
+          "strokeWidth": 1.6,
+          "strokeLinejoin": "round"
+        },
+        "animation": {
+          "kind": "rotate-loop",
+          "periodMs": 1800,
+          "direction": "cw"
         }
       },
       {
         "at": {
           "x": 0,
-          "y": 500
+          "y": 560
         },
         "mark": "polyline",
         "polyline": {
-          "points": [[0, 0], [1300, 0]],
+          "points": [[0, 0], [1500, 0]],
           "fill": "none",
           "stroke": "#1f1a14",
           "strokeWidth": 3.5
@@ -693,11 +938,11 @@
       {
         "at": {
           "x": 0,
-          "y": 506
+          "y": 567
         },
         "mark": "polyline",
         "polyline": {
-          "points": [[0, 0], [1300, 0]],
+          "points": [[0, 0], [1500, 0]],
           "fill": "none",
           "stroke": "#1f1a14",
           "strokeWidth": 3.5
@@ -705,12 +950,12 @@
       },
       {
         "at": {
-          "x": 650,
-          "y": 580
+          "x": 750,
+          "y": 660
         },
         "mark": "text",
         "textMark": {
-          "text": "coal → steam → connecting rods → 200 km/h on steel",
+          "text": "Stephenson's Rocket (1829) → Mallard, LNER A4 (1938): 203 km/h, world steam record",
           "fontSize": 14,
           "fill": "#4a3f30",
           "italic": true,

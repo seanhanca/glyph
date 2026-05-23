@@ -1336,42 +1336,82 @@ function buildBridge() {
 }
 
 // ───────────────────────────────────────────────────────────────────────────
-// ENG — Steam locomotive
+// ENG — Steam locomotive (4-6-2 Pacific class, professional drafting style)
 // ───────────────────────────────────────────────────────────────────────────
 function buildLocomotive() {
-  const W = 1300;
-  const H = 620;
+  const W = 1500;
+  const H = 700;
 
-  const trackY = 500;
-  const bodyY = 280;
-  const wheelY = trackY - 8;
+  const trackY = 560;
+  const wheelY = trackY - 6;
+  const boilerCy = 320;
+  const boilerR = 100; // boiler radius (vertical half-height)
+  const smokeboxFrontX = 110;
+  const boilerFrontX = 230; // smokebox/boiler interface
+  const boilerBackX = 880; // boiler/firebox interface
+  const cabFrontX = 880;
+  const cabBackX = 1080;
 
-  const wheels = [
-    { x: 320, r: 38, isDriver: false },
-    { x: 460, r: 60, isDriver: true },
-    { x: 620, r: 60, isDriver: true },
-    { x: 780, r: 60, isDriver: true },
+  // Wheels: 2-axle pilot truck + 3 drivers + 1-axle trailing + 4-axle tender
+  // (compressed slightly for visual balance, real Pacific is 4-6-2)
+  const drivers = [
+    { x: 380, r: 75 },
+    { x: 550, r: 75 },
+    { x: 720, r: 75 },
+  ];
+  const pilotWheels = [
+    { x: 220, r: 32 },
+    { x: 290, r: 32 },
+  ];
+  const trailingWheels = [{ x: 830, r: 42 }];
+  const tenderWheels = [
+    { x: 1140, r: 38 },
+    { x: 1220, r: 38 },
+    { x: 1300, r: 38 },
+    { x: 1380, r: 38 },
   ];
 
-  const buildWheelSpokes = (r) => {
+  // Build one wheel as a single silhouette-path: outer tire + 10 spokes + hub.
+  // Returned as a relative d-string anchored at (0,0).
+  const wheelD = (r, spokeCount = 10) => {
+    // Outer tire circle (two arcs for a circle in path syntax)
+    const tire = `M ${-r} 0 A ${r} ${r} 0 1 0 ${r} 0 A ${r} ${r} 0 1 0 ${-r} 0`;
+    // Inner tire band (smaller circle for the railhead-rim)
+    const innerR = r - 6;
+    const innerRing = `M ${-innerR} 0 A ${innerR} ${innerR} 0 1 0 ${innerR} 0 A ${innerR} ${innerR} 0 1 0 ${-innerR} 0`;
+    // Hub
+    const hubR = Math.max(6, r * 0.16);
+    const hub = `M ${-hubR} 0 A ${hubR} ${hubR} 0 1 0 ${hubR} 0 A ${hubR} ${hubR} 0 1 0 ${-hubR} 0`;
+    // Spokes — each is a thin rectangle from hub to inner rim
     const spokes = [];
-    for (let k = 0; k < 8; k++) {
-      const a = (Math.PI * k) / 4;
-      const x1 = round(8 * Math.cos(a));
-      const y1 = round(8 * Math.sin(a));
-      const x2 = round((r - 4) * Math.cos(a));
-      const y2 = round((r - 4) * Math.sin(a));
-      spokes.push(`M ${x1} ${y1} L ${x2} ${y2}`);
+    for (let k = 0; k < spokeCount; k++) {
+      const a = (Math.PI * 2 * k) / spokeCount;
+      const cos = Math.cos(a);
+      const sin = Math.sin(a);
+      const w = 1.6; // half-width perpendicular to spoke
+      // 4 corners of the spoke
+      const x1 = round(hubR * cos - w * sin);
+      const y1 = round(hubR * sin + w * cos);
+      const x2 = round(innerR * cos - w * sin);
+      const y2 = round(innerR * sin + w * cos);
+      const x3 = round(innerR * cos + w * sin);
+      const y3 = round(innerR * sin - w * cos);
+      const x4 = round(hubR * cos + w * sin);
+      const y4 = round(hubR * sin - w * cos);
+      spokes.push(`M ${x1} ${y1} L ${x2} ${y2} L ${x3} ${y3} L ${x4} ${y4} Z`);
     }
-    return spokes.join(" ");
+    return `${tire} ${innerRing} ${hub} ${spokes.join(" ")}`;
   };
 
+  // Smoke puffs — 5 billowy circles
   const smokePuffs = [];
-  for (let i = 0; i < 7; i++) {
-    const t = i / 6;
-    const px = 480 + i * 50 - i * i * 4 + (i % 2) * 8;
-    const py = 130 - i * 22 - t * 12;
-    const pr = 36 + i * 4 + (i % 3) * 8;
+  const smokestackX = 270;
+  const smokestackTopY = boilerCy - boilerR - 50;
+  for (let i = 0; i < 5; i++) {
+    const t = i / 4;
+    const px = smokestackX + i * 32 - i * i * 3 + (i % 2) * 12;
+    const py = smokestackTopY - 30 - i * 32 - t * 8;
+    const pr = 30 + i * 8 + (i % 3) * 6;
     smokePuffs.push({
       at: { x: round(px), y: round(py) },
       mark: "circle",
@@ -1379,15 +1419,31 @@ function buildLocomotive() {
     });
   }
 
+  // Side rod (connects driver crank pins, golden/brass) — runs at wheelY
+  // between first and last driver. The crank pin is at the wheel-rim level
+  // at a fixed phase angle, but for a static snapshot we just put it at
+  // the bottom-front of each wheel.
+  const sideRodY = wheelY + 8;
+  const sideRodD = `M ${drivers[0].x} ${sideRodY} L ${drivers[drivers.length - 1].x} ${sideRodY}`;
+
+  // Main connecting rod from cylinder (at front) to last driver crank
+  const cylinderX = 180;
+  const cylinderY = wheelY - 20;
+  const mainRodD = `M ${cylinderX} ${cylinderY} L ${drivers[drivers.length - 1].x} ${sideRodY}`;
+
+  // Far hills (countryside)
   const hillsD =
-    "M 0 380 L 80 320 L 160 350 L 240 290 L 350 320 L 480 280 L 600 310 L 740 290 L 880 320 L 1020 285 L 1170 310 L 1300 290 L 1300 460 L 0 460 Z";
+    "M 0 460 L 100 410 L 200 440 L 320 380 L 440 410 L 580 370 L 720 400 L 880 365 L 1040 395 L 1200 370 L 1360 400 L 1500 380 L 1500 540 L 0 540 Z";
+
+  // Telephone poles for scale
+  const polesD = "M 60 510 L 60 380 M 50 390 L 70 390 M 1450 510 L 1450 380 M 1440 390 L 1460 390";
 
   return {
     compose: {
       viewBox: { width: W, height: H },
-      title: "Steam locomotive — fire on wheels",
+      title: "4-6-2 Pacific — fire on wheels, in detail",
       description:
-        "Stevenson's Rocket (1829) → Mallard (1938, 203 km/h). Coal in the firebox boils water in the boiler; steam expands through cylinders; connecting rods turn the drivers; the whole thing rolls on steel rails.",
+        "American Type 'Pacific' steam locomotive (4-6-2 wheel arrangement) in profile, drawn in the style of a 1930s shop drawing. A 2-axle pilot truck up front, three coupled drivers under the boiler, a single trailing axle under the firebox, and a 4-axle tender behind. Steam dome, sand dome, bell, headlight, brass boiler bands, side + main connecting rods, riveted plating. Stephenson's Rocket (1829) → Mallard (1938, 203 km/h world record).",
       theme: { preset: "pencil-parchment" },
       defs: {
         gradients: [
@@ -1412,7 +1468,8 @@ function buildLocomotive() {
             y2: "100%",
             stops: [
               { offset: "0%", color: "#0a0a0a", opacity: 1 },
-              { offset: "50%", color: "#3a3a2a", opacity: 1 },
+              { offset: "30%", color: "#4a4a3a", opacity: 1 },
+              { offset: "70%", color: "#2a2a1a", opacity: 1 },
               { offset: "100%", color: "#0a0a0a", opacity: 1 },
             ],
           },
@@ -1423,20 +1480,9 @@ function buildLocomotive() {
             cy: "40%",
             r: "60%",
             stops: [
-              { offset: "0%", color: "#e2e8f0", opacity: 0.85 },
-              { offset: "60%", color: "#94a3b8", opacity: 0.5 },
+              { offset: "0%", color: "#e2e8f0", opacity: 0.9 },
+              { offset: "50%", color: "#94a3b8", opacity: 0.6 },
               { offset: "100%", color: "#94a3b8", opacity: 0 },
-            ],
-          },
-          {
-            id: "g-wheel",
-            kind: "radial",
-            cx: "50%",
-            cy: "50%",
-            r: "50%",
-            stops: [
-              { offset: "0%", color: "#1f1a14", opacity: 1 },
-              { offset: "100%", color: "#0a0a0a", opacity: 1 },
             ],
           },
           {
@@ -1447,13 +1493,37 @@ function buildLocomotive() {
             x2: "0%",
             y2: "100%",
             stops: [
-              { offset: "0%", color: "#dc2626", opacity: 1 },
+              { offset: "0%", color: "#7c2d12", opacity: 1 },
+              { offset: "50%", color: "#dc2626", opacity: 1 },
               { offset: "100%", color: "#7c2d12", opacity: 1 },
+            ],
+          },
+          {
+            id: "g-wheel",
+            kind: "radial",
+            cx: "50%",
+            cy: "50%",
+            r: "50%",
+            stops: [
+              { offset: "0%", color: "#2a2a1a", opacity: 1 },
+              { offset: "100%", color: "#0a0a0a", opacity: 1 },
+            ],
+          },
+          {
+            id: "g-headlamp",
+            kind: "radial",
+            cx: "50%",
+            cy: "50%",
+            r: "50%",
+            stops: [
+              { offset: "0%", color: "#fef9c3", opacity: 1 },
+              { offset: "100%", color: "#fbbf24", opacity: 0.85 },
             ],
           },
         ],
       },
       children: [
+        // Sky
         {
           at: { x: 0, y: 0 },
           mark: "silhouette-path",
@@ -1463,6 +1533,7 @@ function buildLocomotive() {
             stroke: "none",
           },
         },
+        // Far hills
         {
           at: { x: 0, y: 0 },
           mark: "silhouette-path",
@@ -1472,181 +1543,390 @@ function buildLocomotive() {
             stroke: "none",
           },
         },
+        // Telephone poles (small detail)
         {
-          at: { x: 0, y: trackY + 18 },
+          at: { x: 0, y: 0 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: `M 0 0 L ${W} 0 L ${W} ${H - trackY - 18} L 0 ${H - trackY - 18} Z`,
+            d: polesD,
+            fill: "none",
+            stroke: "rgba(58,42,20,.6)",
+            strokeWidth: 1.2,
+          },
+        },
+        // Ground / gravel
+        {
+          at: { x: 0, y: trackY + 14 },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: `M 0 0 L ${W} 0 L ${W} ${H - trackY - 14} L 0 ${H - trackY - 14} Z`,
             fill: "#a3b18a",
             stroke: "none",
           },
         },
+        // Smoke (12 puffs from billowing wisp pairs)
         ...smokePuffs,
+        // Pilot/cowcatcher (V-shape at very front) — small angled blade
         {
-          at: { x: 340, y: bodyY },
+          at: { x: 0, y: 0 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: "M 0 0 L 560 0 L 560 120 L 0 120 Z",
+            d: `M ${smokeboxFrontX - 60} ${trackY - 10} L ${smokeboxFrontX} ${boilerCy - 20} L ${smokeboxFrontX} ${trackY - 10} Z M ${smokeboxFrontX - 60} ${trackY - 10} L ${smokeboxFrontX} ${trackY - 10} M ${smokeboxFrontX - 50} ${trackY - 30} L ${smokeboxFrontX} ${trackY - 30} M ${smokeboxFrontX - 40} ${trackY - 50} L ${smokeboxFrontX} ${trackY - 50}`,
+            fill: "#1f1a14",
+            stroke: "#fde68a",
+            strokeWidth: 1.4,
+            strokeLinejoin: "round",
+          },
+        },
+        // Smokebox (cylinder at front of boiler) — slightly larger diameter than boiler
+        {
+          at: { x: 0, y: 0 },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: `M ${smokeboxFrontX} ${boilerCy - boilerR - 10} L ${boilerFrontX} ${boilerCy - boilerR - 10} L ${boilerFrontX} ${boilerCy + boilerR + 10} L ${smokeboxFrontX} ${boilerCy + boilerR + 10} Z`,
             fill: "url(#g-boiler)",
             stroke: "#1f1a14",
             strokeWidth: 2,
           },
         },
-        ...[20, 50, 80, 110].map((dy) => ({
-          at: { x: 340, y: bodyY + dy },
-          mark: "polyline",
-          polyline: {
-            points: [
-              [0, 0],
-              [560, 0],
-            ],
-            fill: "none",
+        // Smokebox front face (round, with rivets)
+        {
+          at: { x: smokeboxFrontX, y: boilerCy },
+          mark: "ellipse",
+          ellipse: {
+            rx: 14,
+            ry: boilerR + 10,
+            fill: "#1f1a14",
+            stroke: "#fde68a",
+            strokeWidth: 2,
+          },
+        },
+        // Smokebox door (slightly smaller circle inset)
+        {
+          at: { x: smokeboxFrontX + 8, y: boilerCy },
+          mark: "circle",
+          circle: {
+            radius: boilerR - 10,
+            fill: "#0a0a0a",
             stroke: "#fde68a",
             strokeWidth: 1.4,
           },
+        },
+        // Smokebox door rivets (ring of 4 small circles around the door)
+        ...[0, 1.57, 3.14, 4.71].map((a) => ({
+          at: {
+            x: smokeboxFrontX + 8 + round((boilerR - 10) * Math.cos(a)),
+            y: boilerCy + round((boilerR - 10) * Math.sin(a)),
+          },
+          mark: "circle",
+          circle: { radius: 1.6, fill: "#fde68a" },
         })),
+        // Builder's plate (rectangle on smokebox door)
         {
-          at: { x: 330, y: bodyY + 60 },
-          mark: "circle",
-          circle: { radius: 68, fill: "#1f1a14", stroke: "#fde68a", strokeWidth: 2.5 },
+          at: { x: smokeboxFrontX + 30, y: boilerCy - 12 },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: "M 0 0 L 60 0 L 60 24 L 0 24 Z",
+            fill: "#fde68a",
+            stroke: "#1f1a14",
+            strokeWidth: 1.2,
+          },
         },
+        // Builder's plate text "4-6-2"
         {
-          at: { x: 330, y: bodyY + 60 },
-          mark: "circle",
-          circle: { radius: 50, fill: "none", stroke: "#fde68a", strokeWidth: 1.4 },
+          at: { x: smokeboxFrontX + 60, y: boilerCy + 4 },
+          mark: "text",
+          textMark: {
+            text: "4-6-2",
+            fontSize: 12,
+            fill: "#1f1a14",
+            italic: true,
+            anchor: "middle",
+          },
         },
+        // Headlight (cone shape on top-front of smokebox)
         {
-          at: { x: 280, y: bodyY + 60 },
-          mark: "circle",
-          circle: { radius: 18, fill: "#fef3c7", stroke: "#1f1a14", strokeWidth: 1.5 },
+          at: { x: smokeboxFrontX - 6, y: boilerCy - boilerR - 30 },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: "M 0 0 L 30 0 L 36 20 L -6 20 Z",
+            fill: "#1f1a14",
+            stroke: "#fde68a",
+            strokeWidth: 1.4,
+          },
         },
+        // Headlight lens (lit)
         {
-          at: { x: 280, y: bodyY + 60 },
+          at: { x: smokeboxFrontX + 9, y: boilerCy - boilerR - 14 },
           mark: "circle",
-          circle: { radius: 10, fill: "#fde68a" },
+          circle: {
+            radius: 9,
+            fill: "url(#g-headlamp)",
+            stroke: "#1f1a14",
+            strokeWidth: 1,
+          },
         },
+        // Boiler (long horizontal cylinder)
         {
           at: { x: 0, y: 0 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: `M 260 ${trackY - 10} L 330 ${bodyY + 110} L 330 ${trackY - 10} Z`,
-            fill: "#1f1a14",
-            stroke: "#fde68a",
-            strokeWidth: 1.4,
+            d: `M ${boilerFrontX} ${boilerCy - boilerR} L ${boilerBackX} ${boilerCy - boilerR} L ${boilerBackX} ${boilerCy + boilerR} L ${boilerFrontX} ${boilerCy + boilerR} Z`,
+            fill: "url(#g-boiler)",
+            stroke: "#1f1a14",
+            strokeWidth: 2,
           },
         },
+        // Boiler bands (6 brass rings spaced along boiler)
+        ...[280, 380, 480, 580, 680, 780].map((x) => ({
+          at: { x, y: 0 },
+          mark: "polyline",
+          polyline: {
+            points: [
+              [0, boilerCy - boilerR - 2],
+              [0, boilerCy + boilerR + 2],
+            ],
+            fill: "none",
+            stroke: "#fde68a",
+            strokeWidth: 2.2,
+          },
+        })),
+        // Handrail (along boiler, one thin line for the running board)
         {
-          at: { x: 420, y: bodyY - 65 },
+          at: { x: 0, y: 0 },
+          mark: "polyline",
+          polyline: {
+            points: [
+              [boilerFrontX, boilerCy - boilerR + 16],
+              [boilerBackX, boilerCy - boilerR + 16],
+            ],
+            fill: "none",
+            stroke: "#fde68a",
+            strokeWidth: 1,
+          },
+        },
+        // Smokestack (taller, slimmer, with flared rim)
+        {
+          at: { x: smokestackX, y: smokestackTopY },
           mark: "silhouette-path",
           silhouettePath: {
-            d: "M 0 0 L 60 0 L 70 65 L -10 65 Z",
-            fill: "#1f1a14",
+            d: "M -22 0 L -28 -10 L 28 -10 L 22 0 L 18 50 L -18 50 Z",
+            fill: "#0a0a0a",
             stroke: "#fde68a",
             strokeWidth: 1.5,
           },
         },
+        // Steam dome (rounded dome on top of boiler)
         {
-          at: { x: 580, y: bodyY - 20 },
-          mark: "ellipse",
-          ellipse: { rx: 32, ry: 22, fill: "#1f1a14", stroke: "#fde68a", strokeWidth: 1.5 },
-        },
-        {
-          at: { x: 650, y: bodyY - 8 },
+          at: { x: 480, y: boilerCy - boilerR },
           mark: "silhouette-path",
           silhouettePath: {
-            d: "M 0 0 L 8 0 L 8 -22 L 0 -22 Z",
+            d: "M -36 0 L -38 -10 Q -38 -36, 0 -38 Q 38 -36, 38 -10 L 36 0 Z",
+            fill: "#1f1a14",
+            stroke: "#fde68a",
+            strokeWidth: 1.8,
+          },
+        },
+        // Sand dome (smaller dome behind the steam dome)
+        {
+          at: { x: 640, y: boilerCy - boilerR },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: "M -26 0 L -28 -6 Q -28 -26, 0 -28 Q 28 -26, 28 -6 L 26 0 Z",
+            fill: "#1f1a14",
+            stroke: "#fde68a",
+            strokeWidth: 1.6,
+          },
+        },
+        // Bell (small bell hanging from frame on top, between domes)
+        {
+          at: { x: 560, y: boilerCy - boilerR - 8 },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: "M -8 0 L -10 -6 L -6 -16 L 6 -16 L 10 -6 L 8 0 Z",
+            fill: "#fde68a",
+            stroke: "#1f1a14",
+            strokeWidth: 1.2,
+          },
+        },
+        // Whistle (small vertical pipe on boiler)
+        {
+          at: { x: 720, y: boilerCy - boilerR - 4 },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: "M 0 0 L 6 0 L 6 -22 L 0 -22 Z",
             fill: "#fde68a",
             stroke: "#1f1a14",
             strokeWidth: 1,
           },
         },
+        // Cylinder block (front of boiler, low) — where the piston works
         {
-          at: { x: 900, y: bodyY - 90 },
+          at: { x: 0, y: 0 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: "M 0 0 L 160 0 L 160 210 L 0 210 Z",
+            d: `M ${cylinderX - 30} ${cylinderY - 20} L ${cylinderX + 30} ${cylinderY - 20} L ${cylinderX + 30} ${cylinderY + 40} L ${cylinderX - 30} ${cylinderY + 40} Z`,
+            fill: "#1f1a14",
+            stroke: "#fde68a",
+            strokeWidth: 1.6,
+          },
+        },
+        // Cab (large box at the rear with proper roof)
+        {
+          at: { x: 0, y: 0 },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: `M ${cabFrontX} ${boilerCy - boilerR - 50} L ${cabBackX} ${boilerCy - boilerR - 50} L ${cabBackX} ${trackY - 6} L ${cabFrontX} ${trackY - 6} Z`,
             fill: "url(#g-cab)",
             stroke: "#1f1a14",
             strokeWidth: 2,
           },
         },
+        // Cab roof overhang
         {
-          at: { x: 888, y: bodyY - 95 },
+          at: { x: 0, y: 0 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: "M 0 0 L 184 0 L 184 10 L 0 10 Z",
+            d: `M ${cabFrontX - 8} ${boilerCy - boilerR - 56} L ${cabBackX + 8} ${boilerCy - boilerR - 56} L ${cabBackX + 8} ${boilerCy - boilerR - 46} L ${cabFrontX - 8} ${boilerCy - boilerR - 46} Z`,
             fill: "#1f1a14",
             stroke: "none",
           },
         },
-        {
-          at: { x: 920, y: bodyY - 70 },
+        // Cab windows (3 small square windows)
+        ...[920, 970, 1020].map((x) => ({
+          at: { x, y: boilerCy - boilerR - 32 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: "M 0 0 L 60 0 L 60 55 L 0 55 Z",
+            d: "M 0 0 L 30 0 L 30 38 L 0 38 Z",
             fill: "#fef3c7",
             stroke: "#1f1a14",
             strokeWidth: 1.4,
           },
-        },
+        })),
+        // Tender (coal car behind cab)
         {
-          at: { x: 1060, y: bodyY - 20 },
+          at: { x: 0, y: 0 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: "M 0 0 L 180 0 L 180 140 L 0 140 Z",
+            d: `M ${cabBackX + 10} ${boilerCy - 40} L ${cabBackX + 10 + 350} ${boilerCy - 40} L ${cabBackX + 10 + 350} ${trackY - 6} L ${cabBackX + 10} ${trackY - 6} Z`,
             fill: "#3a2a14",
             stroke: "#1f1a14",
             strokeWidth: 2,
           },
         },
-        {
-          at: { x: 1070, y: bodyY - 30 },
-          mark: "silhouette-path",
-          silhouettePath: {
-            d: "M 0 0 L 160 0 L 160 12 L 80 5 L 0 12 Z",
-            fill: "#0a0a0a",
-            stroke: "#1f1a14",
-            strokeWidth: 1,
-          },
-        },
+        // Tender coal pile (sloped top)
         {
           at: { x: 0, y: 0 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: `M ${wheels[1].x} ${wheelY} L ${wheels[3].x} ${wheelY}`,
+            d: `M ${cabBackX + 20} ${boilerCy - 50} L ${cabBackX + 200} ${boilerCy - 70} L ${cabBackX + 350} ${boilerCy - 50} L ${cabBackX + 350} ${boilerCy - 38} L ${cabBackX + 20} ${boilerCy - 38} Z`,
+            fill: "#0a0a0a",
+            stroke: "#1f1a14",
+            strokeWidth: 1.4,
+          },
+        },
+        // Frame (thin line under boiler connecting wheels)
+        {
+          at: { x: 0, y: 0 },
+          mark: "polyline",
+          polyline: {
+            points: [
+              [smokeboxFrontX, wheelY - 24],
+              [cabBackX, wheelY - 24],
+            ],
+            fill: "none",
+            stroke: "#1f1a14",
+            strokeWidth: 3,
+          },
+        },
+        // Side rod (brass, links the 3 drivers)
+        {
+          at: { x: 0, y: 0 },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: sideRodD,
             fill: "none",
             stroke: "#fde68a",
-            strokeWidth: 6,
+            strokeWidth: 7,
             strokeLinecap: "round",
           },
         },
-        ...wheels.map((w) => ({
-          at: { x: w.x, y: wheelY },
-          mark: "circle",
-          circle: {
-            radius: w.r,
-            fill: "url(#g-wheel)",
+        // Main connecting rod (cylinder → last driver crank)
+        {
+          at: { x: 0, y: 0 },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: mainRodD,
+            fill: "none",
             stroke: "#fde68a",
-            strokeWidth: 2.5,
+            strokeWidth: 5,
+            strokeLinecap: "round",
           },
-          animation: { kind: "rotate-loop", periodMs: 3500, direction: "cw" },
-        })),
-        ...wheels.map((w) => ({
+        },
+        // Crosshead (small box where main rod meets piston rod)
+        {
+          at: { x: cylinderX + 30, y: cylinderY - 6 },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: "M 0 0 L 30 0 L 30 12 L 0 12 Z",
+            fill: "#fde68a",
+            stroke: "#1f1a14",
+            strokeWidth: 1.4,
+          },
+        },
+        // Driving wheels (3 big drivers with 10 spokes each, animated)
+        ...drivers.map((w) => ({
           at: { x: w.x, y: wheelY },
           mark: "silhouette-path",
           silhouettePath: {
-            d: buildWheelSpokes(w.r),
-            fill: "none",
+            d: wheelD(w.r, 10),
+            fill: "url(#g-wheel)",
             stroke: "#fde68a",
-            strokeWidth: 2.2,
+            strokeWidth: 2,
+            strokeLinejoin: "round",
           },
           animation: { kind: "rotate-loop", periodMs: 3500, direction: "cw" },
         })),
-        ...wheels.map((w) => ({
+        // Pilot truck (2 small leading wheels, animated faster since smaller)
+        ...pilotWheels.map((w) => ({
           at: { x: w.x, y: wheelY },
-          mark: "circle",
-          circle: { radius: 6, fill: "#fde68a", stroke: "#1f1a14", strokeWidth: 1 },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: wheelD(w.r, 8),
+            fill: "url(#g-wheel)",
+            stroke: "#fde68a",
+            strokeWidth: 1.6,
+            strokeLinejoin: "round",
+          },
+          animation: { kind: "rotate-loop", periodMs: 1500, direction: "cw" },
         })),
+        // Trailing wheel (1 medium wheel)
+        ...trailingWheels.map((w) => ({
+          at: { x: w.x, y: wheelY },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: wheelD(w.r, 10),
+            fill: "url(#g-wheel)",
+            stroke: "#fde68a",
+            strokeWidth: 1.8,
+            strokeLinejoin: "round",
+          },
+          animation: { kind: "rotate-loop", periodMs: 2000, direction: "cw" },
+        })),
+        // Tender wheels (4 small wheels under the tender)
+        ...tenderWheels.map((w) => ({
+          at: { x: w.x, y: wheelY },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: wheelD(w.r, 8),
+            fill: "url(#g-wheel)",
+            stroke: "#fde68a",
+            strokeWidth: 1.6,
+            strokeLinejoin: "round",
+          },
+          animation: { kind: "rotate-loop", periodMs: 1800, direction: "cw" },
+        })),
+        // Rails (2 parallel lines, drawn very prominent)
         {
           at: { x: 0, y: trackY },
           mark: "polyline",
@@ -1661,7 +1941,7 @@ function buildLocomotive() {
           },
         },
         {
-          at: { x: 0, y: trackY + 6 },
+          at: { x: 0, y: trackY + 7 },
           mark: "polyline",
           polyline: {
             points: [
@@ -1673,11 +1953,12 @@ function buildLocomotive() {
             strokeWidth: 3.5,
           },
         },
+        // Caption
         {
-          at: { x: W / 2, y: 580 },
+          at: { x: W / 2, y: 660 },
           mark: "text",
           textMark: {
-            text: "coal → steam → connecting rods → 200 km/h on steel",
+            text: "Stephenson's Rocket (1829) → Mallard, LNER A4 (1938): 203 km/h, world steam record",
             fontSize: 14,
             fill: "#4a3f30",
             italic: true,
@@ -2207,97 +2488,117 @@ function buildTemple() {
 }
 
 // ───────────────────────────────────────────────────────────────────────────
-// ARCH — Gothic cathedral
+// ARCH — Gothic cathedral (Notre-Dame west facade, professional drafting)
 // ───────────────────────────────────────────────────────────────────────────
 function buildCathedral() {
-  const W = 800;
-  const H = 1050;
-  const groundY = 950;
+  const W = 900;
+  const H = 1300;
+  const groundY = 1240;
 
-  const naveX0 = 220;
+  // Three-part facade (twin towers + central nave)
+  const towerLX0 = 90;
+  const towerLX1 = 320;
+  const towerRX0 = 580;
+  const towerRX1 = 810;
+  const naveX0 = 320;
   const naveX1 = 580;
-  const naveTopY = 480;
-  const towerX0L = 110;
-  const towerX1L = 220;
-  const towerX0R = 580;
-  const towerX1R = 690;
-  const towerTopY = 240;
-  const spireBaseY = 240;
-  const spireTipY = 60;
-  const centralSpireBaseY = 280;
-  const centralSpireTipY = 30;
+  const naveCenterX = (naveX0 + naveX1) / 2;
 
-  const roseCx = W / 2;
-  const roseCy = 600;
-  const roseR = 80;
+  // Tower top (square plinth where spire starts) — at this y, the towers
+  // are still rectangular; above it, spires begin.
+  const towerTopY = 380;
+  const spireTipY = 100;
 
-  const roseRays = [];
+  // Pinnacle (small spires at corners of tower top)
+  const pinnacleD = "M -8 0 L 8 0 L 0 -28 Z";
+
+  // Rose window
+  const roseCy = 670;
+  const roseR = 95;
+
+  // Build a rose-window-petal pattern: 12 outer arches forming a ring around
+  // the rose center, plus 6 inner spokes for additional tracery.
+  const rosePetals = [];
   for (let i = 0; i < 12; i++) {
     const a = (2 * Math.PI * i) / 12;
-    roseRays.push({
-      at: { x: roseCx, y: roseCy },
+    const cos = Math.cos(a);
+    const sin = Math.sin(a);
+    // a teardrop-shape petal from the outer ring inward
+    rosePetals.push({
+      at: { x: naveCenterX, y: roseCy },
       mark: "polyline",
       polyline: {
         points: [
-          [round(15 * Math.cos(a)), round(15 * Math.sin(a))],
-          [round(roseR * Math.cos(a)), round(roseR * Math.sin(a))],
+          [round(18 * cos), round(18 * sin)],
+          [round(roseR * 0.6 * cos - 12 * sin), round(roseR * 0.6 * sin + 12 * cos)],
+          [round(roseR * 0.92 * cos), round(roseR * 0.92 * sin)],
+          [round(roseR * 0.6 * cos + 12 * sin), round(roseR * 0.6 * sin - 12 * cos)],
+          [round(18 * cos), round(18 * sin)],
         ],
         fill: "none",
         stroke: "#3a2a14",
-        strokeWidth: 1.6,
+        strokeWidth: 1.4,
       },
     });
   }
 
-  const naveArches = [];
-  for (let i = 0; i < 3; i++) {
-    const ax = 320 + i * 80;
-    naveArches.push({
-      at: { x: ax, y: 860 },
+  // Triple portal — three pointed-arch doorways at the base
+  // Central portal is bigger
+  const centralPortalCx = naveCenterX;
+  const centralPortalBaseY = groundY;
+  const sidePortalBaseY = groundY;
+
+  // Kings' Gallery — row of 7 small arched niches above the portals
+  const kingsArches = [];
+  const kingsY = 850;
+  for (let i = 0; i < 7; i++) {
+    const kx = naveX0 + 30 + i * 30;
+    kingsArches.push({
+      at: { x: kx, y: kingsY },
       mark: "silhouette-path",
       silhouettePath: {
-        d: "M -22 0 L -22 -110 Q -22 -145, 0 -145 Q 22 -145, 22 -110 L 22 0 Z",
-        fill: "#1f1a14",
-        stroke: "#3a2a14",
-        strokeWidth: 1.5,
-      },
-    });
-    naveArches.push({
-      at: { x: ax, y: 860 },
-      mark: "polyline",
-      polyline: {
-        points: [
-          [0, -135],
-          [0, 0],
-        ],
-        fill: "none",
-        stroke: "#fefce8",
-        strokeWidth: 1,
+        d: "M -10 0 L -10 -32 Q -10 -42, 0 -42 Q 10 -42, 10 -32 L 10 0 Z",
+        fill: "#3a2a14",
+        stroke: "#1f1a14",
+        strokeWidth: 0.8,
       },
     });
   }
 
-  const towerDetails = [];
+  // Tower belfry windows — tall pointed lancet pair per tower
+  const belfryWindows = [];
   for (const [tx0, tx1] of [
-    [towerX0L, towerX1L],
-    [towerX0R, towerX1R],
+    [towerLX0, towerLX1],
+    [towerRX0, towerRX1],
   ]) {
     const mid = (tx0 + tx1) / 2;
-    towerDetails.push({
-      at: { x: mid, y: 770 },
+    // Two lancets per belfry
+    belfryWindows.push({
+      at: { x: mid - 26, y: 580 },
       mark: "silhouette-path",
       silhouettePath: {
-        d: "M -18 0 L -18 -90 Q -18 -120, 0 -120 Q 18 -120, 18 -90 L 18 0 Z",
+        d: "M -14 0 L -14 -100 Q -14 -130, 0 -130 Q 14 -130, 14 -100 L 14 0 Z",
         fill: "#1f1a14",
         stroke: "#3a2a14",
-        strokeWidth: 1.2,
+        strokeWidth: 1.4,
       },
     });
-    towerDetails.push({
-      at: { x: mid, y: 580 },
+    belfryWindows.push({
+      at: { x: mid + 26, y: 580 },
+      mark: "silhouette-path",
+      silhouettePath: {
+        d: "M -14 0 L -14 -100 Q -14 -130, 0 -130 Q 14 -130, 14 -100 L 14 0 Z",
+        fill: "#1f1a14",
+        stroke: "#3a2a14",
+        strokeWidth: 1.4,
+      },
+    });
+    // Oculus (small round window) above each tower's belfry
+    belfryWindows.push({
+      at: { x: mid, y: 470 },
       mark: "circle",
       circle: {
-        radius: 16,
+        radius: 14,
         fill: "#3a2a14",
         stroke: "#fefce8",
         strokeWidth: 1.4,
@@ -2308,9 +2609,9 @@ function buildCathedral() {
   return {
     compose: {
       viewBox: { width: W, height: H },
-      title: "A Gothic cathedral — light through stone",
+      title: "Notre-Dame west facade — Gothic order, professional draft",
       description:
-        "Notre-Dame, Chartres, Reims, Cologne. The pointed arch lets the cathedral reach for sky in a way the Romanesque round arch never could. The rose window — a wheel of stained glass — became the calling card of 12th–15th century Europe.",
+        "West facade of a French Gothic cathedral, drawn in the style of a 19th-century architectural draftsman. Three horizontal stages — portal level (triple pointed-arch doorway), gallery level (Kings' Gallery with arcaded niches), rose-window level — capped by twin towers with belfry lancets, oculi, and tall pinnacled spires. Notre-Dame (1163), Chartres (1145), Reims (1211), Cologne (1248).",
       theme: { preset: "pencil-parchment" },
       defs: {
         gradients: [
@@ -2323,7 +2624,7 @@ function buildCathedral() {
             y2: "100%",
             stops: [
               { offset: "0%", color: "#fef3c7", opacity: 1 },
-              { offset: "40%", color: "#fed7aa", opacity: 1 },
+              { offset: "50%", color: "#fed7aa", opacity: 1 },
               { offset: "100%", color: "#ebe1c4", opacity: 1 },
             ],
           },
@@ -2335,8 +2636,8 @@ function buildCathedral() {
             r: "50%",
             stops: [
               { offset: "0%", color: "#fef3c7", opacity: 1 },
-              { offset: "30%", color: "#dc2626", opacity: 0.9 },
-              { offset: "60%", color: "#1d4ed8", opacity: 0.95 },
+              { offset: "25%", color: "#dc2626", opacity: 0.9 },
+              { offset: "55%", color: "#1d4ed8", opacity: 0.95 },
               { offset: "100%", color: "#581c87", opacity: 0.95 },
             ],
           },
@@ -2348,14 +2649,28 @@ function buildCathedral() {
             x2: "100%",
             y2: "0%",
             stops: [
-              { offset: "0%", color: "#f5edd9", opacity: 1 },
+              { offset: "0%", color: "#e7ddc6", opacity: 1 },
               { offset: "50%", color: "#ebe1c4", opacity: 1 },
               { offset: "100%", color: "#cbb89c", opacity: 1 },
+            ],
+          },
+          {
+            id: "g-spire",
+            kind: "linear",
+            x1: "0%",
+            y1: "0%",
+            x2: "100%",
+            y2: "0%",
+            stops: [
+              { offset: "0%", color: "#3a4a2a", opacity: 1 },
+              { offset: "50%", color: "#5a6a3a", opacity: 1 },
+              { offset: "100%", color: "#3a4a2a", opacity: 1 },
             ],
           },
         ],
       },
       children: [
+        // Dawn sky
         {
           at: { x: 0, y: 0 },
           mark: "silhouette-path",
@@ -2365,154 +2680,156 @@ function buildCathedral() {
             stroke: "none",
           },
         },
+        // Ground (paving)
         {
           at: { x: 0, y: groundY },
           mark: "silhouette-path",
           silhouettePath: {
             d: `M 0 0 L ${W} 0 L ${W} ${H - groundY} L 0 ${H - groundY} Z`,
-            fill: "#6b8a4a",
+            fill: "#8b9968",
             stroke: "none",
           },
         },
+        // Distant city/abbey rooftops in haze
+        {
+          at: { x: 0, y: groundY - 40 },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: "M 0 40 L 40 30 L 70 35 L 110 25 L 140 30 L 170 20 L 200 28 L 230 18 L 0 18 Z M 700 30 L 740 22 L 770 28 L 810 18 L 840 25 L 900 22 L 900 40 L 700 40 Z",
+            fill: "rgba(124,45,18,.2)",
+            stroke: "none",
+          },
+        },
+        // ── Cathedral structure ──
+        // Left tower body
         {
           at: { x: 0, y: 0 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: `M ${naveX0} ${groundY} L ${naveX0} ${naveTopY + 60} L ${naveX0 + 20} ${naveTopY + 20} L ${W / 2} ${naveTopY - 30} L ${naveX1 - 20} ${naveTopY + 20} L ${naveX1} ${naveTopY + 60} L ${naveX1} ${groundY} Z`,
+            d: `M ${towerLX0} ${groundY} L ${towerLX0} ${towerTopY} L ${towerLX1} ${towerTopY} L ${towerLX1} ${groundY} Z`,
             fill: "url(#g-stone)",
             stroke: "#3a2a14",
-            strokeWidth: 2.2,
+            strokeWidth: 2.4,
           },
         },
+        // Right tower body
         {
           at: { x: 0, y: 0 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: `M ${towerX0L} ${groundY} L ${towerX0L} ${towerTopY} L ${towerX1L} ${towerTopY} L ${towerX1L} ${groundY} Z`,
+            d: `M ${towerRX0} ${groundY} L ${towerRX0} ${towerTopY} L ${towerRX1} ${towerTopY} L ${towerRX1} ${groundY} Z`,
             fill: "url(#g-stone)",
             stroke: "#3a2a14",
-            strokeWidth: 2.2,
+            strokeWidth: 2.4,
           },
         },
+        // Central nave body (with peaked Gothic gable above rose window)
         {
           at: { x: 0, y: 0 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: `M ${towerX0R} ${groundY} L ${towerX0R} ${towerTopY} L ${towerX1R} ${towerTopY} L ${towerX1R} ${groundY} Z`,
+            d: `M ${naveX0} ${groundY} L ${naveX0} ${roseCy - roseR - 60} L ${naveX0 + 30} ${roseCy - roseR - 100} L ${naveCenterX} ${roseCy - roseR - 160} L ${naveX1 - 30} ${roseCy - roseR - 100} L ${naveX1} ${roseCy - roseR - 60} L ${naveX1} ${groundY} Z`,
             fill: "url(#g-stone)",
             stroke: "#3a2a14",
-            strokeWidth: 2.2,
+            strokeWidth: 2.4,
           },
         },
-        ...[490, 800].flatMap((y) =>
-          [
-            [towerX0L, towerX1L],
-            [towerX0R, towerX1R],
-          ].map(([x0, x1]) => ({
-            at: { x: 0, y },
-            mark: "polyline",
-            polyline: {
-              points: [
-                [x0, 0],
-                [x1, 0],
-              ],
-              fill: "none",
-              stroke: "#3a2a14",
-              strokeWidth: 1,
-            },
-          })),
-        ),
-        {
-          at: { x: 0, y: 0 },
-          mark: "polygon",
-          polygon: {
+        // String courses (4 horizontal stone bands across the entire facade
+        // at the major level breaks: above portals, above gallery, above rose, at tower top)
+        ...[820, 760, 540, towerTopY + 10].map((y) => ({
+          at: { x: 0, y },
+          mark: "polyline",
+          polyline: {
             points: [
-              [towerX0L - 12, spireBaseY],
-              [towerX1L + 12, spireBaseY],
-              [(towerX0L + towerX1L) / 2, spireTipY],
+              [towerLX0, 0],
+              [towerRX1, 0],
             ],
-            fill: "#3a4a2a",
-            stroke: "#1f1a14",
-            strokeWidth: 2,
-          },
-        },
-        {
-          at: { x: 0, y: 0 },
-          mark: "polygon",
-          polygon: {
-            points: [
-              [towerX0R - 12, spireBaseY],
-              [towerX1R + 12, spireBaseY],
-              [(towerX0R + towerX1R) / 2, spireTipY],
-            ],
-            fill: "#3a4a2a",
-            stroke: "#1f1a14",
-            strokeWidth: 2,
-          },
-        },
-        ...[(towerX0L + towerX1L) / 2, (towerX0R + towerX1R) / 2].map((cx) => ({
-          at: { x: cx, y: spireTipY - 4 },
-          mark: "silhouette-path",
-          silhouettePath: {
-            d: "M 0 0 L 0 -18 M -7 -12 L 7 -12",
             fill: "none",
             stroke: "#3a2a14",
-            strokeWidth: 1.8,
+            strokeWidth: 1.2,
           },
         })),
+        // Left tower spire (tall, pyramidal)
         {
           at: { x: 0, y: 0 },
           mark: "polygon",
           polygon: {
             points: [
-              [W / 2 - 26, centralSpireBaseY],
-              [W / 2 + 26, centralSpireBaseY],
-              [W / 2, centralSpireTipY],
+              [towerLX0 - 16, towerTopY],
+              [towerLX1 + 16, towerTopY],
+              [(towerLX0 + towerLX1) / 2, spireTipY],
             ],
-            fill: "#3a4a2a",
+            fill: "url(#g-spire)",
             stroke: "#1f1a14",
             strokeWidth: 2,
           },
         },
+        // Right tower spire
         {
-          at: { x: W / 2, y: centralSpireTipY - 6 },
+          at: { x: 0, y: 0 },
+          mark: "polygon",
+          polygon: {
+            points: [
+              [towerRX0 - 16, towerTopY],
+              [towerRX1 + 16, towerTopY],
+              [(towerRX0 + towerRX1) / 2, spireTipY],
+            ],
+            fill: "url(#g-spire)",
+            stroke: "#1f1a14",
+            strokeWidth: 2,
+          },
+        },
+        // Cross at each tower spire tip
+        ...[(towerLX0 + towerLX1) / 2, (towerRX0 + towerRX1) / 2].map((cx) => ({
+          at: { x: cx, y: spireTipY - 6 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: "M 0 0 L 0 -24 M -9 -16 L 9 -16",
+            d: "M 0 0 L 0 -22 M -9 -14 L 9 -14",
             fill: "none",
             stroke: "#3a2a14",
             strokeWidth: 2,
           },
-        },
-        ...towerDetails,
-        {
-          at: { x: W / 2, y: roseCy },
-          mark: "silhouette-path",
-          silhouettePath: {
-            d: `M ${-roseR - 25} ${roseR + 50} L ${-roseR - 25} -10 Q ${-roseR - 25} ${-roseR - 60}, 0 ${-roseR - 70} Q ${roseR + 25} ${-roseR - 60}, ${roseR + 25} -10 L ${roseR + 25} ${roseR + 50} Z`,
-            fill: "rgba(31,26,20,.2)",
+        })),
+        // Pinnacles at corners of tower tops (4 per tower = 8 total, but
+        // here we use just 2 outer corner pinnacles per tower for clarity)
+        ...[towerLX0, towerLX1, towerRX0, towerRX1].map((cx) => ({
+          at: { x: cx, y: towerTopY },
+          mark: "polygon",
+          polygon: {
+            points: [
+              [-8, 0],
+              [8, 0],
+              [0, -28],
+            ],
+            fill: "url(#g-stone)",
             stroke: "#3a2a14",
             strokeWidth: 1.4,
           },
-        },
+        })),
+        // Tower belfry windows + oculi (6 children)
+        ...belfryWindows,
+        // Rose window — outer dark ring
         {
-          at: { x: roseCx, y: roseCy },
+          at: { x: naveCenterX, y: roseCy },
           mark: "circle",
           circle: {
-            radius: roseR + 8,
+            radius: roseR + 10,
             fill: "#3a2a14",
             stroke: "#fefce8",
-            strokeWidth: 2,
+            strokeWidth: 2.4,
           },
         },
+        // Rose window — stained glass (radial gradient)
         {
-          at: { x: roseCx, y: roseCy },
+          at: { x: naveCenterX, y: roseCy },
           mark: "circle",
           circle: { radius: roseR, fill: "url(#g-rose)" },
         },
-        ...roseRays,
+        // Rose petals (12 tracery polylines)
+        ...rosePetals,
+        // Rose central hub
         {
-          at: { x: roseCx, y: roseCy },
+          at: { x: naveCenterX, y: roseCy },
           mark: "circle",
           circle: {
             radius: 16,
@@ -2521,47 +2838,121 @@ function buildCathedral() {
             strokeWidth: 1.5,
           },
         },
-        ...naveArches,
+        // Gothic pointed arch frame ABOVE the rose (the gable arch)
         {
-          at: { x: W / 2, y: groundY },
+          at: { x: naveCenterX, y: roseCy },
           mark: "silhouette-path",
           silhouettePath: {
-            d: "M -65 0 L -65 -130 Q -65 -180, 0 -180 Q 65 -180, 65 -130 L 65 0 Z",
-            fill: "#3a2a14",
-            stroke: "#1f1a14",
-            strokeWidth: 2.2,
+            d: `M ${-roseR - 30} ${-10} Q ${-roseR - 30} ${-roseR - 100}, 0 ${-roseR - 130} Q ${roseR + 30} ${-roseR - 100}, ${roseR + 30} ${-10}`,
+            fill: "none",
+            stroke: "#3a2a14",
+            strokeWidth: 1.8,
           },
         },
+        // Kings' Gallery — arcaded niches (7 children)
+        ...kingsArches,
+        // String course below Kings' Gallery (extra emphasis)
         {
-          at: { x: W / 2, y: groundY - 2 },
+          at: { x: 0, y: 890 },
           mark: "polyline",
           polyline: {
             points: [
-              [0, -178],
+              [towerLX0, 0],
+              [towerRX1, 0],
+            ],
+            fill: "none",
+            stroke: "#3a2a14",
+            strokeWidth: 2.4,
+          },
+        },
+        // Central portal (large pointed Gothic arch with recessed orders)
+        {
+          at: { x: centralPortalCx, y: centralPortalBaseY },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: "M -68 0 L -68 -150 Q -68 -210, 0 -210 Q 68 -210, 68 -150 L 68 0 Z",
+            fill: "#3a2a14",
+            stroke: "#1f1a14",
+            strokeWidth: 2.4,
+          },
+        },
+        // Central portal recessed inner arch
+        {
+          at: { x: centralPortalCx, y: centralPortalBaseY - 4 },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: "M -58 0 L -58 -140 Q -58 -195, 0 -195 Q 58 -195, 58 -140 L 58 0 Z",
+            fill: "#1f1a14",
+            stroke: "#fefce8",
+            strokeWidth: 1.4,
+          },
+        },
+        // Central portal mullion (vertical divider)
+        {
+          at: { x: centralPortalCx, y: centralPortalBaseY - 4 },
+          mark: "polyline",
+          polyline: {
+            points: [
+              [0, -190],
               [0, 0],
             ],
             fill: "none",
             stroke: "#fefce8",
-            strokeWidth: 1.2,
+            strokeWidth: 1.4,
           },
         },
+        // Left side portal (smaller)
         {
-          at: { x: W / 2, y: 80 },
+          at: { x: naveX0 + 50, y: centralPortalBaseY },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: "M -30 0 L -30 -90 Q -30 -130, 0 -130 Q 30 -130, 30 -90 L 30 0 Z",
+            fill: "#3a2a14",
+            stroke: "#1f1a14",
+            strokeWidth: 1.8,
+          },
+        },
+        // Right side portal
+        {
+          at: { x: naveX1 - 50, y: centralPortalBaseY },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: "M -30 0 L -30 -90 Q -30 -130, 0 -130 Q 30 -130, 30 -90 L 30 0 Z",
+            fill: "#3a2a14",
+            stroke: "#1f1a14",
+            strokeWidth: 1.8,
+          },
+        },
+        // Buttress piers below the towers (2 per outer corner)
+        ...[towerLX0, towerRX1].map((bx) => ({
+          at: { x: bx, y: 0 },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: `M -12 ${groundY} L -12 ${roseCy + 100} L -8 ${roseCy + 60} L -8 ${groundY} Z M -8 ${groundY} L -8 ${roseCy + 100} L -4 ${roseCy + 60} L -4 ${groundY} Z`,
+            fill: "url(#g-stone)",
+            stroke: "#3a2a14",
+            strokeWidth: 1.4,
+          },
+        })),
+        // Title
+        {
+          at: { x: W / 2, y: 75 },
           mark: "text",
           textMark: {
-            text: "Ecclesia Cathedralis · Gothic order",
-            fontSize: 18,
+            text: "Ecclesia Cathedralis · Notre-Dame de Paris, west facade",
+            fontSize: 17,
             fill: "#1f1a14",
             italic: true,
             anchor: "middle",
           },
         },
+        // Caption
         {
-          at: { x: W / 2, y: 1010 },
+          at: { x: W / 2, y: 1290 },
           mark: "text",
           textMark: {
-            text: "pointed arch · flying buttress · rose window · light + stone",
-            fontSize: 13,
+            text: "pointed arch · flying buttress · rose window · stained glass · pinnacle · spire · Kings' Gallery",
+            fontSize: 12,
             fill: "#4a3f30",
             italic: true,
             anchor: "middle",
@@ -2573,23 +2964,85 @@ function buildCathedral() {
 }
 
 // ───────────────────────────────────────────────────────────────────────────
-// ARCH — Modern skyscraper
+// ARCH — Skyscraper (Empire State Building / Art Deco, professional draft)
 // ───────────────────────────────────────────────────────────────────────────
 function buildSkyscraper() {
   const W = 900;
-  const H = 1050;
-  const groundY = 980;
-  const towerX0 = 320;
-  const towerX1 = 580;
-  const towerTopY = 80;
-  const antennaTopY = 20;
+  const H = 1400;
+  const groundY = 1340;
+  const cx = W / 2;
+
+  // 4-tier Art-Deco massing (Empire State / Chrysler hybrid):
+  //   Tier 1 (base, widest)     : y 1100 → 1340
+  //   Setback A                 : y 1100
+  //   Tier 2 (middle, narrower) : y 600 → 1100
+  //   Setback B                 : y 600
+  //   Tier 3 (upper, narrower)  : y 320 → 600
+  //   Setback C                 : y 320
+  //   Tier 4 (crown)            : y 180 → 320
+  //   Spire/antenna             : y 60 → 180
+  const tier1W = 340;
+  const tier2W = 240;
+  const tier3W = 160;
+  const tier4W = 84;
+  const tier1Top = 1100;
+  const tier2Top = 600;
+  const tier3Top = 320;
+  const tier4Top = 180;
+  const spireTop = 60;
+
+  const halfT1 = tier1W / 2;
+  const halfT2 = tier2W / 2;
+  const halfT3 = tier3W / 2;
+  const halfT4 = tier4W / 2;
+
+  // Vertical limestone bands (Art Deco vertical emphasis) on each tier — these
+  // are thin lines running vertically through the window grid, suggesting
+  // the limestone-clad piers between the recessed window bays.
+  const tier1Bands = [];
+  for (let i = -5; i <= 5; i++) {
+    if (i === 0) continue;
+    const x = cx + i * 28;
+    tier1Bands.push({
+      at: { x, y: 0 },
+      mark: "polyline",
+      polyline: {
+        points: [
+          [0, tier1Top + 10],
+          [0, groundY - 30],
+        ],
+        fill: "none",
+        stroke: "rgba(31,30,40,.7)",
+        strokeWidth: 1.2,
+      },
+    });
+  }
+
+  // Crown ornaments — radial Art-Deco fan above tier 4 (like Chrysler's
+  // crown). Use 3 stepped arches narrowing toward the spire.
+  const crownArches = [];
+  for (let i = 0; i < 3; i++) {
+    const half = halfT4 - i * 14;
+    const yTop = tier4Top + 10 - i * 18;
+    const yBot = tier4Top + 50 - i * 18;
+    crownArches.push({
+      at: { x: cx, y: 0 },
+      mark: "silhouette-path",
+      silhouettePath: {
+        d: `M ${-half} ${yBot} L ${-half} ${yTop + 20} Q ${-half} ${yTop}, 0 ${yTop} Q ${half} ${yTop}, ${half} ${yTop + 20} L ${half} ${yBot}`,
+        fill: "url(#g-tower)",
+        stroke: "#0c1126",
+        strokeWidth: 1.4,
+      },
+    });
+  }
 
   return {
     compose: {
       viewBox: { width: W, height: H },
-      title: "A skyscraper at dusk — the city in one column",
+      title: "Empire State — modernist tower at dusk, Art Deco draft",
       description:
-        "Modernist glass tower at last light. A steel skeleton sheathed in a curtain wall of windows. Sullivan, 1896: form follows function. Mies, 1958 (Seagram Building): glass plus rhythm = the 20th century.",
+        "Steel-frame modernist tower in profile, drawn in the spirit of a 1930s architect's rendering. Three-tier setback massing inspired by the Empire State Building (1931): a wide limestone base, narrower middle shaft, slender upper shaft, and an Art-Deco crown with stepped arches feeding into a needle spire. Adjacent buildings, moon, sunset gradient. Sullivan (1896): form follows function.",
       theme: { background: "#0c1126", foreground: "#fef3c7" },
       defs: {
         gradients: [
@@ -2601,9 +3054,9 @@ function buildSkyscraper() {
             x2: "0%",
             y2: "100%",
             stops: [
-              { offset: "0%", color: "#1e3a8a", opacity: 1 },
-              { offset: "35%", color: "#7c2d12", opacity: 1 },
-              { offset: "65%", color: "#dc2626", opacity: 1 },
+              { offset: "0%", color: "#1e1b4b", opacity: 1 },
+              { offset: "30%", color: "#7c2d12", opacity: 1 },
+              { offset: "60%", color: "#dc2626", opacity: 1 },
               { offset: "100%", color: "#fed7aa", opacity: 1 },
             ],
           },
@@ -2615,9 +3068,9 @@ function buildSkyscraper() {
             x2: "100%",
             y2: "0%",
             stops: [
-              { offset: "0%", color: "#0c4a6e", opacity: 1 },
-              { offset: "50%", color: "#1e3a8a", opacity: 1 },
-              { offset: "100%", color: "#0c1e3a", opacity: 1 },
+              { offset: "0%", color: "#374151", opacity: 1 },
+              { offset: "50%", color: "#4b5563", opacity: 1 },
+              { offset: "100%", color: "#1f2937", opacity: 1 },
             ],
           },
           {
@@ -2628,9 +3081,9 @@ function buildSkyscraper() {
             x2: "100%",
             y2: "100%",
             stops: [
-              { offset: "0%", color: "#fbbf24", opacity: 0.5 },
-              { offset: "60%", color: "#dc2626", opacity: 0.15 },
-              { offset: "100%", color: "#fbbf24", opacity: 0 },
+              { offset: "0%", color: "#fde68a", opacity: 0.42 },
+              { offset: "60%", color: "#dc2626", opacity: 0.12 },
+              { offset: "100%", color: "#fde68a", opacity: 0 },
             ],
           },
           {
@@ -2661,34 +3114,35 @@ function buildSkyscraper() {
           {
             id: "p-windows",
             width: 28,
-            height: 40,
+            height: 36,
             children: [
-              { kind: "rect", x: 4, y: 6, width: 9, height: 14, fill: "#fde68a" },
-              { kind: "rect", x: 15, y: 6, width: 9, height: 14, fill: "#fbbf24" },
+              { kind: "rect", x: 5, y: 6, width: 8, height: 14, fill: "#fde68a" },
+              { kind: "rect", x: 15, y: 6, width: 8, height: 14, fill: "#fbbf24" },
               {
                 kind: "rect",
-                x: 4,
-                y: 24,
-                width: 9,
-                height: 14,
+                x: 5,
+                y: 22,
+                width: 8,
+                height: 10,
                 fill: "rgba(253,230,138,.35)",
               },
-              { kind: "rect", x: 15, y: 24, width: 9, height: 14, fill: "#fde68a" },
+              { kind: "rect", x: 15, y: 22, width: 8, height: 10, fill: "#fde68a" },
             ],
           },
           {
             id: "p-adj-windows",
-            width: 18,
-            height: 24,
+            width: 16,
+            height: 22,
             children: [
-              { kind: "rect", x: 3, y: 4, width: 5, height: 8, fill: "#fde68a" },
-              { kind: "rect", x: 10, y: 4, width: 5, height: 8, fill: "rgba(253,230,138,.4)" },
-              { kind: "rect", x: 3, y: 14, width: 5, height: 8, fill: "#fde68a" },
+              { kind: "rect", x: 2, y: 3, width: 4, height: 7, fill: "#fde68a" },
+              { kind: "rect", x: 9, y: 3, width: 4, height: 7, fill: "rgba(253,230,138,.4)" },
+              { kind: "rect", x: 2, y: 13, width: 4, height: 7, fill: "#fde68a" },
             ],
           },
         ],
       },
       children: [
+        // Dusk sky
         {
           at: { x: 0, y: 0 },
           mark: "silhouette-path",
@@ -2698,8 +3152,9 @@ function buildSkyscraper() {
             stroke: "none",
           },
         },
+        // Moon
         {
-          at: { x: 740, y: 140 },
+          at: { x: 720, y: 200 },
           mark: "circle",
           circle: {
             radius: 38,
@@ -2708,25 +3163,28 @@ function buildSkyscraper() {
             strokeWidth: 1,
           },
         },
+        // Moon craters
         ...[
           [-8, -10, 4],
           [10, -2, 3],
           [-2, 12, 2.5],
         ].map(([dx, dy, r]) => ({
-          at: { x: 740 + dx, y: 140 + dy },
+          at: { x: 720 + dx, y: 200 + dy },
           mark: "circle",
           circle: { radius: r, fill: "rgba(202,138,4,.25)" },
         })),
+        // Stars
         {
           at: { x: 0, y: 0 },
           mark: "starfield",
-          starfield: { count: 35, seed: 47, region: { x: 0, y: 0, w: W, h: 250 } },
+          starfield: { count: 40, seed: 47, region: { x: 0, y: 0, w: W, h: 320 } },
         },
+        // Adjacent buildings - varied silhouettes
         {
           at: { x: 0, y: 0 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: "M 0 600 L 80 600 L 80 980 L 0 980 Z M 80 680 L 180 680 L 180 980 L 80 980 Z M 180 720 L 250 720 L 250 980 L 180 980 Z",
+            d: "M 0 920 L 80 920 L 80 1340 L 0 1340 Z M 80 1020 L 200 1020 L 200 1340 L 80 1340 Z M 200 980 L 280 980 L 280 1340 L 200 1340 Z",
             fill: "#0c1126",
             stroke: "#1d2444",
             strokeWidth: 1,
@@ -2736,83 +3194,179 @@ function buildSkyscraper() {
           at: { x: 0, y: 0 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: "M 620 540 L 700 540 L 700 980 L 620 980 Z M 700 660 L 800 660 L 800 980 L 700 980 Z M 800 600 L 880 600 L 880 980 L 800 980 Z M 880 700 L 900 700 L 900 980 L 880 980 Z",
+            d: "M 620 900 L 720 900 L 720 1340 L 620 1340 Z M 720 1000 L 820 1000 L 820 1340 L 720 1340 Z M 820 940 L 900 940 L 900 1340 L 820 1340 Z",
             fill: "#0c1126",
             stroke: "#1d2444",
             strokeWidth: 1,
           },
         },
+        // Adjacent building windows
         {
           at: { x: 0, y: 0 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: "M 0 600 L 80 600 L 80 980 L 0 980 Z M 80 680 L 180 680 L 180 980 L 80 980 Z M 180 720 L 250 720 L 250 980 L 180 980 Z M 620 540 L 700 540 L 700 980 L 620 980 Z M 700 660 L 800 660 L 800 980 L 700 980 Z M 800 600 L 880 600 L 880 980 L 800 980 Z M 880 700 L 900 700 L 900 980 L 880 980 Z",
+            d: "M 0 920 L 80 920 L 80 1340 L 0 1340 Z M 80 1020 L 200 1020 L 200 1340 L 80 1340 Z M 200 980 L 280 980 L 280 1340 L 200 1340 Z M 620 900 L 720 900 L 720 1340 L 620 1340 Z M 720 1000 L 820 1000 L 820 1340 L 720 1340 Z M 820 940 L 900 940 L 900 1340 L 820 1340 Z",
             fill: "url(#p-adj-windows)",
             stroke: "none",
             opacity: 0.55,
           },
         },
+        // ── Main tower (4 tiers) ──
+        // Tier 1 (base)
         {
           at: { x: 0, y: 0 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: `M ${towerX0} ${groundY} L ${towerX0} ${towerTopY + 70} L ${towerX0 + 30} ${towerTopY + 70} L ${towerX0 + 30} ${towerTopY} L ${towerX1 - 30} ${towerTopY} L ${towerX1 - 30} ${towerTopY + 70} L ${towerX1} ${towerTopY + 70} L ${towerX1} ${groundY} Z`,
+            d: `M ${cx - halfT1} ${groundY} L ${cx - halfT1} ${tier1Top} L ${cx + halfT1} ${tier1Top} L ${cx + halfT1} ${groundY} Z`,
             fill: "url(#g-tower)",
             stroke: "#0c4a6e",
             strokeWidth: 2,
           },
         },
+        // Tier 1 window grid (recessed)
         {
           at: { x: 0, y: 0 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: `M ${towerX0 + 12} ${towerTopY + 90} L ${towerX1 - 12} ${towerTopY + 90} L ${towerX1 - 12} ${groundY - 90} L ${towerX0 + 12} ${groundY - 90} Z`,
+            d: `M ${cx - halfT1 + 14} ${groundY - 40} L ${cx + halfT1 - 14} ${groundY - 40} L ${cx + halfT1 - 14} ${tier1Top + 30} L ${cx - halfT1 + 14} ${tier1Top + 30} Z`,
             fill: "url(#p-windows)",
             stroke: "none",
           },
         },
+        // Vertical limestone bands on tier 1
+        ...tier1Bands,
+        // Tier 1 cornice (horizontal band at top)
+        {
+          at: { x: 0, y: tier1Top + 4 },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: `M ${cx - halfT1 - 6} 0 L ${cx + halfT1 + 6} 0 L ${cx + halfT1 + 6} 14 L ${cx - halfT1 - 6} 14 Z`,
+            fill: "#1f2937",
+            stroke: "#fde68a",
+            strokeWidth: 1.4,
+          },
+        },
+        // Tier 2 (middle)
         {
           at: { x: 0, y: 0 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: `M ${towerX0 + 40} ${towerTopY + 10} L ${towerX1 - 40} ${towerTopY + 10} L ${towerX1 - 40} ${towerTopY + 65} L ${towerX0 + 40} ${towerTopY + 65} Z`,
+            d: `M ${cx - halfT2} ${tier1Top} L ${cx - halfT2} ${tier2Top} L ${cx + halfT2} ${tier2Top} L ${cx + halfT2} ${tier1Top} Z`,
+            fill: "url(#g-tower)",
+            stroke: "#0c4a6e",
+            strokeWidth: 2,
+          },
+        },
+        // Tier 2 windows
+        {
+          at: { x: 0, y: 0 },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: `M ${cx - halfT2 + 10} ${tier1Top - 10} L ${cx + halfT2 - 10} ${tier1Top - 10} L ${cx + halfT2 - 10} ${tier2Top + 20} L ${cx - halfT2 + 10} ${tier2Top + 20} Z`,
             fill: "url(#p-windows)",
             stroke: "none",
           },
         },
+        // Tier 2 cornice
+        {
+          at: { x: 0, y: tier2Top + 4 },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: `M ${cx - halfT2 - 5} 0 L ${cx + halfT2 + 5} 0 L ${cx + halfT2 + 5} 12 L ${cx - halfT2 - 5} 12 Z`,
+            fill: "#1f2937",
+            stroke: "#fde68a",
+            strokeWidth: 1.4,
+          },
+        },
+        // Tier 3 (upper)
         {
           at: { x: 0, y: 0 },
           mark: "silhouette-path",
           silhouettePath: {
-            d: `M ${towerX0 + 12} ${towerTopY + 90} L ${towerX1 - 12} ${towerTopY + 90} L ${towerX1 - 12} ${groundY - 90} L ${towerX0 + 12} ${groundY - 90} Z`,
+            d: `M ${cx - halfT3} ${tier2Top} L ${cx - halfT3} ${tier3Top} L ${cx + halfT3} ${tier3Top} L ${cx + halfT3} ${tier2Top} Z`,
+            fill: "url(#g-tower)",
+            stroke: "#0c4a6e",
+            strokeWidth: 2,
+          },
+        },
+        // Tier 3 windows
+        {
+          at: { x: 0, y: 0 },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: `M ${cx - halfT3 + 8} ${tier2Top - 6} L ${cx + halfT3 - 8} ${tier2Top - 6} L ${cx + halfT3 - 8} ${tier3Top + 15} L ${cx - halfT3 + 8} ${tier3Top + 15} Z`,
+            fill: "url(#p-windows)",
+            stroke: "none",
+          },
+        },
+        // Tier 3 cornice
+        {
+          at: { x: 0, y: tier3Top + 4 },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: `M ${cx - halfT3 - 4} 0 L ${cx + halfT3 + 4} 0 L ${cx + halfT3 + 4} 10 L ${cx - halfT3 - 4} 10 Z`,
+            fill: "#1f2937",
+            stroke: "#fde68a",
+            strokeWidth: 1.2,
+          },
+        },
+        // Tier 4 (crown body)
+        {
+          at: { x: 0, y: 0 },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: `M ${cx - halfT4} ${tier3Top} L ${cx - halfT4} ${tier4Top} L ${cx + halfT4} ${tier4Top} L ${cx + halfT4} ${tier3Top} Z`,
+            fill: "url(#g-tower)",
+            stroke: "#0c4a6e",
+            strokeWidth: 2,
+          },
+        },
+        // Tier 4 small window
+        {
+          at: { x: 0, y: 0 },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: `M ${cx - halfT4 + 6} ${tier3Top - 4} L ${cx + halfT4 - 6} ${tier3Top - 4} L ${cx + halfT4 - 6} ${tier4Top + 10} L ${cx - halfT4 + 6} ${tier4Top + 10} Z`,
+            fill: "url(#p-windows)",
+            stroke: "none",
+          },
+        },
+        // Crown decorative stepped arches (Art Deco)
+        ...crownArches,
+        // Reflection overlay (warm diagonal across the whole tower)
+        {
+          at: { x: 0, y: 0 },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: `M ${cx - halfT1 + 14} ${groundY - 40} L ${cx + halfT1 - 14} ${groundY - 40} L ${cx + halfT1 - 14} ${tier1Top + 30} L ${cx - halfT1 + 14} ${tier1Top + 30} Z`,
             fill: "url(#g-reflect)",
             stroke: "none",
           },
         },
+        // Spire (the needle on top, with subtle taper)
         {
-          at: { x: W / 2, y: antennaTopY },
-          mark: "polyline",
-          polyline: {
-            points: [
-              [0, 0],
-              [0, towerTopY - antennaTopY],
-            ],
-            fill: "none",
-            stroke: "#0c1126",
-            strokeWidth: 3,
+          at: { x: 0, y: 0 },
+          mark: "silhouette-path",
+          silhouettePath: {
+            d: `M ${cx - 6} ${tier4Top} L ${cx + 6} ${tier4Top} L ${cx + 3} ${spireTop + 20} L ${cx} ${spireTop} L ${cx - 3} ${spireTop + 20} Z`,
+            fill: "#1f2937",
+            stroke: "#fde68a",
+            strokeWidth: 1.4,
           },
         },
+        // Spire warning light (pulses red)
         {
-          at: { x: W / 2, y: antennaTopY + 4 },
+          at: { x: cx, y: spireTop + 6 },
           mark: "circle",
           circle: {
-            radius: 4,
+            radius: 4.5,
             fill: "#dc2626",
             stroke: "#7c2d12",
             strokeWidth: 0.5,
           },
-          animation: { kind: "pulse", periodMs: 1500, scale: 1.5 },
+          animation: { kind: "pulse", periodMs: 1500, scale: 1.6 },
         },
+        // Ground (dark street level)
         {
           at: { x: 0, y: groundY },
           mark: "silhouette-path",
@@ -2822,7 +3376,8 @@ function buildSkyscraper() {
             stroke: "none",
           },
         },
-        ...[140, 280, 440, 620, 760].map((dx) => ({
+        // Street lights (small glowing dots)
+        ...[120, 280, 440, 600, 780].map((dx) => ({
           at: { x: dx, y: groundY + 22 },
           mark: "circle",
           circle: {
@@ -2832,23 +3387,25 @@ function buildSkyscraper() {
             strokeWidth: 4,
           },
         })),
+        // Title
         {
-          at: { x: W / 2, y: 36 },
+          at: { x: W / 2, y: 38 },
           mark: "text",
           textMark: {
-            text: "form follows function · Sullivan, 1896",
+            text: "form follows function · Sullivan, 1896 · Empire State, 1931",
             fontSize: 13,
             fill: "#fef3c7",
             italic: true,
             anchor: "middle",
           },
         },
+        // Caption
         {
-          at: { x: W / 2, y: 1025 },
+          at: { x: W / 2, y: 1380 },
           mark: "text",
           textMark: {
-            text: "steel frame · curtain wall · the city in one column",
-            fontSize: 13,
+            text: "steel frame · limestone clad · 102 stories · 381 m to roof · 443 m to needle",
+            fontSize: 12,
             fill: "#fbbf24",
             italic: true,
             anchor: "middle",

@@ -2,10 +2,10 @@
   "compose": {
     "viewBox": {
       "width": 900,
-      "height": 1050
+      "height": 1400
     },
-    "title": "A skyscraper at dusk — the city in one column",
-    "description": "Modernist glass tower at last light. A steel skeleton sheathed in a curtain wall of windows. Sullivan, 1896: form follows function. Mies, 1958 (Seagram Building): glass plus rhythm = the 20th century.",
+    "title": "Empire State — modernist tower at dusk, Art Deco draft",
+    "description": "Steel-frame modernist tower in profile, drawn in the spirit of a 1930s architect's rendering. Three-tier setback massing inspired by the Empire State Building (1931): a wide limestone base, narrower middle shaft, slender upper shaft, and an Art-Deco crown with stepped arches feeding into a needle spire. Adjacent buildings, moon, sunset gradient. Sullivan (1896): form follows function.",
     "theme": {
       "background": "#0c1126",
       "foreground": "#fef3c7"
@@ -22,16 +22,16 @@
           "stops": [
             {
               "offset": "0%",
-              "color": "#1e3a8a",
+              "color": "#1e1b4b",
               "opacity": 1
             },
             {
-              "offset": "35%",
+              "offset": "30%",
               "color": "#7c2d12",
               "opacity": 1
             },
             {
-              "offset": "65%",
+              "offset": "60%",
               "color": "#dc2626",
               "opacity": 1
             },
@@ -52,17 +52,17 @@
           "stops": [
             {
               "offset": "0%",
-              "color": "#0c4a6e",
+              "color": "#374151",
               "opacity": 1
             },
             {
               "offset": "50%",
-              "color": "#1e3a8a",
+              "color": "#4b5563",
               "opacity": 1
             },
             {
               "offset": "100%",
-              "color": "#0c1e3a",
+              "color": "#1f2937",
               "opacity": 1
             }
           ]
@@ -77,17 +77,17 @@
           "stops": [
             {
               "offset": "0%",
-              "color": "#fbbf24",
-              "opacity": 0.5
+              "color": "#fde68a",
+              "opacity": 0.42
             },
             {
               "offset": "60%",
               "color": "#dc2626",
-              "opacity": 0.15
+              "opacity": 0.12
             },
             {
               "offset": "100%",
-              "color": "#fbbf24",
+              "color": "#fde68a",
               "opacity": 0
             }
           ]
@@ -136,13 +136,13 @@
         {
           "id": "p-windows",
           "width": 28,
-          "height": 40,
+          "height": 36,
           "children": [
             {
               "kind": "rect",
-              "x": 4,
+              "x": 5,
               "y": 6,
-              "width": 9,
+              "width": 8,
               "height": 14,
               "fill": "#fde68a"
             },
@@ -150,55 +150,55 @@
               "kind": "rect",
               "x": 15,
               "y": 6,
-              "width": 9,
+              "width": 8,
               "height": 14,
               "fill": "#fbbf24"
             },
             {
               "kind": "rect",
-              "x": 4,
-              "y": 24,
-              "width": 9,
-              "height": 14,
+              "x": 5,
+              "y": 22,
+              "width": 8,
+              "height": 10,
               "fill": "rgba(253,230,138,.35)"
             },
             {
               "kind": "rect",
               "x": 15,
-              "y": 24,
-              "width": 9,
-              "height": 14,
+              "y": 22,
+              "width": 8,
+              "height": 10,
               "fill": "#fde68a"
             }
           ]
         },
         {
           "id": "p-adj-windows",
-          "width": 18,
-          "height": 24,
+          "width": 16,
+          "height": 22,
           "children": [
             {
               "kind": "rect",
-              "x": 3,
-              "y": 4,
-              "width": 5,
-              "height": 8,
+              "x": 2,
+              "y": 3,
+              "width": 4,
+              "height": 7,
               "fill": "#fde68a"
             },
             {
               "kind": "rect",
-              "x": 10,
-              "y": 4,
-              "width": 5,
-              "height": 8,
+              "x": 9,
+              "y": 3,
+              "width": 4,
+              "height": 7,
               "fill": "rgba(253,230,138,.4)"
             },
             {
               "kind": "rect",
-              "x": 3,
-              "y": 14,
-              "width": 5,
-              "height": 8,
+              "x": 2,
+              "y": 13,
+              "width": 4,
+              "height": 7,
               "fill": "#fde68a"
             }
           ]
@@ -213,15 +213,15 @@
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 0 0 L 900 0 L 900 980 L 0 980 Z",
+          "d": "M 0 0 L 900 0 L 900 1340 L 0 1340 Z",
           "fill": "url(#g-dusk)",
           "stroke": "none"
         }
       },
       {
         "at": {
-          "x": 740,
-          "y": 140
+          "x": 720,
+          "y": 200
         },
         "mark": "circle",
         "circle": {
@@ -233,8 +233,8 @@
       },
       {
         "at": {
-          "x": 732,
-          "y": 130
+          "x": 712,
+          "y": 190
         },
         "mark": "circle",
         "circle": {
@@ -244,8 +244,8 @@
       },
       {
         "at": {
-          "x": 750,
-          "y": 138
+          "x": 730,
+          "y": 198
         },
         "mark": "circle",
         "circle": {
@@ -255,8 +255,8 @@
       },
       {
         "at": {
-          "x": 738,
-          "y": 152
+          "x": 718,
+          "y": 212
         },
         "mark": "circle",
         "circle": {
@@ -271,13 +271,13 @@
         },
         "mark": "starfield",
         "starfield": {
-          "count": 35,
+          "count": 40,
           "seed": 47,
           "region": {
             "x": 0,
             "y": 0,
             "w": 900,
-            "h": 250
+            "h": 320
           }
         }
       },
@@ -288,7 +288,7 @@
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 0 600 L 80 600 L 80 980 L 0 980 Z M 80 680 L 180 680 L 180 980 L 80 980 Z M 180 720 L 250 720 L 250 980 L 180 980 Z",
+          "d": "M 0 920 L 80 920 L 80 1340 L 0 1340 Z M 80 1020 L 200 1020 L 200 1340 L 80 1340 Z M 200 980 L 280 980 L 280 1340 L 200 1340 Z",
           "fill": "#0c1126",
           "stroke": "#1d2444",
           "strokeWidth": 1
@@ -301,7 +301,7 @@
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 620 540 L 700 540 L 700 980 L 620 980 Z M 700 660 L 800 660 L 800 980 L 700 980 Z M 800 600 L 880 600 L 880 980 L 800 980 Z M 880 700 L 900 700 L 900 980 L 880 980 Z",
+          "d": "M 620 900 L 720 900 L 720 1340 L 620 1340 Z M 720 1000 L 820 1000 L 820 1340 L 720 1340 Z M 820 940 L 900 940 L 900 1340 L 820 1340 Z",
           "fill": "#0c1126",
           "stroke": "#1d2444",
           "strokeWidth": 1
@@ -314,7 +314,7 @@
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 0 600 L 80 600 L 80 980 L 0 980 Z M 80 680 L 180 680 L 180 980 L 80 980 Z M 180 720 L 250 720 L 250 980 L 180 980 Z M 620 540 L 700 540 L 700 980 L 620 980 Z M 700 660 L 800 660 L 800 980 L 700 980 Z M 800 600 L 880 600 L 880 980 L 800 980 Z M 880 700 L 900 700 L 900 980 L 880 980 Z",
+          "d": "M 0 920 L 80 920 L 80 1340 L 0 1340 Z M 80 1020 L 200 1020 L 200 1340 L 80 1340 Z M 200 980 L 280 980 L 280 1340 L 200 1340 Z M 620 900 L 720 900 L 720 1340 L 620 1340 Z M 720 1000 L 820 1000 L 820 1340 L 720 1340 Z M 820 940 L 900 940 L 900 1340 L 820 1340 Z",
           "fill": "url(#p-adj-windows)",
           "stroke": "none",
           "opacity": 0.55
@@ -327,7 +327,7 @@
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 320 980 L 320 150 L 350 150 L 350 80 L 550 80 L 550 150 L 580 150 L 580 980 Z",
+          "d": "M 280 1340 L 280 1100 L 620 1100 L 620 1340 Z",
           "fill": "url(#g-tower)",
           "stroke": "#0c4a6e",
           "strokeWidth": 2
@@ -340,9 +340,152 @@
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 332 170 L 568 170 L 568 890 L 332 890 Z",
+          "d": "M 294 1300 L 606 1300 L 606 1130 L 294 1130 Z",
           "fill": "url(#p-windows)",
           "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 310,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 1110], [0, 1310]],
+          "fill": "none",
+          "stroke": "rgba(31,30,40,.7)",
+          "strokeWidth": 1.2
+        }
+      },
+      {
+        "at": {
+          "x": 338,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 1110], [0, 1310]],
+          "fill": "none",
+          "stroke": "rgba(31,30,40,.7)",
+          "strokeWidth": 1.2
+        }
+      },
+      {
+        "at": {
+          "x": 366,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 1110], [0, 1310]],
+          "fill": "none",
+          "stroke": "rgba(31,30,40,.7)",
+          "strokeWidth": 1.2
+        }
+      },
+      {
+        "at": {
+          "x": 394,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 1110], [0, 1310]],
+          "fill": "none",
+          "stroke": "rgba(31,30,40,.7)",
+          "strokeWidth": 1.2
+        }
+      },
+      {
+        "at": {
+          "x": 422,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 1110], [0, 1310]],
+          "fill": "none",
+          "stroke": "rgba(31,30,40,.7)",
+          "strokeWidth": 1.2
+        }
+      },
+      {
+        "at": {
+          "x": 478,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 1110], [0, 1310]],
+          "fill": "none",
+          "stroke": "rgba(31,30,40,.7)",
+          "strokeWidth": 1.2
+        }
+      },
+      {
+        "at": {
+          "x": 506,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 1110], [0, 1310]],
+          "fill": "none",
+          "stroke": "rgba(31,30,40,.7)",
+          "strokeWidth": 1.2
+        }
+      },
+      {
+        "at": {
+          "x": 534,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 1110], [0, 1310]],
+          "fill": "none",
+          "stroke": "rgba(31,30,40,.7)",
+          "strokeWidth": 1.2
+        }
+      },
+      {
+        "at": {
+          "x": 562,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 1110], [0, 1310]],
+          "fill": "none",
+          "stroke": "rgba(31,30,40,.7)",
+          "strokeWidth": 1.2
+        }
+      },
+      {
+        "at": {
+          "x": 590,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 1110], [0, 1310]],
+          "fill": "none",
+          "stroke": "rgba(31,30,40,.7)",
+          "strokeWidth": 1.2
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 1104
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 274 0 L 626 0 L 626 14 L 274 14 Z",
+          "fill": "#1f2937",
+          "stroke": "#fde68a",
+          "strokeWidth": 1.4
         }
       },
       {
@@ -352,9 +495,10 @@
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 360 90 L 540 90 L 540 145 L 360 145 Z",
-          "fill": "url(#p-windows)",
-          "stroke": "none"
+          "d": "M 330 1100 L 330 600 L 570 600 L 570 1100 Z",
+          "fill": "url(#g-tower)",
+          "stroke": "#0c4a6e",
+          "strokeWidth": 2
         }
       },
       {
@@ -364,32 +508,159 @@
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 332 170 L 568 170 L 568 890 L 332 890 Z",
+          "d": "M 340 1090 L 560 1090 L 560 620 L 340 620 Z",
+          "fill": "url(#p-windows)",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 604
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 325 0 L 575 0 L 575 12 L 325 12 Z",
+          "fill": "#1f2937",
+          "stroke": "#fde68a",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 370 600 L 370 320 L 530 320 L 530 600 Z",
+          "fill": "url(#g-tower)",
+          "stroke": "#0c4a6e",
+          "strokeWidth": 2
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 378 594 L 522 594 L 522 335 L 378 335 Z",
+          "fill": "url(#p-windows)",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 324
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 366 0 L 534 0 L 534 10 L 366 10 Z",
+          "fill": "#1f2937",
+          "stroke": "#fde68a",
+          "strokeWidth": 1.2
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 408 320 L 408 180 L 492 180 L 492 320 Z",
+          "fill": "url(#g-tower)",
+          "stroke": "#0c4a6e",
+          "strokeWidth": 2
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 414 316 L 486 316 L 486 190 L 414 190 Z",
+          "fill": "url(#p-windows)",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -42 230 L -42 210 Q -42 190, 0 190 Q 42 190, 42 210 L 42 230",
+          "fill": "url(#g-tower)",
+          "stroke": "#0c1126",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -28 212 L -28 192 Q -28 172, 0 172 Q 28 172, 28 192 L 28 212",
+          "fill": "url(#g-tower)",
+          "stroke": "#0c1126",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -14 194 L -14 174 Q -14 154, 0 154 Q 14 154, 14 174 L 14 194",
+          "fill": "url(#g-tower)",
+          "stroke": "#0c1126",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 294 1300 L 606 1300 L 606 1130 L 294 1130 Z",
           "fill": "url(#g-reflect)",
           "stroke": "none"
         }
       },
       {
         "at": {
-          "x": 450,
-          "y": 20
+          "x": 0,
+          "y": 0
         },
-        "mark": "polyline",
-        "polyline": {
-          "points": [[0, 0], [0, 60]],
-          "fill": "none",
-          "stroke": "#0c1126",
-          "strokeWidth": 3
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 444 180 L 456 180 L 453 80 L 450 60 L 447 80 Z",
+          "fill": "#1f2937",
+          "stroke": "#fde68a",
+          "strokeWidth": 1.4
         }
       },
       {
         "at": {
           "x": 450,
-          "y": 24
+          "y": 66
         },
         "mark": "circle",
         "circle": {
-          "radius": 4,
+          "radius": 4.5,
           "fill": "#dc2626",
           "stroke": "#7c2d12",
           "strokeWidth": 0.5
@@ -397,25 +668,25 @@
         "animation": {
           "kind": "pulse",
           "periodMs": 1500,
-          "scale": 1.5
+          "scale": 1.6
         }
       },
       {
         "at": {
           "x": 0,
-          "y": 980
+          "y": 1340
         },
         "mark": "silhouette-path",
         "silhouettePath": {
-          "d": "M 0 0 L 900 0 L 900 70 L 0 70 Z",
+          "d": "M 0 0 L 900 0 L 900 60 L 0 60 Z",
           "fill": "url(#g-ground)",
           "stroke": "none"
         }
       },
       {
         "at": {
-          "x": 140,
-          "y": 1002
+          "x": 120,
+          "y": 1362
         },
         "mark": "circle",
         "circle": {
@@ -428,7 +699,7 @@
       {
         "at": {
           "x": 280,
-          "y": 1002
+          "y": 1362
         },
         "mark": "circle",
         "circle": {
@@ -441,7 +712,7 @@
       {
         "at": {
           "x": 440,
-          "y": 1002
+          "y": 1362
         },
         "mark": "circle",
         "circle": {
@@ -453,8 +724,8 @@
       },
       {
         "at": {
-          "x": 620,
-          "y": 1002
+          "x": 600,
+          "y": 1362
         },
         "mark": "circle",
         "circle": {
@@ -466,8 +737,8 @@
       },
       {
         "at": {
-          "x": 760,
-          "y": 1002
+          "x": 780,
+          "y": 1362
         },
         "mark": "circle",
         "circle": {
@@ -480,11 +751,11 @@
       {
         "at": {
           "x": 450,
-          "y": 36
+          "y": 38
         },
         "mark": "text",
         "textMark": {
-          "text": "form follows function · Sullivan, 1896",
+          "text": "form follows function · Sullivan, 1896 · Empire State, 1931",
           "fontSize": 13,
           "fill": "#fef3c7",
           "italic": true,
@@ -494,12 +765,12 @@
       {
         "at": {
           "x": 450,
-          "y": 1025
+          "y": 1380
         },
         "mark": "text",
         "textMark": {
-          "text": "steel frame · curtain wall · the city in one column",
-          "fontSize": 13,
+          "text": "steel frame · limestone clad · 102 stories · 381 m to roof · 443 m to needle",
+          "fontSize": 12,
           "fill": "#fbbf24",
           "italic": true,
           "anchor": "middle"
