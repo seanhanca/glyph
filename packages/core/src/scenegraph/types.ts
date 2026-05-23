@@ -203,6 +203,64 @@ export type SceneMark =
        * so SVG viewers run the animation. Undefined for static groups.
        */
       readonly loopAnimationXml?: string;
+      /** RFC #9 — optional id emitted on the `<g>` element. */
+      readonly id?: string;
+    }
+  | {
+      /** RFC #9 — gradient def emitted inside the SVG `<defs>` block.
+       *  Compiler walks the spec's `defs.gradients` and emits one of
+       *  these per gradient. Renderer collects all gradient-def marks
+       *  into a single `<defs>` block at the start of the output. */
+      readonly type: "gradient-def";
+      readonly id: string;
+      readonly kind: "linear" | "radial";
+      readonly attrs: Record<string, string>;
+      readonly stops: ReadonlyArray<{ readonly offset: string; readonly color: string; readonly opacity?: number }>;
+    }
+  | {
+      /** RFC #9 — pattern def emitted inside the SVG `<defs>` block. */
+      readonly type: "pattern-def";
+      readonly id: string;
+      readonly width: number;
+      readonly height: number;
+      readonly patternTransform?: string;
+      readonly children: ReadonlyArray<SceneMark>;
+    }
+  | {
+      /** RFC #9 — ellipse primitive (sunflower petals, savannah haze). */
+      readonly type: "ellipse";
+      readonly cx: number;
+      readonly cy: number;
+      readonly rx: number;
+      readonly ry: number;
+      readonly fill: string;
+      readonly stroke?: string;
+      readonly strokeWidth?: number;
+      readonly opacity?: number;
+      readonly rotateDeg?: number;
+    }
+  | {
+      /** RFC #9 — polygon primitive (closed shape from point list). */
+      readonly type: "polygon";
+      readonly points: ReadonlyArray<readonly [number, number]>;
+      readonly fill: string;
+      readonly stroke?: string;
+      readonly strokeWidth?: number;
+    }
+  | {
+      /** RFC #9 — polyline primitive (open shape from point list). */
+      readonly type: "polyline";
+      readonly points: ReadonlyArray<readonly [number, number]>;
+      readonly fill: string;
+      readonly stroke: string;
+      readonly strokeWidth: number;
+      readonly strokeDasharray?: string;
+    }
+  | {
+      /** RFC #9 — raw-svg escape hatch. The xml string is inserted
+       *  verbatim. Validated upstream by the schema's allowlist regex. */
+      readonly type: "raw-svg";
+      readonly xml: string;
     };
 
 /**

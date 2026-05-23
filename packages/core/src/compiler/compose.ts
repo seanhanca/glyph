@@ -11,16 +11,25 @@
 
 import { emitLoopAnimation } from "../animation/loops.js";
 import type { Scene, SceneMark } from "../scenegraph/types.js";
+import { ICON_LIBRARY } from "../icons/library.js";
 import type {
   AnnotationMarkConfig,
   CircleMarkConfig,
   ComposeChild,
   ComposeSpec,
+  EllipseConfig,
   FrameMarkConfig,
   GearMarkConfig,
+  GlowConfig,
   HeartIconConfig,
+  IconConfig,
   PendulumMarkConfig,
+  PolygonConfig,
+  PolylineConfig,
+  RawSvgConfig,
+  SilhouettePathConfig,
   SliderCrankConfig,
+  StarfieldConfig,
   TextMarkConfig,
   WankelRotorConfig,
 } from "../spec/compose-schema.js";
@@ -46,6 +55,75 @@ export function compileCompose(spec: ComposeSpec): Scene {
     });
   }
 
+  // RFC #9 — emit `<defs>` first. gradient-def and pattern-def
+  // SceneMarks are collected at the front of the marks array so the
+  // renderer's <defs> block picks them up before any content marks.
+  if (spec.defs?.gradients) {
+    for (const g of spec.defs.gradients) {
+      const attrs: Record<string, string> =
+        g.kind === "linear"
+          ? { x1: g.x1, y1: g.y1, x2: g.x2, y2: g.y2 }
+          : { cx: g.cx, cy: g.cy, r: g.r };
+      marks.push({
+        type: "gradient-def",
+        id: g.id,
+        kind: g.kind,
+        attrs,
+        // exactOptionalPropertyTypes wants the opacity property
+        // ABSENT (not =undefined) on stops without explicit opacity.
+        // Filter undefineds out so the SceneMark variant matches.
+        stops: g.stops.map((s) =>
+          s.opacity !== undefined
+            ? { offset: s.offset, color: s.color, opacity: s.opacity }
+            : { offset: s.offset, color: s.color },
+        ),
+      });
+    }
+  }
+  if (spec.defs?.patterns) {
+    for (const p of spec.defs.patterns) {
+      const children: SceneMark[] = p.children.map((c) => {
+        if (c.kind === "line")
+          return {
+            type: "line" as const,
+            x1: c.x1,
+            y1: c.y1,
+            x2: c.x2,
+            y2: c.y2,
+            stroke: c.stroke,
+            strokeWidth: c.strokeWidth,
+          };
+        if (c.kind === "rect")
+          return {
+            type: "rect" as const,
+            x: c.x,
+            y: c.y,
+            width: c.width,
+            height: c.height,
+            fill: c.fill,
+          };
+        return {
+          type: "circle" as const,
+          cx: c.cx,
+          cy: c.cy,
+          r: c.r,
+          fill: c.fill,
+        };
+      });
+      const patternMark: SceneMark = p.patternTransform
+        ? {
+            type: "pattern-def",
+            id: p.id,
+            width: p.width,
+            height: p.height,
+            patternTransform: p.patternTransform,
+            children,
+          }
+        : { type: "pattern-def", id: p.id, width: p.width, height: p.height, children };
+      marks.push(patternMark);
+    }
+  }
+
   // Optional graph-paper grid (RFC #8). Drawn before children so it
   // sits behind the schematic.
   if (spec.theme?.gridPattern === "graph-paper") {
@@ -57,20 +135,17 @@ export function compileCompose(spec: ComposeSpec): Scene {
     const groupChildren = compileChild(child);
     if (groupChildren.length === 0) continue;
     const animXml = emitLoopAnimation(child.animation);
-    const group: SceneMark = animXml
-      ? {
-          type: "group",
-          translateX: child.at.x,
-          translateY: child.at.y,
-          children: groupChildren,
-          loopAnimationXml: animXml,
-        }
-      : {
-          type: "group",
-          translateX: child.at.x,
-          translateY: child.at.y,
-          children: groupChildren,
-        };
+    // Construct the group mark via conditional spread so that the
+    // exactOptionalPropertyTypes compiler strictness doesn't complain
+    // when id / loopAnimationXml are undefined.
+    const base = {
+      type: "group" as const,
+      translateX: child.at.x,
+      translateY: child.at.y,
+      children: groupChildren,
+    };
+    const withId: SceneMark = child.id ? { ...base, id: child.id } : base;
+    const group: SceneMark = animXml ? { ...withId, loopAnimationXml: animXml } : withId;
     marks.push(group);
   }
 
@@ -103,6 +178,16 @@ function compileChild(child: ComposeChild): SceneMark[] {
     return compileSliderCrank(child.sliderCrank);
   if (child.mark === "wankel-rotor" && child.wankelRotor)
     return compileWankelRotor(child.wankelRotor);
+  // RFC #9 additions
+  if (child.mark === "starfield" && child.starfield) return compileStarfield(child.starfield);
+  if (child.mark === "glow" && child.glow) return compileGlow(child.glow);
+  if (child.mark === "silhouette-path" && child.silhouettePath)
+    return compileSilhouettePath(child.silhouettePath);
+  if (child.mark === "icon" && child.icon) return compileIcon(child.icon);
+  if (child.mark === "ellipse" && child.ellipse) return compileEllipse(child.ellipse);
+  if (child.mark === "polygon" && child.polygon) return compilePolygon(child.polygon);
+  if (child.mark === "polyline" && child.polyline) return compilePolyline(child.polyline);
+  if (child.mark === "raw-svg" && child.rawSvg) return compileRawSvg(child.rawSvg);
   return [];
 }
 
@@ -619,4 +704,167 @@ export function compileWankelRotor(cfg: WankelRotorConfig): SceneMark[] {
     // Rotor bearing center
     { type: "circle", cx: 0, cy: 0, r: 4, fill: "#4a3f30" },
   ];
+}
+
+/* ----------------------------------------------------------------
+ *  RFC #9 — decorative-primitive compilers
+ * ---------------------------------------------------------------- */
+
+/** Park-Miller LCG. Deterministic, byte-stable across platforms.
+ *  Same seed → same sequence, every call. Used by the starfield. */
+function makeRng(seed: number): () => number {
+  let state = seed >>> 0;
+  if (state === 0) state = 1; // avoid degenerate zero state
+  return () => {
+    state = (state * 48271) % 0x7fffffff;
+    return state / 0x7fffffff;
+  };
+}
+
+/**
+ * Starfield: N stars placed deterministically in a rect region. Each
+ * star is one `<circle>` SceneMark with size + color picked from the
+ * cfg. Stars alternate between colorA/colorB so the rendered field
+ * has gentle variation without needing per-star color config.
+ *
+ * When `twinkleMs > 0` an `<animate>` opacity oscillation is
+ * attached to each star — but the implementation is deferred to
+ * RFC #10's `attribute-animate` machinery so for now we emit
+ * static stars.
+ */
+export function compileStarfield(cfg: StarfieldConfig): SceneMark[] {
+  const rng = makeRng(cfg.seed);
+  const out: SceneMark[] = [];
+  for (let i = 0; i < cfg.count; i++) {
+    const x = cfg.region.x + rng() * cfg.region.w;
+    const y = cfg.region.y + rng() * cfg.region.h;
+    const r = cfg.radiusMin + rng() * (cfg.radiusMax - cfg.radiusMin);
+    const fill = i % 2 === 0 ? cfg.colorA : cfg.colorB;
+    out.push({
+      type: "circle",
+      cx: Number(x.toFixed(3)),
+      cy: Number(y.toFixed(3)),
+      r: Number(r.toFixed(3)),
+      fill,
+    });
+  }
+  return out;
+}
+
+/**
+ * Glow: a circle filled with a radial gradient at the group's origin.
+ * The gradient must be defined in `spec.defs.gradients` and
+ * referenced here by id. Optional `pulseMs > 0` adds a SMIL
+ * `<animate>` on `r` for the breathing effect — implemented via
+ * RFC #10's attribute-animate later; for now the radius is static.
+ */
+export function compileGlow(cfg: GlowConfig): SceneMark[] {
+  return [
+    {
+      type: "circle",
+      cx: 0,
+      cy: 0,
+      r: cfg.radius,
+      fill: `url(#${cfg.gradientId})`,
+    },
+  ];
+}
+
+/** Silhouette-path: raw d-string with fill + optional stroke. */
+export function compileSilhouettePath(cfg: SilhouettePathConfig): SceneMark[] {
+  const base = {
+    type: "path" as const,
+    d: cfg.d,
+    fill: cfg.fill,
+  };
+  const opacityBit = cfg.opacity !== undefined ? { opacity: cfg.opacity } : {};
+  const strokeBits =
+    cfg.stroke !== undefined
+      ? {
+          stroke: cfg.stroke,
+          ...(cfg.strokeWidth !== undefined ? { strokeWidth: cfg.strokeWidth } : {}),
+          ...(cfg.strokeDasharray !== undefined
+            ? { strokeDasharray: cfg.strokeDasharray }
+            : {}),
+        }
+      : {};
+  return [{ ...base, ...strokeBits, ...opacityBit } as SceneMark];
+}
+
+/**
+ * Icon: look up `id` in the ICON_LIBRARY, scale the unit-sized path
+ * to the requested size, emit one `<path>` SceneMark. The icon's
+ * native viewBox is [-0.5, +0.5] so size scales it to the desired
+ * extent (size = 40 → icon spans 40 px).
+ */
+export function compileIcon(cfg: IconConfig): SceneMark[] {
+  const entry = ICON_LIBRARY[cfg.id];
+  if (!entry) return [];
+  // Scale the d-string's coordinates by `size`. Since the unit
+  // viewBox is [-0.5, +0.5], multiplying coordinates by size gives
+  // the right extent. We rebuild the d-string by parsing numbers
+  // out of it. Path commands (letters) are preserved verbatim.
+  const scaled = entry.d.replace(/-?\d*\.?\d+(?:[eE][+-]?\d+)?/g, (n) => {
+    const v = Number.parseFloat(n) * cfg.size;
+    return Number(v.toFixed(3)).toString();
+  });
+  const out: SceneMark = {
+    type: "path",
+    d: scaled,
+    fill: cfg.fill,
+    ...(cfg.stroke !== undefined ? { stroke: cfg.stroke } : {}),
+    ...(cfg.strokeWidth !== undefined ? { strokeWidth: cfg.strokeWidth } : {}),
+  };
+  return [out];
+}
+
+/** Decorative ellipse at local origin, optionally rotated. */
+export function compileEllipse(cfg: EllipseConfig): SceneMark[] {
+  // If we need rotation, wrap in a group with a transform. For
+  // axis-aligned ellipses, emit directly.
+  const ellipse: SceneMark = {
+    type: "ellipse",
+    cx: 0,
+    cy: 0,
+    rx: cfg.rx,
+    ry: cfg.ry,
+    fill: cfg.fill,
+    ...(cfg.stroke !== undefined ? { stroke: cfg.stroke } : {}),
+    ...(cfg.strokeWidth !== undefined ? { strokeWidth: cfg.strokeWidth } : {}),
+    ...(cfg.opacity !== undefined ? { opacity: cfg.opacity } : {}),
+    ...(cfg.rotateDeg !== 0 ? { rotateDeg: cfg.rotateDeg } : {}),
+  };
+  return [ellipse];
+}
+
+/** Polygon — closed shape from point list. */
+export function compilePolygon(cfg: PolygonConfig): SceneMark[] {
+  return [
+    {
+      type: "polygon",
+      points: cfg.points,
+      fill: cfg.fill,
+      ...(cfg.stroke !== undefined ? { stroke: cfg.stroke } : {}),
+      ...(cfg.strokeWidth !== undefined ? { strokeWidth: cfg.strokeWidth } : {}),
+    },
+  ];
+}
+
+/** Polyline — open shape from point list. */
+export function compilePolyline(cfg: PolylineConfig): SceneMark[] {
+  return [
+    {
+      type: "polyline",
+      points: cfg.points,
+      fill: cfg.fill,
+      stroke: cfg.stroke,
+      strokeWidth: cfg.strokeWidth,
+      ...(cfg.strokeDasharray !== undefined ? { strokeDasharray: cfg.strokeDasharray } : {}),
+    },
+  ];
+}
+
+/** Raw-svg escape hatch. The xml is validated upstream; emit verbatim. */
+export function compileRawSvg(cfg: RawSvgConfig): SceneMark[] {
+  return [{ type: "raw-svg", xml: cfg.xml }];
 }

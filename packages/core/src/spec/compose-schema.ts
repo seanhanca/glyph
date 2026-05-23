@@ -149,6 +149,249 @@ export const WankelRotorSchema = z
   .strict();
 
 /** A single child in a compose scene — one mark at one position. */
+
+/** Theme overrides for a compose scene. RFC #8 adds presets. */
+export const ComposeThemeSchema = z
+  .object({
+    preset: z.enum(["pencil-parchment"]).optional(),
+    background: z.string().max(60).optional(),
+    foreground: z.string().max(40).optional(),
+    gridPattern: z.enum(["graph-paper", "none"]).default("none"),
+  })
+  .strict()
+  .optional();
+
+/* ----------------------------------------------------------------
+ *  RFC #9 — defs block: gradients + patterns
+ * ---------------------------------------------------------------- */
+
+/** A single color stop in a gradient. `offset` is a percentage like "55%". */
+export const GradientStopSchema = z
+  .object({
+    offset: z.string().regex(/^\d{1,3}(\.\d+)?%$/, "offset must be e.g. '0%' or '55.5%'"),
+    color: z.string().max(60),
+    opacity: z.number().min(0).max(1).optional(),
+  })
+  .strict();
+
+/** Linear gradient definition. Coordinates are percentages of the
+ *  fillee's bounding box (objectBoundingBox is the SVG default). */
+export const LinearGradientDefSchema = z
+  .object({
+    id: z.string().min(1).max(60),
+    kind: z.literal("linear"),
+    x1: z.string().default("0%"),
+    y1: z.string().default("0%"),
+    x2: z.string().default("100%"),
+    y2: z.string().default("0%"),
+    stops: z.array(GradientStopSchema).min(2).max(10),
+  })
+  .strict();
+
+/** Radial gradient definition. cx/cy/r are percentages of the fillee. */
+export const RadialGradientDefSchema = z
+  .object({
+    id: z.string().min(1).max(60),
+    kind: z.literal("radial"),
+    cx: z.string().default("50%"),
+    cy: z.string().default("50%"),
+    r: z.string().default("50%"),
+    stops: z.array(GradientStopSchema).min(2).max(10),
+  })
+  .strict();
+
+export const GradientDefSchema = z.union([LinearGradientDefSchema, RadialGradientDefSchema]);
+
+/** A primitive element inside a `<pattern>` def — line, rect, or circle.
+ *  Allowed shapes are SVG primitives the renderer already supports.
+ *  No nested groups; keep patterns visually flat. */
+export const PatternElementSchema = z.union([
+  z
+    .object({
+      kind: z.literal("line"),
+      x1: z.number(),
+      y1: z.number(),
+      x2: z.number(),
+      y2: z.number(),
+      stroke: z.string().max(60),
+      strokeWidth: z.number().min(0).max(20).default(1),
+    })
+    .strict(),
+  z
+    .object({
+      kind: z.literal("rect"),
+      x: z.number(),
+      y: z.number(),
+      width: z.number().positive(),
+      height: z.number().positive(),
+      fill: z.string().max(60),
+    })
+    .strict(),
+  z
+    .object({
+      kind: z.literal("circle"),
+      cx: z.number(),
+      cy: z.number(),
+      r: z.number().positive(),
+      fill: z.string().max(60),
+    })
+    .strict(),
+]);
+
+/** Pattern fill def. patternUnits defaults to "userSpaceOnUse" so the
+ *  width/height are absolute pixels, not bounding-box fractions. */
+export const PatternDefSchema = z
+  .object({
+    id: z.string().min(1).max(60),
+    width: z.number().positive().max(200),
+    height: z.number().positive().max(200),
+    patternTransform: z.string().max(80).optional(),
+    children: z.array(PatternElementSchema).min(1).max(20),
+  })
+  .strict();
+
+/** Top-level <defs> container — gradients + patterns. */
+export const ComposeDefsSchema = z
+  .object({
+    gradients: z.array(GradientDefSchema).max(32).optional(),
+    patterns: z.array(PatternDefSchema).max(32).optional(),
+  })
+  .strict()
+  .optional();
+
+/* ----------------------------------------------------------------
+ *  RFC #9 — new mark configs
+ * ---------------------------------------------------------------- */
+
+/** Starfield: N stars placed deterministically inside a rectangular
+ *  region. The seed drives a Park-Miller LCG so the same seed always
+ *  produces the same star positions. Optional twinkle adds a SMIL
+ *  opacity oscillation. */
+export const StarfieldSchema = z
+  .object({
+    count: z.number().int().min(1).max(500),
+    seed: z.number().int().min(0).max(0x7fffffff),
+    region: z
+      .object({
+        x: z.number(),
+        y: z.number(),
+        w: z.number().positive(),
+        h: z.number().positive(),
+      })
+      .strict(),
+    radiusMin: z.number().positive().max(10).default(0.5),
+    radiusMax: z.number().positive().max(10).default(1.2),
+    colorA: z.string().max(60).default("#ffffff"),
+    colorB: z.string().max(60).default("#cbd5e1"),
+    twinkleMs: z.number().int().min(0).max(60_000).default(0),
+  })
+  .strict();
+
+/** Glow: a radial-gradient halo around a center point, with optional
+ *  breathing pulse (SMIL `<animate attributeName="r">`). */
+export const GlowSchema = z
+  .object({
+    radius: z.number().positive().max(400),
+    gradientId: z.string().min(1).max(60),
+    pulseMs: z.number().int().min(0).max(60_000).default(0),
+    pulseDeltaR: z.number().min(0).max(40).default(2),
+  })
+  .strict();
+
+/** Silhouette-path: a raw SVG path `d` string with fill + stroke + an
+ *  optional draw-in animation. The `d` regex permits SVG path commands
+ *  and numeric whitespace only — no XML injection surface. */
+export const SilhouettePathSchema = z
+  .object({
+    d: z.string().regex(/^[ MmLlHhVvCcSsQqTtAaZz0-9.,\s+\-eE]+$/, "d must be a valid SVG path string"),
+    fill: z.string().max(60).default("none"),
+    stroke: z.string().max(60).optional(),
+    strokeWidth: z.number().min(0).max(20).optional(),
+    strokeDasharray: z.string().max(40).optional(),
+    strokeLinecap: z.enum(["butt", "round", "square"]).optional(),
+    strokeLinejoin: z.enum(["miter", "round", "bevel"]).optional(),
+    opacity: z.number().min(0).max(1).optional(),
+  })
+  .strict();
+
+/** Icon: reference to a pre-built icon in the library (id) at a given
+ *  size. The library entry contains the path `d` + viewBox. */
+export const IconSchema = z
+  .object({
+    id: z.enum(["heart", "spacecraft", "leopard", "sunflower", "flame", "lightning", "leaf", "star", "raindrop", "snowflake"]),
+    size: z.number().positive().max(400).default(40),
+    fill: z.string().max(60).default("#1f1a14"),
+    stroke: z.string().max(60).optional(),
+    strokeWidth: z.number().min(0).max(20).optional(),
+  })
+  .strict();
+
+/** Decorative ellipse — used for sunflower petals, savannah haze, etc. */
+export const EllipseSchema = z
+  .object({
+    rx: z.number().positive().max(800),
+    ry: z.number().positive().max(800),
+    fill: z.string().max(60),
+    stroke: z.string().max(60).optional(),
+    strokeWidth: z.number().min(0).max(20).optional(),
+    opacity: z.number().min(0).max(1).optional(),
+    rotateDeg: z.number().min(-360).max(360).default(0),
+  })
+  .strict();
+
+/** Polygon — closed shape from an explicit list of points. Used for
+ *  the Orion spacecraft body, Reuleaux triangles, etc. */
+export const PolygonSchema = z
+  .object({
+    points: z.array(z.tuple([z.number(), z.number()])).min(3).max(200),
+    fill: z.string().max(60).default("none"),
+    stroke: z.string().max(60).optional(),
+    strokeWidth: z.number().min(0).max(20).optional(),
+  })
+  .strict();
+
+/** Polyline — open shape from an explicit list of points. */
+export const PolylineSchema = z
+  .object({
+    points: z.array(z.tuple([z.number(), z.number()])).min(2).max(2000),
+    fill: z.string().max(60).default("none"),
+    stroke: z.string().max(60).default("#1f1a14"),
+    strokeWidth: z.number().min(0).max(20).default(1),
+    strokeDasharray: z.string().max(40).optional(),
+  })
+  .strict();
+
+/** Raw SVG escape hatch for plugin marks that need primitives the
+ *  SceneMark set doesn't cover (e.g. <filter>, <mask>, advanced
+ *  gradient stop chains). STRICTLY size-capped + regex-allowlisted
+ *  to block <script>, <foreignObject>, <image>, javascript:, on*=
+ *  event handlers. The 4 KB cap stops one DoS spec from inflating
+ *  the SVG. */
+const SAFE_SVG_REGEX = /^(?:(?!<\s*(?:script|foreignObject|image)\b)(?!\bon[a-z]+\s*=)(?!\bjavascript:)[\s\S])*$/i;
+export const RawSvgSchema = z
+  .object({
+    xml: z.string().min(1).max(4096).refine(
+      (s) => SAFE_SVG_REGEX.test(s),
+      "raw-svg xml contains forbidden tags (script, foreignObject, image) or event handlers",
+    ),
+  })
+  .strict();
+
+export type GradientStop = z.infer<typeof GradientStopSchema>;
+export type GradientDef = z.infer<typeof GradientDefSchema>;
+export type PatternElement = z.infer<typeof PatternElementSchema>;
+export type PatternDef = z.infer<typeof PatternDefSchema>;
+export type ComposeDefs = z.infer<typeof ComposeDefsSchema>;
+export type StarfieldConfig = z.infer<typeof StarfieldSchema>;
+export type GlowConfig = z.infer<typeof GlowSchema>;
+export type SilhouettePathConfig = z.infer<typeof SilhouettePathSchema>;
+export type IconConfig = z.infer<typeof IconSchema>;
+export type EllipseConfig = z.infer<typeof EllipseSchema>;
+export type PolygonConfig = z.infer<typeof PolygonSchema>;
+export type PolylineConfig = z.infer<typeof PolylineSchema>;
+export type RawSvgConfig = z.infer<typeof RawSvgSchema>;
+
+/** Top-level compose spec. */
 export const ComposeChildSchema = z
   .object({
     /** Absolute position on the parent canvas (top-left origin, SVG y-down). */
@@ -167,6 +410,10 @@ export const ComposeChildSchema = z
         h: z.number().positive(),
       })
       .optional(),
+    /** Optional id — emitted on the outer group `<g>` so other marks
+     *  (motion-along-path, attribute-animate via `set href`, etc.) can
+     *  reference this child. */
+    id: z.string().min(1).max(60).optional(),
     /** Which schematic mark this child renders, or `chart` for an embedded chart spec. */
     mark: z.enum([
       "frame",
@@ -179,6 +426,15 @@ export const ComposeChildSchema = z
       "heart-icon",
       "slider-crank",
       "wankel-rotor",
+      // RFC #9 additions
+      "starfield",
+      "glow",
+      "silhouette-path",
+      "icon",
+      "ellipse",
+      "polygon",
+      "polyline",
+      "raw-svg",
     ]),
     /** Mark-specific config; exactly one of these must match `mark`. */
     frame: FrameMarkSchema.optional(),
@@ -190,6 +446,15 @@ export const ComposeChildSchema = z
     heartIcon: HeartIconSchema.optional(),
     sliderCrank: SliderCrankSchema.optional(),
     wankelRotor: WankelRotorSchema.optional(),
+    // RFC #9 additions
+    starfield: StarfieldSchema.optional(),
+    glow: GlowSchema.optional(),
+    silhouettePath: SilhouettePathSchema.optional(),
+    icon: IconSchema.optional(),
+    ellipse: EllipseSchema.optional(),
+    polygon: PolygonSchema.optional(),
+    polyline: PolylineSchema.optional(),
+    rawSvg: RawSvgSchema.optional(),
     /**
      * `chart` mark: a nested Glyph chart spec (data + layers). The
      * compose compiler recursively calls compileSpec on this spec
@@ -216,6 +481,14 @@ export const ComposeChildSchema = z
       if (c.mark === "heart-icon") return c.heartIcon !== undefined;
       if (c.mark === "slider-crank") return c.sliderCrank !== undefined;
       if (c.mark === "wankel-rotor") return c.wankelRotor !== undefined;
+      if (c.mark === "starfield") return c.starfield !== undefined;
+      if (c.mark === "glow") return c.glow !== undefined;
+      if (c.mark === "silhouette-path") return c.silhouettePath !== undefined;
+      if (c.mark === "icon") return c.icon !== undefined;
+      if (c.mark === "ellipse") return c.ellipse !== undefined;
+      if (c.mark === "polygon") return c.polygon !== undefined;
+      if (c.mark === "polyline") return c.polyline !== undefined;
+      if (c.mark === "raw-svg") return c.rawSvg !== undefined;
       return false;
     },
     {
@@ -224,22 +497,13 @@ export const ComposeChildSchema = z
     },
   );
 
-/** Theme overrides for a compose scene. RFC #8 adds presets. */
-export const ComposeThemeSchema = z
-  .object({
-    preset: z.enum(["pencil-parchment"]).optional(),
-    background: z.string().max(40).optional(),
-    foreground: z.string().max(40).optional(),
-    gridPattern: z.enum(["graph-paper", "none"]).default("none"),
-  })
-  .strict()
-  .optional();
-
-/** Top-level compose spec. */
 export const ComposeSpecSchema = z
   .object({
     version: z.literal("glyph/0.1").optional(),
     title: z.string().max(120).optional(),
+    /** Long-form accessibility description emitted as `<desc>` inside
+     *  the root `<svg>`. Mirrors the chart-spec a11y contract. */
+    description: z.string().max(800).optional(),
     /** Canvas dimensions in SVG user units. */
     viewBox: z.object({
       width: z.number().int().positive().max(4000),
@@ -247,6 +511,10 @@ export const ComposeSpecSchema = z
     }),
     /** Theme / brand. RFC #8 adds the pencil-parchment preset. */
     theme: ComposeThemeSchema,
+    /** RFC #9 — `<defs>` block: gradients + patterns referenced by id. */
+    defs: ComposeDefsSchema,
+    /** RFC #11 — click-to-replay event triggering on the root <svg>. */
+    replayOnClick: z.boolean().default(false).optional(),
     /** Children — at least one. Cap at 64 to prevent DoS specs. */
     children: z.array(ComposeChildSchema).min(1).max(64),
   })

@@ -306,7 +306,55 @@ function renderMark(m: SceneMark, interactive: boolean): string {
       }
       const childrenSvg = m.children.map((c) => renderMark(c, interactive)).join("");
       const anim = m.loopAnimationXml ?? "";
-      return `<g transform="${transform}">${childrenSvg}${anim}</g>`;
+      const idAttr = m.id ? ` id="${esc(m.id)}"` : "";
+      return `<g${idAttr} transform="${transform}">${childrenSvg}${anim}</g>`;
+    }
+    case "gradient-def": {
+      // RFC #9 — emitted inside the `<defs>` block at the top of the
+      // SVG. The renderer's `renderSvg` collects all gradient-def +
+      // pattern-def marks into one `<defs>` block.
+      const tag = m.kind === "linear" ? "linearGradient" : "radialGradient";
+      const attrs = Object.entries(m.attrs)
+        .map(([k, v]) => `${k}="${esc(v)}"`)
+        .join(" ");
+      const stops = m.stops
+        .map(
+          (s) =>
+            `<stop offset="${esc(s.offset)}" stop-color="${esc(s.color)}"${
+              s.opacity !== undefined ? ` stop-opacity="${s.opacity}"` : ""
+            }/>`,
+        )
+        .join("");
+      return `<${tag} id="${esc(m.id)}" ${attrs}>${stops}</${tag}>`;
+    }
+    case "pattern-def": {
+      const transform = m.patternTransform ? ` patternTransform="${esc(m.patternTransform)}"` : "";
+      const childrenSvg = m.children.map((c) => renderMark(c, interactive)).join("");
+      return `<pattern id="${esc(m.id)}" width="${m.width}" height="${m.height}" patternUnits="userSpaceOnUse"${transform}>${childrenSvg}</pattern>`;
+    }
+    case "ellipse": {
+      const stroke = m.stroke ? ` stroke="${esc(m.stroke)}"` : "";
+      const sw = m.strokeWidth !== undefined ? ` stroke-width="${m.strokeWidth}"` : "";
+      const op = m.opacity !== undefined ? ` opacity="${m.opacity}"` : "";
+      const rot = m.rotateDeg !== undefined && m.rotateDeg !== 0
+        ? ` transform="rotate(${m.rotateDeg.toFixed(3)})"`
+        : "";
+      return `<ellipse cx="${m.cx}" cy="${m.cy}" rx="${m.rx}" ry="${m.ry}" fill="${esc(m.fill)}"${stroke}${sw}${op}${rot}/>`;
+    }
+    case "polygon": {
+      const pts = m.points.map(([x, y]) => `${x},${y}`).join(" ");
+      const stroke = m.stroke ? ` stroke="${esc(m.stroke)}"` : "";
+      const sw = m.strokeWidth !== undefined ? ` stroke-width="${m.strokeWidth}"` : "";
+      return `<polygon points="${pts}" fill="${esc(m.fill)}"${stroke}${sw}/>`;
+    }
+    case "polyline": {
+      const pts = m.points.map(([x, y]) => `${x},${y}`).join(" ");
+      const dash = m.strokeDasharray ? ` stroke-dasharray="${esc(m.strokeDasharray)}"` : "";
+      return `<polyline points="${pts}" fill="${esc(m.fill)}" stroke="${esc(m.stroke)}" stroke-width="${m.strokeWidth}"${dash}/>`;
+    }
+    case "raw-svg": {
+      // RFC #9 — verbatim SVG XML escape hatch. Schema-validated upstream.
+      return m.xml;
     }
   }
 }
@@ -655,9 +703,22 @@ export function renderSvg(scene: Scene): string {
     animKind === "stage-stagger"
       ? ((scene.animation as { stagger_ms?: number }).stagger_ms ?? 60)
       : 0;
-  const renderedMarks = scene.marks.map((m, i) =>
+  // RFC #9 — separate `<defs>`-bound marks (gradient-def, pattern-def)
+  // from regular content marks. The defs marks are emitted at the
+  // top inside a single `<defs>` block so SVG viewers resolve
+  // `url(#…)` references correctly. Content marks render in order.
+  const defsMarks: SceneMark[] = [];
+  const contentMarks: SceneMark[] = [];
+  for (const m of scene.marks) {
+    if (m.type === "gradient-def" || m.type === "pattern-def") defsMarks.push(m);
+    else contentMarks.push(m);
+  }
+  const renderedMarks = contentMarks.map((m, i) =>
     decorateMarkForAnimation(renderMark(m, interactive), i, scene, stagger),
   );
+  const composeDefsBlock = defsMarks.length > 0
+    ? `<defs>${defsMarks.map((d) => renderMark(d, interactive)).join("")}</defs>`
+    : "";
   const animClass =
     animKind === "stage"
       ? " glyph-stage"
@@ -689,7 +750,7 @@ export function renderSvg(scene: Scene): string {
   // SceneMark is present. Returns "" for scenes with no arrows so
   // existing snapshots stay byte-identical.
   const arrowDefs = renderArrowDefs(scene);
-  return `${head}${desc}${provenance}${hoverStyle}${crossfilterStyle}${animationStyle}${uncertaintyStyle}${arrowDefs}${bg}${title}${grid}${marks}${axes}${timelineCaptions}${uncertaintyOverlay}${legends}</svg>\n`;
+  return `${head}${desc}${provenance}${hoverStyle}${crossfilterStyle}${animationStyle}${uncertaintyStyle}${arrowDefs}${composeDefsBlock}${bg}${title}${grid}${marks}${axes}${timelineCaptions}${uncertaintyOverlay}${legends}</svg>\n`;
 }
 
 // E3 — timeline animation: assemble the per-scene mark groups.
