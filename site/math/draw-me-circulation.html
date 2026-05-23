@@ -4,36 +4,36 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="dark">
-<title>Draw me an eye — Claude × Glyph showcase</title>
-<meta name="description" content="Draw me an eye. A Claude × Glyph showcase: one English prompt, one compose JSON spec, one byte-locked SVG.">
-<meta property="og:title" content="Draw me an eye — Life in Glyph">
-<meta property="og:description" content="The camera nature evolved 40 separate times. You asked Claude. Glyph drew it — from a compose spec. Almond sclera, radial-fiber iris, black pupil, a catchlight reflecting the world.">
+<title>Draw me a heart + circulation — Claude × Glyph showcase</title>
+<meta name="description" content="Draw me a heart + circulation. A Claude × Glyph showcase: one English prompt, one compose JSON spec, one byte-locked SVG.">
+<meta property="og:title" content="Draw me a heart + circulation — Life in Glyph">
+<meta property="og:description" content="The engine of you. You asked Claude. Glyph drew it — from a compose spec, with a real SMIL pulse animation on the heart muscle. Anatomical front view: four chambers, the great vessels, the lungs. Pencil on parchment.">
 <style>
   :root {
     --bg-deep: #02030a;
     --panel: #0c1126;
     --panel-edge: #1d2444;
     --ink: #f1f5fb;
-    --muted: #fde68a;
-    --primary: #7dd3fc;
-    --primary-soft: rgba(125,211,252,.10);
-    --primary-edge: rgba(125,211,252,.35);
-    --alt2: #fbbf24;
-    --stage-bg: #1a0f0a;
+    --muted: #94a3b8;
+    --primary: #dc2626;
+    --primary-soft: rgba(220,38,38,.08);
+    --primary-edge: rgba(220,38,38,.35);
+    --alt2: #1d4ed8;
+    --stage-bg: #f5edd9;
     --font-sans: -apple-system, "Helvetica Neue", system-ui, "Segoe UI", sans-serif;
     --font-mono: "SF Mono", "Cascadia Code", ui-monospace, monospace;
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0;background:var(--bg-deep);color:var(--ink);font-family:var(--font-sans);-webkit-font-smoothing:antialiased;line-height:1.6}
   body{background:
-    radial-gradient(ellipse at 50% 18%, rgba(125,211,252,.10), transparent 55%),
+    radial-gradient(ellipse at 50% 18%, rgba(220,38,38,.08), transparent 55%),
     radial-gradient(ellipse at 80% 80%, rgba(125,211,252,.04), transparent 55%),
     var(--bg-deep);
     min-height:100vh}
   a{color:var(--primary);text-underline-offset:3px}
   h1,h2,h3{margin:0 0 .4em;letter-spacing:-.015em;line-height:1.15}
-  h1{font-size:clamp(2.4rem,6vw,4.2rem);font-weight:800;background:linear-gradient(180deg, #fde68a, #fbbf24, #7dd3fc);-webkit-background-clip:text;background-clip:text;color:transparent}
-  h2{font-size:clamp(1.6rem,3.5vw,2.4rem);font-weight:700;color:#bae6fd}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);font-weight:800;background:linear-gradient(180deg, #fecaca, #dc2626, #7c2d12);-webkit-background-clip:text;background-clip:text;color:transparent}
+  h2{font-size:clamp(1.6rem,3.5vw,2.4rem);font-weight:700;color:#fca5a5}
   h3{font-size:1.18rem;font-weight:600;color:var(--ink)}
   p{margin:0 0 1em}
   .container{max-width:1100px;margin:0 auto;padding:0 24px}
@@ -54,7 +54,7 @@
   .hero p.lede strong{color:var(--ink)}
   .hero p.byline{color:var(--muted);font-size:.92rem;margin-top:24px;font-style:italic}
 
-  .prompt-card{margin:32px auto 24px;max-width:760px;background:linear-gradient(180deg, rgba(125,211,252,.10), rgba(125,211,252,.03));border:1px solid var(--panel-edge);border-radius:18px;padding:28px 32px}
+  .prompt-card{margin:32px auto 24px;max-width:760px;background:linear-gradient(180deg, rgba(220,38,38,.08), rgba(125,211,252,.03));border:1px solid var(--panel-edge);border-radius:18px;padding:28px 32px}
   .prompt-card .label{display:inline-block;font-size:.74rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--alt2);margin-bottom:10px}
   .prompt-card blockquote{margin:0;font-family:var(--font-mono);font-size:1.04rem;line-height:1.7;color:var(--ink);padding-left:18px;border-left:3px solid var(--primary)}
   .prompt-card .who{margin-top:14px;font-size:.86rem;color:var(--muted)}
@@ -74,12 +74,12 @@
   .timeline-card h3{margin-bottom:8px}
   .timeline-card p{font-size:.96rem;color:var(--muted);margin:0}
 
-  .reveal{padding:48px 0;border-top:1px solid var(--panel-edge);background:linear-gradient(180deg, rgba(125,211,252,.10), transparent 40%)}
+  .reveal{padding:48px 0;border-top:1px solid var(--panel-edge);background:linear-gradient(180deg, rgba(220,38,38,.08), transparent 40%)}
   .reveal h2{text-align:center}
   .reveal > .container > p.lede{color:var(--muted);text-align:center;max-width:60ch;margin:0 auto 32px;font-size:1.02rem}
   .reveal-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;max-width:1080px;margin:0 auto}
   @media (max-width:880px){.reveal-grid{grid-template-columns:1fr}}
-  .reveal-side h3{margin-bottom:10px;display:flex;align-items:center;gap:10px;color:#bae6fd}
+  .reveal-side h3{margin-bottom:10px;display:flex;align-items:center;gap:10px;color:#fca5a5}
   .reveal-side h3 .pill{font-size:.66rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:9999px;background:var(--primary-soft);color:var(--primary);border:1px solid var(--primary-edge)}
   .reveal-side p.cap{color:var(--muted);font-size:.92rem;margin-top:10px}
   .reveal-svg-frame{background:var(--stage-bg);border-radius:12px;padding:6px;border:1px solid var(--panel-edge)}
@@ -87,8 +87,8 @@
 
   .cta{text-align:center;padding:48px 24px;border-top:1px solid var(--panel-edge)}
   .cta .btn{display:inline-block;margin:6px;padding:12px 22px;border-radius:9999px;text-decoration:none;font-weight:600;font-size:.96rem;border:1px solid transparent;transition:transform .15s ease,background .15s ease}
-  .cta .btn-primary{background:var(--primary);color:#1a1a1a}
-  .cta .btn-primary:hover{transform:translateY(-1px);background:#bae6fd}
+  .cta .btn-primary{background:var(--primary);color:#fef3c7}
+  .cta .btn-primary:hover{transform:translateY(-1px);background:#fca5a5}
   .cta .btn-ghost{border-color:#374151;color:var(--ink)}
   .cta .btn-ghost:hover{border-color:var(--primary);color:var(--primary)}
   footer{padding:24px 0 48px;text-align:center;color:var(--muted);font-size:.88rem}
@@ -103,23 +103,23 @@
 <header class="hero">
   <div class="container">
     <span class="kicker">Life in Glyph · RFC #9 · bio extension</span>
-    <h1>Draw me an eye</h1>
-    <p class="lede">The camera nature evolved 40 separate times. <strong>You asked Claude. Glyph drew it — from a compose spec.</strong> Almond sclera, radial-fiber iris, black pupil, a catchlight reflecting the world.</p>
-    <p class="byline">Substrate: vertebrate eye. The iris's 36 radial muscle fibers open and close the aperture — your camera does the same.</p>
+    <h1>Draw me a heart + circulation</h1>
+    <p class="lede">The engine of you. <strong>You asked Claude. Glyph drew it — from a compose spec, with a real SMIL <code>pulse</code> animation on the heart muscle.</strong> Anatomical front view: four chambers, the great vessels, the lungs. Pencil on parchment.</p>
+    <p class="byline">Subject: <em>Cor humanum</em>. ~60 bpm at rest. ~5 L/min cardiac output. ~3 billion beats in an 80-year life.</p>
   </div>
 </header>
 
 <section class="container">
   <div class="prompt-card">
     <span class="label">▸ The prompt</span>
-    <blockquote>"Draw me an eye looking straight at me. Almond shape. Blue iris with radial fibers. Black pupil. A small white catchlight near the upper-left. Warm skin tone framing. Two or three eyelashes."</blockquote>
+    <blockquote>"Draw me a heart with circulation. Anatomical front view: four chambers (RA, RV, LA, LV), aorta arching up and down, pulmonary trunk splitting to both lungs, vena cavae entering the right side, pulmonary veins from the lungs. The heart should pulse. Pencil-on-parchment."</blockquote>
     <p class="who">— what to say to your AI agent. Claude writes the Glyph compose spec; the compose compiler emits one byte-locked SVG.</p>
   </div>
 </section>
 
 <section class="container">
-  <div class="stage" aria-label="Draw me an eye">
-    <img src="bio-eye.svg" alt="A vertebrate eye in cross-section: an almond-shaped white sclera bordered by warm orange skin, a blue iris with 36 radial muscle fibers and a 3-stop radial gradient, a black pupil with a white catchlight near the top-left, five short eyelashes curving up." loading="lazy">
+  <div class="stage" aria-label="Draw me a heart + circulation">
+    <img src="bio-circulation.svg" alt="Anatomical pencil-drawing of a human heart with its great vessels and lungs. Pear-shaped heart in red with chamber labels RA, RV, LA, LV and a vertical septum. Red aorta arches up from the upper-left of the heart, curves right and descends. Blue pulmonary arteries fan out from the upper-middle of the heart to a lavender lung on each side. Red pulmonary veins return from the lungs to the upper-left of the heart. Blue superior and inferior vena cavae enter the right side from above and below." loading="lazy">
   </div>
 </section>
 
@@ -130,21 +130,21 @@
     <div class="timeline-grid">
       <div class="timeline-card">
         <span class="phase-num">PRIMITIVE 1</span>
-        <div class="ticks">polyline × 36</div>
-        <h3>The iris fibers</h3>
-        <p>Thirty-six polylines radiating from the inner pupil edge to the outer iris. Length jitter by index gives a natural irregular look — real iris muscles don't all reach the limit cleanly.</p>
+        <div class="ticks">silhouette-path + radial gradient</div>
+        <h3>The heart itself</h3>
+        <p>One d-string with eight cubic Béziers traces the pear-shaped organ. Two pulled-up lobes at the top (the atria), a tapered body, a slight apex pointing down-left (the natural orientation of a real heart in the chest). Filled with a 3-stop radial gradient (rose → red → maroon).</p>
       </div>
       <div class="timeline-card">
         <span class="phase-num">PRIMITIVE 2</span>
-        <div class="ticks">circle × 3 + ellipse</div>
-        <h3>Pupil + catchlight</h3>
-        <p>The pupil is a 48-radius black circle. The catchlight — that tiny white reflection that makes the eye look alive — is a small ellipse plus a tiny round secondary highlight. Cinematographers call it the eye-light.</p>
+        <div class="ticks">silhouette × 6 (red + blue vessels)</div>
+        <h3>The great vessels</h3>
+        <p>Six silhouette-paths for the aorta (with thin inner highlight tube for the pencil-cross-section look), pulmonary trunk splitting both ways to the lungs, paired vena cavae, and the pulmonary veins. Color convention: red = oxygenated, blue = deoxygenated.</p>
       </div>
       <div class="timeline-card">
         <span class="phase-num">PRIMITIVE 3</span>
-        <div class="ticks">silhouette + 3 radial grads</div>
-        <h3>Sclera + iris gradients</h3>
-        <p>The sclera is a single d-string with two arcs, almond-shaped. The iris uses a radial gradient with three stops (deep navy → cyan → sky), and a separate radial gradient for the solid iris base behind the fibers.</p>
+        <div class="ticks">pulse · 900 ms · scale 1.05</div>
+        <h3>The animation</h3>
+        <p>An RFC #6 <code>pulse</code> loop animation on the heart silhouette + septum + chamber labels makes the heart contract once per 0.9 seconds — that's ~67 bpm, the resting rate of a healthy adult.</p>
       </div>
     </div>
   </div>
@@ -159,40 +159,47 @@
         <h3>The compose spec <span class="pill">JSON · excerpt</span></h3>
         <pre>{
   "compose": {
-    "viewBox": { "width": 800, "height": 600 },
-    "theme": { "background": "#1a0f0a" },
+    "viewBox": { "width": 1100, "height": 700 },
+    "theme": { "preset": "pencil-parchment" },
     "defs": {
       "gradients": [
-        { "id": "g-iris", "kind": "radial",
-          "cx": "50%", "cy": "50%", "r": "50%",
+        { "id": "g-heart", "kind": "radial",
+          "cx": "40%", "cy": "40%", "r": "60%",
           "stops": [
-            { "offset": "0%",  "color": "#0c4a6e" },
-            { "offset": "60%", "color": "#0284c7" },
-            { "offset": "100%","color": "#7dd3fc" }
+            { "offset": "0%",   "color": "#fda4af" },
+            { "offset": "55%",  "color": "#dc2626" },
+            { "offset": "100%", "color": "#7c2d12" }
           ]
         }
-        // ... g-sclera, g-iris-base, g-skin
+        // ... g-lung (radial, lavender-blush)
       ]
     },
     "children": [
-      <span class="c">// 1. skin background (radial)</span>
-      <span class="c">// 2. almond sclera silhouette</span>
-      <span class="c">// 3. solid iris circle (radial base)</span>
-      <span class="c">// 4. 36 iris-fiber polylines</span>
-      <span class="c">// 5. outer iris ring</span>
-      <span class="c">// 6. pupil circle (radius 48)</span>
-      <span class="c">// 7. catchlight ellipse + dot</span>
-      <span class="c">// 8. 5 eyelash silhouette-paths</span>
-      <span class="c">// 9. title + caption text</span>
+      <span class="c">// 1. left lung silhouette (radial lavender)</span>
+      <span class="c">// 2. right lung silhouette (radial lavender)</span>
+      <span class="c">// 3. 2 lung-hatching silhouettes (pencil shading)</span>
+      <span class="c">// 4. aorta silhouette (red, arches up + descends)</span>
+      <span class="c">// 5. aorta inner-highlight tube</span>
+      <span class="c">// 6. 3 aortic branches (head + arms)</span>
+      <span class="c">// 7. pulmonary trunk → L+R pulm arteries (blue)</span>
+      <span class="c">// 8. L+R pulmonary veins (red, lung → LA)</span>
+      <span class="c">// 9. superior vena cava (blue, from above → RA)</span>
+      <span class="c">// 10. inferior vena cava (blue, from below → RA)</span>
+      <span class="c">// 11. heart silhouette · pulse loop · 900 ms</span>
+      <span class="c">// 12. septum line · pulse loop</span>
+      <span class="c">// 13. AV groove line · pulse loop</span>
+      <span class="c">// 14. 4 chamber labels RA, RV, LA, LV · pulse loop</span>
+      <span class="c">// 15. 4 annotation-leaders (aorta, SVC, pulm artery, pulm vein)</span>
+      <span class="c">// 16. title + caption text</span>
     ]
   }
 }</pre>
-        <p class="cap">Generator script: <code>scripts/gen-showcase-extensions.mjs</code> · fixture: <code>packages/core/__fixtures__/compose/bio-eye.json</code>. <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/compose/bio-eye.json">View on GitHub</a>.</p>
+        <p class="cap">Generator script: <code>scripts/gen-showcase-extensions.mjs</code> · fixture: <code>packages/core/__fixtures__/compose/bio-circulation.json</code>. <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/compose/bio-circulation.json">View on GitHub</a>.</p>
       </div>
       <div class="reveal-side">
         <h3>Glyph compose output <span class="pill">SVG</span></h3>
         <div class="reveal-svg-frame">
-          <img src="bio-eye.svg" alt="Glyph-rendered draw me an eye, same SVG as the hero stage" loading="lazy">
+          <img src="bio-circulation.svg" alt="Glyph-rendered draw me a heart + circulation, same SVG as the hero stage" loading="lazy">
         </div>
         <p class="cap">Byte-stable across Ubuntu / macOS / Windows × Node 20 / 22. The compose compiler resolves the gradient + pattern defs first, then walks children in z-order.</p>
       </div>
@@ -203,9 +210,9 @@
 <section class="cta">
   <h2 style="margin-bottom:24px">More Life in Glyph</h2>
   <a class="btn btn-primary" href="life-in-glyph.html">See the gallery ↗</a>
-  <a class="btn btn-ghost" href="draw-me-butterfly.html">Butterfly</a>
   <a class="btn btn-ghost" href="draw-me-neuron.html">Neuron</a>
-  <a class="btn btn-ghost" href="draw-me-jellyfish.html">Jellyfish</a>
+  <a class="btn btn-ghost" href="draw-me-heartbeat.html">Heartbeat (ECG)</a>
+  <a class="btn btn-ghost" href="draw-me-dna.html">DNA</a>
 </section>
 
 <footer>
