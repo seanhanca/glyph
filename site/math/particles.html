@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Particles in Glyph — the hardest case, done well</title>
+<meta name="description" content="Glyph is built for static SVG, not real-time GPU particles. Here's the best it can do for a particle field — static + animated — and a 4-step recipe to reproduce it.">
+<meta property="og:title" content="Particles in Glyph">
+<meta property="og:description" content="The hardest visualization paradigm for SVG — and how to do it anyway.">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:#02030a;color:#e6e6ea;font-family:-apple-system,"Helvetica Neue",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:#a78bfa;text-underline-offset:3px}
+  a:hover{color:#c4b5fd}
+
+  .wrap{max-width:760px;margin:0 auto;padding:64px 24px 96px}
+
+  .breadcrumb{font-size:.86rem;color:#6b7280;margin-bottom:48px}
+  .breadcrumb a{color:#6b7280;text-decoration:none;border-bottom:1px dashed transparent;transition:color .15s,border-color .15s}
+  .breadcrumb a:hover{color:#e6e6ea;border-bottom-color:#e6e6ea}
+
+  h1{font-size:clamp(2.2rem,5vw,3.4rem);font-weight:700;letter-spacing:-.02em;line-height:1.1;margin-bottom:16px;color:#f1f5fb}
+  h1 .accent{color:#a78bfa}
+  .lede{color:#9ca3af;font-size:1.1rem;max-width:60ch;margin-bottom:64px}
+  .lede strong{color:#e6e6ea;font-weight:600}
+
+  h2{font-size:1.5rem;font-weight:600;letter-spacing:-.01em;color:#f1f5fb;margin:48px 0 16px}
+  h2 small{font-size:.78rem;font-weight:500;color:#6b7280;letter-spacing:.05em;text-transform:uppercase;margin-left:12px;vertical-align:middle}
+
+  p{color:#9ca3af;margin-bottom:24px}
+  p strong{color:#e6e6ea;font-weight:500}
+
+  .stage{margin:32px 0;border-radius:8px;overflow:hidden;background:#020617}
+  .stage img{display:block;width:100%;height:auto}
+  .stage-note{font-size:.86rem;color:#6b7280;margin-top:8px;font-style:italic}
+
+  hr{border:none;height:1px;background:#1f2937;margin:64px 0 32px}
+
+  ol.steps{list-style:none;padding:0;margin:32px 0 0;counter-reset:step}
+  ol.steps > li{margin-bottom:48px;padding-left:48px;position:relative;counter-increment:step}
+  ol.steps > li::before{
+    content:counter(step);
+    position:absolute;
+    left:0; top:-4px;
+    width:32px; height:32px;
+    border-radius:50%;
+    background:#a78bfa;
+    color:#02030a;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:.95rem;
+    font-feature-settings:"tnum";
+  }
+  ol.steps h3{font-size:1.1rem;font-weight:600;color:#f1f5fb;margin-bottom:10px}
+  ol.steps p{margin-bottom:14px}
+
+  pre{
+    font-family:"SF Mono","Cascadia Code",ui-monospace,monospace;
+    font-size:.86rem;
+    background:#0a0f1e;
+    border:1px solid #1f2937;
+    border-radius:8px;
+    padding:18px 20px;
+    color:#cbd5e1;
+    overflow-x:auto;
+    line-height:1.55;
+  }
+  pre .k{color:#7eb6ff}
+  pre .s{color:#fda4af}
+  pre .n{color:#a78bfa}
+  pre .c{color:#6b7280;font-style:italic}
+  code{font-family:"SF Mono","Cascadia Code",ui-monospace,monospace;font-size:.9em;background:#0a0f1e;padding:.12em .4em;border-radius:4px;color:#cbd5e1}
+
+  .footer{margin-top:80px;padding-top:32px;border-top:1px solid #1f2937;font-size:.88rem;color:#6b7280}
+  .footer a{color:#6b7280}
+  .footer a:hover{color:#e6e6ea}
+
+  .key{display:inline-block;font-size:.78rem;font-weight:500;padding:2px 8px;border-radius:4px;background:#1f2937;color:#cbd5e1;font-family:"SF Mono",ui-monospace,monospace}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="breadcrumb">
+    <a href="life-in-glyph.html">← Life in Glyph</a> · <a href="extendedcases.html">Extended Cases</a>
+  </div>
+
+  <h1>Particles in <span class="accent">Glyph</span></h1>
+  <p class="lede">Real-time GPU particle systems are the visualization paradigm SVG is worst at. <strong>Glyph can't do millions of particles at 60 fps</strong> — that's a different tool. But it can do <em>the physics underneath them</em>, deterministically, in one byte-stable SVG. Here's the best version, the animated variant, and the 4-step recipe to make either.</p>
+
+  <h2>The output <small>static · 144 trajectories</small></h2>
+  <div class="stage">
+    <img src="particle-static.svg" alt="A particle-field visualization rendered by Glyph: 144 streamlines through an Arnold-Beltrami-Childress-flavored vector field, each colored by the local flow angle, on a deep purple radial-gradient background with a subtle starfield." loading="lazy">
+  </div>
+  <p class="stage-note">144 RK4-integrated trajectories. Color by local flow angle. One JSON spec → one SVG. Same bytes every time.</p>
+
+  <h2>Same field, animated <small>SMIL rotate-loop · 30 s per revolution</small></h2>
+  <div class="stage">
+    <img src="particle-animated.svg" alt="The same particle field with a SMIL rotate-loop animation that turns the whole scene once every 30 seconds. The streamlines themselves don't move; the entire group rotates as a slow hypnotic galaxy." loading="lazy">
+  </div>
+  <p class="stage-note">Open this in a browser to see it rotate. The streamlines stay fixed; the whole group spins around the center once per 30 seconds.</p>
+
+  <hr>
+
+  <h2>How to make it</h2>
+  <p>Four steps. The whole spec fits on one page.</p>
+
+  <ol class="steps">
+
+    <li>
+      <h3>Define the vector field</h3>
+      <p>Write <code>dx/dt</code> and <code>dy/dt</code> as math expressions in two strings. Glyph's parser supports <code>sin</code>, <code>cos</code>, <code>exp</code>, <code>sqrt</code>, arithmetic, parentheses, and the variables <code>x</code> and <code>y</code>.</p>
+<pre><span class="c">// ABC-flavored field — two pairs of counter-rotating vortices</span>
+<span class="k">"dxdt"</span>: <span class="s">"sin(2*y) + 0.4*cos(x)"</span>,
+<span class="k">"dydt"</span>: <span class="s">"-sin(2*x) + 0.4*sin(y)"</span>,
+<span class="k">"domain"</span>: { <span class="k">"x"</span>: [<span class="n">-3.14</span>, <span class="n">3.14</span>], <span class="k">"y"</span>: [<span class="n">-3.14</span>, <span class="n">3.14</span>] }</pre>
+      <p>Try other fields: <code>"-y"</code>, <code>"x"</code> for pure rotation. Or <code>"x*(1-x*x-y*y)"</code>, <code>"y*(1-x*x-y*y)"</code> for a limit-cycle attractor. Each one paints a different signature.</p>
+    </li>
+
+    <li>
+      <h3>Pick your seed density</h3>
+      <p>The <code>seeds</code> block tells Glyph where to start each trajectory. <code>grid</code> seeds give an even sampling; bigger numbers = denser output.</p>
+<pre><span class="k">"seeds"</span>: { <span class="k">"kind"</span>: <span class="s">"grid"</span>, <span class="k">"rows"</span>: <span class="n">12</span>, <span class="k">"cols"</span>: <span class="n">12</span> },
+<span class="k">"step"</span>: <span class="n">0.04</span>,        <span class="c">// RK4 step size (smaller = smoother)</span>
+<span class="k">"maxSteps"</span>: <span class="n">100</span>      <span class="c">// trajectory length cap</span></pre>
+      <p>12×12 = 144 trajectories is a sweet spot for visual density without bloating the SVG.</p>
+    </li>
+
+    <li>
+      <h3>Color the trails</h3>
+      <p>Three modes, each tells a different story:</p>
+<pre><span class="k">"colorBy"</span>: <span class="s">"step"</span>      <span class="c">// rainbow from start to end of each trail</span>
+<span class="k">"colorBy"</span>: <span class="s">"angle"</span>     <span class="c">// color = local flow direction</span>
+<span class="k">"colorBy"</span>: <span class="s">"magnitude"</span> <span class="c">// color = local flow speed</span></pre>
+      <p><span class="key">angle</span> reads the cleanest at high seed counts. <span class="key">step</span> is gorgeous but quadruples SVG size. <span class="key">magnitude</span> highlights fast vs slow regions of the field.</p>
+    </li>
+
+    <li>
+      <h3>Wrap it in compose, optionally animate</h3>
+      <p>Drop the chart into a compose scene with a dark background and (optionally) a SMIL <code>rotate-loop</code> on the chart child. The animation rotates the whole streamline group around its center.</p>
+<pre>{
+  <span class="k">"compose"</span>: {
+    <span class="k">"viewBox"</span>: { <span class="k">"width"</span>: <span class="n">900</span>, <span class="k">"height"</span>: <span class="n">900</span> },
+    <span class="k">"theme"</span>: { <span class="k">"background"</span>: <span class="s">"#020617"</span> },
+    <span class="k">"children"</span>: [
+      { <span class="k">"at"</span>: { <span class="k">"x"</span>: <span class="n">50</span>, <span class="k">"y"</span>: <span class="n">50</span> },
+        <span class="k">"size"</span>: { <span class="k">"w"</span>: <span class="n">800</span>, <span class="k">"h"</span>: <span class="n">800</span> },
+        <span class="k">"mark"</span>: <span class="s">"chart"</span>,
+        <span class="k">"chart"</span>: { <span class="c">/* the streamline spec from steps 1–3 */</span> },
+        <span class="k">"animation"</span>: {
+          <span class="k">"kind"</span>: <span class="s">"rotate-loop"</span>,
+          <span class="k">"periodMs"</span>: <span class="n">30000</span>,
+          <span class="k">"direction"</span>: <span class="s">"ccw"</span>
+        }
+      }
+    ]
+  }
+}</pre>
+      <p>Drop the <code>animation</code> block to get the static version. Keep it for the spinning-galaxy effect.</p>
+    </li>
+
+  </ol>
+
+  <hr>
+
+  <h2>The full spec</h2>
+  <p>If you want to copy + paste a working starting point, here's the entire spec (static variant). Run it through Glyph and you'll get the image at the top of this page.</p>
+<pre>{
+  <span class="k">"compose"</span>: {
+    <span class="k">"viewBox"</span>: { <span class="k">"width"</span>: <span class="n">900</span>, <span class="k">"height"</span>: <span class="n">900</span> },
+    <span class="k">"theme"</span>: { <span class="k">"background"</span>: <span class="s">"#020617"</span> },
+    <span class="k">"children"</span>: [
+      { <span class="k">"at"</span>: { <span class="k">"x"</span>: <span class="n">0</span>, <span class="k">"y"</span>: <span class="n">0</span> },
+        <span class="k">"mark"</span>: <span class="s">"starfield"</span>,
+        <span class="k">"starfield"</span>: { <span class="k">"count"</span>: <span class="n">60</span>, <span class="k">"seed"</span>: <span class="n">13</span>,
+                       <span class="k">"region"</span>: { <span class="k">"x"</span>: <span class="n">0</span>, <span class="k">"y"</span>: <span class="n">0</span>, <span class="k">"w"</span>: <span class="n">900</span>, <span class="k">"h"</span>: <span class="n">900</span> } } },
+      { <span class="k">"at"</span>: { <span class="k">"x"</span>: <span class="n">50</span>, <span class="k">"y"</span>: <span class="n">50</span> },
+        <span class="k">"size"</span>: { <span class="k">"w"</span>: <span class="n">800</span>, <span class="k">"h"</span>: <span class="n">800</span> },
+        <span class="k">"mark"</span>: <span class="s">"chart"</span>,
+        <span class="k">"chart"</span>: {
+          <span class="k">"version"</span>: <span class="s">"glyph/0.1"</span>,
+          <span class="k">"data"</span>: { <span class="k">"source"</span>: <span class="s">"inline:particles"</span> },
+          <span class="k">"layers"</span>: [{
+            <span class="k">"mark"</span>: <span class="s">"streamline"</span>,
+            <span class="k">"encoding"</span>: {
+              <span class="k">"x"</span>: { <span class="k">"field"</span>: <span class="s">"x"</span>, <span class="k">"type"</span>: <span class="s">"quantitative"</span>,
+                    <span class="k">"scale"</span>: { <span class="k">"domain"</span>: [<span class="n">-3.14</span>, <span class="n">3.14</span>] } },
+              <span class="k">"y"</span>: { <span class="k">"field"</span>: <span class="s">"y"</span>, <span class="k">"type"</span>: <span class="s">"quantitative"</span>,
+                    <span class="k">"scale"</span>: { <span class="k">"domain"</span>: [<span class="n">-3.14</span>, <span class="n">3.14</span>] } }
+            },
+            <span class="k">"streamline"</span>: {
+              <span class="k">"dxdt"</span>: <span class="s">"sin(2*y) + 0.4*cos(x)"</span>,
+              <span class="k">"dydt"</span>: <span class="s">"-sin(2*x) + 0.4*sin(y)"</span>,
+              <span class="k">"seeds"</span>: { <span class="k">"kind"</span>: <span class="s">"grid"</span>, <span class="k">"rows"</span>: <span class="n">12</span>, <span class="k">"cols"</span>: <span class="n">12</span> },
+              <span class="k">"step"</span>: <span class="n">0.04</span>,
+              <span class="k">"maxSteps"</span>: <span class="n">100</span>,
+              <span class="k">"domain"</span>: { <span class="k">"x"</span>: [<span class="n">-3.14</span>, <span class="n">3.14</span>],
+                          <span class="k">"y"</span>: [<span class="n">-3.14</span>, <span class="n">3.14</span>] },
+              <span class="k">"colorBy"</span>: <span class="s">"angle"</span>
+            }
+          }]
+        }
+      }
+    ]
+  }
+}</pre>
+  <p>Save as <code>particles.json</code> and run <code>glyph render particles.json</code>. Done.</p>
+
+  <div class="footer">
+    <p>Honest about limits. Glyph integrates and renders ~150 trajectories cleanly. Real-time GPU demos run millions. Different tools for different jobs — but the math is the same.</p>
+    <p>← <a href="life-in-glyph.html">Back to the gallery</a></p>
+  </div>
+
+</div>
+
+</body>
+</html>
