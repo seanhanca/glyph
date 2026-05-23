@@ -1,0 +1,29 @@
+{
+  "version": "glyph/0.1",
+  "title": "Wankel rotary engine housing — epitrochoid (Felix Wankel, 1957) — life-in-glyph",
+  "data": {
+    "function": {
+      "shape": "function",
+      "parameter": { "name": "t", "min": 0, "max": 6.283185307179586, "samples": 400 },
+      "xExpr": "4*cos(t) + cos(3*t)",
+      "yExpr": "4*sin(t) + sin(3*t)"
+    }
+  },
+  "layers": [
+    {
+      "mark": "line",
+      "encoding": {
+        "x": {
+          "field": "x",
+          "type": "quantitative",
+          "scale": { "domain": [-5.5, 5.5] }
+        },
+        "y": {
+          "field": "y",
+          "type": "quantitative",
+          "scale": { "domain": [-5.5, 5.5] }
+        }
+      }
+    }
+  ]
+}

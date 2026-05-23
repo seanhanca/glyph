@@ -1,0 +1,30 @@
+{
+  "version": "glyph/0.1",
+  "title": "Pendulum clock — Huygens 1656, damped harmonic ODE — life-in-glyph",
+  "data": {
+    "trajectory": {
+      "shape": "trajectory",
+      "dxdt": "y",
+      "dydt": "-x - 0.02*y",
+      "initial": { "x": 0.6, "y": 0 },
+      "time": { "min": 0, "max": 60, "samples": 1200 }
+    }
+  },
+  "layers": [
+    {
+      "mark": "line",
+      "encoding": {
+        "x": {
+          "field": "t",
+          "type": "quantitative",
+          "scale": { "domain": [0, 60] }
+        },
+        "y": {
+          "field": "x",
+          "type": "quantitative",
+          "scale": { "domain": [-0.7, 0.7] }
+        }
+      }
+    }
+  ]
+}

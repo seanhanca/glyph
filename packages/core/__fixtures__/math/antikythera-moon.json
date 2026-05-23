@@ -1,0 +1,29 @@
+{
+  "version": "glyph/0.1",
+  "title": "Antikythera Mechanism — Moon position from compound epicycles (~150 BCE) — life-in-glyph",
+  "data": {
+    "function": {
+      "shape": "function",
+      "parameter": { "name": "t", "min": 0, "max": 6.283185307179586, "samples": 800 },
+      "xExpr": "5*cos(t) + 1.2*cos(13*t)",
+      "yExpr": "5*sin(t) + 1.2*sin(13*t)"
+    }
+  },
+  "layers": [
+    {
+      "mark": "line",
+      "encoding": {
+        "x": {
+          "field": "x",
+          "type": "quantitative",
+          "scale": { "domain": [-7, 7] }
+        },
+        "y": {
+          "field": "y",
+          "type": "quantitative",
+          "scale": { "domain": [-7, 7] }
+        }
+      }
+    }
+  ]
+}

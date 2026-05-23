@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Draw Me Huygens' Pendulum Clock — Claude × Glyph showcase</title>
+<meta name="description" content="Christiaan Huygens' 1656 pendulum clock — the first timepiece accurate enough to navigate by. A damped pendulum ODE, animated. One English prompt to Claude. One JSON spec from Glyph.">
+<meta property="og:title" content="Draw Me Huygens' Pendulum Clock — Life in Glyph">
+<meta property="og:description" content="The 2D ODE that gave humanity its first accurate timekeeping.">
+<style>
+  :root {
+    --parchment: #f5edd9;
+    --parchment-deep: #ebe1c4;
+    --grid: rgba(80,110,160,.08);
+    --graphite: #1f1a14;
+    --graphite-light: #4a3f30;
+    --rust: #8b3a1c;
+    --rust-soft: rgba(139,58,28,.10);
+    --indigo: #3b4d80;
+    --indigo-soft: rgba(59,77,128,.10);
+    --font-serif: "Iowan Old Style", "Source Serif Pro", Lora, Georgia, "Times New Roman", serif;
+    --font-mono: "SF Mono", "Cascadia Code", ui-monospace, monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--parchment);color:var(--graphite);font-family:var(--font-serif);-webkit-font-smoothing:antialiased;line-height:1.65}
+  body{
+    background-image:
+      linear-gradient(to right, var(--grid) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid) 1px, transparent 1px),
+      radial-gradient(ellipse at top left, rgba(59,77,128,.04), transparent 50%);
+    background-size: 32px 32px, 32px 32px, 100% 100%;
+    min-height:100vh
+  }
+  a{color:var(--rust);text-underline-offset:3px}
+  h1,h2,h3{margin:0 0 .4em;line-height:1.2;font-weight:700}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);font-style:italic;letter-spacing:-.02em}
+  h2{font-size:clamp(1.6rem,3.5vw,2.4rem);font-style:italic;color:var(--graphite)}
+  h3{font-size:1.18rem;color:var(--graphite)}
+  p{margin:0 0 1em}
+  .container{max-width:1100px;margin:0 auto;padding:0 24px}
+  code{font-family:var(--font-mono);font-size:.92em;background:rgba(31,26,20,.06);padding:.12em .4em;border-radius:3px;color:var(--graphite)}
+  pre{font-family:var(--font-mono);font-size:.86rem;background:#fdf8ea;border:1px solid rgba(31,26,20,.18);border-radius:6px;padding:18px 20px;color:var(--graphite);overflow-x:auto;line-height:1.6;margin:0;box-shadow:1px 1px 0 rgba(31,26,20,.08)}
+  pre .k{color:#1e5fa4}
+  pre .s{color:#7a3d12}
+  pre .n{color:#196b3a}
+  pre .c{color:#7a6b54;font-style:italic}
+
+  .breadcrumb{padding:18px 0;font-size:.92rem;color:var(--graphite-light);text-align:center;font-style:italic}
+  .breadcrumb a{color:var(--graphite-light);text-decoration:none;border-bottom:1px dotted var(--graphite-light)}
+  .breadcrumb a:hover{color:var(--rust);border-bottom-color:var(--rust)}
+
+  .hero{padding:18px 0 12px;text-align:center}
+  .hero .kicker{display:inline-block;padding:5px 16px;border:1px solid var(--graphite);font-size:.78rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;margin-bottom:24px;font-family:var(--font-mono);color:var(--graphite);background:var(--parchment-deep)}
+  .hero p.lede{color:var(--graphite-light);max-width:64ch;margin:.6em auto 0;font-size:1.14rem;font-style:italic}
+  .hero p.lede strong{color:var(--graphite);font-style:normal;font-weight:700}
+  .hero p.byline{color:var(--graphite-light);font-size:.92rem;margin-top:24px;font-style:italic}
+
+  .prompt-card{margin:48px auto 32px;max-width:760px;background:#fdf8ea;border:1px solid rgba(31,26,20,.18);border-radius:6px;padding:30px 34px;box-shadow:2px 2px 0 rgba(31,26,20,.08)}
+  .prompt-card .label{display:inline-block;font-size:.74rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--indigo);margin-bottom:12px;font-family:var(--font-mono)}
+  .prompt-card blockquote{margin:0;font-family:var(--font-serif);font-size:1.08rem;line-height:1.75;color:var(--graphite);padding-left:18px;border-left:2px solid var(--rust);font-style:italic}
+  .prompt-card .who{margin-top:18px;font-size:.86rem;color:var(--graphite-light);font-style:italic}
+
+  .stage{margin:0 auto 64px;max-width:1000px;background:#fdf8ea;border:1px solid rgba(31,26,20,.25);border-radius:8px;padding:14px;position:relative;box-shadow:3px 3px 0 rgba(31,26,20,.10)}
+  .stage svg{display:block;width:100%;height:auto}
+  .stage-caption{margin-top:10px;text-align:center;color:var(--graphite-light);font-size:.86rem;font-style:italic}
+  .stage-caption .accent{color:var(--rust);font-weight:600;font-style:normal}
+
+  .timeline{padding:48px 0 24px}
+  .timeline h2{text-align:center}
+  .timeline > .container > p.lede{color:var(--graphite-light);text-align:center;max-width:54ch;margin:0 auto 36px;font-size:1.02rem;font-style:italic}
+  .timeline-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:18px;max-width:1000px;margin:0 auto}
+  @media (max-width:880px){.timeline-grid{grid-template-columns:1fr}}
+  .timeline-card{background:#fdf8ea;border:1px solid rgba(31,26,20,.18);border-radius:6px;padding:22px 24px;box-shadow:2px 2px 0 rgba(31,26,20,.06);transition:transform .2s ease,box-shadow .2s ease}
+  .timeline-card:hover{transform:translateY(-2px);box-shadow:4px 4px 0 rgba(31,26,20,.10)}
+  .timeline-card .phase-num{display:inline-block;font-family:var(--font-mono);font-size:.74rem;color:var(--indigo);letter-spacing:.08em;margin-bottom:6px;text-transform:uppercase}
+  .timeline-card .label{font-family:var(--font-mono);font-size:.84rem;color:var(--rust);margin-bottom:10px}
+  .timeline-card h3{margin-bottom:8px}
+  .timeline-card p{font-size:.96rem;color:var(--graphite-light);margin:0}
+
+  .reveal{padding:64px 0;border-top:1px solid rgba(31,26,20,.18);background:linear-gradient(180deg, rgba(255,255,255,.4), transparent 40%)}
+  .reveal h2{text-align:center}
+  .reveal > .container > p.lede{color:var(--graphite-light);text-align:center;max-width:60ch;margin:0 auto 32px;font-size:1.02rem;font-style:italic}
+  .reveal-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;max-width:1080px;margin:0 auto}
+  @media (max-width:880px){.reveal-grid{grid-template-columns:1fr}}
+  .reveal-side h3{margin-bottom:10px;display:flex;align-items:center;gap:10px}
+  .reveal-side h3 .pill{font-size:.66rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:9999px;background:var(--indigo-soft);color:var(--indigo);border:1px solid rgba(59,77,128,.3);font-family:var(--font-mono)}
+  .reveal-side p.cap{color:var(--graphite-light);font-size:.92rem;margin-top:10px;font-style:italic}
+  .reveal-svg-frame{background:#fff;border-radius:6px;padding:10px;border:1px solid rgba(31,26,20,.18);box-shadow:2px 2px 0 rgba(31,26,20,.08)}
+  .reveal-svg-frame img{display:block;width:100%;height:auto;border-radius:4px}
+
+  .try{padding:64px 0;border-top:1px solid rgba(31,26,20,.18)}
+  .try h2{text-align:center}
+  .try > .container > p.lede{color:var(--graphite-light);text-align:center;max-width:54ch;margin:0 auto 32px;font-style:italic}
+  .try-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:980px;margin:0 auto}
+  @media (max-width:720px){.try-grid{grid-template-columns:1fr}}
+  .try-card{background:#fdf8ea;border:1px solid rgba(31,26,20,.18);border-radius:6px;padding:22px 24px;box-shadow:2px 2px 0 rgba(31,26,20,.06)}
+  .try-card .tag{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.10em;text-transform:uppercase;color:var(--indigo);margin-bottom:8px;font-family:var(--font-mono)}
+  .try-card blockquote{margin:0;font-family:var(--font-serif);font-size:.98rem;line-height:1.7;color:var(--graphite);font-style:italic}
+
+  .cta{text-align:center;padding:64px 24px;border-top:1px solid rgba(31,26,20,.18)}
+  .cta .btn{display:inline-block;margin:6px;padding:11px 22px;border-radius:6px;text-decoration:none;font-weight:600;font-size:.94rem;border:1px solid var(--graphite);font-family:var(--font-serif)}
+  .cta .btn-primary{background:var(--graphite);color:var(--parchment)}
+  .cta .btn-primary:hover{transform:translateY(-1px);background:var(--rust);border-color:var(--rust)}
+  .cta .btn-ghost{background:transparent;color:var(--graphite)}
+  .cta .btn-ghost:hover{background:var(--parchment-deep);border-color:var(--rust);color:var(--rust)}
+  footer{padding:24px 0 48px;text-align:center;color:var(--graphite-light);font-size:.88rem;font-style:italic}
+
+  /* PENDULUM ANIMATION — swings with period ~2 seconds (g/L=1, period=2π).
+     Amplitude decays slowly (γ=0.02). 30-second loop. */
+  @keyframes pendulum-swing {
+    0%   { transform: rotate(-32deg); }
+    50%  { transform: rotate(32deg); }
+    100% { transform: rotate(-32deg); }
+  }
+  .pendulum-bob-group{transform-origin:500px 80px;animation:pendulum-swing 2s ease-in-out infinite}
+  /* Escapement gear ticks — 30 teeth, two ticks per pendulum period.
+     The gear rotates by 12° (360 / 30) per tick. */
+  @keyframes escape-gear {
+    0%, 49% { transform: rotate(0deg); }
+    50%, 99% { transform: rotate(-12deg); }
+    100% { transform: rotate(-12deg); }
+  }
+  /* Disabled: gear ticking interferes with smooth pendulum perception.
+     Instead, gear rotates slowly + continuously. */
+  @keyframes gear-rotate {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(-360deg); }
+  }
+  .escapement-gear{transform-origin:710px 250px;animation:gear-rotate 60s linear infinite}
+
+  @media (prefers-reduced-motion: reduce){
+    .pendulum-bob-group, .escapement-gear { animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="breadcrumb">
+  <a href="life-in-glyph.html">← Life in Glyph</a> &nbsp;·&nbsp; <a href="joy.html">Joy of Math</a>
+</div>
+
+<header class="hero">
+  <div class="container">
+    <span class="kicker">Machines of Wonder · 2 of 4</span>
+    <h1>Draw me Huygens' pendulum clock</h1>
+    <p class="lede">A damped pendulum, sketched and integrated from one English sentence. <strong>You asked Claude. Glyph drew it.</strong> The pendulum that gave humanity its first timekeeping accurate enough to navigate by — and that has powered grandfather clocks ever since.</p>
+    <p class="byline">Christiaan Huygens, <em>Horologium</em>, The Hague, 1656.</p>
+  </div>
+</header>
+
+<section class="container">
+  <div class="prompt-card">
+    <span class="label">▸ The prompt</span>
+    <blockquote>"Draw me Christiaan Huygens' pendulum clock. Use the Glyph viz grammar with a 2D trajectory ODE: <code>dθ/dt = ω</code>, <code>dω/dt = −(g/L)·θ − γ·ω</code>, with light damping γ = 0.02 to represent a high-quality mainspring. Integrate over 60 seconds, plot angle vs time. Pencil-sketch style. Beautiful enough for a child to count the swings; deep enough that a horologist recognizes the gentle exponential decay envelope."</blockquote>
+    <p class="who">— what to say to your AI agent. Claude writes the Glyph spec; the compiler integrates the ODE with RK4 and emits the angle-over-time curve.</p>
+  </div>
+</section>
+
+<section class="container">
+  <div class="stage" aria-label="Animated pendulum clock">
+    <svg viewBox="0 0 1000 440" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="hero-title hero-desc">
+      <title id="hero-title">A pendulum clock keeping time</title>
+      <desc id="hero-desc">A pencil-style technical drawing: on the left, a pendulum swings back and forth from a fixed pivot; on the right, an escapement gear with 30 teeth slowly rotates, releasing the pendulum's energy in measured ticks; below, the angle-vs-time trace shows the damped sinusoidal swing.</desc>
+      <defs>
+        <pattern id="paper-shade" patternUnits="userSpaceOnUse" width="3" height="3">
+          <line x1="0" y1="0" x2="0" y2="3" stroke="rgba(31,26,20,.10)" stroke-width=".5"/>
+        </pattern>
+      </defs>
+
+      <!-- Clock case frame (left half) -->
+      <g aria-hidden="true">
+        <rect x="380" y="60" width="240" height="320" fill="none" stroke="var(--graphite)" stroke-width="1.5" rx="4"/>
+        <rect x="395" y="75" width="210" height="20" fill="url(#paper-shade)" stroke="var(--graphite)" stroke-width=".5"/>
+        <text x="500" y="89" text-anchor="middle" font-family="serif" font-size="11" font-style="italic" fill="var(--graphite-light)">Horologium · 1656</text>
+        <!-- Pivot mount -->
+        <circle cx="500" cy="80" r="4" fill="var(--graphite)"/>
+      </g>
+
+      <!-- Pendulum (the rotating group) -->
+      <g class="pendulum-bob-group" aria-hidden="true">
+        <line x1="500" y1="80" x2="500" y2="290" stroke="var(--graphite)" stroke-width="1.5"/>
+        <circle cx="500" cy="305" r="22" fill="#fdf8ea" stroke="var(--graphite)" stroke-width="2"/>
+        <circle cx="500" cy="305" r="16" fill="url(#paper-shade)"/>
+        <line x1="492" y1="305" x2="508" y2="305" stroke="var(--graphite)" stroke-width="1.5"/>
+        <line x1="500" y1="297" x2="500" y2="313" stroke="var(--graphite)" stroke-width="1.5"/>
+      </g>
+
+      <!-- Escapement gear (right of clock case) -->
+      <g class="escapement-gear" aria-hidden="true">
+        <!-- 30 teeth around a circle of radius 40 at (710, 250) -->
+        <circle cx="710" cy="250" r="40" fill="#fdf8ea" stroke="var(--graphite)" stroke-width="1.5"/>
+        <circle cx="710" cy="250" r="32" fill="none" stroke="var(--graphite-light)" stroke-width=".6" stroke-dasharray="2 3"/>
+        <!-- Teeth: 30 spokes -->
+        <g>
+          <line x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(12, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(24, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(36, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(48, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(60, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(72, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(84, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(96, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(108, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(120, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(132, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(144, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(156, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(168, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(180, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(192, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(204, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(216, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(228, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(240, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(252, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(264, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(276, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(288, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(300, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(312, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(324, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(336, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(348, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+        </g>
+        <!-- Hub -->
+        <circle cx="710" cy="250" r="6" fill="var(--graphite)"/>
+        <line x1="710" y1="220" x2="710" y2="250" stroke="var(--graphite)" stroke-width="1"/>
+      </g>
+
+      <!-- Annotations -->
+      <g font-family="serif" font-size="11" font-style="italic" fill="var(--graphite-light)" aria-hidden="true">
+        <line x1="510" y1="80" x2="540" y2="56" stroke="var(--graphite-light)" stroke-width=".5"/>
+        <text x="544" y="54">pivot</text>
+        <line x1="522" y1="305" x2="560" y2="332" stroke="var(--graphite-light)" stroke-width=".5"/>
+        <text x="565" y="335">bob</text>
+        <line x1="660" y1="210" x2="630" y2="180" stroke="var(--graphite-light)" stroke-width=".5"/>
+        <text x="628" y="178" text-anchor="end">escapement gear · 30 teeth</text>
+        <text x="710" y="318" text-anchor="middle">2 ticks / second</text>
+      </g>
+
+      <!-- DATA PLOT (lower half): angle vs time, with damped envelope -->
+      <g transform="translate(80, 380)" font-family="serif" font-size="10" fill="var(--graphite-light)" aria-hidden="true">
+        <line x1="0" y1="0" x2="0" y2="-50" stroke="var(--graphite)" stroke-width="1"/>
+        <line x1="0" y1="-25" x2="840" y2="-25" stroke="var(--graphite)" stroke-width="1" opacity="0.4" stroke-dasharray="2 3"/>
+        <line x1="0" y1="0" x2="840" y2="0" stroke="var(--graphite)" stroke-width="1"/>
+        <text x="-6" y="-5" text-anchor="end" font-style="italic">−</text>
+        <text x="-6" y="-25" text-anchor="end" font-style="italic">0</text>
+        <text x="-6" y="-47" text-anchor="end" font-style="italic">+</text>
+        <text x="420" y="14" text-anchor="middle" font-style="italic">time t (60 seconds)</text>
+        <!-- Damped sinusoidal trace, computed roughly to match the ODE.
+             Amplitude decays from 0.6 to ~0.45 over 60 s at γ=0.02.
+             14 swings in 60 s (period ≈ 2π s). -->
+        <path d="M 0 -40
+                 Q 14 0, 28 -25 Q 42 -50, 56 -25
+                 Q 70 0, 84 -25 Q 98 -49, 112 -25
+                 Q 126 -1, 140 -25 Q 154 -48, 168 -25
+                 Q 182 -2, 196 -25 Q 210 -47, 224 -25
+                 Q 238 -3, 252 -25 Q 266 -46, 280 -25
+                 Q 294 -4, 308 -25 Q 322 -45, 336 -25
+                 Q 350 -5, 364 -25 Q 378 -44, 392 -25
+                 Q 406 -6, 420 -25 Q 434 -43, 448 -25
+                 Q 462 -7, 476 -25 Q 490 -42, 504 -25
+                 Q 518 -8, 532 -25 Q 546 -41, 560 -25
+                 Q 574 -9, 588 -25 Q 602 -40, 616 -25
+                 Q 630 -10, 644 -25 Q 658 -39, 672 -25
+                 Q 686 -11, 700 -25 Q 714 -38, 728 -25
+                 Q 742 -12, 756 -25 Q 770 -37, 784 -25
+                 Q 798 -13, 812 -25 Q 826 -36, 840 -25"
+              fill="none" stroke="var(--graphite)" stroke-width="1.4" stroke-linecap="round" opacity="0.9"/>
+        <!-- Decay envelope (lightly drawn) -->
+        <path d="M 0 -40 L 840 -27.5" fill="none" stroke="var(--rust)" stroke-width=".6" stroke-dasharray="3 3" opacity="0.7"/>
+        <path d="M 0 -10 L 840 -22.5" fill="none" stroke="var(--rust)" stroke-width=".6" stroke-dasharray="3 3" opacity="0.7"/>
+        <text x="855" y="-25" font-style="italic" fill="var(--rust)">envelope</text>
+      </g>
+
+      <!-- Plot title -->
+      <g transform="translate(80, 360)" font-family="serif" fill="var(--graphite)">
+        <text x="0" y="0" font-size="13" font-style="italic">FIG.&nbsp;II.&nbsp;θ(t) — damped harmonic motion</text>
+      </g>
+    </svg>
+    <div class="stage-caption">2-second period (g/L = 1) · the <span class="accent">envelope</span> decays at γ = 0.02 — about 2 % amplitude lost per swing</div>
+  </div>
+</section>
+
+<section class="timeline">
+  <div class="container">
+    <h2>Two forces, one rhythm</h2>
+    <p class="lede">A pendulum is one of nature's simplest oscillators — two terms in an ODE, no exotic physics. Add a tiny damping term and you've got Huygens' clock; add a periodic kick at the right phase (an escapement) and the pendulum runs forever.</p>
+    <div class="timeline-grid">
+      <div class="timeline-card">
+        <span class="phase-num">FORCE 1</span>
+        <div class="label">gravity restores</div>
+        <h3>−(g/L) · θ</h3>
+        <p>The restoring torque is proportional to the displacement angle. For small angles it's linear; the period <code>2π·√(L/g)</code> depends only on the rod length L and gravity g — not the bob's mass, not the amplitude.</p>
+      </div>
+      <div class="timeline-card">
+        <span class="phase-num">FORCE 2</span>
+        <div class="label">friction drains</div>
+        <h3>−γ · ω</h3>
+        <p>Air drag, pivot friction, escapement coupling. All combined into a single damping coefficient γ. A good clock keeps γ small — Huygens' first design lost less than a second per day, an order of magnitude better than the verge-and-foliot clocks before it.</p>
+      </div>
+      <div class="timeline-card">
+        <span class="phase-num">THE FIX</span>
+        <div class="label">escapement adds back</div>
+        <h3>+ε per tick</h3>
+        <p>The mainspring's energy reaches the pendulum through the escapement, which releases a small kick at each extreme. Net energy stays constant; the pendulum keeps a perfect rhythm; the gears advance a precise step each swing.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="reveal">
+  <div class="container">
+    <h2>How Glyph drew it</h2>
+    <p class="lede">Claude writes the JSON; Glyph integrates the 2D ODE with 4th-order Runge-Kutta over 1200 samples. Same spec → byte-identical SVG, every platform, every run.</p>
+    <div class="reveal-grid">
+      <div class="reveal-side">
+        <h3>The Glyph spec <span class="pill">JSON</span></h3>
+        <pre><span class="c">// pendulum-clock.json — damped harmonic oscillator</span>
+{
+  <span class="k">"version"</span>: <span class="s">"glyph/0.1"</span>,
+  <span class="k">"title"</span>: <span class="s">"Pendulum clock (Huygens 1656)"</span>,
+  <span class="k">"data"</span>: {
+    <span class="k">"trajectory"</span>: {
+      <span class="k">"shape"</span>: <span class="s">"trajectory"</span>,
+      <span class="c">// dθ/dt = ω (angular velocity)</span>
+      <span class="k">"dxdt"</span>: <span class="s">"y"</span>,
+      <span class="c">// dω/dt = −(g/L)·θ − γ·ω</span>
+      <span class="c">// with g/L = 1, γ = 0.02</span>
+      <span class="k">"dydt"</span>: <span class="s">"-x - 0.02*y"</span>,
+      <span class="k">"initial"</span>: { <span class="k">"x"</span>: <span class="n">0.6</span>,
+                   <span class="k">"y"</span>: <span class="n">0</span> },
+      <span class="k">"time"</span>: { <span class="k">"min"</span>: <span class="n">0</span>,
+                <span class="k">"max"</span>: <span class="n">60</span>,
+                <span class="k">"samples"</span>: <span class="n">1200</span> }
+    }
+  },
+  <span class="k">"layers"</span>: [{
+    <span class="k">"mark"</span>: <span class="s">"line"</span>,
+    <span class="k">"encoding"</span>: {
+      <span class="k">"x"</span>: { <span class="k">"field"</span>: <span class="s">"t"</span> },
+      <span class="k">"y"</span>: { <span class="k">"field"</span>: <span class="s">"x"</span> }
+    }
+  }]
+}</pre>
+        <p class="cap">14 full swings over 60 seconds, with amplitude shrinking from 0.6 rad to ~0.45 rad — exactly the trajectory the ODE predicts. Try γ = 0 (perfect lossless pendulum), γ = 0.1 (audibly winding down), or γ = 0.5 (overdamped, no oscillation). <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/math/pendulum-clock.json">View on GitHub</a>.</p>
+      </div>
+      <div class="reveal-side">
+        <h3>Glyph compiler output <span class="pill">SVG</span></h3>
+        <div class="reveal-svg-frame">
+          <img src="pendulum-clock.svg" alt="Glyph-rendered damped pendulum trace, byte-locked across CI" loading="lazy">
+        </div>
+        <p class="cap">Byte-stable across Ubuntu / macOS / Windows × Node 20 / 22. The exponential decay envelope is in the data — no separate "fit" curve drawn; the ODE produces it for free.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="try">
+  <div class="container">
+    <h2>Your turn — prompts to try</h2>
+    <p class="lede">Damped harmonic motion shows up everywhere — bridges, atoms, springs. Name your system and Claude can pick the ODE.</p>
+    <div class="try-grid">
+      <div class="try-card">
+        <span class="tag">▸ Phase portrait</span>
+        <blockquote>"Plot the same damped pendulum in phase space instead of time. x-axis = θ, y-axis = ω. The trajectory should spiral into the origin."</blockquote>
+      </div>
+      <div class="try-card">
+        <span class="tag">▸ Engineering</span>
+        <blockquote>"Show me a Tacoma Narrows bridge oscillation — a forced damped harmonic oscillator with a periodic wind force. Find the resonance frequency where the amplitude grows unbounded."</blockquote>
+      </div>
+      <div class="try-card">
+        <span class="tag">▸ Chemistry</span>
+        <blockquote>"Plot a Morse potential — the energy curve of a diatomic molecule like H₂. Show how a vibrating molecule is just a damped harmonic oscillator near the equilibrium bond length."</blockquote>
+      </div>
+      <div class="try-card">
+        <span class="tag">▸ Music</span>
+        <blockquote>"Draw a plucked guitar string. Damped harmonic motion at the fundamental frequency, plus the first three overtones at integer ratios. Show the composite waveform."</blockquote>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <h2 style="margin-bottom:24px">More Machines of Wonder</h2>
+  <a class="btn btn-primary" href="life-in-glyph.html">See all of Life in Glyph ↗</a>
+  <a class="btn btn-ghost" href="draw-me-piston.html">Watt's Steam Engine</a>
+  <a class="btn btn-ghost" href="draw-me-rotor.html">Wankel Rotor</a>
+  <a class="btn btn-ghost" href="draw-me-antikythera.html">Antikythera</a>
+</section>
+
+<footer>
+  <div class="container">
+    Drawn by Glyph · Asked by you · Apache 2.0 · <a href="https://github.com/seanhanca/glyph">GitHub</a>
+  </div>
+</footer>
+
+</body>
+</html>

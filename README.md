@@ -165,9 +165,11 @@ Every image below is a real fixture in this repo, locked at byte-identity in CI.
 
 ## Life in Glyph
 
-Four hand-crafted showcases of what one English prompt + an AI agent + Glyph produce together. Each page picks a subject anyone can recognize, walks the reader through **prompt → JSON spec → byte-locked SVG → animated page**, and ends with prompt templates you can adapt for your own ideas.
+**Eight** hand-crafted showcases of what one English prompt + an AI agent + Glyph produce together. Each page picks a subject anyone can recognize, walks the reader through **prompt → JSON spec → byte-locked SVG → animated page**, and ends with prompt templates you can adapt for your own ideas.
 
 **Gallery:** [`seanhanca.github.io/glyph/math/life-in-glyph.html`](https://seanhanca.github.io/glyph/math/life-in-glyph.html)
+
+### Life — biology, physics, the cosmos
 
 <table>
 <tr>
@@ -208,7 +210,48 @@ Four hand-crafted showcases of what one English prompt + an AI agent + Glyph pro
 </tr>
 </table>
 
-> Each page ends with four prompt templates ("your turn — prompts to try") across different domains, so you can adapt the pattern to your own subject — a zebra's stripes, a pine cone's spirals, a different mission, a different oscillator.
+### Machines of Wonder — what humans built
+
+<table>
+<tr>
+<td width="50%" valign="top">
+  <a href="https://seanhanca.github.io/glyph/math/draw-me-piston.html">
+    <img alt="Slider-crank piston-position curve" src="https://raw.githubusercontent.com/seanhanca/glyph/main/packages/core/__fixtures__/math/slider-crank.svg" width="100%">
+  </a>
+  <h4>🔧 <a href="https://seanhanca.github.io/glyph/math/draw-me-piston.html">Watt's steam engine</a></h4>
+  <sub><code>data.shape: "function"</code> · slider-crank kinematics (1769) · pencil/parchment style</sub><br><br>
+  <sub><b>Prompt:</b> "Draw me James Watt's steam engine — the slider-crank mechanism that converts piston motion into rotation. Pencil-sketch style. Beautiful enough for a child to follow the crank; technical enough for a mechanical engineer to recognize the asymmetric power stroke."</sub>
+</td>
+<td width="50%" valign="top">
+  <a href="https://seanhanca.github.io/glyph/math/draw-me-pendulum-clock.html">
+    <img alt="Damped pendulum oscillation" src="https://raw.githubusercontent.com/seanhanca/glyph/main/packages/core/__fixtures__/math/pendulum-clock.svg" width="100%">
+  </a>
+  <h4>⏰ <a href="https://seanhanca.github.io/glyph/math/draw-me-pendulum-clock.html">Huygens' pendulum clock</a></h4>
+  <sub><code>data.shape: "trajectory"</code> · damped harmonic oscillator (1656)</sub><br><br>
+  <sub><b>Prompt:</b> "Draw me Christiaan Huygens' pendulum clock. 2D trajectory ODE: dθ/dt = ω, dω/dt = −(g/L)·θ − γ·ω, with γ = 0.02. Pencil-sketch style. Beautiful enough for a child to count the swings; deep enough that a horologist recognizes the decay envelope."</sub>
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+  <a href="https://seanhanca.github.io/glyph/math/draw-me-rotor.html">
+    <img alt="Wankel epitrochoid housing curve" src="https://raw.githubusercontent.com/seanhanca/glyph/main/packages/core/__fixtures__/math/wankel-rotor.svg" width="100%">
+  </a>
+  <h4>🌀 <a href="https://seanhanca.github.io/glyph/math/draw-me-rotor.html">Wankel rotary engine</a></h4>
+  <sub><code>data.shape: "function"</code> · epitrochoidal housing (Felix Wankel, 1957)</sub><br><br>
+  <sub><b>Prompt:</b> "Draw me a Wankel rotary engine housing. Parametric function with a 1:3 frequency ratio: x(t) = R·cos(t) + e·cos(3t), y(t) = R·sin(t) + e·sin(3t). Pencil-sketch style. A child should see the three lobes; an engineer should recognize why a triangular rotor exactly fits."</sub>
+</td>
+<td width="50%" valign="top">
+  <a href="https://seanhanca.github.io/glyph/math/draw-me-antikythera.html">
+    <img alt="Antikythera compound-epicycle Moon trace" src="https://raw.githubusercontent.com/seanhanca/glyph/main/packages/core/__fixtures__/math/antikythera-moon.svg" width="100%">
+  </a>
+  <h4>⚙️ <a href="https://seanhanca.github.io/glyph/math/draw-me-antikythera.html">The Antikythera Mechanism</a></h4>
+  <sub><code>data.shape: "function"</code> · compound epicycle (~150 BCE)</sub><br><br>
+  <sub><b>Prompt:</b> "Draw me the Antikythera Mechanism's Moon-pointer output. Compound epicycle: x(t) = R₁·cos(t) + R₂·cos(13t), with R₁ = 5 deferent + R₂ = 1.2 epicycle. Pencil-sketch style. A child should see the flower-pattern; a historian should recognize the Saros 223:235 ratio."</sub>
+</td>
+</tr>
+</table>
+
+> Each page ends with four prompt templates ("your turn — prompts to try") across different domains, so you can adapt the pattern to your own subject — a zebra's stripes, a pine cone's spirals, a different mission, a different oscillator, a Stirling engine, a tide-predicting machine, a robot arm.
 
 ---
 

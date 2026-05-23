@@ -1,0 +1,29 @@
+{
+  "version": "glyph/0.1",
+  "title": "Slider-crank mechanism (Watt steam engine, 1769) — life-in-glyph",
+  "data": {
+    "function": {
+      "shape": "function",
+      "parameter": { "name": "t", "min": 0, "max": 6.283185307179586, "samples": 360 },
+      "xExpr": "t",
+      "yExpr": "cos(t) + sqrt(9 - sin(t)*sin(t))"
+    }
+  },
+  "layers": [
+    {
+      "mark": "line",
+      "encoding": {
+        "x": {
+          "field": "x",
+          "type": "quantitative",
+          "scale": { "domain": [0, 6.283185307179586] }
+        },
+        "y": {
+          "field": "y",
+          "type": "quantitative",
+          "scale": { "domain": [1, 4.2] }
+        }
+      }
+    }
+  ]
+}

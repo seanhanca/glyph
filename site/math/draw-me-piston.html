@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Draw Me Watt's Steam Engine — Claude × Glyph showcase</title>
+<meta name="description" content="James Watt's slider-crank mechanism (1769) — the kinematic heart of the Industrial Revolution. One English prompt to Claude. One JSON spec from Glyph. Part of Life in Glyph.">
+<meta property="og:title" content="Draw Me Watt's Steam Engine — Life in Glyph">
+<meta property="og:description" content="The piston-position curve that started the Industrial Revolution.">
+<style>
+  /* ===========================================================
+     PENCIL / PARCHMENT — Machines of Wonder.
+     Warm cream background, dark graphite strokes, serif
+     typography, faint blue graph-paper gridlines. Each mechanism
+     is shown as a hand-drafted technical schematic with a labeled
+     callout, then the byte-locked Glyph compiler output below.
+     =========================================================== */
+  :root {
+    --parchment: #f5edd9;
+    --parchment-deep: #ebe1c4;
+    --grid: rgba(80,110,160,.08);
+    --graphite: #1f1a14;
+    --graphite-light: #4a3f30;
+    --rust: #8b3a1c;
+    --rust-soft: rgba(139,58,28,.10);
+    --indigo: #3b4d80;
+    --indigo-soft: rgba(59,77,128,.10);
+    --font-serif: "Iowan Old Style", "Source Serif Pro", Lora, Georgia, "Times New Roman", serif;
+    --font-hand: "Caveat", "Bradley Hand", "Comic Sans MS", cursive;
+    --font-mono: "SF Mono", "Cascadia Code", ui-monospace, monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--parchment);color:var(--graphite);font-family:var(--font-serif);-webkit-font-smoothing:antialiased;line-height:1.65}
+  body{
+    background-image:
+      linear-gradient(to right, var(--grid) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid) 1px, transparent 1px),
+      radial-gradient(ellipse at top right, rgba(139,58,28,.04), transparent 50%);
+    background-size: 32px 32px, 32px 32px, 100% 100%;
+    min-height:100vh
+  }
+  a{color:var(--rust);text-underline-offset:3px}
+  h1,h2,h3{margin:0 0 .4em;line-height:1.2;font-weight:700}
+  h1{font-size:clamp(2.4rem,6vw,4.2rem);font-style:italic;letter-spacing:-.02em}
+  h2{font-size:clamp(1.6rem,3.5vw,2.4rem);font-style:italic;color:var(--graphite)}
+  h3{font-size:1.18rem;color:var(--graphite)}
+  p{margin:0 0 1em}
+  .container{max-width:1100px;margin:0 auto;padding:0 24px}
+  code{font-family:var(--font-mono);font-size:.92em;background:rgba(31,26,20,.06);padding:.12em .4em;border-radius:3px;color:var(--graphite)}
+  pre{font-family:var(--font-mono);font-size:.86rem;background:#fdf8ea;border:1px solid rgba(31,26,20,.18);border-radius:6px;padding:18px 20px;color:var(--graphite);overflow-x:auto;line-height:1.6;margin:0;box-shadow:1px 1px 0 rgba(31,26,20,.08)}
+  pre .k{color:#1e5fa4}
+  pre .s{color:#7a3d12}
+  pre .n{color:#196b3a}
+  pre .c{color:#7a6b54;font-style:italic}
+
+  .breadcrumb{padding:18px 0;font-size:.92rem;color:var(--graphite-light);text-align:center;font-style:italic}
+  .breadcrumb a{color:var(--graphite-light);text-decoration:none;border-bottom:1px dotted var(--graphite-light);transition:color .15s ease}
+  .breadcrumb a:hover{color:var(--rust);border-bottom-color:var(--rust)}
+
+  .hero{padding:18px 0 12px;text-align:center}
+  .hero .kicker{display:inline-block;padding:5px 16px;border:1px solid var(--graphite);font-size:.78rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;margin-bottom:24px;font-family:var(--font-mono);color:var(--graphite);background:var(--parchment-deep)}
+  .hero p.lede{color:var(--graphite-light);max-width:64ch;margin:.6em auto 0;font-size:1.14rem;font-style:italic}
+  .hero p.lede strong{color:var(--graphite);font-style:normal;font-weight:700}
+  .hero p.byline{color:var(--graphite-light);font-size:.92rem;margin-top:24px;font-style:italic}
+
+  .prompt-card{margin:48px auto 32px;max-width:760px;background:#fdf8ea;border:1px solid rgba(31,26,20,.18);border-radius:6px;padding:30px 34px;box-shadow:2px 2px 0 rgba(31,26,20,.08)}
+  .prompt-card .label{display:inline-block;font-size:.74rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--indigo);margin-bottom:12px;font-family:var(--font-mono)}
+  .prompt-card blockquote{margin:0;font-family:var(--font-serif);font-size:1.08rem;line-height:1.75;color:var(--graphite);padding-left:18px;border-left:2px solid var(--rust);font-style:italic}
+  .prompt-card .who{margin-top:18px;font-size:.86rem;color:var(--graphite-light);font-style:italic}
+
+  .stage{margin:0 auto 64px;max-width:1000px;background:#fdf8ea;border:1px solid rgba(31,26,20,.25);border-radius:8px;padding:14px;position:relative;box-shadow:3px 3px 0 rgba(31,26,20,.10)}
+  .stage svg{display:block;width:100%;height:auto}
+  .stage-caption{margin-top:10px;text-align:center;color:var(--graphite-light);font-size:.86rem;font-style:italic}
+  .stage-caption .accent{color:var(--rust);font-weight:600;font-style:normal}
+
+  .timeline{padding:48px 0 24px}
+  .timeline h2{text-align:center}
+  .timeline > .container > p.lede{color:var(--graphite-light);text-align:center;max-width:54ch;margin:0 auto 36px;font-size:1.02rem;font-style:italic}
+  .timeline-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:18px;max-width:1000px;margin:0 auto}
+  @media (max-width:880px){.timeline-grid{grid-template-columns:1fr}}
+  .timeline-card{background:#fdf8ea;border:1px solid rgba(31,26,20,.18);border-radius:6px;padding:22px 24px;box-shadow:2px 2px 0 rgba(31,26,20,.06);transition:transform .2s ease,box-shadow .2s ease}
+  .timeline-card:hover{transform:translateY(-2px);box-shadow:4px 4px 0 rgba(31,26,20,.10)}
+  .timeline-card .phase-num{display:inline-block;font-family:var(--font-mono);font-size:.74rem;color:var(--indigo);letter-spacing:.08em;margin-bottom:6px;text-transform:uppercase}
+  .timeline-card .label{font-family:var(--font-mono);font-size:.84rem;color:var(--rust);margin-bottom:10px}
+  .timeline-card h3{margin-bottom:8px}
+  .timeline-card p{font-size:.96rem;color:var(--graphite-light);margin:0}
+
+  .reveal{padding:64px 0;border-top:1px solid rgba(31,26,20,.18);background:linear-gradient(180deg, rgba(255,255,255,.4), transparent 40%)}
+  .reveal h2{text-align:center}
+  .reveal > .container > p.lede{color:var(--graphite-light);text-align:center;max-width:60ch;margin:0 auto 32px;font-size:1.02rem;font-style:italic}
+  .reveal-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;max-width:1080px;margin:0 auto}
+  @media (max-width:880px){.reveal-grid{grid-template-columns:1fr}}
+  .reveal-side h3{margin-bottom:10px;display:flex;align-items:center;gap:10px}
+  .reveal-side h3 .pill{font-size:.66rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:9999px;background:var(--indigo-soft);color:var(--indigo);border:1px solid rgba(59,77,128,.3);font-family:var(--font-mono)}
+  .reveal-side p.cap{color:var(--graphite-light);font-size:.92rem;margin-top:10px;font-style:italic}
+  .reveal-svg-frame{background:#fff;border-radius:6px;padding:10px;border:1px solid rgba(31,26,20,.18);box-shadow:2px 2px 0 rgba(31,26,20,.08)}
+  .reveal-svg-frame img{display:block;width:100%;height:auto;border-radius:4px}
+
+  .try{padding:64px 0;border-top:1px solid rgba(31,26,20,.18)}
+  .try h2{text-align:center}
+  .try > .container > p.lede{color:var(--graphite-light);text-align:center;max-width:54ch;margin:0 auto 32px;font-style:italic}
+  .try-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:980px;margin:0 auto}
+  @media (max-width:720px){.try-grid{grid-template-columns:1fr}}
+  .try-card{background:#fdf8ea;border:1px solid rgba(31,26,20,.18);border-radius:6px;padding:22px 24px;box-shadow:2px 2px 0 rgba(31,26,20,.06)}
+  .try-card .tag{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.10em;text-transform:uppercase;color:var(--indigo);margin-bottom:8px;font-family:var(--font-mono)}
+  .try-card blockquote{margin:0;font-family:var(--font-serif);font-size:.98rem;line-height:1.7;color:var(--graphite);font-style:italic}
+
+  .cta{text-align:center;padding:64px 24px;border-top:1px solid rgba(31,26,20,.18)}
+  .cta .btn{display:inline-block;margin:6px;padding:11px 22px;border-radius:6px;text-decoration:none;font-weight:600;font-size:.94rem;border:1px solid var(--graphite);font-family:var(--font-serif);transition:transform .15s ease,background .15s ease}
+  .cta .btn-primary{background:var(--graphite);color:var(--parchment)}
+  .cta .btn-primary:hover{transform:translateY(-1px);background:var(--rust);border-color:var(--rust)}
+  .cta .btn-ghost{background:transparent;color:var(--graphite)}
+  .cta .btn-ghost:hover{background:var(--parchment-deep);border-color:var(--rust);color:var(--rust)}
+  footer{padding:24px 0 48px;text-align:center;color:var(--graphite-light);font-size:.88rem;font-style:italic}
+
+  /* SLIDER-CRANK ANIMATION — crank rotates at 6 RPM (10s/rev), the
+     connecting rod follows, piston bobs in the cylinder. The data
+     plot below traces the piston-position vs crank-angle curve in
+     lockstep — both driven by the same 10-second cycle. */
+  @keyframes rotate-crank {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  .crank-group{transform-origin:280px 220px;animation:rotate-crank 10s linear infinite}
+  @media (prefers-reduced-motion: reduce){.crank-group{animation:none !important}}
+</style>
+</head>
+<body>
+
+<div class="breadcrumb">
+  <a href="life-in-glyph.html">← Life in Glyph</a> &nbsp;·&nbsp; <a href="joy.html">Joy of Math</a>
+</div>
+
+<header class="hero">
+  <div class="container">
+    <span class="kicker">Machines of Wonder · 1 of 4</span>
+    <h1>Draw me Watt's steam engine</h1>
+    <p class="lede">The slider-crank mechanism, animated from one English sentence. <strong>You asked Claude. Glyph drew it.</strong> A piston bobs up and down, a crank converts that to rotation, and the world gets the Industrial Revolution.</p>
+    <p class="byline">James Watt's improved steam engine, patented 1769.</p>
+  </div>
+</header>
+
+<section class="container">
+  <div class="prompt-card">
+    <span class="label">▸ The prompt</span>
+    <blockquote>"Draw me James Watt's steam engine — the slider-crank mechanism that converts piston motion into rotation. Use the Glyph viz grammar with a parametric function: piston extension is <code>cos(θ) + √(l² − sin²(θ))</code> where θ is the crank angle and l is the connecting-rod length. Pencil-sketch style. Beautiful enough for a child to follow the crank around; technical enough for a mechanical engineer to recognize the asymmetric power stroke."</blockquote>
+    <p class="who">— what to say to your AI agent. Claude writes the Glyph spec; the compiler samples the formula 360 times around the crank and renders the piston-position curve.</p>
+  </div>
+</section>
+
+<section class="container">
+  <div class="stage" aria-label="Animated slider-crank mechanism">
+    <svg viewBox="0 0 1000 440" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="hero-title hero-desc">
+      <title id="hero-title">A slider-crank mechanism in motion</title>
+      <desc id="hero-desc">A pencil-style technical drawing: on the left, a crank wheel rotates; a connecting rod links the crank pin to a piston that slides in a cylinder on the right. On the right of the canvas, the piston-position-vs-crank-angle curve is plotted in graphite ink, with a moving indicator that tracks the crank's current position.</desc>
+      <defs>
+        <pattern id="hatch" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
+          <line x1="0" y1="0" x2="0" y2="6" stroke="rgba(31,26,20,.25)" stroke-width="1"/>
+        </pattern>
+      </defs>
+
+      <!-- LEFT HALF: the actual mechanism. Crank center at (280, 220),
+           crank radius 60, connecting rod length 180. The piston
+           slides along the line y=220 in the cylinder on the right. -->
+
+      <!-- Cylinder body (right of the crank) -->
+      <g aria-hidden="true">
+        <rect x="500" y="190" width="220" height="60" fill="none" stroke="var(--graphite)" stroke-width="1.5"/>
+        <!-- Cylinder mouth (open) -->
+        <line x1="500" y1="190" x2="500" y2="250" stroke="none"/>
+        <!-- Hatched cylinder back wall -->
+        <rect x="715" y="190" width="5" height="60" fill="url(#hatch)" stroke="var(--graphite)" stroke-width="1"/>
+        <!-- Cylinder label -->
+        <text x="610" y="178" text-anchor="middle" font-size="11" font-style="italic" fill="var(--graphite-light)">cylinder</text>
+      </g>
+
+      <!-- Crank wheel -->
+      <g class="crank-group" aria-hidden="true">
+        <!-- The wheel itself -->
+        <circle cx="280" cy="220" r="60" fill="#fdf8ea" stroke="var(--graphite)" stroke-width="1.5"/>
+        <circle cx="280" cy="220" r="55" fill="none" stroke="var(--graphite-light)" stroke-width=".5" stroke-dasharray="2 3"/>
+        <!-- Spoke lines -->
+        <line x1="220" y1="220" x2="340" y2="220" stroke="var(--graphite)" stroke-width="1" opacity=".5"/>
+        <line x1="280" y1="160" x2="280" y2="280" stroke="var(--graphite)" stroke-width="1" opacity=".5"/>
+        <!-- Crank center hub -->
+        <circle cx="280" cy="220" r="6" fill="var(--graphite)"/>
+        <!-- Crank pin (where the connecting rod attaches) — starts at θ=0, i.e. (340, 220) -->
+        <circle cx="340" cy="220" r="5" fill="var(--rust)" stroke="var(--graphite)" stroke-width="1"/>
+      </g>
+
+      <!-- Crank center label (outside the rotating group so it stays still) -->
+      <text x="280" y="305" text-anchor="middle" font-size="11" font-style="italic" fill="var(--graphite-light)">crank · 60 RPM</text>
+
+      <!-- Connecting rod + piston — these MOVE with the crank.
+           The connecting rod links the rotating crank pin to the
+           sliding piston, and the piston slides inside the cylinder.
+           Computed in JS at load time from the same formula the
+           Glyph spec compiles. -->
+      <g class="rod-piston" aria-hidden="true">
+        <line class="rod" x1="340" y1="220" x2="500" y2="220" stroke="var(--graphite)" stroke-width="2.5" stroke-linecap="round"/>
+        <rect class="piston" x="490" y="200" width="40" height="40" fill="#f5edd9" stroke="var(--graphite)" stroke-width="1.5"/>
+        <line class="piston-rod" x1="500" y1="220" x2="520" y2="220" stroke="var(--graphite)" stroke-width="1.5"/>
+      </g>
+
+      <!-- Annotations: leader lines + italic labels -->
+      <g font-family="serif" font-size="11" font-style="italic" fill="var(--graphite-light)" aria-hidden="true">
+        <line x1="378" y1="195" x2="410" y2="170" stroke="var(--graphite-light)" stroke-width=".5"/>
+        <text x="412" y="167">connecting rod</text>
+        <line x1="510" y1="200" x2="500" y2="170" stroke="var(--graphite-light)" stroke-width=".5"/>
+        <text x="498" y="166" text-anchor="end">piston</text>
+      </g>
+
+      <!-- Floor / baseline -->
+      <line x1="60" y1="318" x2="940" y2="318" stroke="var(--graphite)" stroke-width="1.2"/>
+      <g aria-hidden="true">
+        <pattern id="ground" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(45)">
+          <line x1="0" y1="0" x2="0" y2="8" stroke="rgba(31,26,20,.5)" stroke-width=".8"/>
+        </pattern>
+        <rect x="60" y="318" width="880" height="14" fill="url(#ground)"/>
+      </g>
+
+      <!-- RIGHT HALF: the data plot. Axes drawn in graphite. The
+           curve (piston extension vs θ) is sketched in advance; a
+           dot rides it in lockstep with the crank. -->
+      <g transform="translate(540, 350)" font-family="serif" font-size="10" fill="var(--graphite-light)" aria-hidden="true">
+        <!-- Axes -->
+        <line x1="0" y1="0" x2="0" y2="-80" stroke="var(--graphite)" stroke-width="1"/>
+        <line x1="0" y1="0" x2="400" y2="0" stroke="var(--graphite)" stroke-width="1"/>
+        <text x="-6" y="-5" text-anchor="end" font-style="italic">1</text>
+        <text x="-6" y="-77" text-anchor="end" font-style="italic">4</text>
+        <text x="200" y="14" text-anchor="middle" font-style="italic">crank angle θ</text>
+        <text x="2" y="0" font-style="italic" transform="rotate(-90, 2, 0) translate(40, -12)">x_piston</text>
+        <!-- Tick markers for π/2, π, 3π/2, 2π -->
+        <line x1="100" y1="-3" x2="100" y2="3" stroke="var(--graphite)" stroke-width=".5"/>
+        <text x="100" y="14" text-anchor="middle">π/2</text>
+        <line x1="200" y1="-3" x2="200" y2="3" stroke="var(--graphite)" stroke-width=".5"/>
+        <text x="200" y="28" text-anchor="middle" fill="var(--rust)">π · power stroke</text>
+        <line x1="300" y1="-3" x2="300" y2="3" stroke="var(--graphite)" stroke-width=".5"/>
+        <text x="300" y="14" text-anchor="middle">3π/2</text>
+      </g>
+
+      <!-- Curve: x_piston(θ) = cos(θ) + sqrt(9 - sin²θ).
+           At θ=0 (TDC), x = 1 + 3 = 4.
+           At θ=π (BDC), x = -1 + 3 = 2.
+           Range = [2, 4]. Plotted in pixel space (400 px wide,
+           80 px tall, mapped to data range [1, 4]).
+           400 px / (2π) ≈ 63.66 px/rad.
+           y mapping: 0 → 80 px, with y_data ∈ [1, 4] → y_px ∈ [0, -80].
+           Approximated as a polyline at 40 sample points. -->
+      <g transform="translate(540, 350)" aria-hidden="true">
+        <path class="piston-curve" d="
+            M 0 -80 L 10 -79.5 L 20 -78.0 L 30 -75.5 L 40 -72.2 L 50 -68.4 L 60 -64.2 L 70 -59.8 L 80 -55.3 L 90 -50.9
+            L 100 -46.7 L 110 -42.8 L 120 -39.4 L 130 -36.4 L 140 -34.0 L 150 -32.1 L 160 -30.8 L 170 -30.0 L 180 -29.7 L 190 -30.0
+            L 200 -30.7 L 210 -32.0 L 220 -33.8 L 230 -36.2 L 240 -39.1 L 250 -42.5 L 260 -46.4 L 270 -50.6 L 280 -55.0 L 290 -59.5
+            L 300 -64.0 L 310 -68.2 L 320 -72.0 L 330 -75.3 L 340 -77.9 L 350 -79.5 L 360 -80.0 L 370 -79.5 L 380 -78.0 L 390 -75.5
+            L 400 -71.9
+          " fill="none" stroke="var(--graphite)" stroke-width="1.5" stroke-linecap="round" opacity="0.85"/>
+        <!-- Indicator dot riding the curve (synced with the crank rotation) -->
+        <circle class="indicator-dot" cx="0" cy="-80" r="4" fill="var(--rust)" stroke="var(--graphite)" stroke-width=".8"/>
+      </g>
+
+      <!-- Title in the upper-right -->
+      <g transform="translate(540, 30)" font-family="serif" fill="var(--graphite)">
+        <text x="0" y="0" font-size="14" font-style="italic">FIG.&nbsp;I.&nbsp;Slider-crank kinematics</text>
+        <text x="0" y="18" font-size="10" font-style="italic" fill="var(--graphite-light)">— after Watt, 1769 —</text>
+      </g>
+    </svg>
+    <div class="stage-caption">10 seconds per crank revolution · the indicator <span class="accent">rides the curve</span> in lockstep with the rotating crank pin</div>
+  </div>
+</section>
+
+<section class="timeline">
+  <div class="container">
+    <h2>The mechanism, in three motions</h2>
+    <p class="lede">A slider-crank converts straight-line motion to rotation (or vice versa). The asymmetry of the piston's travel — slow near top dead centre, fast near the middle — is what makes it useful.</p>
+    <div class="timeline-grid">
+      <div class="timeline-card">
+        <span class="phase-num">θ = 0</span>
+        <div class="label">top dead centre</div>
+        <h3>Piston fully out</h3>
+        <p>The crank pin is on the cylinder axis. Piston extension is at its maximum (<code>r + l</code>). The piston is momentarily stationary — all forward velocity has been spent.</p>
+      </div>
+      <div class="timeline-card">
+        <span class="phase-num">θ = π</span>
+        <div class="label">bottom dead centre</div>
+        <h3>Power stroke complete</h3>
+        <p>The crank pin is on the opposite side. Piston extension is at its minimum (<code>l − r</code>). The asymmetry between this position and TDC is what gives the engine its working torque.</p>
+      </div>
+      <div class="timeline-card">
+        <span class="phase-num">θ = 2π</span>
+        <div class="label">cycle close</div>
+        <h3>One full revolution</h3>
+        <p>The piston has completed one out-and-back trip. In a four-stroke engine, every two revolutions produces one power stroke — the rest are intake, compression, and exhaust.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="reveal">
+  <div class="container">
+    <h2>How Glyph drew it</h2>
+    <p class="lede">Claude writes the JSON; Glyph samples the piston-position formula 360 times around the crank and emits a polyline. Same spec → byte-identical SVG, every platform, every run.</p>
+    <div class="reveal-grid">
+      <div class="reveal-side">
+        <h3>The Glyph spec <span class="pill">JSON</span></h3>
+        <pre><span class="c">// slider-crank.json — parametric piston-position curve</span>
+{
+  <span class="k">"version"</span>: <span class="s">"glyph/0.1"</span>,
+  <span class="k">"title"</span>: <span class="s">"Slider-crank (Watt 1769)"</span>,
+  <span class="k">"data"</span>: {
+    <span class="k">"function"</span>: {
+      <span class="k">"shape"</span>: <span class="s">"function"</span>,
+      <span class="k">"parameter"</span>: { <span class="k">"name"</span>: <span class="s">"t"</span>,
+                     <span class="k">"min"</span>: <span class="n">0</span>,
+                     <span class="k">"max"</span>: <span class="n">6.283185307179586</span>,
+                     <span class="k">"samples"</span>: <span class="n">360</span> },
+      <span class="k">"xExpr"</span>: <span class="s">"t"</span>,
+      <span class="c">// x_piston = r·cos(θ) + √(l² − r²·sin²(θ))</span>
+      <span class="c">// here r = 1, l = 3 → range [2, 4]</span>
+      <span class="k">"yExpr"</span>: <span class="s">"cos(t) + sqrt(9 - sin(t)*sin(t))"</span>
+    }
+  },
+  <span class="k">"layers"</span>: [{
+    <span class="k">"mark"</span>: <span class="s">"line"</span>,
+    <span class="k">"encoding"</span>: {
+      <span class="k">"x"</span>: { <span class="k">"field"</span>: <span class="s">"x"</span> },
+      <span class="k">"y"</span>: { <span class="k">"field"</span>: <span class="s">"y"</span> }
+    }
+  }]
+}</pre>
+        <p class="cap">No physics solver needed — the kinematics are closed-form. The non-sinusoidal shape comes from the <code>sqrt</code>, which encodes how the connecting rod tilts relative to the cylinder axis at different crank angles. <a href="https://github.com/seanhanca/glyph/blob/main/packages/core/__fixtures__/math/slider-crank.json">View on GitHub</a>.</p>
+      </div>
+      <div class="reveal-side">
+        <h3>Glyph compiler output <span class="pill">SVG</span></h3>
+        <div class="reveal-svg-frame">
+          <img src="slider-crank.svg" alt="Glyph-rendered slider-crank piston-position curve, byte-locked across CI" loading="lazy">
+        </div>
+        <p class="cap">Byte-stable across Ubuntu / macOS / Windows × Node 20 / 22. Asymmetric around θ = π — the upper portion (cos > 0) climbs steeper than the lower (cos &lt; 0) descends, because the sqrt term peaks at π/2 and 3π/2.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="try">
+  <div class="container">
+    <h2>Your turn — prompts to try</h2>
+    <p class="lede">Most mechanical linkages have closed-form kinematics. Name the mechanism and Claude can write the formula.</p>
+    <div class="try-grid">
+      <div class="try-card">
+        <span class="tag">▸ Mechanism</span>
+        <blockquote>"Draw me the Scotch yoke — same input/output as a slider-crank but with a slotted yoke instead of a connecting rod. Show the piston as a pure cosine. Side-by-side comparison with the Watt slider-crank."</blockquote>
+      </div>
+      <div class="try-card">
+        <span class="tag">▸ Engine cycle</span>
+        <blockquote>"Show me a four-stroke Otto cycle on a P-V diagram. Intake at constant pressure, adiabatic compression, ignition at top dead centre, power stroke, exhaust. Label each leg."</blockquote>
+      </div>
+      <div class="try-card">
+        <span class="tag">▸ Locomotive</span>
+        <blockquote>"Draw the driving wheels of Stephenson's Rocket — three coupled axles with connecting rods. Each wheel's crank pin offset by 90° from the next. Show the rod path over one revolution."</blockquote>
+      </div>
+      <div class="try-card">
+        <span class="tag">▸ Robotics</span>
+        <blockquote>"Plot the end-effector trajectory of a two-link planar robot arm. Link lengths 2 and 1.5. Animate the joints sweeping through θ₁ ∈ [0, π] and θ₂ ∈ [−π/2, π/2]."</blockquote>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <h2 style="margin-bottom:24px">More Machines of Wonder</h2>
+  <a class="btn btn-primary" href="life-in-glyph.html">See all of Life in Glyph ↗</a>
+  <a class="btn btn-ghost" href="draw-me-pendulum-clock.html">Huygens' Pendulum</a>
+  <a class="btn btn-ghost" href="draw-me-rotor.html">Wankel Rotor</a>
+  <a class="btn btn-ghost" href="draw-me-antikythera.html">Antikythera</a>
+</section>
+
+<footer>
+  <div class="container">
+    Drawn by Glyph · Asked by you · Apache 2.0 · <a href="https://github.com/seanhanca/glyph">GitHub</a>
+  </div>
+</footer>
+
+<script>
+  // The connecting rod + piston follow the crank in real time.
+  // Compute each frame from the SAME formula the Glyph spec compiles:
+  //   crank pin = (cx + r·cos(θ), cy + r·sin(θ))
+  //   piston x = cx + r·cos(θ) + sqrt(l² − r²·sin²(θ))    [in data units]
+  // We work in SVG-pixel units: cx=280, cy=220, r=60, l=180.
+  // Indicator dot on the data plot rides the curve at the same θ.
+  function animateMechanism(){
+    const rodEl = document.querySelector('.rod');
+    const pistonEl = document.querySelector('.piston');
+    const pistonRodEl = document.querySelector('.piston-rod');
+    const dotEl = document.querySelector('.indicator-dot');
+    if (!rodEl || !pistonEl || !pistonRodEl || !dotEl) return;
+    const cx = 280, cy = 220, r = 60, l = 180;
+    const cycleMs = 10000;
+    function frame(ts){
+      const t = ((ts % cycleMs) / cycleMs) * 2 * Math.PI;
+      const pinX = cx + r * Math.cos(t);
+      const pinY = cy + r * Math.sin(t);
+      const pistonX = cx + r * Math.cos(t) + Math.sqrt(l*l - r*r*Math.sin(t)*Math.sin(t));
+      rodEl.setAttribute('x1', pinX.toFixed(2));
+      rodEl.setAttribute('y1', pinY.toFixed(2));
+      rodEl.setAttribute('x2', pistonX.toFixed(2));
+      rodEl.setAttribute('y2', cy.toFixed(2));
+      pistonEl.setAttribute('x', (pistonX - 10).toFixed(2));
+      pistonRodEl.setAttribute('x1', pistonX.toFixed(2));
+      pistonRodEl.setAttribute('x2', (pistonX + 20).toFixed(2));
+      // Indicator dot on the data plot: x = (θ / 2π) × 400 px,
+      // y = mapping of piston extension into [-80, 0] px. The
+      // data range is [2, 4] (piston in r=1, l=3 units), so:
+      //   y_data = cos(t) + sqrt(9 - sin²(t))
+      //   y_px = -((y_data - 1) / 3) × 80   (data 1 → -0, data 4 → -80)
+      const yData = Math.cos(t) + Math.sqrt(9 - Math.sin(t)*Math.sin(t));
+      const xDotPx = (t / (2 * Math.PI)) * 400;
+      const yDotPx = -((yData - 1) / 3) * 80;
+      dotEl.setAttribute('cx', xDotPx.toFixed(2));
+      dotEl.setAttribute('cy', yDotPx.toFixed(2));
+      requestAnimationFrame(frame);
+    }
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      requestAnimationFrame(frame);
+    }
+  }
+  animateMechanism();
+</script>
+
+</body>
+</html>
