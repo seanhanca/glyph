@@ -188,6 +188,14 @@ export type SceneMark =
       readonly type: "group";
       readonly translateX: number;
       readonly translateY: number;
+      /**
+       * Optional uniform / per-axis scale applied AFTER translate
+       * (so the children are scaled about the group's local origin,
+       * not the parent's). Used to embed a nested chart at a custom
+       * size while preserving the chart's internal scale resolution.
+       */
+      readonly scaleX?: number;
+      readonly scaleY?: number;
       readonly children: ReadonlyArray<SceneMark>;
       /**
        * Pre-rendered SMIL XML (the output of one of the emitters in

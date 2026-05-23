@@ -95,13 +95,34 @@ export const ComposeChildSchema = z
       x: z.number().refine(Number.isFinite, "compose child x must be finite"),
       y: z.number().refine(Number.isFinite, "compose child y must be finite"),
     }),
-    /** Which schematic mark this child renders. */
-    mark: z.enum(["frame", "gear", "pendulum", "annotation-leader"]),
+    /**
+     * Optional size for the child. Currently used by `chart` children
+     * to inset the embedded chart at this size (the chart's own
+     * viewBox is scaled to fit).
+     */
+    size: z
+      .object({
+        w: z.number().positive(),
+        h: z.number().positive(),
+      })
+      .optional(),
+    /** Which schematic mark this child renders, or `chart` for an embedded chart spec. */
+    mark: z.enum(["frame", "gear", "pendulum", "annotation-leader", "chart"]),
     /** Mark-specific config; exactly one of these must match `mark`. */
     frame: FrameMarkSchema.optional(),
     gear: GearMarkSchema.optional(),
     pendulum: PendulumMarkSchema.optional(),
     annotation: AnnotationMarkSchema.optional(),
+    /**
+     * `chart` mark: a nested Glyph chart spec (data + layers). The
+     * compose compiler recursively calls compileSpec on this spec
+     * and places the resulting Scene at `at.{x, y}` scaled to
+     * `size.{w, h}`. The recursion is one-level deep — a chart spec
+     * cannot itself contain a compose. Validated as `unknown` here
+     * so we don't pull in the full GlyphSpecSchema (avoiding a
+     * circular import); the compiler defers to parseSpec.
+     */
+    chart: z.unknown().optional(),
     /** RFC #6 — optional looping animation on this child. */
     animation: LoopAnimationSchema,
   })
@@ -112,10 +133,12 @@ export const ComposeChildSchema = z
       if (c.mark === "gear") return c.gear !== undefined;
       if (c.mark === "pendulum") return c.pendulum !== undefined;
       if (c.mark === "annotation-leader") return c.annotation !== undefined;
+      if (c.mark === "chart") return c.chart !== undefined && c.size !== undefined;
       return false;
     },
     {
-      message: "compose child: the mark field must have a matching config block",
+      message:
+        "compose child: the mark field must have a matching config block (chart needs both `chart` and `size`)",
     },
   );
 

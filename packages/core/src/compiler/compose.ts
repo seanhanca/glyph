@@ -19,6 +19,9 @@ import type {
   GearMarkConfig,
   PendulumMarkConfig,
 } from "../spec/compose-schema.js";
+import { parseSpec } from "../spec/parse.js";
+import type { CompileFieldInfo } from "./compile.js";
+import { compileSpec } from "./compile.js";
 
 /** Top-level compose compiler. Returns a Scene ready for renderSvg. */
 export function compileCompose(spec: ComposeSpec): Scene {
@@ -86,7 +89,45 @@ function compileChild(child: ComposeChild): SceneMark[] {
   if (child.mark === "pendulum" && child.pendulum) return compilePendulum(child.pendulum);
   if (child.mark === "annotation-leader" && child.annotation)
     return compileAnnotationLeader(child.annotation, child.at.x, child.at.y);
+  if (child.mark === "chart" && child.chart && child.size)
+    return compileChart(child.chart, child.size);
   return [];
+}
+
+/**
+ * Nested chart spec inside a compose scene. Parses + compiles the
+ * given chart spec, scales its viewBox down to fit the child's
+ * `size`, and returns the scaled marks so the parent's group
+ * wrapper can position them.
+ *
+ * The chart spec uses its own width/height (default 640×400) and
+ * its scales resolve against the chart's own data. We then wrap
+ * the resulting marks in a scaling SceneMark group so the chart
+ * fits the requested `size`.
+ *
+ * This keeps composition compositional — the chart is rendered
+ * exactly as if it were standalone, then placed in the parent.
+ */
+function compileChart(rawChart: unknown, size: { w: number; h: number }): SceneMark[] {
+  const spec = parseSpec(rawChart);
+  const rows: ReadonlyArray<ReadonlyArray<number>> = [];
+  const schema: CompileFieldInfo[] = [];
+  const scene = compileSpec({ spec, rows, schema });
+  const sx = size.w / scene.width;
+  const sy = size.h / scene.height;
+  // Inner group applies the scale; outer (compose-child) group
+  // applies the translate. Two-step keeps each transformation
+  // composable and easy to reason about.
+  return [
+    {
+      type: "group",
+      translateX: 0,
+      translateY: 0,
+      scaleX: sx,
+      scaleY: sy,
+      children: [...scene.marks],
+    },
+  ];
 }
 
 /* ----------------------------------------------------------------
