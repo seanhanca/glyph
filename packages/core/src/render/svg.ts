@@ -287,6 +287,20 @@ function renderMark(m: SceneMark, interactive: boolean): string {
         m.stroke,
       )}" stroke-width="${sw}" marker-end="url(#glyph-arrow)"/>`;
     }
+    case "group": {
+      // RFC #5 — compose group. Render the children recursively
+      // inside a `<g transform="translate(...)">` wrapper; if the
+      // group has a loop animation, append the pre-rendered SMIL
+      // XML after the children. The translate places the group on
+      // the parent canvas; the SMIL `additive="sum"` rotation /
+      // scale layers on top of the translate so the contents
+      // rotate / pulse about their own local origin.
+      const tx = m.translateX.toFixed(3);
+      const ty = m.translateY.toFixed(3);
+      const childrenSvg = m.children.map((c) => renderMark(c, interactive)).join("");
+      const anim = m.loopAnimationXml ?? "";
+      return `<g transform="translate(${tx}, ${ty})">${childrenSvg}${anim}</g>`;
+    }
   }
 }
 
