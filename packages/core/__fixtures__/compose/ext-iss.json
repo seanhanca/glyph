@@ -1,0 +1,872 @@
+{
+  "compose": {
+    "viewBox": {
+      "width": 1500,
+      "height": 900
+    },
+    "title": "ISS — engineering elevation, pencil draft",
+    "description": "International Space Station, side-elevation schematic. Integrated Truss Structure (the spine), 8 solar arrays in 4 pairs, 6 pressurized modules + Cupola, 3 radiator panels. The orbit is the thin grey ellipse below the station; Earth's limb arcs underneath. Drawn the way an engineer would draft it.",
+    "theme": {
+      "preset": "pencil-parchment"
+    },
+    "defs": {
+      "gradients": [
+        {
+          "id": "g-space",
+          "kind": "linear",
+          "x1": "0%",
+          "y1": "0%",
+          "x2": "0%",
+          "y2": "100%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#0c0a25",
+              "opacity": 1
+            },
+            {
+              "offset": "75%",
+              "color": "#082f49",
+              "opacity": 1
+            },
+            {
+              "offset": "100%",
+              "color": "#0c4a6e",
+              "opacity": 1
+            }
+          ]
+        },
+        {
+          "id": "g-earth",
+          "kind": "radial",
+          "cx": "50%",
+          "cy": "0%",
+          "r": "100%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#7dd3fc",
+              "opacity": 1
+            },
+            {
+              "offset": "40%",
+              "color": "#0284c7",
+              "opacity": 1
+            },
+            {
+              "offset": "100%",
+              "color": "#082f49",
+              "opacity": 1
+            }
+          ]
+        },
+        {
+          "id": "g-solar",
+          "kind": "linear",
+          "x1": "0%",
+          "y1": "0%",
+          "x2": "100%",
+          "y2": "0%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#1e3a8a",
+              "opacity": 1
+            },
+            {
+              "offset": "50%",
+              "color": "#3730a3",
+              "opacity": 1
+            },
+            {
+              "offset": "100%",
+              "color": "#1e3a8a",
+              "opacity": 1
+            }
+          ]
+        },
+        {
+          "id": "g-module",
+          "kind": "linear",
+          "x1": "0%",
+          "y1": "0%",
+          "x2": "0%",
+          "y2": "100%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#f5edd9",
+              "opacity": 1
+            },
+            {
+              "offset": "50%",
+              "color": "#cbb89c",
+              "opacity": 1
+            },
+            {
+              "offset": "100%",
+              "color": "#8b7355",
+              "opacity": 1
+            }
+          ]
+        }
+      ]
+    },
+    "children": [
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 1500 0 L 1500 900 L 0 900 Z",
+          "fill": "url(#g-space)",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "starfield",
+        "starfield": {
+          "count": 120,
+          "seed": 51,
+          "region": {
+            "x": 0,
+            "y": 0,
+            "w": 1500,
+            "h": 630
+          }
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -200 1000 A 1900 1900 0 0 0 1700 1000 L 1700 900 L -200 900 Z",
+          "fill": "url(#g-earth)",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -200 1000 A 1860 1860 0 0 0 1700 1000 L 1700 995 A 1855 1855 0 0 1 -200 995 Z",
+          "fill": "rgba(125,211,252,.4)",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 720
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 50 0 Q 750 -80, 1450 0",
+          "fill": "none",
+          "stroke": "rgba(253,230,138,.4)",
+          "strokeWidth": 1.5,
+          "strokeDasharray": "8 6"
+        }
+      },
+      {
+        "at": {
+          "x": 270,
+          "y": 164
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 60 0 L 60 200 L 0 200 Z",
+          "fill": "url(#g-solar)",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 270,
+          "y": 164
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 22.22 L 60 22.22 M 0 44.44 L 60 44.44 M 0 66.67 L 60 66.67 M 0 88.89 L 60 88.89 M 0 111.11 L 60 111.11 M 0 133.33 L 60 133.33 M 0 155.56 L 60 155.56 M 0 177.78 L 60 177.78",
+          "fill": "none",
+          "stroke": "rgba(253,230,138,.35)",
+          "strokeWidth": 0.5
+        }
+      },
+      {
+        "at": {
+          "x": 270,
+          "y": 396
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 60 0 L 60 200 L 0 200 Z",
+          "fill": "url(#g-solar)",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 270,
+          "y": 396
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 22.22 L 60 22.22 M 0 44.44 L 60 44.44 M 0 66.67 L 60 66.67 M 0 88.89 L 60 88.89 M 0 111.11 L 60 111.11 M 0 133.33 L 60 133.33 M 0 155.56 L 60 155.56 M 0 177.78 L 60 177.78",
+          "fill": "none",
+          "stroke": "rgba(253,230,138,.35)",
+          "strokeWidth": 0.5
+        }
+      },
+      {
+        "at": {
+          "x": 300,
+          "y": 380
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 8,
+          "fill": "#fde68a",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 520,
+          "y": 164
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 60 0 L 60 200 L 0 200 Z",
+          "fill": "url(#g-solar)",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 520,
+          "y": 164
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 22.22 L 60 22.22 M 0 44.44 L 60 44.44 M 0 66.67 L 60 66.67 M 0 88.89 L 60 88.89 M 0 111.11 L 60 111.11 M 0 133.33 L 60 133.33 M 0 155.56 L 60 155.56 M 0 177.78 L 60 177.78",
+          "fill": "none",
+          "stroke": "rgba(253,230,138,.35)",
+          "strokeWidth": 0.5
+        }
+      },
+      {
+        "at": {
+          "x": 520,
+          "y": 396
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 60 0 L 60 200 L 0 200 Z",
+          "fill": "url(#g-solar)",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 520,
+          "y": 396
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 22.22 L 60 22.22 M 0 44.44 L 60 44.44 M 0 66.67 L 60 66.67 M 0 88.89 L 60 88.89 M 0 111.11 L 60 111.11 M 0 133.33 L 60 133.33 M 0 155.56 L 60 155.56 M 0 177.78 L 60 177.78",
+          "fill": "none",
+          "stroke": "rgba(253,230,138,.35)",
+          "strokeWidth": 0.5
+        }
+      },
+      {
+        "at": {
+          "x": 550,
+          "y": 380
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 8,
+          "fill": "#fde68a",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 970,
+          "y": 164
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 60 0 L 60 200 L 0 200 Z",
+          "fill": "url(#g-solar)",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 970,
+          "y": 164
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 22.22 L 60 22.22 M 0 44.44 L 60 44.44 M 0 66.67 L 60 66.67 M 0 88.89 L 60 88.89 M 0 111.11 L 60 111.11 M 0 133.33 L 60 133.33 M 0 155.56 L 60 155.56 M 0 177.78 L 60 177.78",
+          "fill": "none",
+          "stroke": "rgba(253,230,138,.35)",
+          "strokeWidth": 0.5
+        }
+      },
+      {
+        "at": {
+          "x": 970,
+          "y": 396
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 60 0 L 60 200 L 0 200 Z",
+          "fill": "url(#g-solar)",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 970,
+          "y": 396
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 22.22 L 60 22.22 M 0 44.44 L 60 44.44 M 0 66.67 L 60 66.67 M 0 88.89 L 60 88.89 M 0 111.11 L 60 111.11 M 0 133.33 L 60 133.33 M 0 155.56 L 60 155.56 M 0 177.78 L 60 177.78",
+          "fill": "none",
+          "stroke": "rgba(253,230,138,.35)",
+          "strokeWidth": 0.5
+        }
+      },
+      {
+        "at": {
+          "x": 1000,
+          "y": 380
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 8,
+          "fill": "#fde68a",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 1220,
+          "y": 164
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 60 0 L 60 200 L 0 200 Z",
+          "fill": "url(#g-solar)",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 1220,
+          "y": 164
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 22.22 L 60 22.22 M 0 44.44 L 60 44.44 M 0 66.67 L 60 66.67 M 0 88.89 L 60 88.89 M 0 111.11 L 60 111.11 M 0 133.33 L 60 133.33 M 0 155.56 L 60 155.56 M 0 177.78 L 60 177.78",
+          "fill": "none",
+          "stroke": "rgba(253,230,138,.35)",
+          "strokeWidth": 0.5
+        }
+      },
+      {
+        "at": {
+          "x": 1220,
+          "y": 396
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 60 0 L 60 200 L 0 200 Z",
+          "fill": "url(#g-solar)",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 1220,
+          "y": 396
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 22.22 L 60 22.22 M 0 44.44 L 60 44.44 M 0 66.67 L 60 66.67 M 0 88.89 L 60 88.89 M 0 111.11 L 60 111.11 M 0 133.33 L 60 133.33 M 0 155.56 L 60 155.56 M 0 177.78 L 60 177.78",
+          "fill": "none",
+          "stroke": "rgba(253,230,138,.35)",
+          "strokeWidth": 0.5
+        }
+      },
+      {
+        "at": {
+          "x": 1250,
+          "y": 380
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 8,
+          "fill": "#fde68a",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 382,
+          "y": 388
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 36 0 L 36 70 L 0 70 Z",
+          "fill": "#fefce8",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 732,
+          "y": 388
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 36 0 L 36 70 L 0 70 Z",
+          "fill": "#fefce8",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 1082,
+          "y": 388
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 36 0 L 36 70 L 0 70 Z",
+          "fill": "#fefce8",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 200 372 L 1300 372 L 1300 388 L 200 388 Z",
+          "fill": "#1f1a14",
+          "stroke": "#fde68a",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 200 372 L 300 388 M 300 372 L 200 388 M 300 372 L 400 388 M 400 372 L 300 388 M 400 372 L 500 388 M 500 372 L 400 388 M 500 372 L 600 388 M 600 372 L 500 388 M 600 372 L 700 388 M 700 372 L 600 388 M 700 372 L 800 388 M 800 372 L 700 388 M 800 372 L 900 388 M 900 372 L 800 388 M 900 372 L 1000 388 M 1000 372 L 900 388 M 1000 372 L 1100 388 M 1100 372 L 1000 388 M 1100 372 L 1200 388 M 1200 372 L 1100 388 M 1200 372 L 1300 388 M 1300 372 L 1200 388",
+          "fill": "none",
+          "stroke": "rgba(253,230,138,.5)",
+          "strokeWidth": 0.6
+        }
+      },
+      {
+        "at": {
+          "x": 585,
+          "y": 350
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 130 0 L 130 60 L 0 60 Z",
+          "fill": "url(#g-module)",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.8
+        }
+      },
+      {
+        "at": {
+          "x": 685,
+          "y": 347.5
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 70 0 L 70 65 L 0 65 Z",
+          "fill": "url(#g-module)",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.8
+        }
+      },
+      {
+        "at": {
+          "x": 725,
+          "y": 347.5
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 130 0 L 130 65 L 0 65 Z",
+          "fill": "url(#g-module)",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.8
+        }
+      },
+      {
+        "at": {
+          "x": 885,
+          "y": 347.5
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 70 0 L 70 65 L 0 65 Z",
+          "fill": "url(#g-module)",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.8
+        }
+      },
+      {
+        "at": {
+          "x": 945,
+          "y": 350
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 90 0 L 90 60 L 0 60 Z",
+          "fill": "url(#g-module)",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.8
+        }
+      },
+      {
+        "at": {
+          "x": 935,
+          "y": 350
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 110 0 L 110 60 L 0 60 Z",
+          "fill": "url(#g-module)",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.8
+        }
+      },
+      {
+        "at": {
+          "x": 585,
+          "y": 380
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 4,
+          "fill": "#1f1a14"
+        }
+      },
+      {
+        "at": {
+          "x": 715,
+          "y": 380
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 4,
+          "fill": "#1f1a14"
+        }
+      },
+      {
+        "at": {
+          "x": 685,
+          "y": 380
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 4,
+          "fill": "#1f1a14"
+        }
+      },
+      {
+        "at": {
+          "x": 755,
+          "y": 380
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 4,
+          "fill": "#1f1a14"
+        }
+      },
+      {
+        "at": {
+          "x": 725,
+          "y": 380
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 4,
+          "fill": "#1f1a14"
+        }
+      },
+      {
+        "at": {
+          "x": 855,
+          "y": 380
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 4,
+          "fill": "#1f1a14"
+        }
+      },
+      {
+        "at": {
+          "x": 885,
+          "y": 380
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 4,
+          "fill": "#1f1a14"
+        }
+      },
+      {
+        "at": {
+          "x": 955,
+          "y": 380
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 4,
+          "fill": "#1f1a14"
+        }
+      },
+      {
+        "at": {
+          "x": 945,
+          "y": 380
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 4,
+          "fill": "#1f1a14"
+        }
+      },
+      {
+        "at": {
+          "x": 1035,
+          "y": 380
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 4,
+          "fill": "#1f1a14"
+        }
+      },
+      {
+        "at": {
+          "x": 935,
+          "y": 380
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 4,
+          "fill": "#1f1a14"
+        }
+      },
+      {
+        "at": {
+          "x": 1045,
+          "y": 380
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 4,
+          "fill": "#1f1a14"
+        }
+      },
+      {
+        "at": {
+          "x": 780,
+          "y": 412
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 Q 8 28, 24 28 Q 40 28, 48 0 Z",
+          "fill": "url(#g-module)",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 788,
+          "y": 398
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 2,
+          "fill": "#1f1a14"
+        }
+      },
+      {
+        "at": {
+          "x": 796,
+          "y": 398
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 2,
+          "fill": "#1f1a14"
+        }
+      },
+      {
+        "at": {
+          "x": 804,
+          "y": 398
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 2,
+          "fill": "#1f1a14"
+        }
+      },
+      {
+        "at": {
+          "x": 812,
+          "y": 398
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 2,
+          "fill": "#1f1a14"
+        }
+      },
+      {
+        "at": {
+          "x": 820,
+          "y": 398
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 2,
+          "fill": "#1f1a14"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "annotation-leader",
+        "annotation": {
+          "from": [300, 160],
+          "to": [170, 100],
+          "text": "solar array · port-far",
+          "italic": true,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "annotation-leader",
+        "annotation": {
+          "from": [1250, 160],
+          "to": [1350, 100],
+          "text": "solar array · starboard-far",
+          "italic": true,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "annotation-leader",
+        "annotation": {
+          "from": [750, 388],
+          "to": [850, 560],
+          "text": "Integrated Truss Structure (108 m)",
+          "italic": true,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "annotation-leader",
+        "annotation": {
+          "from": [800, 350],
+          "to": [950, 250],
+          "text": "Destiny + Harmony modules",
+          "italic": true,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 750,
+          "y": 60
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "International Space Station — elevation, side view",
+          "fontSize": 20,
+          "fill": "#fde68a",
+          "italic": true,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 750,
+          "y": 870
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "altitude 408 km · velocity 7.66 km/s · orbital period 92.7 min · mass 420 t · 109 m × 73 m",
+          "fontSize": 12,
+          "fill": "#cbd5e1",
+          "italic": true,
+          "anchor": "middle"
+        }
+      }
+    ]
+  }
+}

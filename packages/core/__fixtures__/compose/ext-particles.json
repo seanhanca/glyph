@@ -1,0 +1,151 @@
+{
+  "compose": {
+    "viewBox": {
+      "width": 900,
+      "height": 900
+    },
+    "title": "Particle field — double-vortex streamlines",
+    "description": "Two counter-rotating vortices placed at (1,1) and (-1,-1). Each Gaussian-weighted vector field is integrated from an 8×8 grid of seed points using RK4; each trace becomes a path colored by the local flow direction. The signature of a million-particle GPU demo, drawn deterministically by integrating 64 trajectories.",
+    "theme": {
+      "background": "#020617",
+      "foreground": "#fef3c7"
+    },
+    "defs": {
+      "gradients": [
+        {
+          "id": "g-bg",
+          "kind": "radial",
+          "cx": "50%",
+          "cy": "50%",
+          "r": "80%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#1e1b4b",
+              "opacity": 1
+            },
+            {
+              "offset": "100%",
+              "color": "#020617",
+              "opacity": 1
+            }
+          ]
+        }
+      ]
+    },
+    "children": [
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 900 0 L 900 900 L 0 900 Z",
+          "fill": "url(#g-bg)",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "starfield",
+        "starfield": {
+          "count": 80,
+          "seed": 17,
+          "region": {
+            "x": 0,
+            "y": 0,
+            "w": 900,
+            "h": 900
+          }
+        }
+      },
+      {
+        "at": {
+          "x": 80,
+          "y": 90
+        },
+        "size": {
+          "w": 740,
+          "h": 740
+        },
+        "mark": "chart",
+        "chart": {
+          "version": "glyph/0.1",
+          "title": "Double-vortex flow · 8×8 seeds · RK4 integration · colorBy: angle",
+          "data": {
+            "source": "inline:ext-particles"
+          },
+          "layers": [
+            {
+              "mark": "streamline",
+              "encoding": {
+                "x": {
+                  "field": "x",
+                  "type": "quantitative",
+                  "scale": {
+                    "domain": [-2.4, 2.4]
+                  }
+                },
+                "y": {
+                  "field": "y",
+                  "type": "quantitative",
+                  "scale": {
+                    "domain": [-2.4, 2.4]
+                  }
+                }
+              },
+              "streamline": {
+                "dxdt": "-(y-1)*exp(-((x-1)^2+(y-1)^2)/1.5) + (y+1)*exp(-((x+1)^2+(y+1)^2)/1.5)",
+                "dydt": "(x-1)*exp(-((x-1)^2+(y-1)^2)/1.5) - (x+1)*exp(-((x+1)^2+(y+1)^2)/1.5)",
+                "seeds": {
+                  "kind": "grid",
+                  "rows": 8,
+                  "cols": 8
+                },
+                "step": 0.05,
+                "maxSteps": 100,
+                "domain": {
+                  "x": [-2.4, 2.4],
+                  "y": [-2.4, 2.4]
+                },
+                "colorBy": "angle"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 50
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Particle field — the physics of beautiful particles",
+          "fontSize": 20,
+          "fill": "#fef3c7",
+          "italic": true,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 870
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "data.shape: 'streamline' · ODE integration · ~200 deterministic traces · static SVG",
+          "fontSize": 12,
+          "fill": "#94a3b8",
+          "italic": true,
+          "anchor": "middle"
+        }
+      }
+    ]
+  }
+}
