@@ -1,0 +1,754 @@
+{
+  "compose": {
+    "viewBox": {
+      "width": 800,
+      "height": 800
+    },
+    "title": "Radio waves — invisible voices",
+    "description": "Marconi, 1901 — the first wireless transatlantic signal. A single antenna driven by an oscillator radiates electromagnetic waves at the speed of light in all directions. Every radio, every wifi router, every cell tower is a refinement of this one trick.",
+    "theme": {
+      "background": "#020617",
+      "foreground": "#fef3c7"
+    },
+    "defs": {
+      "gradients": [
+        {
+          "id": "g-bg",
+          "kind": "radial",
+          "cx": "50%",
+          "cy": "50%",
+          "r": "80%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#0c1e3a",
+              "opacity": 1
+            },
+            {
+              "offset": "60%",
+              "color": "#04102a",
+              "opacity": 1
+            },
+            {
+              "offset": "100%",
+              "color": "#020617",
+              "opacity": 1
+            }
+          ]
+        },
+        {
+          "id": "g-tip",
+          "kind": "radial",
+          "cx": "50%",
+          "cy": "50%",
+          "r": "50%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#fde68a",
+              "opacity": 1
+            },
+            {
+              "offset": "100%",
+              "color": "#fde68a",
+              "opacity": 0
+            }
+          ]
+        }
+      ]
+    },
+    "children": [
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 800 0 L 800 800 L 0 800 Z",
+          "fill": "url(#g-bg)",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "starfield",
+        "starfield": {
+          "count": 100,
+          "seed": 31,
+          "region": {
+            "x": 0,
+            "y": 0,
+            "w": 800,
+            "h": 800
+          }
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 700
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 800 0 L 800 100 L 0 100 Z",
+          "fill": "rgba(15, 23, 42, 0.85)",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 200
+        },
+        "mark": "ellipse",
+        "ellipse": {
+          "rx": 60,
+          "ry": 33,
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1.4,
+          "opacity": 0.62
+        },
+        "animation": {
+          "kind": "pulse",
+          "periodMs": 3200,
+          "scale": 1.05
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 200
+        },
+        "mark": "ellipse",
+        "ellipse": {
+          "rx": 120,
+          "ry": 66,
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1.4,
+          "opacity": 0.5399999999999999
+        },
+        "animation": {
+          "kind": "pulse",
+          "periodMs": 3400,
+          "scale": 1.05
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 200
+        },
+        "mark": "ellipse",
+        "ellipse": {
+          "rx": 180,
+          "ry": 99.00000000000001,
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1.4,
+          "opacity": 0.45999999999999996
+        },
+        "animation": {
+          "kind": "pulse",
+          "periodMs": 3600,
+          "scale": 1.05
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 200
+        },
+        "mark": "ellipse",
+        "ellipse": {
+          "rx": 240,
+          "ry": 132,
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1.4,
+          "opacity": 0.37999999999999995
+        },
+        "animation": {
+          "kind": "pulse",
+          "periodMs": 3800,
+          "scale": 1.05
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 200
+        },
+        "mark": "ellipse",
+        "ellipse": {
+          "rx": 300,
+          "ry": 165,
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1.4,
+          "opacity": 0.29999999999999993
+        },
+        "animation": {
+          "kind": "pulse",
+          "periodMs": 4000,
+          "scale": 1.05
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 200
+        },
+        "mark": "ellipse",
+        "ellipse": {
+          "rx": 360,
+          "ry": 198.00000000000003,
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1.4,
+          "opacity": 0.21999999999999997
+        },
+        "animation": {
+          "kind": "pulse",
+          "periodMs": 4200,
+          "scale": 1.05
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 200
+        },
+        "mark": "ellipse",
+        "ellipse": {
+          "rx": 420,
+          "ry": 231.00000000000003,
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1.4,
+          "opacity": 0.1399999999999999
+        },
+        "animation": {
+          "kind": "pulse",
+          "periodMs": 4400,
+          "scale": 1.05
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 200
+        },
+        "mark": "glow",
+        "glow": {
+          "radius": 50,
+          "gradientId": "g-tip"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 330 700 L 470 700 L 410 280 L 390 280 Z",
+          "fill": "rgba(15, 23, 42, 0.4)",
+          "stroke": "#fde68a",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[330, 700], [466.25, 673.75]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1,
+          "strokeDasharray": ""
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[470, 700], [333.75, 673.75]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[333.75, 673.75], [462.5, 647.5]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1,
+          "strokeDasharray": ""
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[466.25, 673.75], [337.5, 647.5]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[337.5, 647.5], [458.75, 621.25]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1,
+          "strokeDasharray": ""
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[462.5, 647.5], [341.25, 621.25]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[341.25, 621.25], [455, 595]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1,
+          "strokeDasharray": ""
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[458.75, 621.25], [345, 595]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[345, 595], [451.25, 568.75]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1,
+          "strokeDasharray": ""
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[455, 595], [348.75, 568.75]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[348.75, 568.75], [447.5, 542.5]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1,
+          "strokeDasharray": ""
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[451.25, 568.75], [352.5, 542.5]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[352.5, 542.5], [443.75, 516.25]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1,
+          "strokeDasharray": ""
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[447.5, 542.5], [356.25, 516.25]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[356.25, 516.25], [440, 490]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1,
+          "strokeDasharray": ""
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[443.75, 516.25], [360, 490]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[360, 490], [436.25, 463.75]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1,
+          "strokeDasharray": ""
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[440, 490], [363.75, 463.75]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[363.75, 463.75], [432.5, 437.5]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1,
+          "strokeDasharray": ""
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[436.25, 463.75], [367.5, 437.5]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[367.5, 437.5], [428.75, 411.25]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1,
+          "strokeDasharray": ""
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[432.5, 437.5], [371.25, 411.25]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[371.25, 411.25], [425, 385]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1,
+          "strokeDasharray": ""
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[428.75, 411.25], [375, 385]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[375, 385], [421.25, 358.75]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1,
+          "strokeDasharray": ""
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[425, 385], [378.75, 358.75]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[378.75, 358.75], [417.5, 332.5]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1,
+          "strokeDasharray": ""
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[421.25, 358.75], [382.5, 332.5]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[382.5, 332.5], [413.75, 306.25]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1,
+          "strokeDasharray": ""
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[417.5, 332.5], [386.25, 306.25]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[386.25, 306.25], [410, 280]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1,
+          "strokeDasharray": ""
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[413.75, 306.25], [390, 280]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 400 280 L 400 200",
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 2.5
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 200
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 6,
+          "fill": "#fde68a",
+          "stroke": "#fbbf24",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 90
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "broadcasting · 88 — 108 MHz",
+          "fontSize": 16,
+          "fill": "#fde68a",
+          "italic": true,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 765
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "electromagnetic waves · speed of light · receives everywhere within range",
+          "fontSize": 13,
+          "fill": "#94a3b8",
+          "italic": true,
+          "anchor": "middle"
+        }
+      }
+    ]
+  }
+}

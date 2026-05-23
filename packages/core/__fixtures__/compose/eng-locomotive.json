@@ -1,0 +1,676 @@
+{
+  "compose": {
+    "viewBox": {
+      "width": 1200,
+      "height": 600
+    },
+    "title": "Steam locomotive — fire on wheels",
+    "description": "Stevenson's Rocket (1829) → Mallard (1938, world speed record 203 km/h). Coal in the firebox boils water in the boiler; steam expands through the cylinders; connecting rods turn the drivers; the whole thing rolls on steel rails.",
+    "theme": {
+      "preset": "pencil-parchment"
+    },
+    "defs": {
+      "gradients": [
+        {
+          "id": "g-sky",
+          "kind": "linear",
+          "x1": "0%",
+          "y1": "0%",
+          "x2": "0%",
+          "y2": "100%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#fef3c7",
+              "opacity": 1
+            },
+            {
+              "offset": "100%",
+              "color": "#ebe1c4",
+              "opacity": 1
+            }
+          ]
+        },
+        {
+          "id": "g-boiler",
+          "kind": "linear",
+          "x1": "0%",
+          "y1": "0%",
+          "x2": "0%",
+          "y2": "100%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#1f1a14",
+              "opacity": 1
+            },
+            {
+              "offset": "60%",
+              "color": "#3a3a2a",
+              "opacity": 1
+            },
+            {
+              "offset": "100%",
+              "color": "#1f1a14",
+              "opacity": 1
+            }
+          ]
+        },
+        {
+          "id": "g-smoke",
+          "kind": "radial",
+          "cx": "50%",
+          "cy": "50%",
+          "r": "50%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#94a3b8",
+              "opacity": 0.8
+            },
+            {
+              "offset": "100%",
+              "color": "#94a3b8",
+              "opacity": 0
+            }
+          ]
+        }
+      ]
+    },
+    "children": [
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 1200 0 L 1200 480 L 0 480 Z",
+          "fill": "url(#g-sky)",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 496
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 1200 0 L 1200 104 L 0 104 Z",
+          "fill": "#a3b18a",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 380 L 120 320 L 220 360 L 340 290 L 480 340 L 620 300 L 760 350 L 880 305 L 1020 345 L 1200 320 L 1200 460 L 0 460 Z",
+          "fill": "rgba(107,138,74,.4)",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 360,
+          "y": 130
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 35,
+          "fill": "url(#g-smoke)"
+        }
+      },
+      {
+        "at": {
+          "x": 402,
+          "y": 105
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 41,
+          "fill": "url(#g-smoke)"
+        }
+      },
+      {
+        "at": {
+          "x": 428,
+          "y": 80
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 47,
+          "fill": "url(#g-smoke)"
+        }
+      },
+      {
+        "at": {
+          "x": 438,
+          "y": 55
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 53,
+          "fill": "url(#g-smoke)"
+        }
+      },
+      {
+        "at": {
+          "x": 432,
+          "y": 30
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 59,
+          "fill": "url(#g-smoke)"
+        }
+      },
+      {
+        "at": {
+          "x": 360,
+          "y": 280
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 540 0 L 540 110 L 0 110 Z",
+          "fill": "url(#g-boiler)",
+          "stroke": "#1f1a14",
+          "strokeWidth": 2
+        }
+      },
+      {
+        "at": {
+          "x": 360,
+          "y": 295
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [540, 0]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 360,
+          "y": 335
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [540, 0]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 360,
+          "y": 375
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [540, 0]],
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 350,
+          "y": 335
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 60,
+          "fill": "#1f1a14",
+          "stroke": "#fde68a",
+          "strokeWidth": 2
+        }
+      },
+      {
+        "at": {
+          "x": 300,
+          "y": 335
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 16,
+          "fill": "#fde68a",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 410,
+          "y": 220
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 60 0 L 70 60 L -10 60 Z",
+          "fill": "#1f1a14",
+          "stroke": "#fde68a",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 580,
+          "y": 260
+        },
+        "mark": "ellipse",
+        "ellipse": {
+          "rx": 30,
+          "ry": 22,
+          "fill": "#1f1a14",
+          "stroke": "#fde68a",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 640,
+          "y": 270
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 6 0 L 6 -20 L 0 -20 Z",
+          "fill": "#fde68a",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 750,
+          "y": 200
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 150 0 L 150 200 L 0 200 Z",
+          "fill": "#7c2d12",
+          "stroke": "#1f1a14",
+          "strokeWidth": 2
+        }
+      },
+      {
+        "at": {
+          "x": 740,
+          "y": 195
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 170 0 L 170 10 L 0 10 Z",
+          "fill": "#1f1a14",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 770,
+          "y": 220
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 50 0 L 50 50 L 0 50 Z",
+          "fill": "#fde68a",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 472
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 470 0 L 850 0",
+          "fill": "none",
+          "stroke": "#fde68a",
+          "strokeWidth": 5,
+          "strokeLinecap": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 280,
+          "y": 472
+        },
+        "mark": "gear",
+        "gear": {
+          "radius": 60,
+          "teeth": 24,
+          "toothLength": 4,
+          "hubRadius": 8
+        },
+        "animation": {
+          "kind": "rotate-loop",
+          "periodMs": 4000,
+          "direction": "cw"
+        }
+      },
+      {
+        "at": {
+          "x": 470,
+          "y": 472
+        },
+        "mark": "gear",
+        "gear": {
+          "radius": 80,
+          "teeth": 28,
+          "toothLength": 4,
+          "hubRadius": 8
+        },
+        "animation": {
+          "kind": "rotate-loop",
+          "periodMs": 4000,
+          "direction": "cw"
+        }
+      },
+      {
+        "at": {
+          "x": 660,
+          "y": 472
+        },
+        "mark": "gear",
+        "gear": {
+          "radius": 80,
+          "teeth": 28,
+          "toothLength": 4,
+          "hubRadius": 8
+        },
+        "animation": {
+          "kind": "rotate-loop",
+          "periodMs": 4000,
+          "direction": "cw"
+        }
+      },
+      {
+        "at": {
+          "x": 850,
+          "y": 472
+        },
+        "mark": "gear",
+        "gear": {
+          "radius": 80,
+          "teeth": 28,
+          "toothLength": 4,
+          "hubRadius": 8
+        },
+        "animation": {
+          "kind": "rotate-loop",
+          "periodMs": 4000,
+          "direction": "cw"
+        }
+      },
+      {
+        "at": {
+          "x": 470,
+          "y": 472
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 6,
+          "fill": "#1f1a14",
+          "stroke": "#fde68a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 660,
+          "y": 472
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 6,
+          "fill": "#1f1a14",
+          "stroke": "#fde68a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 850,
+          "y": 472
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 6,
+          "fill": "#1f1a14",
+          "stroke": "#fde68a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 480
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [1200, 0]],
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 3
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 484
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [1200, 0]],
+          "fill": "none",
+          "stroke": "#1f1a14",
+          "strokeWidth": 3
+        }
+      },
+      {
+        "at": {
+          "x": 40,
+          "y": 490
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 50 0 L 50 8 L 0 8 Z",
+          "fill": "#3a2a14",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 120,
+          "y": 490
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 50 0 L 50 8 L 0 8 Z",
+          "fill": "#3a2a14",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 200,
+          "y": 490
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 50 0 L 50 8 L 0 8 Z",
+          "fill": "#3a2a14",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 280,
+          "y": 490
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 50 0 L 50 8 L 0 8 Z",
+          "fill": "#3a2a14",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 360,
+          "y": 490
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 50 0 L 50 8 L 0 8 Z",
+          "fill": "#3a2a14",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 440,
+          "y": 490
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 50 0 L 50 8 L 0 8 Z",
+          "fill": "#3a2a14",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 520,
+          "y": 490
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 50 0 L 50 8 L 0 8 Z",
+          "fill": "#3a2a14",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 600,
+          "y": 490
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 50 0 L 50 8 L 0 8 Z",
+          "fill": "#3a2a14",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 680,
+          "y": 490
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 50 0 L 50 8 L 0 8 Z",
+          "fill": "#3a2a14",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 760,
+          "y": 490
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 50 0 L 50 8 L 0 8 Z",
+          "fill": "#3a2a14",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 840,
+          "y": 490
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 50 0 L 50 8 L 0 8 Z",
+          "fill": "#3a2a14",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 920,
+          "y": 490
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 50 0 L 50 8 L 0 8 Z",
+          "fill": "#3a2a14",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 1000,
+          "y": 490
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 50 0 L 50 8 L 0 8 Z",
+          "fill": "#3a2a14",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 1080,
+          "y": 490
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 50 0 L 50 8 L 0 8 Z",
+          "fill": "#3a2a14",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 1160,
+          "y": 490
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 50 0 L 50 8 L 0 8 Z",
+          "fill": "#3a2a14",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 600,
+          "y": 560
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "fire → boiling water → expanding steam → turning wheels → 200 km/h",
+          "fontSize": 14,
+          "fill": "#4a3f30",
+          "italic": true,
+          "anchor": "middle"
+        }
+      }
+    ]
+  }
+}
