@@ -1,0 +1,64 @@
+{
+  "compose": {
+    "viewBox": { "width": 1000, "height": 440 },
+    "theme": { "preset": "pencil-parchment", "gridPattern": "graph-paper" },
+    "children": [
+      {
+        "at": { "x": 140, "y": 220 },
+        "mark": "circle",
+        "circle": { "radius": 30, "fill": "#38bdf8", "stroke": "#1f1a14", "strokeWidth": 1 }
+      },
+      {
+        "at": { "x": 140, "y": 270 },
+        "mark": "text",
+        "textMark": { "text": "Earth", "fontSize": 14, "fill": "#3b4d80", "italic": true }
+      },
+      {
+        "at": { "x": 780, "y": 220 },
+        "mark": "circle",
+        "circle": { "radius": 11, "fill": "#d4d4d8", "stroke": "#1f1a14", "strokeWidth": 1 }
+      },
+      {
+        "at": { "x": 780, "y": 260 },
+        "mark": "text",
+        "textMark": { "text": "Moon", "fontSize": 13, "fill": "#4a3f30", "italic": true }
+      },
+      {
+        "at": { "x": 80, "y": 80 },
+        "size": { "w": 840, "h": 280 },
+        "mark": "chart",
+        "chart": {
+          "version": "glyph/0.1",
+          "data": {
+            "function": {
+              "shape": "function",
+              "parameter": { "name": "t", "min": 0, "max": 1, "samples": 400 },
+              "xExpr": "(t < 0.3) ? (0.6 + 4.9*(t/0.3)) : ((t < 0.7) ? (8 + 2.5*cos(PI - 1.5*PI*((t-0.3)/0.4))) : (8 - 7.4*((t-0.7)/0.3)))",
+              "yExpr": "(t < 0.3) ? (sin((t/0.3)*PI)*1.5) : ((t < 0.7) ? (2.5*sin(PI - 1.5*PI*((t-0.3)/0.4))) : (-2.5*(1 - (t-0.7)/0.3) - sin(((t-0.7)/0.3)*PI)*0.5))"
+            }
+          },
+          "layers": [
+            {
+              "mark": "line",
+              "encoding": {
+                "x": { "field": "x", "type": "quantitative", "scale": { "domain": [-2, 12] } },
+                "y": { "field": "y", "type": "quantitative", "scale": { "domain": [-4, 4] } }
+              }
+            }
+          ],
+          "animation": { "kind": "draw-in", "duration_ms": 12000, "easing": "ease-in-out" }
+        }
+      },
+      {
+        "at": { "x": 480, "y": 24 },
+        "mark": "text",
+        "textMark": {
+          "text": "FIG. — Orion's free-return trajectory · Artemis I, Nov 16 – Dec 11, 2022",
+          "fontSize": 13,
+          "fill": "#1f1a14",
+          "italic": true
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "compose": {
+    "viewBox": { "width": 1000, "height": 420 },
+    "theme": { "preset": "pencil-parchment", "gridPattern": "graph-paper" },
+    "children": [
+      {
+        "at": { "x": 160, "y": 210 },
+        "mark": "heart-icon",
+        "heartIcon": { "size": 110, "fill": "#ef4444", "stroke": "#7f1d1d" },
+        "animation": { "kind": "pulse", "periodMs": 1000, "scale": 1.12 }
+      },
+      {
+        "at": { "x": 160, "y": 300 },
+        "mark": "text",
+        "textMark": { "text": "60 BPM", "fontSize": 16, "fill": "#7f1d1d", "italic": true }
+      },
+      {
+        "at": { "x": 320, "y": 80 },
+        "size": { "w": 620, "h": 260 },
+        "mark": "chart",
+        "chart": {
+          "version": "glyph/0.1",
+          "data": {
+            "trajectory": {
+              "shape": "trajectory",
+              "dxdt": "x - x*x*x/3 - y + 0.5",
+              "dydt": "0.08*(x + 0.7 - 0.8*y)",
+              "initial": { "x": -1.2, "y": -0.6 },
+              "time": { "min": 0, "max": 200, "samples": 2000 }
+            }
+          },
+          "layers": [
+            {
+              "mark": "line",
+              "encoding": {
+                "x": { "field": "t", "type": "quantitative", "scale": { "domain": [0, 200] } },
+                "y": { "field": "x", "type": "quantitative", "scale": { "domain": [-2.5, 2.5] } }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "at": { "x": 630, "y": 30 },
+        "mark": "text",
+        "textMark": {
+          "text": "FIG. — V(t) · FitzHugh-Nagumo relaxation oscillator",
+          "fontSize": 13,
+          "fill": "#1f1a14",
+          "italic": true
+        }
+      }
+    ]
+  }
+}

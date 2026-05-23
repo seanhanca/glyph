@@ -1,0 +1,55 @@
+{
+  "compose": {
+    "viewBox": { "width": 1000, "height": 460 },
+    "theme": { "preset": "pencil-parchment", "gridPattern": "graph-paper" },
+    "children": [
+      {
+        "at": { "x": 280, "y": 230 },
+        "mark": "gear",
+        "gear": { "radius": 130, "teeth": 36, "toothLength": 10, "hubRadius": 5 },
+        "animation": { "kind": "rotate-loop", "periodMs": 60000, "direction": "cw" }
+      },
+      {
+        "at": { "x": 280, "y": 110 },
+        "mark": "gear",
+        "gear": { "radius": 38, "teeth": 16, "toothLength": 6, "hubRadius": 3 },
+        "animation": { "kind": "rotate-loop", "periodMs": 4600, "direction": "ccw" }
+      },
+      {
+        "at": { "x": 740, "y": 230 },
+        "size": { "w": 460, "h": 360 },
+        "mark": "chart",
+        "chart": {
+          "version": "glyph/0.1",
+          "data": {
+            "function": {
+              "shape": "function",
+              "parameter": { "name": "t", "min": 0, "max": 6.283185307179586, "samples": 800 },
+              "xExpr": "5*cos(t) + 1.2*cos(13*t)",
+              "yExpr": "5*sin(t) + 1.2*sin(13*t)"
+            }
+          },
+          "layers": [
+            {
+              "mark": "line",
+              "encoding": {
+                "x": { "field": "x", "type": "quantitative", "scale": { "domain": [-7, 7] } },
+                "y": { "field": "y", "type": "quantitative", "scale": { "domain": [-7, 7] } }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "at": { "x": 280, "y": 430 },
+        "mark": "text",
+        "textMark": {
+          "text": "deferent + epicycle · 1:13 ratio · ~150 BCE",
+          "fontSize": 13,
+          "fill": "#1f1a14",
+          "italic": true
+        }
+      }
+    ]
+  }
+}
