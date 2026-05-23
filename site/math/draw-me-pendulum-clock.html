@@ -159,15 +159,127 @@
 
 <section class="container">
   <div class="stage" aria-label="Animated pendulum clock">
-    <!-- HERO is now a SINGLE Glyph-rendered SVG.
-         Asked Claude for a pendulum clock scene; Claude wrote one
-         compose spec; Glyph compiler produced this byte-locked
-         SVG (swinging pendulum + rotating gear + embedded
-         trajectory chart + parchment + graph paper grid + 3
-         annotations) — all from one JSON file, no hand-authored
-         scaffolding. See packages/core/__fixtures__/compose/
-         pendulum-clock-scene.json + .test.ts. -->
-    <img src="pendulum-clock-scene.svg" alt="Pendulum clock scene rendered from one Glyph compose spec — swinging pendulum at the pivot, rotating 30-tooth escapement gear, embedded damped-sinusoid trace, parchment background, graph-paper grid, three italic annotations">
+    <svg viewBox="0 0 1000 440" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="hero-title hero-desc">
+      <title id="hero-title">A pendulum clock keeping time</title>
+      <desc id="hero-desc">A pencil-style technical drawing: on the left, a pendulum swings back and forth from a fixed pivot; on the right, an escapement gear with 30 teeth slowly rotates, releasing the pendulum's energy in measured ticks; below, the angle-vs-time trace shows the damped sinusoidal swing.</desc>
+      <defs>
+        <pattern id="paper-shade" patternUnits="userSpaceOnUse" width="3" height="3">
+          <line x1="0" y1="0" x2="0" y2="3" stroke="rgba(31,26,20,.10)" stroke-width=".5"/>
+        </pattern>
+      </defs>
+
+      <!-- Clock case frame (left half) -->
+      <g aria-hidden="true">
+        <rect x="380" y="60" width="240" height="320" fill="none" stroke="var(--graphite)" stroke-width="1.5" rx="4"/>
+        <rect x="395" y="75" width="210" height="20" fill="url(#paper-shade)" stroke="var(--graphite)" stroke-width=".5"/>
+        <text x="500" y="89" text-anchor="middle" font-family="serif" font-size="11" font-style="italic" fill="var(--graphite-light)">Horologium · 1656</text>
+        <!-- Pivot mount -->
+        <circle cx="500" cy="80" r="4" fill="var(--graphite)"/>
+      </g>
+
+      <!-- Pendulum (the rotating group) -->
+      <g class="pendulum-bob-group" aria-hidden="true">
+        <line x1="500" y1="80" x2="500" y2="290" stroke="var(--graphite)" stroke-width="1.5"/>
+        <circle cx="500" cy="305" r="22" fill="#fdf8ea" stroke="var(--graphite)" stroke-width="2"/>
+        <circle cx="500" cy="305" r="16" fill="url(#paper-shade)"/>
+        <line x1="492" y1="305" x2="508" y2="305" stroke="var(--graphite)" stroke-width="1.5"/>
+        <line x1="500" y1="297" x2="500" y2="313" stroke="var(--graphite)" stroke-width="1.5"/>
+      </g>
+
+      <!-- Escapement gear (right of clock case) -->
+      <g class="escapement-gear" aria-hidden="true">
+        <!-- 30 teeth around a circle of radius 40 at (710, 250) -->
+        <circle cx="710" cy="250" r="40" fill="#fdf8ea" stroke="var(--graphite)" stroke-width="1.5"/>
+        <circle cx="710" cy="250" r="32" fill="none" stroke="var(--graphite-light)" stroke-width=".6" stroke-dasharray="2 3"/>
+        <!-- Teeth: 30 spokes -->
+        <g>
+          <line x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(12, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(24, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(36, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(48, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(60, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(72, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(84, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(96, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(108, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(120, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(132, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(144, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(156, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(168, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(180, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(192, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(204, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(216, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(228, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(240, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(252, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(264, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(276, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(288, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(300, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(312, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(324, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(336, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+          <line transform="rotate(348, 710, 250)" x1="710" y1="210" x2="710" y2="202" stroke="var(--graphite)" stroke-width="1.2"/>
+        </g>
+        <!-- Hub -->
+        <circle cx="710" cy="250" r="6" fill="var(--graphite)"/>
+        <line x1="710" y1="220" x2="710" y2="250" stroke="var(--graphite)" stroke-width="1"/>
+      </g>
+
+      <!-- Annotations -->
+      <g font-family="serif" font-size="11" font-style="italic" fill="var(--graphite-light)" aria-hidden="true">
+        <line x1="510" y1="80" x2="540" y2="56" stroke="var(--graphite-light)" stroke-width=".5"/>
+        <text x="544" y="54">pivot</text>
+        <line x1="522" y1="305" x2="560" y2="332" stroke="var(--graphite-light)" stroke-width=".5"/>
+        <text x="565" y="335">bob</text>
+        <line x1="660" y1="210" x2="630" y2="180" stroke="var(--graphite-light)" stroke-width=".5"/>
+        <text x="628" y="178" text-anchor="end">escapement gear · 30 teeth</text>
+        <text x="710" y="318" text-anchor="middle">2 ticks / second</text>
+      </g>
+
+      <!-- DATA PLOT (lower half): angle vs time, with damped envelope -->
+      <g transform="translate(80, 380)" font-family="serif" font-size="10" fill="var(--graphite-light)" aria-hidden="true">
+        <line x1="0" y1="0" x2="0" y2="-50" stroke="var(--graphite)" stroke-width="1"/>
+        <line x1="0" y1="-25" x2="840" y2="-25" stroke="var(--graphite)" stroke-width="1" opacity="0.4" stroke-dasharray="2 3"/>
+        <line x1="0" y1="0" x2="840" y2="0" stroke="var(--graphite)" stroke-width="1"/>
+        <text x="-6" y="-5" text-anchor="end" font-style="italic">−</text>
+        <text x="-6" y="-25" text-anchor="end" font-style="italic">0</text>
+        <text x="-6" y="-47" text-anchor="end" font-style="italic">+</text>
+        <text x="420" y="14" text-anchor="middle" font-style="italic">time t (60 seconds)</text>
+        <!-- Damped sinusoidal trace, computed roughly to match the ODE.
+             Amplitude decays from 0.6 to ~0.45 over 60 s at γ=0.02.
+             14 swings in 60 s (period ≈ 2π s). -->
+        <path d="M 0 -40
+                 Q 14 0, 28 -25 Q 42 -50, 56 -25
+                 Q 70 0, 84 -25 Q 98 -49, 112 -25
+                 Q 126 -1, 140 -25 Q 154 -48, 168 -25
+                 Q 182 -2, 196 -25 Q 210 -47, 224 -25
+                 Q 238 -3, 252 -25 Q 266 -46, 280 -25
+                 Q 294 -4, 308 -25 Q 322 -45, 336 -25
+                 Q 350 -5, 364 -25 Q 378 -44, 392 -25
+                 Q 406 -6, 420 -25 Q 434 -43, 448 -25
+                 Q 462 -7, 476 -25 Q 490 -42, 504 -25
+                 Q 518 -8, 532 -25 Q 546 -41, 560 -25
+                 Q 574 -9, 588 -25 Q 602 -40, 616 -25
+                 Q 630 -10, 644 -25 Q 658 -39, 672 -25
+                 Q 686 -11, 700 -25 Q 714 -38, 728 -25
+                 Q 742 -12, 756 -25 Q 770 -37, 784 -25
+                 Q 798 -13, 812 -25 Q 826 -36, 840 -25"
+              fill="none" stroke="var(--graphite)" stroke-width="1.4" stroke-linecap="round" opacity="0.9"/>
+        <!-- Decay envelope (lightly drawn) -->
+        <path d="M 0 -40 L 840 -27.5" fill="none" stroke="var(--rust)" stroke-width=".6" stroke-dasharray="3 3" opacity="0.7"/>
+        <path d="M 0 -10 L 840 -22.5" fill="none" stroke="var(--rust)" stroke-width=".6" stroke-dasharray="3 3" opacity="0.7"/>
+        <text x="855" y="-25" font-style="italic" fill="var(--rust)">envelope</text>
+      </g>
+
+      <!-- Plot title -->
+      <g transform="translate(80, 360)" font-family="serif" fill="var(--graphite)">
+        <text x="0" y="0" font-size="13" font-style="italic">FIG.&nbsp;II.&nbsp;θ(t) — damped harmonic motion</text>
+      </g>
+    </svg>
     <div class="stage-caption">2-second period (g/L = 1) · the <span class="accent">envelope</span> decays at γ = 0.02 — about 2 % amplitude lost per swing</div>
   </div>
 </section>

@@ -163,10 +163,104 @@
 
 <section class="container">
   <div class="stage" aria-label="Animated heartbeat visualization">
-    <!-- HERO is now a SINGLE Glyph-rendered SVG produced from one
-         compose JSON spec. See packages/core/__fixtures__/compose/
-         heartbeat-scene.json + the locking test. -->
-    <img src="heartbeat-scene.svg" alt="Heartbeat scene rendered from one Glyph compose spec — pulsing heart icon next to the FitzHugh-Nagumo membrane-potential trace">
+    <svg viewBox="0 0 1000 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="hero-title hero-desc">
+      <title id="hero-title">A resting heartbeat at 60 BPM</title>
+      <desc id="hero-desc">An animated SVG: a pulsing heart icon on the left beats once per second; an ECG trace on the right draws five heartbeats per cycle with the characteristic P-QRS-T waveform; a sweep dot rides the trace.</desc>
+      <defs>
+        <radialGradient id="g-heart" cx="40%" cy="40%" r="60%">
+          <stop offset="0%" stop-color="#fecaca"/>
+          <stop offset="60%" stop-color="#ef4444"/>
+          <stop offset="100%" stop-color="#7f1d1d"/>
+        </radialGradient>
+        <radialGradient id="g-heart-aura" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="rgba(248,113,113,.7)"/>
+          <stop offset="60%" stop-color="rgba(248,113,113,.15)"/>
+          <stop offset="100%" stop-color="rgba(248,113,113,0)"/>
+        </radialGradient>
+        <linearGradient id="g-trace" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="rgba(253,164,175,.3)"/>
+          <stop offset="60%" stop-color="rgba(248,113,113,.9)"/>
+          <stop offset="100%" stop-color="#f87171"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Heart icon (left) -->
+      <g transform="translate(160, 210)">
+        <circle class="heart-aura" cx="0" cy="0" r="78" fill="url(#g-heart-aura)" aria-hidden="true"/>
+        <g class="heart-icon">
+          <path d="M 0 28
+                   C -34 6, -52 -16, -34 -36
+                   C -16 -52, 0 -38, 0 -22
+                   C 0 -38, 16 -52, 34 -36
+                   C 52 -16, 34 6, 0 28 Z"
+                fill="url(#g-heart)" stroke="rgba(254,202,202,.5)" stroke-width="0.8"/>
+        </g>
+        <text x="0" y="64" text-anchor="middle" fill="#fecaca" font-size="14" font-family="system-ui" letter-spacing="0.04em">60 BPM</text>
+      </g>
+
+      <!-- ECG baseline grid -->
+      <g stroke="rgba(56,189,248,.10)" stroke-width="1" aria-hidden="true">
+        <line x1="320" y1="120" x2="960" y2="120"/>
+        <line x1="320" y1="170" x2="960" y2="170"/>
+        <line x1="320" y1="220" x2="960" y2="220"/>
+        <line x1="320" y1="270" x2="960" y2="270"/>
+        <line x1="320" y1="320" x2="960" y2="320"/>
+      </g>
+      <line x1="320" y1="220" x2="960" y2="220" stroke="rgba(56,189,248,.25)" stroke-width="1.5"/>
+
+      <!-- ECG TRACE — five idealized P-QRS-T complexes from x=320 to x=960
+           (640 px wide). Each beat spans 128 px (= 1 second at 60 BPM).
+           Waveform per beat:
+             P wave  : small bump up
+             Q       : small dip down
+             R       : sharp spike up
+             S       : sharp dip down
+             T       : rounded bump up
+             baseline back to 220 -->
+      <path class="ecg-trace"
+            d="M 320 220
+               L 332 220 Q 340 208, 348 220
+               L 360 220 L 364 228 L 368 180 L 372 250 L 376 220
+               Q 388 200, 400 220
+               L 448 220 L 460 220 Q 468 208, 476 220
+               L 488 220 L 492 228 L 496 180 L 500 250 L 504 220
+               Q 516 200, 528 220
+               L 576 220 L 588 220 Q 596 208, 604 220
+               L 616 220 L 620 228 L 624 180 L 628 250 L 632 220
+               Q 644 200, 656 220
+               L 704 220 L 716 220 Q 724 208, 732 220
+               L 744 220 L 748 228 L 752 180 L 756 250 L 760 220
+               Q 772 200, 784 220
+               L 832 220 L 844 220 Q 852 208, 860 220
+               L 872 220 L 876 228 L 880 180 L 884 250 L 888 220
+               Q 900 200, 912 220
+               L 960 220"
+            fill="none"
+            stroke="url(#g-trace)"
+            stroke-width="2.4"
+            stroke-linecap="round"
+            stroke-linejoin="round"/>
+
+      <!-- Sweep dot rides the trace -->
+      <g class="sweep-dot" aria-hidden="true">
+        <circle cx="0" cy="0" r="5" fill="#fef2f2" stroke="#f87171" stroke-width="1.5"/>
+      </g>
+
+      <!-- Wave labels -->
+      <g font-family="system-ui" font-size="10" fill="rgba(241,245,251,.45)" letter-spacing="0.04em" aria-hidden="true">
+        <text x="346" y="350" text-anchor="middle">P</text>
+        <text x="368" y="350" text-anchor="middle">QRS</text>
+        <text x="394" y="350" text-anchor="middle">T</text>
+        <text x="640" y="360" text-anchor="middle" font-size="11" fill="rgba(241,245,251,.6)">1 second per beat ≈ 5 beats shown</text>
+      </g>
+
+      <!-- BPM counter (top-right) -->
+      <g transform="translate(960, 36)" font-family="ui-monospace, monospace" fill="#fda4af">
+        <text x="0" y="0" font-size="10" letter-spacing="0.08em" text-anchor="end" opacity="0.7">HEART RATE</text>
+        <text x="0" y="22" font-size="28" font-weight="700" text-anchor="end">60</text>
+        <text x="0" y="36" font-size="9" letter-spacing="0.08em" text-anchor="end" opacity="0.6">beats per minute</text>
+      </g>
+    </svg>
     <div class="stage-caption">~3 billion beats in an 80-year lifetime · <span class="bpm">click anywhere</span> to restart the trace</div>
   </div>
 </section>
