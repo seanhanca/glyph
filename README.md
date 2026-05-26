@@ -8,6 +8,9 @@
 [![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen.svg)](#requirements)
 [![CI](https://img.shields.io/badge/CI-Ubuntu%20%2B%20macOS%20%2B%20Windows-brightgreen.svg)](.github/workflows/ci.yml)
 [![No telemetry](https://img.shields.io/badge/telemetry-none-brightgreen.svg)](#license)
+[![AI-built · AI-maintained](https://img.shields.io/badge/AI--built%20%C2%B7%20AI--maintained-by%20Cowork-a78bfa.svg)](./CONTRIBUTING.md#ai-maintained)
+
+> **Built by AI. Maintained by AI.** This repo is triaged, reviewed, and merged by [Cowork](./CONTRIBUTING.md#ai-maintained) (an instance of Claude). See the [live maintenance dashboard](https://seanhanca.github.io/glyph/maintenance.html), the [agent-facing docs (`AGENTS.md`)](./AGENTS.md), or the canonical [two-agents-on-a-chart demo](https://seanhanca.github.io/glyph/math/two-agents.html).
 
 <p align="center">
 <img alt="Sine wave story composed by glyph_story — animated SVG, same bytes Claude returns" src="https://raw.githubusercontent.com/seanhanca/glyph/main/packages/core/__fixtures__/story/sine-wave-for-an-8yo.svg" width="640">
@@ -23,6 +26,14 @@ No JS, no CDN. Deterministic. Same bytes a year from now.</em>
 <a href="./docs/LEARN.md">📚 Learn in 30 minutes</a> ·
 <a href="#use-it-from-an-llm-agent">🤖 Use with Claude</a> ·
 <a href="https://github.com/seanhanca/glyph/discussions">💬 Discussions</a>
+</p>
+
+<p align="center">
+<a href="https://seanhanca.github.io/glyph/math/life-in-glyph.html">🖼️ Gallery</a> ·
+<a href="https://seanhanca.github.io/glyph/math/strengths.html">📝 What it's for (essay)</a> ·
+<a href="https://seanhanca.github.io/glyph/math/two-agents.html">🤝 Two-agents demo</a> ·
+<a href="https://seanhanca.github.io/glyph/math/extendedcases.html">🔭 Extended cases</a> ·
+<a href="https://seanhanca.github.io/glyph/math/particles.html">✨ Particles tutorial</a>
 </p>
 
 ---

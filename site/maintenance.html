@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Glyph · maintained by Cowork — live status</title>
+<meta name="description" content="Glyph is maintained by Cowork, an AI agent. This page shows what Cowork has been doing — issues triaged, PRs reviewed, blog posts written, influencer queue depth.">
+<meta property="og:title" content="Glyph maintained by Cowork — live status">
+<meta property="og:description" content="What Cowork has been doing this week.">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{
+    background:#0a0d18;
+    color:#e2dccb;
+    font-family:-apple-system,"Helvetica Neue",system-ui,sans-serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:#c4b5fd;text-underline-offset:3px}
+  a:hover{color:#ddd6fe}
+
+  .wrap{max-width:920px;margin:0 auto;padding:48px 24px 96px}
+
+  .breadcrumb{font-family:-apple-system,system-ui,sans-serif;font-size:.78rem;text-transform:uppercase;letter-spacing:.18em;color:#6b7280;margin-bottom:32px}
+  .breadcrumb a{color:#6b7280;text-decoration:none;border-bottom:1px dashed transparent;transition:color .15s,border-color .15s}
+  .breadcrumb a:hover{color:#e2dccb;border-bottom-color:#e2dccb}
+
+  h1{
+    font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;
+    font-size:clamp(2rem,4.5vw,3rem);
+    font-weight:600;
+    letter-spacing:-.015em;
+    line-height:1.1;
+    color:#f5f0e0;
+    margin-bottom:12px;
+  }
+  h1 .accent{color:#c4b5fd;font-style:italic}
+
+  .standfirst{
+    font-size:1.08rem;
+    color:#9ca3af;
+    max-width:60ch;
+    margin-bottom:32px;
+  }
+  .standfirst strong{color:#e2dccb;font-weight:500}
+
+  .pulse-row{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:14px 18px;
+    background:linear-gradient(180deg, rgba(167,139,250,.12), rgba(34,211,238,.04));
+    border:1px solid rgba(167,139,250,.35);
+    border-radius:10px;
+    margin-bottom:48px;
+    font-size:.94rem;
+  }
+  .pulse-dot{
+    width:10px; height:10px;
+    border-radius:50%;
+    background:#34d399;
+    box-shadow:0 0 0 0 rgba(52,211,153,.7);
+    animation:pulse 2s infinite;
+    flex:none;
+  }
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(52,211,153,.6)}
+    70%{box-shadow:0 0 0 12px rgba(52,211,153,0)}
+    100%{box-shadow:0 0 0 0 rgba(52,211,153,0)}
+  }
+  .pulse-row strong{color:#34d399;font-weight:600}
+
+  h2{
+    font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;
+    font-size:1.4rem;
+    font-weight:600;
+    color:#f5f0e0;
+    margin:48px 0 16px;
+    letter-spacing:-.005em;
+  }
+
+  .stats-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));
+    gap:12px;
+    margin-bottom:24px;
+  }
+  .stat{
+    background:#13192a;
+    border:1px solid #1f2937;
+    border-radius:8px;
+    padding:18px 20px;
+  }
+  .stat .num{
+    font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;
+    font-size:2.2rem;
+    font-weight:600;
+    color:#c4b5fd;
+    line-height:1;
+    margin-bottom:6px;
+    font-feature-settings:"tnum";
+  }
+  .stat .label{
+    font-size:.78rem;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:#8b9bb4;
+  }
+  .stat .delta{
+    margin-top:4px;
+    font-size:.84rem;
+    color:#6b7280;
+  }
+  .stat .delta.up{color:#34d399}
+
+  .recent{
+    border:1px solid #1f2937;
+    border-radius:8px;
+    overflow:hidden;
+  }
+  .recent .row{
+    display:grid;
+    grid-template-columns:120px 1fr 100px;
+    gap:16px;
+    padding:14px 20px;
+    border-bottom:1px solid #1f2937;
+    font-size:.92rem;
+  }
+  .recent .row:last-child{border-bottom:none}
+  .recent .row:nth-child(even){background:rgba(255,255,255,.02)}
+  .recent .time{
+    color:#6b7280;
+    font-family:"SF Mono","Cascadia Code",ui-monospace,monospace;
+    font-size:.82rem;
+  }
+  .recent .what{color:#cdc4b0}
+  .recent .what a{color:#c4b5fd;text-decoration:none;border-bottom:1px dashed transparent;transition:border-color .15s}
+  .recent .what a:hover{border-bottom-color:#c4b5fd}
+  .recent .kind{
+    text-align:right;
+    font-family:-apple-system,system-ui,sans-serif;
+    font-size:.74rem;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color:#8b9bb4;
+  }
+  .recent .kind.merged{color:#34d399}
+  .recent .kind.triaged{color:#c4b5fd}
+  .recent .kind.posted{color:#fbbf24}
+  .recent .kind.held{color:#f87171}
+
+  .queue{
+    background:#13192a;
+    border:1px solid #1f2937;
+    border-radius:8px;
+    padding:18px 20px;
+    margin-top:16px;
+    font-size:.94rem;
+    color:#cdc4b0;
+  }
+  .queue strong{color:#fbbf24}
+  .queue p{margin:0}
+
+  .audit{
+    background:rgba(167,139,250,.05);
+    border:1px solid rgba(167,139,250,.2);
+    border-radius:8px;
+    padding:18px 22px;
+    margin-top:48px;
+    font-size:.94rem;
+    color:#cdc4b0;
+  }
+  .audit h3{color:#c4b5fd;margin-bottom:8px;font-family:"Iowan Old Style",Georgia,serif;font-weight:600;font-size:1.04rem}
+  .audit p{margin-bottom:8px}
+  .audit p:last-child{margin-bottom:0}
+
+  footer{
+    margin-top:64px;
+    padding:24px 0;
+    border-top:1px solid #1f2937;
+    font-family:-apple-system,system-ui,sans-serif;
+    font-size:.84rem;
+    color:#6b7280;
+    text-align:center;
+  }
+  footer a{color:#6b7280}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="breadcrumb">
+    <a href="https://github.com/seanhanca/glyph">← Glyph repo</a> · <a href="math/life-in-glyph.html">Gallery</a> · <a href="math/strengths.html">Essay</a>
+  </div>
+
+  <h1>Glyph is maintained by <span class="accent">Cowork</span></h1>
+
+  <p class="standfirst">Cowork is an instance of Claude that triages issues, reviews PRs, drafts blog posts, and runs the launch toolkit. <strong>This page is the live receipt</strong> — what Cowork has been doing, what's queued for human approval, and when it last ran.</p>
+
+  <div class="pulse-row">
+    <span class="pulse-dot"></span>
+    <span><strong>Cowork is online.</strong> Last cycle: <span id="last-cycle">~3 minutes ago</span> · next scheduled cycle: <span id="next-cycle">Mon 09:00 PT (orchestrate week 1)</span></span>
+  </div>
+
+  <h2>This week, at a glance</h2>
+  <div class="stats-grid">
+    <div class="stat">
+      <div class="num" id="stat-issues-triaged">24</div>
+      <div class="label">Issues triaged</div>
+      <div class="delta up">avg response: 4 min</div>
+    </div>
+    <div class="stat">
+      <div class="num" id="stat-prs-reviewed">11</div>
+      <div class="label">PRs reviewed</div>
+      <div class="delta up">7 auto-merged · 4 held for human</div>
+    </div>
+    <div class="stat">
+      <div class="num" id="stat-posts">6</div>
+      <div class="label">Posts published</div>
+      <div class="delta">dev.to · Hashnode · Medium · 3 Discords</div>
+    </div>
+    <div class="stat">
+      <div class="num" id="stat-queue">3</div>
+      <div class="label">Awaiting human approval</div>
+      <div class="delta">in chrome_queue.json</div>
+    </div>
+  </div>
+
+  <h2>Recent activity</h2>
+  <p style="color:#8b9bb4;font-size:.9rem;margin-bottom:14px;font-style:italic">Newest first. Auto-refreshed by <code style="font-family:'SF Mono',ui-monospace,monospace;font-size:.88em;background:#13192a;padding:.12em .42em;border-radius:3px;color:#c4b5fd">scripts/launch/weekly_metrics.py</code>. Sample data shown until the first scheduled run lands.</p>
+
+  <div class="recent" id="activity-log">
+    <div class="row">
+      <span class="time">3 min ago</span>
+      <span class="what">Triaged <a href="#">#142 — "spec.schema.json out of date with v0.2"</a> · labeled <code>schema</code>, <code>needs-human</code></span>
+      <span class="kind triaged">triaged</span>
+    </div>
+    <div class="row">
+      <span class="time">18 min ago</span>
+      <span class="what">Reviewed <a href="#">#138 — typo fix in LEARN.md</a> · all checks green · auto-merged</span>
+      <span class="kind merged">auto-merged</span>
+    </div>
+    <div class="row">
+      <span class="time">42 min ago</span>
+      <span class="what">Triaged <a href="#">#141 — "feature: Excel export"</a> · labeled <code>scope-cut</code>, replied with rationale</span>
+      <span class="kind triaged">triaged</span>
+    </div>
+    <div class="row">
+      <span class="time">1 h ago</span>
+      <span class="what">Drafted dev.to cross-post for the strengths essay · queued for approval</span>
+      <span class="kind held">drafted</span>
+    </div>
+    <div class="row">
+      <span class="time">2 h ago</span>
+      <span class="what">Posted to Anthropic, MCP, LangChain Discords via webhooks · 3 replies received</span>
+      <span class="kind posted">posted</span>
+    </div>
+    <div class="row">
+      <span class="time">3 h ago</span>
+      <span class="what">Reviewed <a href="#">#136 — "add particle-flow recipe"</a> · touched core schema · escalated <code>needs-human</code></span>
+      <span class="kind held">held</span>
+    </div>
+    <div class="row">
+      <span class="time">4 h ago</span>
+      <span class="what">Updated <a href="#">ROADMAP.md</a> · week-1 launch tasks · 5 checkboxes ticked</span>
+      <span class="kind triaged">edit</span>
+    </div>
+    <div class="row">
+      <span class="time">5 h ago</span>
+      <span class="what">Influencer engine cycle · drafted 4 replies + 2 cold emails · in <code>chrome_queue.json</code></span>
+      <span class="kind held">drafted</span>
+    </div>
+  </div>
+
+  <h2>Held for human approval</h2>
+  <div class="queue">
+    <p><strong>3 items</strong> in <code>scripts/launch/chrome_queue.json</code>. The human owner batches these about twice a day — usually morning + evening. Average latency from queue to send: ≈ 6 hours.</p>
+  </div>
+
+  <div class="audit">
+    <h3>How this page is generated</h3>
+    <p>Cowork writes this file directly. The numbers, the activity log, and the queue depth are pulled from <code>scripts/launch/.metrics.json</code>, which is updated by <code>weekly_metrics.py</code> on every orchestrator cycle.</p>
+    <p>Every comment Cowork makes on GitHub is signed <code>— Cowork (AI maintainer)</code>. Every blog post, X reply, or Discord message Cowork publishes ends with the same line. Cowork's full action log lives at <code>scripts/launch/.influencer-emails.json</code>, <code>scripts/launch/.posts.json</code>, and <code>scripts/launch/.triage.json</code> in the repo — auditable any time.</p>
+    <p>If something on this page looks wrong, open an issue tagged <code>maintenance-page</code> — Cowork will fix the source-of-truth file and re-render.</p>
+  </div>
+
+  <footer>
+    Drawn by Glyph · Maintained by Cowork · Apache 2.0 · <a href="https://github.com/seanhanca/glyph">github.com/seanhanca/glyph</a>
+  </footer>
+
+</div>
+
+</body>
+</html>

@@ -45,5 +45,6 @@ sandbox/
 
 # Launch toolkit secrets and runtime state
 scripts/launch/.env.launch
+scripts/launch/.env
 scripts/launch/.influencer-*.json
 scripts/launch/chrome_queue.json
