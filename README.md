@@ -8,6 +8,7 @@
 [![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen.svg)](#requirements)
 [![CI](https://img.shields.io/badge/CI-Ubuntu%20%2B%20macOS%20%2B%20Windows-brightgreen.svg)](.github/workflows/ci.yml)
 [![No telemetry](https://img.shields.io/badge/telemetry-none-brightgreen.svg)](#license)
+[![SafeSkill 75/100](https://img.shields.io/badge/SafeSkill-75%2F100%20Passes%20with%20Notes-yellow.svg)](https://safeskill.dev/scan/seanhanca-glyph)
 
 <p align="center">
 <img alt="Sine wave story composed by glyph_story — animated SVG, same bytes Claude returns" src="https://raw.githubusercontent.com/seanhanca/glyph/main/packages/core/__fixtures__/story/sine-wave-for-an-8yo.svg" width="640">
