@@ -1,0 +1,24 @@
+{
+  "version": "glyph/0.1",
+  "title": "Bike rides by hour (count per hour)",
+  "data": {
+    "function": {
+      "shape": "function",
+      "x": { "min": 0, "max": 23, "samples": 24 },
+      "expr": "200 + 1200 * exp(-((x - 8) * (x - 8)) / 6) + 1000 * exp(-((x - 17) * (x - 17)) / 7) + 30 * sin(x)"
+    }
+  },
+  "layers": [
+    {
+      "mark": "bar",
+      "encoding": {
+        "x": { "field": "x", "type": "quantitative" },
+        "y": {
+          "field": "y",
+          "type": "quantitative",
+          "scale": { "domain": [0, 1500] }
+        }
+      }
+    }
+  ]
+}

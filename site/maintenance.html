@@ -292,5 +292,55 @@
 
 </div>
 
+<script>
+  // Fetch the live metrics snapshot written by weekly_metrics.py.
+  // Quietly fall back to the static sample numbers when the file
+  // isn't there (e.g. on a fresh clone before the toolkit has run).
+  (async function hydrate() {
+    try {
+      const res = await fetch('maintenance/metrics.json', { cache: 'no-store' });
+      if (!res.ok) return;
+      const m = await res.json();
+      const fmt = (n) => String(n);
+      const setText = (id, val) => {
+        const el = document.getElementById(id);
+        if (el && val !== undefined && val !== null) el.textContent = fmt(val);
+      };
+      setText('stat-issues-triaged', m.cowork && m.cowork.issues_triaged_7d);
+      setText('stat-prs-reviewed', m.cowork && m.cowork.prs_reviewed_7d);
+      setText('stat-posts', m.cowork && m.cowork.posts_published_7d);
+      setText('stat-queue', m.cowork && m.cowork.queue_depth);
+
+      // Update the "last cycle" line if we have a generated_at timestamp.
+      if (m.generated_at) {
+        const ts = new Date(m.generated_at);
+        const now = new Date();
+        const mins = Math.max(1, Math.round((now - ts) / 60000));
+        const last = mins < 60
+          ? `${mins} min ago`
+          : `${Math.round(mins / 60)} h ago`;
+        const el = document.getElementById('last-cycle');
+        if (el) el.textContent = last;
+      }
+
+      // If the cowork.recent feed is populated, replace the sample
+      // activity log with real entries. Sample shows when nothing has run.
+      if (Array.isArray(m.recent) && m.recent.length > 0) {
+        const log = document.getElementById('activity-log');
+        if (log) {
+          log.innerHTML = m.recent.map((row) => `
+            <div class="row">
+              <span class="time">${row.when || ''}</span>
+              <span class="what">${row.what || ''}</span>
+              <span class="kind ${row.kind || ''}">${row.kind || ''}</span>
+            </div>`).join('');
+        }
+      }
+    } catch (e) {
+      // Network-blocked, file missing, or invalid JSON — keep the static sample.
+    }
+  })();
+</script>
+
 </body>
 </html>

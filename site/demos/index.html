@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Glyph · per-influencer demo pages</title>
+<meta name="description" content="Twelve demo pages, one per person, each personalised around their stated interests. Built so the influencer engine can link directly to a relevant Glyph artefact rather than the homepage.">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{
+    background:#0a0d18;
+    color:#e2dccb;
+    font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:#c4b5fd;text-underline-offset:3px;text-decoration-thickness:1px}
+  a:hover{color:#ddd6fe}
+  .wrap{max-width:780px;margin:0 auto;padding:48px 24px 96px}
+  .meta{font-family:-apple-system,system-ui,sans-serif;font-size:.78rem;text-transform:uppercase;letter-spacing:.18em;color:#6b7280;margin-bottom:32px}
+  .meta a{color:#6b7280;text-decoration:none;border-bottom:1px dashed transparent;transition:color .15s,border-color .15s}
+  .meta a:hover{color:#e2dccb;border-bottom-color:#e2dccb}
+  h1{
+    font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;
+    font-size:clamp(2rem,4.5vw,3rem);
+    font-weight:600;
+    letter-spacing:-.015em;
+    line-height:1.1;
+    color:#f5f0e0;
+    margin-bottom:14px;
+  }
+  h1 .accent{color:#c4b5fd;font-style:italic}
+  .lede{
+    font-family:-apple-system,system-ui,sans-serif;
+    font-size:1.06rem;
+    color:#9ca3af;
+    margin-bottom:48px;
+    max-width:64ch;
+  }
+  .lede strong{color:#e2dccb;font-weight:500}
+  ul.demos{list-style:none;padding:0}
+  ul.demos li{
+    margin-bottom:18px;
+    padding:18px 22px;
+    background:#13192a;
+    border:1px solid #1f2937;
+    border-radius:8px;
+    transition:border-color .15s, transform .15s;
+  }
+  ul.demos li:hover{border-color:#a78bfa;transform:translateY(-1px)}
+  ul.demos li a.name{
+    font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;
+    font-size:1.2rem;
+    font-weight:600;
+    color:#f5f0e0;
+    text-decoration:none;
+    display:block;
+    margin-bottom:6px;
+  }
+  ul.demos li a.name:hover{color:#c4b5fd}
+  ul.demos li .x{
+    font-family:"SF Mono","Cascadia Code",ui-monospace,monospace;
+    font-size:.78rem;
+    color:#8b9bb4;
+    margin-left:8px;
+  }
+  ul.demos li .angle{
+    font-family:-apple-system,system-ui,sans-serif;
+    font-size:.94rem;
+    color:#cdc4b0;
+    line-height:1.55;
+  }
+  ul.demos li .angle code{font-family:"SF Mono",ui-monospace,monospace;font-size:.88em;background:#0a0f1e;padding:.1em .4em;border-radius:3px;color:#c4b5fd}
+  footer{margin-top:64px;padding:24px 0;border-top:1px solid #1f2937;font-family:-apple-system,system-ui,sans-serif;font-size:.84rem;color:#6b7280;text-align:center}
+  footer a{color:#6b7280}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="meta">
+    <a href="../math/life-in-glyph.html">← Life in Glyph</a> · <a href="../math/strengths.html">Essay</a> · <a href="../maintenance.html">Maintenance</a>
+  </div>
+
+  <h1>Twelve <span class="accent">demo pages</span>, one per person</h1>
+  <p class="lede">Each page is built around what the person publicly cares about. <strong>The influencer engine in <code style="font-family:'SF Mono',ui-monospace,monospace;font-size:.92em;background:#13192a;padding:.12em .42em;border-radius:3px;color:#c4b5fd">scripts/launch/influencer_engine.py</code> links to these directly</strong> instead of dumping the homepage URL into every cold email. Linking a gift, not a request.</p>
+
+  <ul class="demos">
+    <li>
+      <a class="name" href="for-simon-willison.html">Simon Willison<span class="x">@simonw</span></a>
+      <div class="angle">MCP + DuckDB + LLM tool-use in one small library — your weekly notes hit all three regularly.</div>
+    </li>
+    <li>
+      <a class="name" href="for-swyx.html">Shawn @ Latent Space<span class="x">@swyx</span></a>
+      <div class="angle">Agent-native visualisation as a category. Nobody owns it yet; Glyph is the first move.</div>
+    </li>
+    <li>
+      <a class="name" href="for-harrison-chase.html">Harrison Chase<span class="x">@hwchase17</span></a>
+      <div class="angle">A LangChain tool wrapper for Glyph runs the Analyst+Auditor pattern in ~40 LOC.</div>
+    </li>
+    <li>
+      <a class="name" href="for-joao-moura.html">João Moura<span class="x">@joaomdmoura</span></a>
+      <div class="angle">A CrewAI Analyst+Auditor crew that produces byte-stable charts.</div>
+    </li>
+    <li>
+      <a class="name" href="for-jerry-liu.html">Jerry Liu<span class="x">@jerryjliu0</span></a>
+      <div class="angle">Glyph's <code>data.source</code> field accepts paths into the DuckDB engine — clean tail for LlamaIndex query engines.</div>
+    </li>
+    <li>
+      <a class="name" href="for-yohei-nakajima.html">Yohei Nakajima<span class="x">@yoheinakajima</span></a>
+      <div class="angle">BabyAGI's loop topology applied to chart-making: render → audit → patch → re-render.</div>
+    </li>
+    <li>
+      <a class="name" href="for-alex-albert.html">Alex Albert<span class="x">@alexalbert__</span></a>
+      <div class="angle">52 MCP verbs, byte-stable SVG output, Zod-validated specs — a clean reference MCP server for the chart domain.</div>
+    </li>
+    <li>
+      <a class="name" href="for-hannes-muehleisen.html">Hannes Mühleisen<span class="x">@hfmuehleisen</span></a>
+      <div class="angle">DuckDB lives inside Glyph's renderer. <code>data.source: 'rides.csv'</code> runs through real SQL before reaching the encoding layer.</div>
+    </li>
+    <li>
+      <a class="name" href="for-hadley-wickham.html">Hadley Wickham<span class="x">@hadleywickham</span></a>
+      <div class="angle">Grammar of graphics for AI agents. The same compositional shape ggplot2 introduced, expressed as JSON so an LLM can author it directly.</div>
+    </li>
+    <li>
+      <a class="name" href="for-mike-bostock.html">Mike Bostock<span class="x">@mbostock</span></a>
+      <div class="angle">Byte-stable SVG. Same spec → same bytes on Linux, macOS, Windows × Node 20 / 22.</div>
+    </li>
+    <li>
+      <a class="name" href="for-matt-rickard.html">Matt Rickard<span class="x">@mattrickard</span></a>
+      <div class="angle">AI-built, AI-maintained infrastructure for the AI-engineering ecosystem. The repo demonstrates its own thesis.</div>
+    </li>
+    <li>
+      <a class="name" href="for-nutlope.html">Hassan El Mghari<span class="x">@nutlope</span></a>
+      <div class="angle">Clean OSS demo with a playground link. Joy of Math has nine interactive demos in-browser — perfect to drop in a tweet.</div>
+    </li>
+  </ul>
+
+  <footer>
+    Drawn by Glyph · Maintained by <a href="../maintenance.html">Cowork</a> · Apache 2.0 · <a href="https://github.com/seanhanca/glyph">github.com/seanhanca/glyph</a>
+  </footer>
+
+</div>
+
+</body>
+</html>
