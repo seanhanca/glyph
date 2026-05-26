@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Two agents on a chart — the canonical Glyph collaboration demo</title>
+<meta name="description" content="Agent A renders a chart. Agent B audits it, finds a flaw, emits an RFC 6902 patch. Agent A applies the patch and re-renders. Same JSON, same SVG bytes. The demo no other chart library can run.">
+<meta property="og:title" content="Two agents on a chart">
+<meta property="og:description" content="The canonical Glyph multi-agent collaboration demo.">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{
+    background:#0a0d18;
+    color:#e2dccb;
+    font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:#a78bfa;color:#0a0d18}
+  a{color:#c4b5fd;text-underline-offset:3px}
+  a:hover{color:#ddd6fe}
+
+  .wrap{max-width:880px;margin:0 auto;padding:48px 24px 96px}
+
+  .meta{font-family:-apple-system,system-ui,sans-serif;font-size:.78rem;text-transform:uppercase;letter-spacing:.18em;color:#6b7280;margin-bottom:24px}
+  .meta a{color:#6b7280;text-decoration:none;border-bottom:1px dashed transparent;transition:color .15s,border-color .15s}
+  .meta a:hover{color:#e2dccb;border-bottom-color:#e2dccb}
+
+  h1.title{
+    font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;
+    font-size:clamp(2.2rem,5vw,3.4rem);
+    font-weight:600;
+    letter-spacing:-.015em;
+    line-height:1.1;
+    color:#f5f0e0;
+    margin-bottom:14px;
+    text-wrap:balance;
+  }
+  h1.title .accent{color:#c4b5fd;font-style:italic}
+
+  .standfirst{
+    font-family:-apple-system,system-ui,sans-serif;
+    font-size:1.14rem;
+    line-height:1.6;
+    color:#9ca3af;
+    margin-bottom:48px;
+    max-width:65ch;
+  }
+  .standfirst strong{color:#e2dccb;font-weight:500}
+
+  h2{
+    font-family:"Iowan Old Style",Georgia,serif;
+    font-size:1.7rem;
+    font-weight:600;
+    color:#f5f0e0;
+    margin:48px 0 16px;
+    text-wrap:balance;
+  }
+  h2 .stepnum{
+    font-style:italic;
+    color:#a78bfa;
+    margin-right:8px;
+  }
+  h3{
+    font-family:"Iowan Old Style",Georgia,serif;
+    font-size:1.15rem;
+    font-weight:600;
+    color:#f5f0e0;
+    margin:24px 0 10px;
+  }
+
+  p{margin-bottom:18px;font-size:1.04rem;line-height:1.75;color:#cdc4b0}
+  p strong{color:#f5f0e0;font-weight:500}
+  p code{font-family:"SF Mono","Cascadia Code",ui-monospace,monospace;font-size:.88em;background:#13192a;padding:.12em .42em;border-radius:3px;color:#c4b5fd}
+
+  pre{
+    font-family:"SF Mono","Cascadia Code",ui-monospace,monospace;
+    font-size:.86rem;
+    background:#0a0f1e;
+    border:1px solid #1f2937;
+    border-radius:8px;
+    padding:18px 20px;
+    color:#cbd5e1;
+    overflow-x:auto;
+    line-height:1.6;
+    margin:14px 0 24px;
+  }
+  pre .k{color:#7eb6ff}
+  pre .s{color:#fda4af}
+  pre .n{color:#a78bfa}
+  pre .c{color:#6b7280;font-style:italic}
+  pre .added{color:#34d399}
+  pre .removed{color:#f87171}
+
+  .stage-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+    margin:24px 0 32px;
+  }
+  @media (max-width:720px){.stage-grid{grid-template-columns:1fr}}
+  .stage{
+    background:#020617;
+    border:1px solid #1f2937;
+    border-radius:6px;
+    overflow:hidden;
+  }
+  .stage img{display:block;width:100%;height:auto}
+  .stage figcaption{
+    font-family:-apple-system,system-ui,sans-serif;
+    font-size:.84rem;
+    color:#8b9bb4;
+    padding:8px 12px;
+    background:#0e1422;
+    border-top:1px solid #1f2937;
+  }
+  .stage figcaption strong{color:#cdc4b0;font-weight:500}
+
+  .role{
+    display:inline-block;
+    padding:3px 10px;
+    border-radius:9999px;
+    font-family:-apple-system,system-ui,sans-serif;
+    font-size:.74rem;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    margin-bottom:8px;
+  }
+  .role.a{background:rgba(34,211,238,.12);color:#7dd3fc;border:1px solid rgba(125,211,252,.3)}
+  .role.b{background:rgba(251,191,36,.12);color:#fde68a;border:1px solid rgba(251,191,36,.3)}
+
+  blockquote{
+    border-left:3px solid #a78bfa;
+    padding:6px 18px 6px 20px;
+    margin:24px 0;
+    font-style:italic;
+    color:#cdc4b0;
+    font-size:1.04rem;
+    line-height:1.6;
+  }
+  blockquote .who{
+    display:block;
+    margin-top:8px;
+    font-style:normal;
+    font-size:.86rem;
+    color:#8b9bb4;
+    font-family:-apple-system,system-ui,sans-serif;
+  }
+
+  .why{
+    background:rgba(167,139,250,.05);
+    border:1px solid rgba(167,139,250,.2);
+    border-radius:8px;
+    padding:22px 26px;
+    margin:48px 0;
+  }
+  .why h3{margin-top:0;color:#c4b5fd}
+  .why p:last-child{margin-bottom:0}
+
+  hr.section{border:none;height:1px;background:linear-gradient(90deg, transparent, #1f2937 30%, #1f2937 70%, transparent);margin:64px 0 48px}
+
+  footer{
+    margin-top:64px;
+    padding:24px 0;
+    border-top:1px solid #1f2937;
+    font-family:-apple-system,system-ui,sans-serif;
+    font-size:.84rem;
+    color:#6b7280;
+    text-align:center;
+  }
+  footer a{color:#6b7280}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="meta">
+    <a href="../index.html">← Glyph</a> · <a href="../../AGENTS.md">AGENTS.md</a> · <a href="life-in-glyph.html">Gallery</a> · <a href="strengths.html">Essay</a>
+  </div>
+
+  <h1 class="title">Two agents on a <span class="accent">chart</span></h1>
+
+  <p class="standfirst"><strong>Agent A renders. Agent B audits and patches. Agent A applies the patch and re-renders.</strong> Same JSON. Same SVG bytes. The collaboration demo no other chart library can run — because no other library is byte-deterministic and patchable as JSON.</p>
+
+  <h2><span class="stepnum">I.</span>The setup</h2>
+  <p>The user has a CSV of bicycle rides and asks for a chart. Two agents are in the room: <strong>Agent A</strong>, the renderer, and <strong>Agent B</strong>, the auditor. Both speak MCP, both have Glyph installed (<code>claude mcp add glyph -- npx -y @glyph/mcp</code>), and they share the same scratch space.</p>
+
+  <p>Their contract is simple: Agent A writes Glyph JSON specs, Agent B finds problems, Agent B emits RFC 6902 patches, Agent A applies them. Neither agent regenerates the chart from scratch on each iteration — that would lose the byte-determinism trail.</p>
+
+  <h2><span class="stepnum">II.</span>Agent A's first draft</h2>
+
+  <p><span class="role a">Agent A</span> sees the CSV and drafts a bar chart of rides per hour. It calls <code>glyph_render</code> with this spec:</p>
+
+<pre>{
+  <span class="k">"version"</span>: <span class="s">"glyph/0.1"</span>,
+  <span class="k">"title"</span>: <span class="s">"Bike rides by hour"</span>,
+  <span class="k">"data"</span>: { <span class="k">"source"</span>: <span class="s">"rides.csv"</span> },
+  <span class="k">"layers"</span>: [{
+    <span class="k">"mark"</span>: <span class="s">"bar"</span>,
+    <span class="k">"encoding"</span>: {
+      <span class="k">"x"</span>: { <span class="k">"field"</span>: <span class="s">"hour"</span>, <span class="k">"type"</span>: <span class="s">"ordinal"</span> },
+      <span class="k">"y"</span>: { <span class="k">"field"</span>: <span class="s">"rides"</span>, <span class="k">"type"</span>: <span class="s">"quantitative"</span> }
+    }
+  }]
+}</pre>
+
+  <p>Glyph emits an SVG and an <code>Explanation</code> envelope back. The envelope records the resolved scale domains, the SHA-256 seal, and any audit warnings. Agent A passes the spec, the SVG, and the envelope to Agent B.</p>
+
+  <h2><span class="stepnum">III.</span>Agent B audits</h2>
+
+  <p><span class="role b">Agent B</span> calls <code>glyph_audit_spec</code> on the same spec. Glyph's auditor returns a structured list of findings:</p>
+
+<pre>{
+  <span class="k">"findings"</span>: [
+    {
+      <span class="k">"severity"</span>: <span class="s">"warning"</span>,
+      <span class="k">"path"</span>: <span class="s">"/layers/0/encoding/y/scale"</span>,
+      <span class="k">"message"</span>: <span class="s">"y axis has no explicit domain; auto-fit may exaggerate variation"</span>,
+      <span class="k">"suggested_patch"</span>: [{
+        <span class="k">"op"</span>: <span class="s">"add"</span>,
+        <span class="k">"path"</span>: <span class="s">"/layers/0/encoding/y/scale"</span>,
+        <span class="k">"value"</span>: { <span class="k">"domain"</span>: [<span class="n">0</span>, <span class="n">null</span>] }
+      }]
+    },
+    {
+      <span class="k">"severity"</span>: <span class="s">"info"</span>,
+      <span class="k">"path"</span>: <span class="s">"/title"</span>,
+      <span class="k">"message"</span>: <span class="s">"title lacks units"</span>,
+      <span class="k">"suggested_patch"</span>: [{
+        <span class="k">"op"</span>: <span class="s">"replace"</span>,
+        <span class="k">"path"</span>: <span class="s">"/title"</span>,
+        <span class="k">"value"</span>: <span class="s">"Bike rides by hour (count per hour)"</span>
+      }]
+    }
+  ]
+}</pre>
+
+  <p>Agent B's job isn't to argue — it's to surface the problems. Agent A decides what to apply.</p>
+
+  <h2><span class="stepnum">IV.</span>Agent A applies the patch</h2>
+
+  <p><span class="role a">Agent A</span> accepts both suggestions and emits an RFC 6902 patch:</p>
+
+<pre>[
+  { <span class="k">"op"</span>: <span class="s">"add"</span>,
+    <span class="k">"path"</span>: <span class="s">"/layers/0/encoding/y/scale"</span>,
+    <span class="k">"value"</span>: { <span class="k">"domain"</span>: [<span class="n">0</span>, <span class="n">null</span>] } },
+  { <span class="k">"op"</span>: <span class="s">"replace"</span>,
+    <span class="k">"path"</span>: <span class="s">"/title"</span>,
+    <span class="k">"value"</span>: <span class="s">"Bike rides by hour (count per hour)"</span> }
+]</pre>
+
+  <p>Agent A applies the patch to its own spec, calls <code>glyph_render</code> again, and ships SVG v2 to the user. Because Glyph is byte-deterministic, every other agent (and every CI run) that applies the same patch to the same spec gets exactly the same bytes back. <strong>The whole conversation is reproducible.</strong></p>
+
+  <h2><span class="stepnum">V.</span>The result, side by side</h2>
+
+  <div class="stage-grid">
+    <figure class="stage">
+      <img src="../play/example-bar-rides.svg" alt="First-draft chart from Agent A: bar chart of rides by hour, with auto-fit y-axis and bare title" loading="lazy" onerror="this.style.display='none'">
+      <figcaption><strong>v1 — Agent A's first draft.</strong> Auto-fit y-axis. Title without units.</figcaption>
+    </figure>
+    <figure class="stage">
+      <img src="../play/example-bar-rides-v2.svg" alt="Second draft after Agent B's audit: y-axis pinned to [0, …] and title clarified" loading="lazy" onerror="this.style.display='none'">
+      <figcaption><strong>v2 — after Agent B's patch.</strong> Y-axis pinned to <code>[0, …]</code>. Title carries units.</figcaption>
+    </figure>
+  </div>
+
+  <p style="font-size:.92rem;color:#8b9bb4;font-style:italic">Note: if these images render as broken, the live SVG fixtures live in the repo under <code>packages/core/__fixtures__/play/</code> and the demo can be replayed by any MCP client.</p>
+
+  <hr class="section">
+
+  <div class="why">
+    <h3>Why this demo only works in Glyph</h3>
+    <p><strong>Determinism.</strong> Vega, Plotly, D3 all produce SVG whose bytes drift between platforms (subpixel rounding, ID generation, timestamp embedding). Without byte-equality, "the same spec produced this byte stream" is not a verifiable claim.</p>
+    <p><strong>Audit-as-a-verb.</strong> Glyph's MCP surface includes <code>glyph_audit_spec</code> — the auditor is part of the library, not a separate tool. The second agent doesn't need a custom reviewer prompt to identify chart problems.</p>
+    <p><strong>JSON patches against a stable schema.</strong> Glyph specs are flat JSON validated by Zod. RFC 6902 patches against them are auditable, idempotent, and replayable. A Vega-Lite spec compiled to D3 code is none of those.</p>
+    <p><strong>SHA-256 seal.</strong> Every rendered SVG carries the hash of <code>(spec, rows, schema)</code>. Anyone, including Agent C, can verify the bytes correspond to the claimed spec without re-rendering.</p>
+  </div>
+
+  <h2>Try it yourself</h2>
+  <p>Open two Claude conversations side by side (or one Claude conversation with two roles). In both, run <code>claude mcp add glyph -- npx -y @glyph/mcp</code>. Then:</p>
+
+  <blockquote>
+    Conversation 1 (you'll be Agent A): "Render a bar chart from <code>rides.csv</code> showing rides per hour. Save the spec to <code>spec-v1.json</code> and the SVG to <code>chart-v1.svg</code>."
+    <span class="who">— prompt for Agent A</span>
+  </blockquote>
+
+  <blockquote>
+    Conversation 2 (you'll be Agent B): "Load <code>spec-v1.json</code>. Call <code>glyph_audit_spec</code>. For each finding with severity warning or higher, emit an RFC 6902 patch. Write the patch list to <code>patch.json</code>."
+    <span class="who">— prompt for Agent B</span>
+  </blockquote>
+
+  <blockquote>
+    Back in conversation 1: "Apply <code>patch.json</code> to <code>spec-v1.json</code>, save as <code>spec-v2.json</code>, and re-render to <code>chart-v2.svg</code>."
+    <span class="who">— prompt for Agent A again</span>
+  </blockquote>
+
+  <p>Both <code>chart-v1.svg</code> and <code>chart-v2.svg</code> will be byte-identical to anyone else running the same prompts. That's the trick.</p>
+
+  <footer>
+    Drawn by Glyph · Maintained by Cowork · Apache 2.0 · <a href="https://github.com/seanhanca/glyph">github.com/seanhanca/glyph</a>
+  </footer>
+
+</div>
+
+</body>
+</html>
