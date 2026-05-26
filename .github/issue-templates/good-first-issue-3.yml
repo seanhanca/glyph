@@ -1,0 +1,18 @@
+title: "New brand preset: `theme: \"oss-newsletter\"`"
+labels: [good first issue, theming]
+body: |
+  ## Goal
+  Add a fifth brand preset suited to OSS newsletters and dev.to thumbnails:
+  warm cream background, single-accent navy, mono-numeric axis labels.
+
+  ## Why
+  Lowers the activation energy for community writeups.
+
+  ## Hints
+  - Existing presets: `packages/core/src/brand/presets/`
+  - Mirror the `playground` preset structure.
+
+  ## Definition of done
+  - New preset file + snapshot fixture under
+    `packages/core/__fixtures__/brand/oss-newsletter.svg`.
+  - Documented in `site/index.html#themes`.

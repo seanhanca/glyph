@@ -42,3 +42,8 @@ sandbox/
 # entries above only covered specific paths — this catches subdirs like
 # bindings/python/tests/__pycache__/ that pytest creates per test file).
 **/__pycache__/
+
+# Launch toolkit secrets and runtime state
+scripts/launch/.env.launch
+scripts/launch/.influencer-*.json
+scripts/launch/chrome_queue.json

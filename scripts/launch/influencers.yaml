@@ -1,0 +1,85 @@
+- handle: simonw
+  name: Simon Willison
+  x: simonw
+  rss: https://simonwillison.net/atom/everything/
+  github: simonw
+  email: ""
+  topics: [llm, mcp, duckdb, sqlite, tool-use, plugins]
+  hook: "AI-built + DuckDB + MCP — your weekly notes have hit all three. Glyph might be the cleanest small demo of all three together."
+  do_not_pitch: []
+
+- handle: swyx
+  name: Shawn @ Latent Space
+  x: swyx
+  rss: https://www.latent.space/feed
+  github: sw-yx
+  email: ""
+  topics: [agents, llmops, devrel, ai-engineering, infrastructure]
+  hook: "Agent-native viz — a category nobody owns yet. Want a take for AI Engineer?"
+
+- handle: hwchase17
+  name: Harrison Chase
+  x: hwchase17
+  github: hwchase17
+  topics: [langchain, agents, tools]
+  hook: "Tiny LangChain tool wrapper for Glyph — Analyst+Auditor demo runs in 40 LOC."
+
+- handle: joaomdmoura
+  name: João Moura
+  x: joaomdmoura
+  github: joaomdmoura
+  topics: [crewai, agents]
+  hook: "CrewAI Analyst+Auditor example that ships byte-stable charts."
+
+- handle: jerryjliu0
+  name: Jerry Liu
+  x: jerryjliu0
+  github: jerryjliu
+  topics: [llamaindex, retrieval, agents]
+  hook: "LlamaIndex query-engine integration for grounded chart generation."
+
+- handle: yoheinakajima
+  name: Yohei Nakajima
+  x: yoheinakajima
+  topics: [agents, autonomous, infrastructure]
+  hook: "Two-agents-on-a-chart demo — RFC 6902 patch loop. You'd recognize the pattern."
+
+- handle: alexalbert__
+  name: Alex Albert
+  x: alexalbert__
+  topics: [anthropic, claude, mcp, devrel]
+  hook: "52 MCP verbs, byte-stable across platforms. The cleanest MCP server I've seen."
+
+- handle: hfmuehleisen
+  name: Hannes Mühleisen
+  x: hfmuehleisen
+  github: hannes
+  topics: [duckdb, databases]
+  hook: "DuckDB embedded in the renderer — transforms live in the spec. Worth a look?"
+
+- handle: hadleywickham
+  name: Hadley Wickham
+  x: hadleywickham
+  github: hadley
+  topics: [grammar-of-graphics, ggplot2, tidyverse, r]
+  hook: "Grammar of graphics, but for AI agents to author and diff. Not an R replacement — a different audience."
+
+- handle: mbostock
+  name: Mike Bostock
+  x: mbostock
+  github: mbostock
+  topics: [d3, observable, visualization]
+  hook: "Determinism: same JSON → same SVG bytes. Cryptographic provenance seal on every render."
+
+- handle: mattrickard
+  name: Matt Rickard
+  x: mattrickard
+  topics: [infrastructure, ai, agents]
+  hook: "AI-built, AI-maintained OSS. The launch itself is AI-driven. On-thesis for your audience."
+
+- handle: nutlope
+  name: Hassan El Mghari
+  x: nutlope
+  github: Nutlope
+  topics: [ai-demos, oss, llms]
+  hook: "Joy of Math demos + playground link — the kind of public AI demo you usually share."

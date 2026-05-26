@@ -1,0 +1,18 @@
+title: "Add Vega-Lite → Glyph translator quickstart in docs/LEARN.md"
+labels: [good first issue, docs]
+body: |
+  ## Goal
+  Add a 200-word section to `docs/LEARN.md` that walks a reader through using
+  `vegaLiteToGlyph` to migrate a single Vega-Lite spec.
+
+  ## Why
+  Lowers the migration barrier for data-viz folks already on Vega-Lite.
+
+  ## Hints
+  - Translator lives in `packages/core/src/translate/vega-lite.ts`.
+  - Pick a small but interesting Vega-Lite example (e.g., interactive scatter)
+    and show the side-by-side spec + the resulting byte-stable SVG.
+
+  ## Definition of done
+  - Section added near the end of `docs/LEARN.md`.
+  - Spec + rendered SVG checked into `packages/core/__fixtures__/translate/`.

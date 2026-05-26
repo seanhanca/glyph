@@ -1,0 +1,1 @@
+- [Glyph](https://github.com/seanhanca/glyph) — Deterministic, MCP-native charts for AI agents. 52 MCP verbs, byte-identical SVG output across platforms, SHA-256 provenance seal on every render. Grammar of graphics with DuckDB inside. Apache 2.0, no telemetry, AI-maintained.

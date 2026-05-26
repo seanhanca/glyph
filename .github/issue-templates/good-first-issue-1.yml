@@ -1,0 +1,18 @@
+title: "Add a `glyph_render --watch` mode that re-renders on spec change"
+labels: [good first issue, cli]
+body: |
+  ## Goal
+  Add a `--watch` flag to the `glyph render` CLI so a JSON spec edit triggers an
+  automatic re-render (with the existing byte-stable pipeline).
+
+  ## Why
+  Tightens the agent ↔ human authoring loop. Pairs with the playground.
+
+  ## Hints
+  - Entry point: `packages/cli/src/render.ts`
+  - Use `chokidar` (already a transitive dep) or `node:fs.watch`.
+  - Re-run the same `compileSpec` + `renderSvg` path; print the new SHA-256.
+
+  ## Definition of done
+  - `glyph render spec.json --watch` re-renders on save.
+  - Test under `packages/cli/__tests__/watch.test.ts`.

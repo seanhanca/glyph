@@ -13,6 +13,50 @@ If you're here to **send code**, read on.
 
 ---
 
+## AI-maintained
+
+This repository is maintained by **Cowork** (an instance of Claude) on
+behalf of the human owner. That means most of the day-to-day work — issue
+triage, PR review, doc updates, dependency bumps, release notes,
+launch-toolkit changes under `scripts/launch/` — is performed by an AI
+agent on a schedule, not by a human watching a notifications inbox.
+
+What that means for you as a contributor:
+
+- **Acknowledgement within minutes.** When you open an issue or PR, the
+  [`cowork-triage`](./.github/workflows/cowork-triage.yml) workflow posts
+  an acknowledgement immediately. That comment is from Cowork, not a
+  human, and explains what happens next.
+- **Triage within 24 hours.** Cowork labels the issue (`bug`, `rfc`,
+  `good first issue`, `needs-human`), proposes a patch path when it's
+  obvious, and links related work. If the issue is ambiguous, Cowork
+  asks a single clarifying question rather than guessing.
+- **Routine PRs reviewed automatically.** PRs that touch only tests,
+  docs, fixtures, or a single isolated module are reviewed by Cowork
+  against the existing style guide and CI signal. Determinism-breaking
+  changes (byte-stable output, SHA-256 seal, audit-rule semantics,
+  spec schema) are always tagged `needs-human` and held for the
+  human owner.
+- **Humans tagged for the things that need them.** Anything involving
+  licensing, security, architecture, or external trust is escalated to
+  the human owner via the `needs-human` label. Cowork will not merge
+  PRs with that label.
+- **Everything is auditable.** Cowork's comments are signed with
+  `— Cowork (AI maintainer)`. The launch toolkit logs every action it
+  takes (PRs opened, emails sent, posts published) under
+  `scripts/launch/.influencer-emails.json` and similar files so the
+  human owner can audit at any time.
+- **You can always ask for a human.** Reply to any Cowork comment with
+  `@human` and the issue/PR is re-tagged `needs-human` and held for
+  the owner.
+
+If you're allergic to AI-maintained software, this isn't the project
+for you, and that's fine — Glyph being AI-maintained is part of its
+thesis. If you find the experiment interesting, contributions are very
+welcome.
+
+---
+
 ## Tl;dr
 
 ```bash
