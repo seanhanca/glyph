@@ -259,16 +259,16 @@
 
   <div class="stage-grid">
     <figure class="stage">
-      <img src="../play/example-bar-rides.svg" alt="First-draft chart from Agent A: bar chart of rides by hour, with auto-fit y-axis and bare title" loading="lazy" onerror="this.style.display='none'">
+      <img src="two-agents-v1.svg" alt="First-draft chart from Agent A: bar chart of rides by hour, with auto-fit y-axis and bare title 'Bike rides by hour'. Two visible peaks at hour 8 and hour 17 — the morning and evening commutes." loading="lazy">
       <figcaption><strong>v1 — Agent A's first draft.</strong> Auto-fit y-axis. Title without units.</figcaption>
     </figure>
     <figure class="stage">
-      <img src="../play/example-bar-rides-v2.svg" alt="Second draft after Agent B's audit: y-axis pinned to [0, …] and title clarified" loading="lazy" onerror="this.style.display='none'">
-      <figcaption><strong>v2 — after Agent B's patch.</strong> Y-axis pinned to <code>[0, …]</code>. Title carries units.</figcaption>
+      <img src="two-agents-v2.svg" alt="Second draft after Agent B's audit: y-axis explicitly pinned to [0, 1500] and title clarified to 'Bike rides by hour (count per hour)'. Same data, but the y-axis floor is now anchored at zero so the morning + evening peaks aren't exaggerated." loading="lazy">
+      <figcaption><strong>v2 — after Agent B's patch.</strong> Y-axis pinned to <code>[0, 1500]</code>. Title carries units.</figcaption>
     </figure>
   </div>
 
-  <p style="font-size:.92rem;color:#8b9bb4;font-style:italic">Note: if these images render as broken, the live SVG fixtures live in the repo under <code>packages/core/__fixtures__/play/</code> and the demo can be replayed by any MCP client.</p>
+  <p style="font-size:.92rem;color:#8b9bb4;font-style:italic">These are the actual byte-locked fixtures from <code>packages/core/__fixtures__/two-agents/</code>. Both renders are deterministic and tested in CI — see <code>two-agents.test.ts</code> for the full assertion suite (parse → render → patch → re-render → byte-equal).</p>
 
   <hr class="section">
 

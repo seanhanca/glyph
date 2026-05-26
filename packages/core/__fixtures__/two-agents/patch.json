@@ -1,0 +1,12 @@
+[
+  {
+    "op": "add",
+    "path": "/layers/0/encoding/y/scale",
+    "value": { "domain": [0, 1500] }
+  },
+  {
+    "op": "replace",
+    "path": "/title",
+    "value": "Bike rides by hour (count per hour)"
+  }
+]

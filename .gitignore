@@ -48,3 +48,5 @@ scripts/launch/.env.launch
 scripts/launch/.env
 scripts/launch/.influencer-*.json
 scripts/launch/chrome_queue.json
+scripts/launch/.metrics.json
+data/metrics.csv
