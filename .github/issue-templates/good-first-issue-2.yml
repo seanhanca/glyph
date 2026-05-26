@@ -1,0 +1,20 @@
+title: "New audit rule: detect overlapping axis labels"
+labels: [good first issue, auditor]
+body: |
+  ## Goal
+  Add an audit rule that flags overlapping x-axis or y-axis tick labels at the
+  rendered SVG layer.
+
+  ## Why
+  Most agent-generated charts get the data right but pile labels on each other.
+  Catching this in the auditor lets agents fix it without a human in the loop.
+
+  ## Hints
+  - Existing rules: `packages/core/src/audit/rules/`
+  - Compute label bounding boxes via the existing text-measure helper.
+  - Threshold: any horizontal overlap > 0 px on the major-axis ticks.
+
+  ## Definition of done
+  - New rule file `axis-label-overlap.ts` with unit tests.
+  - Listed in `docs/AUDIT.md`.
+  - Bumped rule count in README ("11 → 12").

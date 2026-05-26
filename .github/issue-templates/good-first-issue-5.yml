@@ -1,0 +1,20 @@
+title: "Add LangChain `GlyphTool` to packages/integrations/langchain"
+labels: [good first issue, integrations]
+body: |
+  ## Goal
+  Ship a one-file LangChain tool wrapper around `@glyph/mcp`, exposing
+  `glyph_render` and `glyph_audit_spec` as standard tools.
+
+  ## Why
+  Makes Glyph one-line-usable from any LangChain agent.
+
+  ## Hints
+  - Use `@langchain/core/tools` `tool` helper.
+  - Spawn `npx -y @glyph/mcp` as a subprocess; talk to it over stdio.
+  - Stub a small test that renders the existing `bar.json` fixture and asserts
+    the SHA-256 hash matches.
+
+  ## Definition of done
+  - `packages/integrations/langchain/glyph_tool.py` (or `.ts`).
+  - Test that runs against the local MCP server.
+  - PR opened against the LangChain examples repo.

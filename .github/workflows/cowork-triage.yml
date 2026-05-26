@@ -1,0 +1,32 @@
+name: Cowork triage
+
+on:
+  issues:
+    types: [opened, reopened]
+  pull_request:
+    types: [opened, reopened, ready_for_review]
+
+permissions:
+  issues: write
+  pull-requests: write
+  contents: read
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Acknowledge
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const isPR = !!context.payload.pull_request;
+            const num  = (context.payload.issue || context.payload.pull_request).number;
+            const body = isPR
+              ? "Thanks for the PR! Cowork (AI maintainer) is reviewing now. Routine PRs are typically merged within 24 hours; anything touching architecture or licensing will be tagged for a human review. See CONTRIBUTING.md → 'AI-maintained'."
+              : "Thanks for the issue! Cowork (AI maintainer) will triage within 24 hours. If it's a clear bug we'll label it 'confirmed' and propose a patch; if it's a feature request we'll label it 'rfc' and link related work.";
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              issue_number: num,
+              body,
+            });
