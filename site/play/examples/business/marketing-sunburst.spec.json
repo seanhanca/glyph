@@ -1,0 +1,82 @@
+{
+  "version": "glyph/0.1",
+  "title": "Marketing spend — annual budget ($K)",
+  "width": 560,
+  "height": 560,
+  "data": {
+    "hierarchy": {
+      "name": "Marketing $4.2M",
+      "children": [
+        {
+          "name": "Performance",
+          "children": [
+            {
+              "name": "Paid search",
+              "value": 720
+            },
+            {
+              "name": "Paid social",
+              "value": 480
+            },
+            {
+              "name": "Display",
+              "value": 240
+            },
+            {
+              "name": "Retargeting",
+              "value": 180
+            }
+          ]
+        },
+        {
+          "name": "Brand",
+          "children": [
+            {
+              "name": "Content",
+              "value": 540
+            },
+            {
+              "name": "PR",
+              "value": 220
+            },
+            {
+              "name": "Events",
+              "value": 380
+            },
+            {
+              "name": "Sponsorships",
+              "value": 140
+            }
+          ]
+        },
+        {
+          "name": "Lifecycle",
+          "children": [
+            {
+              "name": "Email",
+              "value": 320
+            },
+            {
+              "name": "Webinars",
+              "value": 280
+            },
+            {
+              "name": "Referral",
+              "value": 240
+            },
+            {
+              "name": "Community",
+              "value": 160
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "layers": [
+    {
+      "mark": "sunburst",
+      "encoding": {}
+    }
+  ]
+}

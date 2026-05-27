@@ -1,0 +1,25 @@
+{
+  "version": "glyph/0.1",
+  "title": "Orders by day of week × hour of day",
+  "width": 700,
+  "height": 340,
+  "layers": [
+    {
+      "mark": "heatmap",
+      "encoding": {
+        "x": {
+          "field": "hour",
+          "type": "ordinal"
+        },
+        "y": {
+          "field": "day",
+          "type": "ordinal"
+        },
+        "color": {
+          "field": "orders",
+          "type": "quantitative"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "version": "glyph/0.1",
+  "title": "CAC vs LTV by acquisition channel",
+  "width": 640,
+  "height": 420,
+  "layers": [
+    {
+      "mark": "point",
+      "encoding": {
+        "x": {
+          "field": "cac",
+          "type": "quantitative",
+          "scale": {
+            "domain": [0, 420]
+          }
+        },
+        "y": {
+          "field": "ltv",
+          "type": "quantitative",
+          "scale": {
+            "domain": [0, 5200]
+          }
+        },
+        "color": {
+          "field": "channel",
+          "type": "nominal"
+        },
+        "size": {
+          "field": "monthly_signups",
+          "type": "quantitative"
+        }
+      }
+    }
+  ]
+}

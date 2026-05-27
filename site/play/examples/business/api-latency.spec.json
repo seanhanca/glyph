@@ -1,0 +1,21 @@
+{
+  "version": "glyph/0.1",
+  "title": "API latency by endpoint (ms) — boxplot",
+  "width": 640,
+  "height": 400,
+  "layers": [
+    {
+      "mark": "boxplot",
+      "encoding": {
+        "x": {
+          "field": "endpoint",
+          "type": "ordinal"
+        },
+        "y": {
+          "field": "latency_ms",
+          "type": "quantitative"
+        }
+      }
+    }
+  ]
+}
