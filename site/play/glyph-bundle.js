@@ -4453,14 +4453,21 @@ var ChannelObjectSchema = external_exports.object({
    * to a SQL aggregate at compile time.
    */
   metric: external_exports.string().min(1).optional(),
+  /**
+   * Literal constant — bypasses scales entirely. For color channels:
+   * a CSS color string. For size/opacity: a number. The compiler treats
+   * `value` as the unconditional output for every row.
+   */
+  value: external_exports.union([external_exports.string(), external_exports.number()]).optional(),
   type: FieldTypeSchema.optional(),
   scale: ScaleSchema.optional(),
   aggregate: external_exports.enum(["count", "sum", "mean", "median", "min", "max"]).optional(),
   /** Override the axis/legend title. */
   title: external_exports.string().optional()
-}).strict().refine((c) => c.field === void 0 !== (c.metric === void 0), {
-  message: "Channel must have exactly one of `field` or `metric`."
-});
+}).strict().refine((c) => {
+  const n = (c.field !== void 0 ? 1 : 0) + (c.metric !== void 0 ? 1 : 0) + (c.value !== void 0 ? 1 : 0);
+  return n === 1;
+}, { message: "Channel must have exactly one of `field`, `metric`, or `value`." });
 var ChannelSchema = external_exports.union([external_exports.string().min(1), ChannelObjectSchema]);
 var EncodingSchema = external_exports.object({
   x: ChannelSchema.optional(),
@@ -4499,6 +4506,19 @@ var LayerSchema = external_exports.object({
   encoding: EncodingSchema,
   stat: StatSchema.optional(),
   position: PositionSchema.optional(),
+  /**
+   * For `mark: "line"` and `mark: "area"`. How adjacent points are
+   * connected:
+   *   - `"linear"` (default): straight line between (xᵢ, yᵢ) and
+   *     (xᵢ₊₁, yᵢ₊₁) — the prior behavior, byte-equivalent.
+   *   - `"step"`: horizontal segment at yᵢ from xᵢ to xᵢ₊₁, then a
+   *     vertical jump to yᵢ₊₁. The classic staircase shape used for
+   *     state-over-time and step-function plots.
+   *   - `"step-before"`: vertical jump first, then horizontal. Useful
+   *     when the value changes AT the timestamp rather than after it.
+   * Ignored by other marks. Tier-2 RFC.
+   */
+  interpolate: external_exports.enum(["linear", "step", "step-before"]).optional(),
   /**
    * Math PR4 — LaTeX source for `mark: "math-text"`. Required when
    * `mark === "math-text"`; the compiler enforces this via a
@@ -27114,6 +27134,9 @@ function extractRaceValue(m) {
   return 0;
 }
 function colorForRow(encoding, schema, row, colorDomain, theme, rows) {
+  if (typeof encoding.color === "object" && encoding.color !== null && encoding.color.value !== void 0) {
+    return String(encoding.color.value);
+  }
   const field = fieldOf(encoding.color);
   if (!field || colorDomain.length <= 1)
     return theme.marks[0] ?? "#000";
@@ -27145,6 +27168,78 @@ function isQuantColorField(ch, schema, field) {
   if (typeof ch !== "string" && ch && ch.type === "quantitative")
     return true;
   return isQuantitativeType(typeOfColumn(schema, field));
+}
+function buildLinePath(pts, interpolate) {
+  if (pts.length === 0)
+    return "";
+  const first = pts[0];
+  if (!first)
+    return "";
+  let d = `M ${first.x} ${first.y}`;
+  for (let i = 1; i < pts.length; i++) {
+    const a = pts[i - 1];
+    const b = pts[i];
+    if (!a || !b)
+      continue;
+    if (interpolate === "step") {
+      d += ` L ${b.x} ${a.y} L ${b.x} ${b.y}`;
+    } else if (interpolate === "step-before") {
+      d += ` L ${a.x} ${b.y} L ${b.x} ${b.y}`;
+    } else {
+      d += ` L ${b.x} ${b.y}`;
+    }
+  }
+  return d;
+}
+function radiusForRow(encoding, schema, row, rows, defaultR = 3) {
+  const size = encoding.size;
+  if (size === void 0)
+    return defaultR;
+  if (typeof size === "object" && size !== null) {
+    const sObj = size;
+    if (sObj.value !== void 0) {
+      const n = Number(sObj.value);
+      return Number.isFinite(n) && n >= 0 ? n : defaultR;
+    }
+  }
+  const field = fieldOf(size);
+  if (!field)
+    return defaultR;
+  const v = Number(valueAt(row, schema, field));
+  if (!Number.isFinite(v))
+    return defaultR;
+  let rMin = 3;
+  let rMax = 24;
+  if (typeof size === "object" && size !== null) {
+    const range = size.scale?.range;
+    if (Array.isArray(range) && range.length >= 2) {
+      const a = Number(range[0]);
+      const b = Number(range[1]);
+      if (Number.isFinite(a) && Number.isFinite(b) && a >= 0 && b >= 0) {
+        rMin = Math.min(a, b);
+        rMax = Math.max(a, b);
+      }
+    }
+  }
+  const idx = schema.findIndex((c) => c.name === field);
+  if (idx === -1)
+    return defaultR;
+  let lo = Number.POSITIVE_INFINITY;
+  let hi = Number.NEGATIVE_INFINITY;
+  for (const r of rows) {
+    const n = Number(r[idx]);
+    if (Number.isFinite(n)) {
+      if (n < lo)
+        lo = n;
+      if (n > hi)
+        hi = n;
+    }
+  }
+  if (!Number.isFinite(lo) || !Number.isFinite(hi) || lo === hi) {
+    return (rMin + rMax) / 2;
+  }
+  const t = Math.max(0, Math.min(1, (v - lo) / (hi - lo)));
+  return rMin + Math.sqrt(t) * (rMax - rMin);
 }
 function buildBars(out, rows, schema, encoding, xField, yField, xScale, yScale, theme, ctx, policy = "skip") {
   const colorField = fieldOf(encoding.color);
@@ -27257,13 +27352,16 @@ function buildPoints(out, rows, schema, encoding, xField, yField, xScale, yScale
       type: "circle",
       cx: roundPx(xpx),
       cy: ypx,
-      r: 3,
+      // Tier-1 fix: previously hardcoded to 3. Now responds to
+      // `encoding.size` — fields are scaled into a [3, 24] (or
+      // user-supplied range) px radius via sqrt so area tracks value.
+      r: roundPx(radiusForRow(encoding, schema, r, rows)),
       fill: colorForRow(encoding, schema, r, colorDomain, theme, rows),
       ...markDataFor(ctx, r, schema, i)
     });
   }
 }
-function buildLines(out, rows, schema, encoding, xField, yField, xScale, yScale, theme, preserveOrder = false, policy = "skip") {
+function buildLines(out, rows, schema, encoding, xField, yField, xScale, yScale, theme, preserveOrder = false, policy = "skip", interpolate = "linear") {
   const colorField = fieldOf(encoding.color);
   const colorDomain = colorField ? distinctOrdered(rows, schema, colorField) : [""];
   const yIdx = schema.findIndex((c) => c.name === yField);
@@ -27316,13 +27414,7 @@ function buildLines(out, rows, schema, encoding, xField, yField, xScale, yScale,
     const stroke = theme.marks[idx % theme.marks.length] ?? "#000";
     const hasInterp = pts.some((p) => p.interpolated);
     if (!hasInterp) {
-      let d = `M ${pts[0]?.x} ${pts[0]?.y}`;
-      for (let i = 1; i < pts.length; i++) {
-        const p = pts[i];
-        if (!p)
-          continue;
-        d += ` L ${p.x} ${p.y}`;
-      }
+      const d = buildLinePath(pts, interpolate);
       out.push({ type: "path", d, stroke, strokeWidth: 1.5, fill: "none" });
       continue;
     }
@@ -27333,7 +27425,7 @@ function buildLines(out, rows, schema, encoding, xField, yField, xScale, yScale,
       const b = pts[i];
       if (!a || !b)
         continue;
-      const seg = `M ${a.x} ${a.y} L ${b.x} ${b.y}`;
+      const seg = buildLinePath([a, b], interpolate);
       if (a.interpolated || b.interpolated)
         dashedSegs.push(seg);
       else
@@ -28000,7 +28092,21 @@ registerMark({
     const dataBlock = args.spec.data;
     const dataSource = typeof dataBlock === "object" && dataBlock !== null && "source" in dataBlock ? dataBlock.source : void 0;
     const preserveOrder = dataSource === PARAMETRIC_FUNCTION_SOURCE || dataSource === TRAJECTORY_SOURCE;
-    buildLines(args.out, args.rows, args.schema, args.layer.encoding, args.xField, args.yField, args.xScale, args.yScale, args.theme, preserveOrder, resolveMissingPolicy(args.spec));
+    buildLines(
+      args.out,
+      args.rows,
+      args.schema,
+      args.layer.encoding,
+      args.xField,
+      args.yField,
+      args.xScale,
+      args.yScale,
+      args.theme,
+      preserveOrder,
+      resolveMissingPolicy(args.spec),
+      // Tier-2 — line interpolation mode (linear / step / step-before).
+      args.layer.interpolate
+    );
   }
 });
 registerMark({

@@ -694,11 +694,16 @@ export const ScaleSchema = z
  *   - an object: { metric, type?, scale?, ... } — Phase 3 §1 (PR37); the
  *     materializer resolves `metric` against a session-scoped registry and
  *     emits a `_metric_<name>` column the encoding then resolves to.
+ *   - an object: { value: <literal> } — a constant per-layer encoding. The
+ *     compiler skips the data-driven scale and uses the value as-is. Used
+ *     when you want, say, four area layers each with its own fill color
+ *     without inventing a placeholder field. (Tier-1 encoder gap fix.)
  *
  * The shorthand form is what agents reach for first; the object form is the
  * escape hatch when defaults need to be overridden.
  *
- * Constraint: a channel must carry exactly one of `field` or `metric`.
+ * Constraint: a channel must carry exactly one of `field`, `metric`, or
+ * `value`.
  */
 export const ChannelObjectSchema = z
   .object({
@@ -709,6 +714,12 @@ export const ChannelObjectSchema = z
      * to a SQL aggregate at compile time.
      */
     metric: z.string().min(1).optional(),
+    /**
+     * Literal constant — bypasses scales entirely. For color channels:
+     * a CSS color string. For size/opacity: a number. The compiler treats
+     * `value` as the unconditional output for every row.
+     */
+    value: z.union([z.string(), z.number()]).optional(),
     type: FieldTypeSchema.optional(),
     scale: ScaleSchema.optional(),
     aggregate: z.enum(["count", "sum", "mean", "median", "min", "max"]).optional(),
@@ -716,9 +727,16 @@ export const ChannelObjectSchema = z
     title: z.string().optional(),
   })
   .strict()
-  .refine((c) => (c.field === undefined) !== (c.metric === undefined), {
-    message: "Channel must have exactly one of `field` or `metric`.",
-  });
+  .refine(
+    (c) => {
+      const n =
+        (c.field !== undefined ? 1 : 0) +
+        (c.metric !== undefined ? 1 : 0) +
+        (c.value !== undefined ? 1 : 0);
+      return n === 1;
+    },
+    { message: "Channel must have exactly one of `field`, `metric`, or `value`." },
+  );
 
 export const ChannelSchema = z.union([z.string().min(1), ChannelObjectSchema]);
 
@@ -775,6 +793,19 @@ export const LayerSchema = z
     encoding: EncodingSchema,
     stat: StatSchema.optional(),
     position: PositionSchema.optional(),
+    /**
+     * For `mark: "line"` and `mark: "area"`. How adjacent points are
+     * connected:
+     *   - `"linear"` (default): straight line between (xᵢ, yᵢ) and
+     *     (xᵢ₊₁, yᵢ₊₁) — the prior behavior, byte-equivalent.
+     *   - `"step"`: horizontal segment at yᵢ from xᵢ to xᵢ₊₁, then a
+     *     vertical jump to yᵢ₊₁. The classic staircase shape used for
+     *     state-over-time and step-function plots.
+     *   - `"step-before"`: vertical jump first, then horizontal. Useful
+     *     when the value changes AT the timestamp rather than after it.
+     * Ignored by other marks. Tier-2 RFC.
+     */
+    interpolate: z.enum(["linear", "step", "step-before"]).optional(),
     /**
      * Math PR4 — LaTeX source for `mark: "math-text"`. Required when
      * `mark === "math-text"`; the compiler enforces this via a

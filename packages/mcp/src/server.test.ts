@@ -1246,7 +1246,9 @@ describe("Glyph MCP server", () => {
         },
       });
       expect(r.isError).toBe(true);
-      expect(r.text).toMatch(/exactly one of `field` or `metric`/);
+      // After the Tier-1 fix, channels also accept `value`. The error
+      // message lists all three permitted keys.
+      expect(r.text).toMatch(/exactly one of `field`, `metric`, or `value`/);
     });
   });
 

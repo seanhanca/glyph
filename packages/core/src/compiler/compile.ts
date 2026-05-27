@@ -2406,6 +2406,15 @@ function colorForRow(
   theme: Theme,
   rows?: ReadonlyArray<ReadonlyArray<unknown>>,
 ): string {
+  // Tier-1 encoder fix: `color: { value: "#hex" }` short-circuits all the
+  // domain/range / palette logic — every row uses the literal.
+  if (
+    typeof encoding.color === "object" &&
+    encoding.color !== null &&
+    (encoding.color as { value?: unknown }).value !== undefined
+  ) {
+    return String((encoding.color as { value: unknown }).value);
+  }
   const field = fieldOf(encoding.color);
   if (!field || colorDomain.length <= 1) return theme.marks[0] ?? "#000";
   // If the color field is quantitative (declared or schema-inferred), use a
@@ -2440,6 +2449,109 @@ function isQuantColorField(
 ): boolean {
   if (typeof ch !== "string" && ch && ch.type === "quantitative") return true;
   return isQuantitativeType(typeOfColumn(schema, field));
+}
+
+/**
+ * Build the SVG `d` string for a sequence of polyline points, honoring
+ * the layer's `interpolate` mode. Used by both line and area marks.
+ *
+ *   - "linear" (default): straight segments. Output identical to the
+ *     pre-Tier-2 implementation, so existing snapshots stay byte-equal.
+ *   - "step": horizontal at yᵢ until xᵢ₊₁, then vertical to yᵢ₊₁.
+ *     The classic staircase — value holds until the next sample.
+ *   - "step-before": vertical to yᵢ₊₁ first at xᵢ, then horizontal.
+ *     For "the value changes AT the timestamp" semantics.
+ */
+function buildLinePath(
+  pts: ReadonlyArray<{ x: number; y: number }>,
+  interpolate: "linear" | "step" | "step-before" | undefined,
+): string {
+  if (pts.length === 0) return "";
+  const first = pts[0];
+  if (!first) return "";
+  let d = `M ${first.x} ${first.y}`;
+  for (let i = 1; i < pts.length; i++) {
+    const a = pts[i - 1];
+    const b = pts[i];
+    if (!a || !b) continue;
+    if (interpolate === "step") {
+      d += ` L ${b.x} ${a.y} L ${b.x} ${b.y}`;
+    } else if (interpolate === "step-before") {
+      d += ` L ${a.x} ${b.y} L ${b.x} ${b.y}`;
+    } else {
+      d += ` L ${b.x} ${b.y}`;
+    }
+  }
+  return d;
+}
+
+/**
+ * Tier-1 encoder fix — map a row's `encoding.size` value to a pixel
+ * radius. Previously the compiler ignored the size channel and emitted
+ * every point with r=3, which broke the canonical "bubble area =
+ * magnitude" pattern (Gapminder, CAC/LTV scatter, etc.).
+ *
+ * Behavior:
+ *   - `encoding.size === undefined`               → returns `defaultR`
+ *   - `encoding.size = { value: <n> }`            → returns the literal
+ *   - `encoding.size = "field"` or `{ field }`    → linearly maps the
+ *      field's [min, max] across `rows` to the radius range
+ *      [rMin, rMax]. Range defaults to [3, 24]; override with
+ *      `encoding.size.scale.range`.
+ *
+ * Mapping uses sqrt so visual *area* scales with value (Tufte's rule —
+ * eyes read area, not radius). Stays deterministic: the min/max scan
+ * is in row order with no random tiebreakers.
+ */
+function radiusForRow(
+  encoding: Encoding,
+  schema: ReadonlyArray<CompileFieldInfo>,
+  row: ReadonlyArray<unknown>,
+  rows: ReadonlyArray<ReadonlyArray<unknown>>,
+  defaultR = 3,
+): number {
+  const size = encoding.size;
+  if (size === undefined) return defaultR;
+  if (typeof size === "object" && size !== null) {
+    const sObj = size as { value?: unknown; field?: string; scale?: { range?: unknown } };
+    if (sObj.value !== undefined) {
+      const n = Number(sObj.value);
+      return Number.isFinite(n) && n >= 0 ? n : defaultR;
+    }
+  }
+  const field = fieldOf(size);
+  if (!field) return defaultR;
+  const v = Number(valueAt(row, schema, field));
+  if (!Number.isFinite(v)) return defaultR;
+  let rMin = 3;
+  let rMax = 24;
+  if (typeof size === "object" && size !== null) {
+    const range = (size as { scale?: { range?: unknown } }).scale?.range;
+    if (Array.isArray(range) && range.length >= 2) {
+      const a = Number(range[0]);
+      const b = Number(range[1]);
+      if (Number.isFinite(a) && Number.isFinite(b) && a >= 0 && b >= 0) {
+        rMin = Math.min(a, b);
+        rMax = Math.max(a, b);
+      }
+    }
+  }
+  const idx = schema.findIndex((c) => c.name === field);
+  if (idx === -1) return defaultR;
+  let lo = Number.POSITIVE_INFINITY;
+  let hi = Number.NEGATIVE_INFINITY;
+  for (const r of rows) {
+    const n = Number(r[idx]);
+    if (Number.isFinite(n)) {
+      if (n < lo) lo = n;
+      if (n > hi) hi = n;
+    }
+  }
+  if (!Number.isFinite(lo) || !Number.isFinite(hi) || lo === hi) {
+    return (rMin + rMax) / 2;
+  }
+  const t = Math.max(0, Math.min(1, (v - lo) / (hi - lo)));
+  return rMin + Math.sqrt(t) * (rMax - rMin);
 }
 
 function buildBars(
@@ -2597,7 +2709,10 @@ function buildPoints(
       type: "circle",
       cx: roundPx(xpx),
       cy: ypx,
-      r: 3,
+      // Tier-1 fix: previously hardcoded to 3. Now responds to
+      // `encoding.size` — fields are scaled into a [3, 24] (or
+      // user-supplied range) px radius via sqrt so area tracks value.
+      r: roundPx(radiusForRow(encoding, schema, r, rows)),
       fill: colorForRow(encoding, schema, r, colorDomain, theme, rows),
       ...markDataFor(ctx, r, schema, i),
     });
@@ -2639,6 +2754,10 @@ function buildLines(
   theme: Theme,
   preserveOrder = false,
   policy: MissingPolicy = "skip",
+  // Tier-2 RFC — line interpolation mode. "linear" matches prior
+  // behavior byte-for-byte; "step" + "step-before" emit staircase
+  // paths. Ignored when undefined.
+  interpolate: "linear" | "step" | "step-before" | undefined = "linear",
 ): void {
   const colorField = fieldOf(encoding.color);
   const colorDomain = colorField ? distinctOrdered(rows, schema, colorField) : [""];
@@ -2712,12 +2831,7 @@ function buildLines(
     const stroke = theme.marks[idx % theme.marks.length] ?? "#000";
     const hasInterp = pts.some((p) => p.interpolated);
     if (!hasInterp) {
-      let d = `M ${pts[0]?.x} ${pts[0]?.y}`;
-      for (let i = 1; i < pts.length; i++) {
-        const p = pts[i];
-        if (!p) continue;
-        d += ` L ${p.x} ${p.y}`;
-      }
+      const d = buildLinePath(pts, interpolate);
       out.push({ type: "path", d, stroke, strokeWidth: 1.5, fill: "none" });
       continue;
     }
@@ -2728,13 +2842,17 @@ function buildLines(
     // a solid bridge→B segment (Moat 3 review IMPORTANT-1). Same
     // problem on multi-row gaps: every exit edge lost the dash.
     // Both endpoints flagged → the full bridge stroke is dashed.
+    //
+    // Each segment honors the layer's `interpolate` mode so step lines
+    // with bridged gaps render correctly (staircase solid + staircase
+    // dashed, not a hybrid).
     const solidSegs: string[] = [];
     const dashedSegs: string[] = [];
     for (let i = 1; i < pts.length; i++) {
       const a = pts[i - 1];
       const b = pts[i];
       if (!a || !b) continue;
-      const seg = `M ${a.x} ${a.y} L ${b.x} ${b.y}`;
+      const seg = buildLinePath([a, b], interpolate);
       if (a.interpolated || b.interpolated) dashedSegs.push(seg);
       else solidSegs.push(seg);
     }
@@ -3737,6 +3855,8 @@ registerMark({
       args.theme,
       preserveOrder,
       resolveMissingPolicy(args.spec),
+      // Tier-2 — line interpolation mode (linear / step / step-before).
+      (args.layer as { interpolate?: "linear" | "step" | "step-before" }).interpolate,
     );
   },
 });
