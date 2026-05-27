@@ -1,0 +1,33 @@
+{
+  "version": "glyph/0.1",
+  "title": "Sunflower seeds — golden-angle phyllotaxis (life-in-glyph)",
+  "data": {
+    "recurrence": {
+      "shape": "recurrence",
+      "state": ["x", "y"],
+      "initial": { "x": 0, "y": 0 },
+      "step": {
+        "x": "sqrt(n + 1) * cos((n + 1) * 2.39996322972865332)",
+        "y": "sqrt(n + 1) * sin((n + 1) * 2.39996322972865332)"
+      },
+      "steps": 800
+    }
+  },
+  "layers": [
+    {
+      "mark": "point",
+      "encoding": {
+        "x": {
+          "field": "x",
+          "type": "quantitative",
+          "scale": { "domain": [-32, 32] }
+        },
+        "y": {
+          "field": "y",
+          "type": "quantitative",
+          "scale": { "domain": [-32, 32] }
+        }
+      }
+    }
+  ]
+}

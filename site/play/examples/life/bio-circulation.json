@@ -1,0 +1,462 @@
+{
+  "compose": {
+    "viewBox": {
+      "width": 1100,
+      "height": 700
+    },
+    "title": "Heart + circulation — the engine of you",
+    "description": "Anatomical front view of the human heart connected to the great vessels and the lungs. Deoxygenated blood (blue) enters the right side from the vena cavae, gets pumped to the lungs via the pulmonary arteries, returns oxygenated (red) through the pulmonary veins, and exits via the aorta to the body. ~5 L/min at rest.",
+    "theme": {
+      "preset": "pencil-parchment"
+    },
+    "defs": {
+      "gradients": [
+        {
+          "id": "g-heart",
+          "kind": "radial",
+          "cx": "40%",
+          "cy": "40%",
+          "r": "60%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#fda4af",
+              "opacity": 0.95
+            },
+            {
+              "offset": "55%",
+              "color": "#dc2626",
+              "opacity": 0.95
+            },
+            {
+              "offset": "100%",
+              "color": "#7c2d12",
+              "opacity": 0.95
+            }
+          ]
+        },
+        {
+          "id": "g-lung",
+          "kind": "radial",
+          "cx": "50%",
+          "cy": "40%",
+          "r": "65%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#fde9b0",
+              "opacity": 0.7
+            },
+            {
+              "offset": "60%",
+              "color": "#fbcfe8",
+              "opacity": 0.55
+            },
+            {
+              "offset": "100%",
+              "color": "#c084fc",
+              "opacity": 0.4
+            }
+          ]
+        }
+      ]
+    },
+    "children": [
+      {
+        "at": {
+          "x": 330,
+          "y": 180
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 C -40 -20, -90 -10, -130 30 C -160 70, -170 130, -160 180 C -150 230, -120 260, -80 270 C -40 275, -10 260, 0 220 C 5 180, 5 140, 5 100 C 10 60, 5 20, 0 0 Z",
+          "fill": "url(#g-lung)",
+          "stroke": "#3a2a14",
+          "strokeWidth": 1.6
+        }
+      },
+      {
+        "at": {
+          "x": 770,
+          "y": 180
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 C 40 -20, 90 -10, 130 30 C 160 70, 170 130, 160 180 C 150 230, 120 260, 80 270 C 40 275, 10 260, 0 220 C -5 180, -5 140, -5 100 C -10 60, -5 20, 0 0 Z",
+          "fill": "url(#g-lung)",
+          "stroke": "#3a2a14",
+          "strokeWidth": 1.6
+        }
+      },
+      {
+        "at": {
+          "x": 330,
+          "y": 280
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -110 -20 Q -80 -10, -50 -20 M -120 30 Q -80 40, -50 30 M -110 80 Q -80 90, -50 80",
+          "fill": "none",
+          "stroke": "rgba(124,45,18,.25)",
+          "strokeWidth": 0.8
+        }
+      },
+      {
+        "at": {
+          "x": 770,
+          "y": 280
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 50 -20 Q 80 -10, 110 -20 M 50 30 Q 80 40, 120 30 M 50 80 Q 80 90, 110 80",
+          "fill": "none",
+          "stroke": "rgba(124,45,18,.25)",
+          "strokeWidth": 0.8
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 510 250 C 500 160, 630 110, 720 170 C 770 210, 780 290, 770 440 L 770 590",
+          "fill": "none",
+          "stroke": "#b00020",
+          "strokeWidth": 14,
+          "strokeLinecap": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 510 250 C 500 160, 630 110, 720 170 C 770 210, 780 290, 770 440 L 770 590",
+          "fill": "none",
+          "stroke": "#fca5a5",
+          "strokeWidth": 6,
+          "strokeLinecap": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 510,
+          "y": 110
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 C -30 -30, -30 -60, -30 -90",
+          "fill": "none",
+          "stroke": "#b00020",
+          "strokeWidth": 4,
+          "strokeLinecap": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 610,
+          "y": 110
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 C 20 -30, 20 -60, 20 -90",
+          "fill": "none",
+          "stroke": "#b00020",
+          "strokeWidth": 4,
+          "strokeLinecap": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 690,
+          "y": 110
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 C 60 -30, 60 -60, 60 -90",
+          "fill": "none",
+          "stroke": "#b00020",
+          "strokeWidth": 4,
+          "strokeLinecap": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 560 250 C 600 190, 690 180, 750 240 M 560 250 C 520 190, 420 180, 350 240",
+          "fill": "none",
+          "stroke": "#1d4ed8",
+          "strokeWidth": 9,
+          "strokeLinecap": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 470 270 C 370 290, 270 320, 200 370 M 600 270 C 730 290, 830 320, 890 370",
+          "fill": "none",
+          "stroke": "#b00020",
+          "strokeWidth": 7,
+          "strokeLinecap": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 640 250 C 650 180, 650 120, 645 60",
+          "fill": "none",
+          "stroke": "#1d4ed8",
+          "strokeWidth": 11,
+          "strokeLinecap": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 660 480 C 665 550, 660 620, 655 640",
+          "fill": "none",
+          "stroke": "#1d4ed8",
+          "strokeWidth": 11,
+          "strokeLinecap": "round"
+        }
+      },
+      {
+        "at": {
+          "x": 550,
+          "y": 380
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 -130 C 35 -170, 110 -165, 130 -100 C 145 -60, 140 -10, 125 30 C 115 80, 95 130, 60 165 C 30 195, -20 210, -50 195 C -90 175, -130 130, -150 70 C -165 20, -170 -40, -155 -90 C -135 -150, -75 -170, -40 -160 C -20 -150, -8 -140, 0 -130 Z",
+          "fill": "url(#g-heart)",
+          "stroke": "#1f1a14",
+          "strokeWidth": 2.4,
+          "strokeLinejoin": "round"
+        },
+        "animation": {
+          "kind": "pulse",
+          "periodMs": 900,
+          "scale": 1.05
+        }
+      },
+      {
+        "at": {
+          "x": 550,
+          "y": 380
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 -130 C 5 -80, 10 -20, 15 30 C 18 80, 15 130, -20 195",
+          "fill": "none",
+          "stroke": "rgba(31,26,20,.7)",
+          "strokeWidth": 2.2,
+          "strokeLinecap": "round"
+        },
+        "animation": {
+          "kind": "pulse",
+          "periodMs": 900,
+          "scale": 1.05
+        }
+      },
+      {
+        "at": {
+          "x": 550,
+          "y": 380
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -150 -10 C -100 0, 0 5, 130 -5",
+          "fill": "none",
+          "stroke": "rgba(31,26,20,.55)",
+          "strokeWidth": 1.8,
+          "strokeLinecap": "round"
+        },
+        "animation": {
+          "kind": "pulse",
+          "periodMs": 900,
+          "scale": 1.05
+        }
+      },
+      {
+        "at": {
+          "x": 620,
+          "y": 320
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "RA",
+          "fontSize": 16,
+          "fill": "#fef3c7",
+          "italic": true,
+          "anchor": "middle"
+        },
+        "animation": {
+          "kind": "pulse",
+          "periodMs": 900,
+          "scale": 1.05
+        }
+      },
+      {
+        "at": {
+          "x": 610,
+          "y": 460
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "RV",
+          "fontSize": 16,
+          "fill": "#fef3c7",
+          "italic": true,
+          "anchor": "middle"
+        },
+        "animation": {
+          "kind": "pulse",
+          "periodMs": 900,
+          "scale": 1.05
+        }
+      },
+      {
+        "at": {
+          "x": 470,
+          "y": 320
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "LA",
+          "fontSize": 16,
+          "fill": "#fef3c7",
+          "italic": true,
+          "anchor": "middle"
+        },
+        "animation": {
+          "kind": "pulse",
+          "periodMs": 900,
+          "scale": 1.05
+        }
+      },
+      {
+        "at": {
+          "x": 460,
+          "y": 460
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "LV",
+          "fontSize": 18,
+          "fill": "#fef3c7",
+          "italic": true,
+          "anchor": "middle"
+        },
+        "animation": {
+          "kind": "pulse",
+          "periodMs": 900,
+          "scale": 1.05
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "annotation-leader",
+        "annotation": {
+          "from": [765, 150],
+          "to": [840, 100],
+          "text": "aorta · oxygenated",
+          "italic": true,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "annotation-leader",
+        "annotation": {
+          "from": [650, 60],
+          "to": [730, 20],
+          "text": "superior vena cava",
+          "italic": true,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "annotation-leader",
+        "annotation": {
+          "from": [370, 180],
+          "to": [200, 150],
+          "text": "pulmonary artery → lung",
+          "italic": true,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "annotation-leader",
+        "annotation": {
+          "from": [210, 330],
+          "to": [120, 400],
+          "text": "pulmonary vein ← lung",
+          "italic": true,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 550,
+          "y": 60
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Cor humanum · the circulation",
+          "fontSize": 22,
+          "fill": "#1f1a14",
+          "italic": true,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 550,
+          "y": 670
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "blue: deoxygenated · red: oxygenated · 60 bpm · ~5 L/min · ~3 billion beats per lifetime",
+          "fontSize": 13,
+          "fill": "#4a3f30",
+          "italic": true,
+          "anchor": "middle"
+        }
+      }
+    ]
+  }
+}

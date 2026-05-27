@@ -1,0 +1,38 @@
+{
+  "version": "glyph/0.1",
+  "title": "Cubic Bezier with de Casteljau construction at t = 0.5",
+  "data": {
+    "source": "inline:bezier-cubic"
+  },
+  "layers": [
+    {
+      "mark": "bezier",
+      "encoding": {
+        "x": {
+          "field": "x",
+          "type": "quantitative",
+          "scale": { "domain": [0, 10] }
+        },
+        "y": {
+          "field": "y",
+          "type": "quantitative",
+          "scale": { "domain": [0, 10] }
+        }
+      },
+      "bezier": {
+        "controlPoints": [
+          { "x": 1, "y": 1 },
+          { "x": 2, "y": 9 },
+          { "x": 8, "y": 9 },
+          { "x": 9, "y": 1 }
+        ],
+        "samples": 60,
+        "showControls": true,
+        "showConstruction": true,
+        "t": 0.5,
+        "stroke": "#3b82f6",
+        "strokeWidth": 1.8
+      }
+    }
+  ]
+}

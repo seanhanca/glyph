@@ -1,0 +1,29 @@
+{
+  "version": "glyph/0.1",
+  "title": "Hypotrochoid: R=5, r=3, d=5 (rosette)",
+  "data": {
+    "function": {
+      "shape": "function",
+      "parameter": { "name": "t", "min": 0, "max": 18.84955592153876, "samples": 1200 },
+      "xExpr": "(5-3)*cos(t) + 5*cos((5-3)/3 * t)",
+      "yExpr": "(5-3)*sin(t) - 5*sin((5-3)/3 * t)"
+    }
+  },
+  "layers": [
+    {
+      "mark": "line",
+      "encoding": {
+        "x": {
+          "field": "x",
+          "type": "quantitative",
+          "scale": { "domain": [-7.5, 7.5] }
+        },
+        "y": {
+          "field": "y",
+          "type": "quantitative",
+          "scale": { "domain": [-7.5, 7.5] }
+        }
+      }
+    }
+  ]
+}

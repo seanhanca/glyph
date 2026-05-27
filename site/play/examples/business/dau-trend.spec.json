@@ -1,0 +1,28 @@
+{
+  "version": "glyph/0.1",
+  "title": "Daily active users — 30-day growth",
+  "layers": [
+    {
+      "mark": "line",
+      "encoding": {
+        "x": {
+          "field": "day",
+          "type": "quantitative",
+          "scale": { "domain": [1, 30] }
+        },
+        "y": {
+          "field": "dau",
+          "type": "quantitative",
+          "scale": { "domain": [0, 60000] }
+        }
+      }
+    },
+    {
+      "mark": "point",
+      "encoding": {
+        "x": { "field": "day", "type": "quantitative" },
+        "y": { "field": "dau", "type": "quantitative" }
+      }
+    }
+  ]
+}

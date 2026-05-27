@@ -1,0 +1,17 @@
+{
+  "version": "glyph/0.1",
+  "title": "A/B test — sign-up conversion (%)",
+  "layers": [
+    {
+      "mark": "bar",
+      "encoding": {
+        "x": { "field": "variant", "type": "ordinal" },
+        "y": {
+          "field": "conversion",
+          "type": "quantitative",
+          "scale": { "domain": [0, 6] }
+        }
+      }
+    }
+  ]
+}

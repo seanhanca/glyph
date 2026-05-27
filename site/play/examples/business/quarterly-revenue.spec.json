@@ -1,0 +1,17 @@
+{
+  "version": "glyph/0.1",
+  "title": "Quarterly revenue ($M)",
+  "layers": [
+    {
+      "mark": "bar",
+      "encoding": {
+        "x": { "field": "quarter", "type": "ordinal" },
+        "y": {
+          "field": "revenue",
+          "type": "quantitative",
+          "scale": { "domain": [0, 5] }
+        }
+      }
+    }
+  ]
+}

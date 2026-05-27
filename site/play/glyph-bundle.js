@@ -5302,6 +5302,359 @@ function safeParseSpecJson(input) {
   return safeParseSpec(json);
 }
 
+// packages/core/dist/spec/compose-schema.js
+var LoopAnimationSchema = external_exports.union([
+  external_exports.object({
+    kind: external_exports.literal("swing"),
+    amplitudeDeg: external_exports.number().min(0).max(180),
+    periodMs: external_exports.number().int().min(100).max(12e4)
+  }).strict(),
+  external_exports.object({
+    kind: external_exports.literal("rotate-loop"),
+    periodMs: external_exports.number().int().min(100).max(6e5),
+    direction: external_exports.enum(["cw", "ccw"]).default("cw")
+  }).strict(),
+  external_exports.object({
+    kind: external_exports.literal("pulse"),
+    periodMs: external_exports.number().int().min(100).max(6e4),
+    scale: external_exports.number().min(0.5).max(2)
+  }).strict()
+]).optional();
+var FrameMarkSchema = external_exports.object({
+  width: external_exports.number().positive(),
+  height: external_exports.number().positive(),
+  title: external_exports.string().max(80).optional(),
+  cornerRadius: external_exports.number().min(0).max(40).optional()
+}).strict();
+var GearMarkSchema = external_exports.object({
+  radius: external_exports.number().positive().max(400),
+  teeth: external_exports.number().int().min(4).max(120),
+  toothLength: external_exports.number().positive().max(40).default(7),
+  innerStrokeDash: external_exports.string().max(20).optional(),
+  hubRadius: external_exports.number().min(1).max(40).default(5)
+}).strict();
+var PendulumMarkSchema = external_exports.object({
+  length: external_exports.number().positive().max(800),
+  bobRadius: external_exports.number().positive().max(80).default(20),
+  markerKind: external_exports.enum(["cross", "dot", "none"]).default("cross")
+}).strict();
+var AnnotationMarkSchema = external_exports.object({
+  from: external_exports.tuple([external_exports.number(), external_exports.number()]),
+  to: external_exports.tuple([external_exports.number(), external_exports.number()]),
+  text: external_exports.string().max(120),
+  italic: external_exports.boolean().default(true),
+  anchor: external_exports.enum(["start", "middle", "end"]).default("start")
+}).strict();
+var CircleMarkSchema = external_exports.object({
+  radius: external_exports.number().positive().max(400),
+  fill: external_exports.string().max(60),
+  stroke: external_exports.string().max(60).optional(),
+  strokeWidth: external_exports.number().min(0).max(20).optional()
+}).strict();
+var TextMarkSchema = external_exports.object({
+  text: external_exports.string().max(200),
+  fontSize: external_exports.number().min(6).max(64).default(12),
+  fill: external_exports.string().max(60).default("#1f1a14"),
+  italic: external_exports.boolean().default(true),
+  anchor: external_exports.enum(["start", "middle", "end"]).default("middle")
+}).strict();
+var HeartIconSchema = external_exports.object({
+  size: external_exports.number().positive().max(200).default(40),
+  fill: external_exports.string().max(60).default("#ef4444"),
+  stroke: external_exports.string().max(60).default("#7f1d1d")
+}).strict();
+var SliderCrankSchema = external_exports.object({
+  crankRadius: external_exports.number().positive().max(120).default(40),
+  rodLength: external_exports.number().positive().max(400).default(140)
+}).strict();
+var WankelRotorSchema = external_exports.object({
+  apexRadius: external_exports.number().positive().max(160).default(80)
+}).strict();
+var ComposeThemeSchema = external_exports.object({
+  preset: external_exports.enum(["pencil-parchment"]).optional(),
+  background: external_exports.string().max(60).optional(),
+  foreground: external_exports.string().max(40).optional(),
+  gridPattern: external_exports.enum(["graph-paper", "none"]).default("none")
+}).strict().optional();
+var GradientStopSchema = external_exports.object({
+  offset: external_exports.string().regex(/^\d{1,3}(\.\d+)?%$/, "offset must be e.g. '0%' or '55.5%'"),
+  color: external_exports.string().max(60),
+  opacity: external_exports.number().min(0).max(1).optional()
+}).strict();
+var LinearGradientDefSchema = external_exports.object({
+  id: external_exports.string().min(1).max(60),
+  kind: external_exports.literal("linear"),
+  x1: external_exports.string().default("0%"),
+  y1: external_exports.string().default("0%"),
+  x2: external_exports.string().default("100%"),
+  y2: external_exports.string().default("0%"),
+  stops: external_exports.array(GradientStopSchema).min(2).max(10)
+}).strict();
+var RadialGradientDefSchema = external_exports.object({
+  id: external_exports.string().min(1).max(60),
+  kind: external_exports.literal("radial"),
+  cx: external_exports.string().default("50%"),
+  cy: external_exports.string().default("50%"),
+  r: external_exports.string().default("50%"),
+  stops: external_exports.array(GradientStopSchema).min(2).max(10)
+}).strict();
+var GradientDefSchema = external_exports.union([LinearGradientDefSchema, RadialGradientDefSchema]);
+var PatternElementSchema = external_exports.union([
+  external_exports.object({
+    kind: external_exports.literal("line"),
+    x1: external_exports.number(),
+    y1: external_exports.number(),
+    x2: external_exports.number(),
+    y2: external_exports.number(),
+    stroke: external_exports.string().max(60),
+    strokeWidth: external_exports.number().min(0).max(20).default(1)
+  }).strict(),
+  external_exports.object({
+    kind: external_exports.literal("rect"),
+    x: external_exports.number(),
+    y: external_exports.number(),
+    width: external_exports.number().positive(),
+    height: external_exports.number().positive(),
+    fill: external_exports.string().max(60)
+  }).strict(),
+  external_exports.object({
+    kind: external_exports.literal("circle"),
+    cx: external_exports.number(),
+    cy: external_exports.number(),
+    r: external_exports.number().positive(),
+    fill: external_exports.string().max(60)
+  }).strict()
+]);
+var PatternDefSchema = external_exports.object({
+  id: external_exports.string().min(1).max(60),
+  width: external_exports.number().positive().max(200),
+  height: external_exports.number().positive().max(200),
+  patternTransform: external_exports.string().max(80).optional(),
+  children: external_exports.array(PatternElementSchema).min(1).max(20)
+}).strict();
+var ComposeDefsSchema = external_exports.object({
+  gradients: external_exports.array(GradientDefSchema).max(32).optional(),
+  patterns: external_exports.array(PatternDefSchema).max(32).optional()
+}).strict().optional();
+var StarfieldSchema = external_exports.object({
+  count: external_exports.number().int().min(1).max(500),
+  seed: external_exports.number().int().min(0).max(2147483647),
+  region: external_exports.object({
+    x: external_exports.number(),
+    y: external_exports.number(),
+    w: external_exports.number().positive(),
+    h: external_exports.number().positive()
+  }).strict(),
+  radiusMin: external_exports.number().positive().max(10).default(0.5),
+  radiusMax: external_exports.number().positive().max(10).default(1.2),
+  colorA: external_exports.string().max(60).default("#ffffff"),
+  colorB: external_exports.string().max(60).default("#cbd5e1"),
+  twinkleMs: external_exports.number().int().min(0).max(6e4).default(0)
+}).strict();
+var GlowSchema = external_exports.object({
+  radius: external_exports.number().positive().max(400),
+  gradientId: external_exports.string().min(1).max(60),
+  pulseMs: external_exports.number().int().min(0).max(6e4).default(0),
+  pulseDeltaR: external_exports.number().min(0).max(40).default(2)
+}).strict();
+var SilhouettePathSchema = external_exports.object({
+  d: external_exports.string().regex(/^[ MmLlHhVvCcSsQqTtAaZz0-9.,\s+\-eE]+$/, "d must be a valid SVG path string"),
+  fill: external_exports.string().max(60).default("none"),
+  stroke: external_exports.string().max(60).optional(),
+  strokeWidth: external_exports.number().min(0).max(20).optional(),
+  strokeDasharray: external_exports.string().max(40).optional(),
+  strokeLinecap: external_exports.enum(["butt", "round", "square"]).optional(),
+  strokeLinejoin: external_exports.enum(["miter", "round", "bevel"]).optional(),
+  opacity: external_exports.number().min(0).max(1).optional()
+}).strict();
+var IconSchema = external_exports.object({
+  id: external_exports.enum([
+    "heart",
+    "spacecraft",
+    "leopard",
+    "sunflower",
+    "flame",
+    "lightning",
+    "leaf",
+    "star",
+    "raindrop",
+    "snowflake"
+  ]),
+  size: external_exports.number().positive().max(400).default(40),
+  fill: external_exports.string().max(60).default("#1f1a14"),
+  stroke: external_exports.string().max(60).optional(),
+  strokeWidth: external_exports.number().min(0).max(20).optional()
+}).strict();
+var EllipseSchema = external_exports.object({
+  rx: external_exports.number().positive().max(800),
+  ry: external_exports.number().positive().max(800),
+  fill: external_exports.string().max(60),
+  stroke: external_exports.string().max(60).optional(),
+  strokeWidth: external_exports.number().min(0).max(20).optional(),
+  opacity: external_exports.number().min(0).max(1).optional(),
+  rotateDeg: external_exports.number().min(-360).max(360).default(0)
+}).strict();
+var PolygonSchema = external_exports.object({
+  points: external_exports.array(external_exports.tuple([external_exports.number(), external_exports.number()])).min(3).max(200),
+  fill: external_exports.string().max(60).default("none"),
+  stroke: external_exports.string().max(60).optional(),
+  strokeWidth: external_exports.number().min(0).max(20).optional()
+}).strict();
+var PolylineSchema = external_exports.object({
+  points: external_exports.array(external_exports.tuple([external_exports.number(), external_exports.number()])).min(2).max(2e3),
+  fill: external_exports.string().max(60).default("none"),
+  stroke: external_exports.string().max(60).default("#1f1a14"),
+  strokeWidth: external_exports.number().min(0).max(20).default(1),
+  strokeDasharray: external_exports.string().max(40).optional()
+}).strict();
+var SAFE_SVG_REGEX = /^(?:(?!<\s*(?:script|foreignObject|image)\b)(?!\bon[a-z]+\s*=)(?!\bjavascript:)[\s\S])*$/i;
+var RawSvgSchema = external_exports.object({
+  xml: external_exports.string().min(1).max(4096).refine((s) => SAFE_SVG_REGEX.test(s), "raw-svg xml contains forbidden tags (script, foreignObject, image) or event handlers")
+}).strict();
+var ComposeChildSchema = external_exports.object({
+  /** Absolute position on the parent canvas (top-left origin, SVG y-down). */
+  at: external_exports.object({
+    x: external_exports.number().refine(Number.isFinite, "compose child x must be finite"),
+    y: external_exports.number().refine(Number.isFinite, "compose child y must be finite")
+  }),
+  /**
+   * Optional size for the child. Currently used by `chart` children
+   * to inset the embedded chart at this size (the chart's own
+   * viewBox is scaled to fit).
+   */
+  size: external_exports.object({
+    w: external_exports.number().positive(),
+    h: external_exports.number().positive()
+  }).optional(),
+  /** Optional id — emitted on the outer group `<g>` so other marks
+   *  (motion-along-path, attribute-animate via `set href`, etc.) can
+   *  reference this child. */
+  id: external_exports.string().min(1).max(60).optional(),
+  /** Which schematic mark this child renders, or `chart` for an embedded chart spec. */
+  mark: external_exports.enum([
+    "frame",
+    "gear",
+    "pendulum",
+    "annotation-leader",
+    "chart",
+    "circle",
+    "text",
+    "heart-icon",
+    "slider-crank",
+    "wankel-rotor",
+    // RFC #9 additions
+    "starfield",
+    "glow",
+    "silhouette-path",
+    "icon",
+    "ellipse",
+    "polygon",
+    "polyline",
+    "raw-svg"
+  ]),
+  /** Mark-specific config; exactly one of these must match `mark`. */
+  frame: FrameMarkSchema.optional(),
+  gear: GearMarkSchema.optional(),
+  pendulum: PendulumMarkSchema.optional(),
+  annotation: AnnotationMarkSchema.optional(),
+  circle: CircleMarkSchema.optional(),
+  textMark: TextMarkSchema.optional(),
+  heartIcon: HeartIconSchema.optional(),
+  sliderCrank: SliderCrankSchema.optional(),
+  wankelRotor: WankelRotorSchema.optional(),
+  // RFC #9 additions
+  starfield: StarfieldSchema.optional(),
+  glow: GlowSchema.optional(),
+  silhouettePath: SilhouettePathSchema.optional(),
+  icon: IconSchema.optional(),
+  ellipse: EllipseSchema.optional(),
+  polygon: PolygonSchema.optional(),
+  polyline: PolylineSchema.optional(),
+  rawSvg: RawSvgSchema.optional(),
+  /**
+   * `chart` mark: a nested Glyph chart spec (data + layers). The
+   * compose compiler recursively calls compileSpec on this spec
+   * and places the resulting Scene at `at.{x, y}` scaled to
+   * `size.{w, h}`. The recursion is one-level deep — a chart spec
+   * cannot itself contain a compose. Validated as `unknown` here
+   * so we don't pull in the full GlyphSpecSchema (avoiding a
+   * circular import); the compiler defers to parseSpec.
+   */
+  chart: external_exports.unknown().optional(),
+  /** RFC #6 — optional looping animation on this child. */
+  animation: LoopAnimationSchema
+}).strict().refine((c) => {
+  if (c.mark === "frame")
+    return c.frame !== void 0;
+  if (c.mark === "gear")
+    return c.gear !== void 0;
+  if (c.mark === "pendulum")
+    return c.pendulum !== void 0;
+  if (c.mark === "annotation-leader")
+    return c.annotation !== void 0;
+  if (c.mark === "chart")
+    return c.chart !== void 0 && c.size !== void 0;
+  if (c.mark === "circle")
+    return c.circle !== void 0;
+  if (c.mark === "text")
+    return c.textMark !== void 0;
+  if (c.mark === "heart-icon")
+    return c.heartIcon !== void 0;
+  if (c.mark === "slider-crank")
+    return c.sliderCrank !== void 0;
+  if (c.mark === "wankel-rotor")
+    return c.wankelRotor !== void 0;
+  if (c.mark === "starfield")
+    return c.starfield !== void 0;
+  if (c.mark === "glow")
+    return c.glow !== void 0;
+  if (c.mark === "silhouette-path")
+    return c.silhouettePath !== void 0;
+  if (c.mark === "icon")
+    return c.icon !== void 0;
+  if (c.mark === "ellipse")
+    return c.ellipse !== void 0;
+  if (c.mark === "polygon")
+    return c.polygon !== void 0;
+  if (c.mark === "polyline")
+    return c.polyline !== void 0;
+  if (c.mark === "raw-svg")
+    return c.rawSvg !== void 0;
+  return false;
+}, {
+  message: "compose child: the mark field must have a matching config block (chart needs both `chart` and `size`)"
+});
+var ComposeSpecSchema = external_exports.object({
+  version: external_exports.literal("glyph/0.1").optional(),
+  title: external_exports.string().max(120).optional(),
+  /** Long-form accessibility description emitted as `<desc>` inside
+   *  the root `<svg>`. Mirrors the chart-spec a11y contract. */
+  description: external_exports.string().max(800).optional(),
+  /** Canvas dimensions in SVG user units. */
+  viewBox: external_exports.object({
+    width: external_exports.number().int().positive().max(4e3),
+    height: external_exports.number().int().positive().max(4e3)
+  }),
+  /** Theme / brand. RFC #8 adds the pencil-parchment preset. */
+  theme: ComposeThemeSchema,
+  /** RFC #9 — `<defs>` block: gradients + patterns referenced by id. */
+  defs: ComposeDefsSchema,
+  /** RFC #11 — click-to-replay event triggering on the root <svg>. */
+  replayOnClick: external_exports.boolean().default(false).optional(),
+  /** Children — at least one. Cap at 64 to prevent DoS specs. */
+  children: external_exports.array(ComposeChildSchema).min(1).max(64)
+}).strict();
+function parseComposeSpec(raw) {
+  if (typeof raw !== "object" || raw === null) {
+    throw new Error("parseComposeSpec: raw must be an object");
+  }
+  const wrapped = raw;
+  if (!wrapped.compose) {
+    throw new Error("parseComposeSpec: missing top-level `compose` field");
+  }
+  return ComposeSpecSchema.parse(wrapped.compose);
+}
+
 // packages/core/dist/compiler/scales.js
 function roundPx(n) {
   return Math.round(n * 1e8) / 1e8;
@@ -27784,6 +28137,723 @@ function morphScenes(from, to, options = {}) {
   };
 }
 
+// packages/core/dist/animation/loops.js
+function emitLoopAnimation(anim) {
+  if (!anim)
+    return "";
+  if (anim.kind === "swing")
+    return emitSwing(anim.amplitudeDeg, anim.periodMs);
+  if (anim.kind === "rotate-loop")
+    return emitRotateLoop(anim.periodMs, anim.direction);
+  if (anim.kind === "pulse")
+    return emitPulse(anim.periodMs, anim.scale);
+  return "";
+}
+function emitSwing(amplitudeDeg, periodMs) {
+  const a = amplitudeDeg.toFixed(3);
+  const dur = (periodMs / 1e3).toFixed(3);
+  return `<animateTransform attributeName="transform" type="rotate" values="-${a};${a};-${a}" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.42 0 0.58 1;0.42 0 0.58 1" dur="${dur}s" repeatCount="indefinite" additive="sum"/>`;
+}
+function emitRotateLoop(periodMs, direction) {
+  const dur = (periodMs / 1e3).toFixed(3);
+  const end = direction === "cw" ? "360" : "-360";
+  return `<animateTransform attributeName="transform" type="rotate" values="0;${end}" dur="${dur}s" repeatCount="indefinite" additive="sum"/>`;
+}
+function emitPulse(periodMs, scale) {
+  const dur = (periodMs / 1e3).toFixed(3);
+  const s = scale.toFixed(3);
+  return `<animateTransform attributeName="transform" type="scale" values="1;${s};1" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.42 0 0.58 1;0.42 0 0.58 1" dur="${dur}s" repeatCount="indefinite" additive="sum"/>`;
+}
+
+// packages/core/dist/icons/library.js
+var HEART = {
+  d: "M 0 0.32 C -0.42 0.06, -0.65 -0.18, -0.42 -0.4 C -0.2 -0.58, 0 -0.42, 0 -0.24 C 0 -0.42, 0.2 -0.58, 0.42 -0.4 C 0.65 -0.18, 0.42 0.06, 0 0.32 Z",
+  viewBox: [-0.5, -0.5, 1, 1]
+};
+var SPACECRAFT = {
+  d: "M 0.4 0 L -0.2 -0.22 L -0.36 -0.16 L -0.4 0 L -0.36 0.16 L -0.2 0.22 Z M -0.2 -0.22 L -0.2 0.22",
+  viewBox: [-0.5, -0.5, 1, 1]
+};
+var LEOPARD = {
+  d: "M -0.42 0.08 C -0.42 -0.02, -0.36 -0.12, -0.28 -0.12 C -0.22 -0.14, -0.16 -0.12, -0.14 -0.08 C -0.1 -0.14, -0.04 -0.16, 0.02 -0.14 L 0.06 -0.1 C 0.14 -0.14, 0.24 -0.14, 0.3 -0.1 C 0.34 -0.06, 0.36 0, 0.34 0.04 C 0.4 0.06, 0.42 0.1, 0.38 0.16 C 0.34 0.2, 0.28 0.22, 0.24 0.2 C 0.16 0.24, 0.04 0.22, -0.08 0.18 C -0.18 0.16, -0.28 0.14, -0.36 0.1 C -0.4 0.08, -0.42 0.08, -0.42 0.08 Z",
+  viewBox: [-0.5, -0.5, 1, 1]
+};
+var SUNFLOWER = {
+  d: "M 0 -0.46 L 0.12 -0.24 L 0.36 -0.32 L 0.26 -0.08 L 0.46 0.06 L 0.24 0.12 L 0.32 0.36 L 0.08 0.24 L 0 0.46 L -0.08 0.24 L -0.32 0.36 L -0.24 0.12 L -0.46 0.06 L -0.26 -0.08 L -0.36 -0.32 L -0.12 -0.24 Z M 0 -0.18 C 0.1 -0.18, 0.18 -0.1, 0.18 0 C 0.18 0.1, 0.1 0.18, 0 0.18 C -0.1 0.18, -0.18 0.1, -0.18 0 C -0.18 -0.1, -0.1 -0.18, 0 -0.18 Z",
+  viewBox: [-0.5, -0.5, 1, 1]
+};
+var FLAME = {
+  d: "M 0 -0.46 C 0.1 -0.3, 0.24 -0.2, 0.22 -0.04 C 0.2 0.14, 0.12 0.28, 0 0.34 C -0.12 0.28, -0.2 0.14, -0.22 -0.04 C -0.24 -0.2, -0.1 -0.3, 0 -0.46 Z",
+  viewBox: [-0.5, -0.5, 1, 1]
+};
+var LIGHTNING = {
+  d: "M -0.06 -0.46 L -0.3 0.04 L -0.08 0.04 L -0.18 0.46 L 0.3 -0.08 L 0.06 -0.08 L 0.22 -0.46 Z",
+  viewBox: [-0.5, -0.5, 1, 1]
+};
+var LEAF = {
+  d: "M -0.4 0.16 C -0.4 -0.16, -0.16 -0.4, 0.16 -0.4 C 0.4 -0.4, 0.4 -0.16, 0.16 0.16 C -0.16 0.4, -0.4 0.4, -0.4 0.16 Z",
+  viewBox: [-0.5, -0.5, 1, 1]
+};
+var STAR = {
+  d: "M 0 -0.46 L 0.108 -0.142 L 0.438 -0.142 L 0.171 0.054 L 0.272 0.372 L 0 0.176 L -0.272 0.372 L -0.171 0.054 L -0.438 -0.142 L -0.108 -0.142 Z",
+  viewBox: [-0.5, -0.5, 1, 1]
+};
+var RAINDROP = {
+  d: "M 0 -0.46 C 0.18 -0.18, 0.24 0, 0.24 0.16 C 0.24 0.32, 0.12 0.42, 0 0.42 C -0.12 0.42, -0.24 0.32, -0.24 0.16 C -0.24 0, -0.18 -0.18, 0 -0.46 Z",
+  viewBox: [-0.5, -0.5, 1, 1]
+};
+var SNOWFLAKE = {
+  d: "M 0 -0.46 L 0 0.46 M -0.4 -0.23 L 0.4 0.23 M -0.4 0.23 L 0.4 -0.23 M -0.06 -0.4 L 0 -0.46 L 0.06 -0.4 M -0.06 0.4 L 0 0.46 L 0.06 0.4 M -0.36 -0.27 L -0.4 -0.23 L -0.34 -0.17 M 0.36 -0.17 L 0.4 -0.23 L 0.34 -0.27 M -0.36 0.17 L -0.4 0.23 L -0.34 0.27 M 0.36 0.27 L 0.4 0.23 L 0.34 0.17",
+  viewBox: [-0.5, -0.5, 1, 1]
+};
+var ICON_LIBRARY = Object.freeze({
+  heart: HEART,
+  spacecraft: SPACECRAFT,
+  leopard: LEOPARD,
+  sunflower: SUNFLOWER,
+  flame: FLAME,
+  lightning: LIGHTNING,
+  leaf: LEAF,
+  star: STAR,
+  raindrop: RAINDROP,
+  snowflake: SNOWFLAKE
+});
+
+// packages/core/dist/compiler/compose.js
+function compileCompose(spec) {
+  const marks = [];
+  const bg = resolveBackground(spec);
+  if (bg) {
+    marks.push({
+      type: "rect",
+      x: 0,
+      y: 0,
+      width: spec.viewBox.width,
+      height: spec.viewBox.height,
+      fill: bg
+    });
+  }
+  if (spec.defs?.gradients) {
+    for (const g of spec.defs.gradients) {
+      const attrs = g.kind === "linear" ? { x1: g.x1, y1: g.y1, x2: g.x2, y2: g.y2 } : { cx: g.cx, cy: g.cy, r: g.r };
+      marks.push({
+        type: "gradient-def",
+        id: g.id,
+        kind: g.kind,
+        attrs,
+        // exactOptionalPropertyTypes wants the opacity property
+        // ABSENT (not =undefined) on stops without explicit opacity.
+        // Filter undefineds out so the SceneMark variant matches.
+        stops: g.stops.map((s) => s.opacity !== void 0 ? { offset: s.offset, color: s.color, opacity: s.opacity } : { offset: s.offset, color: s.color })
+      });
+    }
+  }
+  if (spec.defs?.patterns) {
+    for (const p of spec.defs.patterns) {
+      const children = p.children.map((c) => {
+        if (c.kind === "line")
+          return {
+            type: "line",
+            x1: c.x1,
+            y1: c.y1,
+            x2: c.x2,
+            y2: c.y2,
+            stroke: c.stroke,
+            strokeWidth: c.strokeWidth
+          };
+        if (c.kind === "rect")
+          return {
+            type: "rect",
+            x: c.x,
+            y: c.y,
+            width: c.width,
+            height: c.height,
+            fill: c.fill
+          };
+        return {
+          type: "circle",
+          cx: c.cx,
+          cy: c.cy,
+          r: c.r,
+          fill: c.fill
+        };
+      });
+      const patternMark = p.patternTransform ? {
+        type: "pattern-def",
+        id: p.id,
+        width: p.width,
+        height: p.height,
+        patternTransform: p.patternTransform,
+        children
+      } : { type: "pattern-def", id: p.id, width: p.width, height: p.height, children };
+      marks.push(patternMark);
+    }
+  }
+  if (spec.theme?.gridPattern === "graph-paper") {
+    pushGraphPaperGrid(marks, spec.viewBox.width, spec.viewBox.height);
+  }
+  for (const child of spec.children) {
+    const groupChildren = compileChild(child);
+    if (groupChildren.length === 0)
+      continue;
+    const animXml = emitLoopAnimation(child.animation);
+    const base = {
+      type: "group",
+      translateX: child.at.x,
+      translateY: child.at.y,
+      children: groupChildren
+    };
+    const withId = child.id ? { ...base, id: child.id } : base;
+    const group = animXml ? { ...withId, loopAnimationXml: animXml } : withId;
+    marks.push(group);
+  }
+  return {
+    width: spec.viewBox.width,
+    height: spec.viewBox.height,
+    marks,
+    // Scene requires a `background` even though we paint it ourselves
+    // via a `rect` mark above (so the grid sits between bg and
+    // children). Set transparent to avoid double-painting.
+    background: "transparent",
+    axes: [],
+    plotArea: { x: 0, y: 0, width: spec.viewBox.width, height: spec.viewBox.height }
+  };
+}
+function compileChild(child) {
+  if (child.mark === "frame" && child.frame)
+    return compileFrame(child.frame);
+  if (child.mark === "gear" && child.gear)
+    return compileGear(child.gear);
+  if (child.mark === "pendulum" && child.pendulum)
+    return compilePendulum(child.pendulum);
+  if (child.mark === "annotation-leader" && child.annotation)
+    return compileAnnotationLeader(child.annotation, child.at.x, child.at.y);
+  if (child.mark === "chart" && child.chart && child.size)
+    return compileChart(child.chart, child.size);
+  if (child.mark === "circle" && child.circle)
+    return compileCircle(child.circle);
+  if (child.mark === "text" && child.textMark)
+    return compileText(child.textMark);
+  if (child.mark === "heart-icon" && child.heartIcon)
+    return compileHeartIcon(child.heartIcon);
+  if (child.mark === "slider-crank" && child.sliderCrank)
+    return compileSliderCrank(child.sliderCrank);
+  if (child.mark === "wankel-rotor" && child.wankelRotor)
+    return compileWankelRotor(child.wankelRotor);
+  if (child.mark === "starfield" && child.starfield)
+    return compileStarfield(child.starfield);
+  if (child.mark === "glow" && child.glow)
+    return compileGlow(child.glow);
+  if (child.mark === "silhouette-path" && child.silhouettePath)
+    return compileSilhouettePath(child.silhouettePath);
+  if (child.mark === "icon" && child.icon)
+    return compileIcon(child.icon);
+  if (child.mark === "ellipse" && child.ellipse)
+    return compileEllipse(child.ellipse);
+  if (child.mark === "polygon" && child.polygon)
+    return compilePolygon(child.polygon);
+  if (child.mark === "polyline" && child.polyline)
+    return compilePolyline(child.polyline);
+  if (child.mark === "raw-svg" && child.rawSvg)
+    return compileRawSvg(child.rawSvg);
+  return [];
+}
+function compileChart(rawChart, size) {
+  const spec = parseSpec(rawChart);
+  const rows = [];
+  const schema = [];
+  const scene = compileSpec({ spec, rows, schema });
+  const sx = size.w / scene.width;
+  const sy = size.h / scene.height;
+  return [
+    {
+      type: "group",
+      translateX: 0,
+      translateY: 0,
+      scaleX: sx,
+      scaleY: sy,
+      children: [...scene.marks]
+    }
+  ];
+}
+function compileFrame(cfg) {
+  const marks = [];
+  const frameRect = cfg.cornerRadius !== void 0 ? {
+    type: "rect",
+    x: 0,
+    y: 0,
+    width: cfg.width,
+    height: cfg.height,
+    fill: "none",
+    stroke: "#1f1a14",
+    strokeWidth: 1.5,
+    rx: cfg.cornerRadius
+  } : {
+    type: "rect",
+    x: 0,
+    y: 0,
+    width: cfg.width,
+    height: cfg.height,
+    fill: "none",
+    stroke: "#1f1a14",
+    strokeWidth: 1.5
+  };
+  marks.push(frameRect);
+  if (cfg.title) {
+    marks.push({
+      type: "rect",
+      x: 15,
+      y: 15,
+      width: cfg.width - 30,
+      height: 20,
+      fill: "rgba(31,26,20,.05)",
+      stroke: "#1f1a14",
+      strokeWidth: 0.5
+    });
+    marks.push({
+      type: "text",
+      x: cfg.width / 2,
+      y: 29,
+      text: cfg.title,
+      fontSize: 11,
+      fill: "#4a3f30",
+      anchor: "middle",
+      baseline: "alphabetic"
+    });
+  }
+  return marks;
+}
+function compileGear(cfg) {
+  const marks = [];
+  marks.push({
+    type: "circle",
+    cx: 0,
+    cy: 0,
+    r: cfg.radius,
+    fill: "#fdf8ea",
+    stroke: "#1f1a14",
+    strokeWidth: 1.5
+  });
+  marks.push({
+    type: "circle",
+    cx: 0,
+    cy: 0,
+    r: cfg.radius - 8,
+    fill: "none",
+    stroke: "#4a3f30",
+    strokeWidth: 0.6
+  });
+  const inner2 = cfg.radius;
+  const outer = cfg.radius + cfg.toothLength;
+  for (let i = 0; i < cfg.teeth; i++) {
+    const angle = i / cfg.teeth * 2 * Math.PI - Math.PI / 2;
+    const x1 = Number((Math.cos(angle) * inner2).toFixed(3));
+    const y1 = Number((Math.sin(angle) * inner2).toFixed(3));
+    const x2 = Number((Math.cos(angle) * outer).toFixed(3));
+    const y2 = Number((Math.sin(angle) * outer).toFixed(3));
+    marks.push({
+      type: "line",
+      x1,
+      y1,
+      x2,
+      y2,
+      stroke: "#1f1a14",
+      strokeWidth: 1.2
+    });
+  }
+  marks.push({
+    type: "circle",
+    cx: 0,
+    cy: 0,
+    r: cfg.hubRadius,
+    fill: "#1f1a14"
+  });
+  return marks;
+}
+function compilePendulum(cfg) {
+  const marks = [];
+  marks.push({
+    type: "line",
+    x1: 0,
+    y1: 0,
+    x2: 0,
+    y2: cfg.length - cfg.bobRadius,
+    stroke: "#1f1a14",
+    strokeWidth: 1.5
+  });
+  marks.push({
+    type: "circle",
+    cx: 0,
+    cy: cfg.length,
+    r: cfg.bobRadius,
+    fill: "#fdf8ea",
+    stroke: "#1f1a14",
+    strokeWidth: 2
+  });
+  if (cfg.markerKind === "cross") {
+    const half = cfg.bobRadius * 0.55;
+    marks.push({
+      type: "line",
+      x1: -half,
+      y1: cfg.length,
+      x2: half,
+      y2: cfg.length,
+      stroke: "#1f1a14",
+      strokeWidth: 1.5
+    });
+    marks.push({
+      type: "line",
+      x1: 0,
+      y1: cfg.length - half,
+      x2: 0,
+      y2: cfg.length + half,
+      stroke: "#1f1a14",
+      strokeWidth: 1.5
+    });
+  } else if (cfg.markerKind === "dot") {
+    marks.push({
+      type: "circle",
+      cx: 0,
+      cy: cfg.length,
+      r: 3,
+      fill: "#1f1a14"
+    });
+  }
+  return marks;
+}
+function compileAnnotationLeader(cfg, originX, originY) {
+  const marks = [];
+  const fromX = cfg.from[0] - originX;
+  const fromY = cfg.from[1] - originY;
+  const toX = cfg.to[0] - originX;
+  const toY = cfg.to[1] - originY;
+  marks.push({
+    type: "line",
+    x1: fromX,
+    y1: fromY,
+    x2: toX,
+    y2: toY,
+    stroke: "#4a3f30",
+    strokeWidth: 0.5
+  });
+  marks.push({
+    type: "text",
+    x: toX + (cfg.anchor === "start" ? 4 : cfg.anchor === "end" ? -4 : 0),
+    y: toY - 2,
+    text: cfg.text,
+    fontSize: 11,
+    fill: "#4a3f30",
+    anchor: cfg.anchor,
+    baseline: "alphabetic"
+  });
+  return marks;
+}
+function resolveBackground(spec) {
+  const t = spec.theme;
+  if (!t)
+    return void 0;
+  if (t.background)
+    return t.background;
+  if (t.preset === "pencil-parchment")
+    return "#f5edd9";
+  return void 0;
+}
+function pushGraphPaperGrid(marks, width, height) {
+  const step = 32;
+  const stroke = "rgba(80,110,160,.08)";
+  for (let x = step; x < width; x += step) {
+    marks.push({
+      type: "line",
+      x1: x,
+      y1: 0,
+      x2: x,
+      y2: height,
+      stroke,
+      strokeWidth: 1
+    });
+  }
+  for (let y = step; y < height; y += step) {
+    marks.push({
+      type: "line",
+      x1: 0,
+      y1: y,
+      x2: width,
+      y2: y,
+      stroke,
+      strokeWidth: 1
+    });
+  }
+}
+function compileCircle(cfg) {
+  if (cfg.stroke !== void 0) {
+    const sw = cfg.strokeWidth ?? 1;
+    return [
+      {
+        type: "circle",
+        cx: 0,
+        cy: 0,
+        r: cfg.radius,
+        fill: cfg.fill,
+        stroke: cfg.stroke,
+        strokeWidth: sw
+      }
+    ];
+  }
+  return [{ type: "circle", cx: 0, cy: 0, r: cfg.radius, fill: cfg.fill }];
+}
+function compileText(cfg) {
+  return [
+    {
+      type: "text",
+      x: 0,
+      y: 0,
+      text: cfg.text,
+      fontSize: cfg.fontSize,
+      fill: cfg.fill,
+      anchor: cfg.anchor,
+      baseline: "middle"
+    }
+  ];
+}
+function compileHeartIcon(cfg) {
+  const s = cfg.size;
+  const h = s * 0.9;
+  const d = `M 0 ${(h * 0.32).toFixed(3)}
+             C ${(-s * 0.42).toFixed(3)} ${(h * 0.06).toFixed(3)}, ${(-s * 0.65).toFixed(3)} ${(-h * 0.18).toFixed(3)}, ${(-s * 0.42).toFixed(3)} ${(-h * 0.4).toFixed(3)}
+             C ${(-s * 0.2).toFixed(3)} ${(-h * 0.58).toFixed(3)}, 0 ${(-h * 0.42).toFixed(3)}, 0 ${(-h * 0.24).toFixed(3)}
+             C 0 ${(-h * 0.42).toFixed(3)}, ${(s * 0.2).toFixed(3)} ${(-h * 0.58).toFixed(3)}, ${(s * 0.42).toFixed(3)} ${(-h * 0.4).toFixed(3)}
+             C ${(s * 0.65).toFixed(3)} ${(-h * 0.18).toFixed(3)}, ${(s * 0.42).toFixed(3)} ${(h * 0.06).toFixed(3)}, 0 ${(h * 0.32).toFixed(3)} Z`;
+  return [
+    {
+      type: "path",
+      d: d.replace(/\s+/g, " ").trim(),
+      fill: cfg.fill,
+      stroke: cfg.stroke,
+      strokeWidth: 0.8
+    }
+  ];
+}
+function compileSliderCrank(cfg) {
+  const marks = [];
+  const r = cfg.crankRadius;
+  const l = cfg.rodLength;
+  const theta = Math.PI / 6;
+  const pinX = r * Math.cos(theta);
+  const pinY = -r * Math.sin(theta);
+  const pistonX = pinX + Math.sqrt(l * l - r * r * Math.sin(theta) * Math.sin(theta));
+  marks.push({
+    type: "circle",
+    cx: 0,
+    cy: 0,
+    r,
+    fill: "#fdf8ea",
+    stroke: "#1f1a14",
+    strokeWidth: 1.5
+  });
+  marks.push({ type: "line", x1: -r, y1: 0, x2: r, y2: 0, stroke: "#4a3f30", strokeWidth: 0.6 });
+  marks.push({ type: "line", x1: 0, y1: -r, x2: 0, y2: r, stroke: "#4a3f30", strokeWidth: 0.6 });
+  marks.push({ type: "circle", cx: 0, cy: 0, r: 4, fill: "#1f1a14" });
+  marks.push({
+    type: "circle",
+    cx: pinX,
+    cy: pinY,
+    r: 3,
+    fill: "#8b3a1c",
+    stroke: "#1f1a14",
+    strokeWidth: 0.8
+  });
+  marks.push({
+    type: "line",
+    x1: pinX,
+    y1: pinY,
+    x2: pistonX,
+    y2: 0,
+    stroke: "#1f1a14",
+    strokeWidth: 2.5
+  });
+  const cylLeft = pistonX - r - 10;
+  const cylRight = pistonX + l * 0.5;
+  marks.push({
+    type: "rect",
+    x: cylLeft,
+    y: -r - 4,
+    width: cylRight - cylLeft,
+    height: 2 * r + 8,
+    fill: "none",
+    stroke: "#1f1a14",
+    strokeWidth: 1.5
+  });
+  marks.push({
+    type: "rect",
+    x: pistonX - 15,
+    y: -r,
+    width: 30,
+    height: 2 * r,
+    fill: "#fdf8ea",
+    stroke: "#1f1a14",
+    strokeWidth: 1.5
+  });
+  return marks;
+}
+function compileWankelRotor(cfg) {
+  const R = cfg.apexRadius;
+  const ax0 = R;
+  const ay0 = 0;
+  const ax1 = -R * 0.5;
+  const ay1 = R * Math.sin(Math.PI * 2 / 3);
+  const ax2 = -R * 0.5;
+  const ay2 = -R * Math.sin(Math.PI * 2 / 3);
+  const d = `M ${ax0.toFixed(3)} ${ay0.toFixed(3)} L ${ax1.toFixed(3)} ${ay1.toFixed(3)} L ${ax2.toFixed(3)} ${ay2.toFixed(3)} Z`;
+  return [
+    {
+      type: "path",
+      d,
+      fill: "rgba(31,26,20,.06)",
+      stroke: "#1f1a14",
+      strokeWidth: 2
+    },
+    {
+      type: "circle",
+      cx: ax0,
+      cy: ay0,
+      r: 4,
+      fill: "#8b3a1c",
+      stroke: "#1f1a14",
+      strokeWidth: 0.8
+    },
+    {
+      type: "circle",
+      cx: ax1,
+      cy: ay1,
+      r: 4,
+      fill: "#8b3a1c",
+      stroke: "#1f1a14",
+      strokeWidth: 0.8
+    },
+    {
+      type: "circle",
+      cx: ax2,
+      cy: ay2,
+      r: 4,
+      fill: "#8b3a1c",
+      stroke: "#1f1a14",
+      strokeWidth: 0.8
+    },
+    // Rotor bearing center
+    { type: "circle", cx: 0, cy: 0, r: 4, fill: "#4a3f30" }
+  ];
+}
+function makeRng(seed) {
+  let state = seed >>> 0;
+  if (state === 0)
+    state = 1;
+  return () => {
+    state = state * 48271 % 2147483647;
+    return state / 2147483647;
+  };
+}
+function compileStarfield(cfg) {
+  const rng = makeRng(cfg.seed);
+  const out = [];
+  for (let i = 0; i < cfg.count; i++) {
+    const x = cfg.region.x + rng() * cfg.region.w;
+    const y = cfg.region.y + rng() * cfg.region.h;
+    const r = cfg.radiusMin + rng() * (cfg.radiusMax - cfg.radiusMin);
+    const fill = i % 2 === 0 ? cfg.colorA : cfg.colorB;
+    out.push({
+      type: "circle",
+      cx: Number(x.toFixed(3)),
+      cy: Number(y.toFixed(3)),
+      r: Number(r.toFixed(3)),
+      fill
+    });
+  }
+  return out;
+}
+function compileGlow(cfg) {
+  return [
+    {
+      type: "circle",
+      cx: 0,
+      cy: 0,
+      r: cfg.radius,
+      fill: `url(#${cfg.gradientId})`
+    }
+  ];
+}
+function compileSilhouettePath(cfg) {
+  const base = {
+    type: "path",
+    d: cfg.d,
+    fill: cfg.fill
+  };
+  const opacityBit = cfg.opacity !== void 0 ? { opacity: cfg.opacity } : {};
+  const strokeBits = cfg.stroke !== void 0 ? {
+    stroke: cfg.stroke,
+    ...cfg.strokeWidth !== void 0 ? { strokeWidth: cfg.strokeWidth } : {},
+    ...cfg.strokeDasharray !== void 0 ? { strokeDasharray: cfg.strokeDasharray } : {}
+  } : {};
+  return [{ ...base, ...strokeBits, ...opacityBit }];
+}
+function compileIcon(cfg) {
+  const entry = ICON_LIBRARY[cfg.id];
+  if (!entry)
+    return [];
+  const scaled = entry.d.replace(/-?\d*\.?\d+(?:[eE][+-]?\d+)?/g, (n) => {
+    const v = Number.parseFloat(n) * cfg.size;
+    return Number(v.toFixed(3)).toString();
+  });
+  const out = {
+    type: "path",
+    d: scaled,
+    fill: cfg.fill,
+    ...cfg.stroke !== void 0 ? { stroke: cfg.stroke } : {},
+    ...cfg.strokeWidth !== void 0 ? { strokeWidth: cfg.strokeWidth } : {}
+  };
+  return [out];
+}
+function compileEllipse(cfg) {
+  const ellipse = {
+    type: "ellipse",
+    cx: 0,
+    cy: 0,
+    rx: cfg.rx,
+    ry: cfg.ry,
+    fill: cfg.fill,
+    ...cfg.stroke !== void 0 ? { stroke: cfg.stroke } : {},
+    ...cfg.strokeWidth !== void 0 ? { strokeWidth: cfg.strokeWidth } : {},
+    ...cfg.opacity !== void 0 ? { opacity: cfg.opacity } : {},
+    ...cfg.rotateDeg !== 0 ? { rotateDeg: cfg.rotateDeg } : {}
+  };
+  return [ellipse];
+}
+function compilePolygon(cfg) {
+  return [
+    {
+      type: "polygon",
+      points: cfg.points,
+      fill: cfg.fill,
+      ...cfg.stroke !== void 0 ? { stroke: cfg.stroke } : {},
+      ...cfg.strokeWidth !== void 0 ? { strokeWidth: cfg.strokeWidth } : {}
+    }
+  ];
+}
+function compilePolyline(cfg) {
+  return [
+    {
+      type: "polyline",
+      points: cfg.points,
+      fill: cfg.fill,
+      stroke: cfg.stroke,
+      strokeWidth: cfg.strokeWidth,
+      ...cfg.strokeDasharray !== void 0 ? { strokeDasharray: cfg.strokeDasharray } : {}
+    }
+  ];
+}
+function compileRawSvg(cfg) {
+  return [{ type: "raw-svg", xml: cfg.xml }];
+}
+
 // packages/core/dist/render/path-length.js
 var COMMAND_RE = /([MLZmlz])/g;
 function parseSegments(d) {
@@ -31546,6 +32616,7 @@ export {
   BrandTypographySchema,
   ChannelObjectSchema,
   ChannelSchema,
+  ComposeSpecSchema,
   CoordinatesSchema,
   DEFAULT_SPEC_VERSION,
   DataFormatSchema,
@@ -31597,6 +32668,7 @@ export {
   canonicalStringify,
   collectGroupByFields,
   collectMetricNames,
+  compileCompose,
   compileSpec,
   composeStory,
   computeProvenance,
@@ -31627,6 +32699,7 @@ export {
   morphScenes,
   nearestPoint,
   niceTicks,
+  parseComposeSpec,
   parseSpec,
   partitionLayout,
   polarToCartesian,

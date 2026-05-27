@@ -1,0 +1,17 @@
+{
+  "version": "glyph/0.1",
+  "title": "Top-selling products — last 30 days",
+  "layers": [
+    {
+      "mark": "bar",
+      "encoding": {
+        "x": { "field": "product", "type": "ordinal" },
+        "y": {
+          "field": "units",
+          "type": "quantitative",
+          "scale": { "domain": [0, 4000] }
+        }
+      }
+    }
+  ]
+}

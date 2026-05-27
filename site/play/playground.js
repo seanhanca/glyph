@@ -4,7 +4,7 @@
 // SVG chart. Later PRs add audit panel + share.
 import { describeTable, getDuckDb, loadCsv, queryRows } from "./duckdb.js";
 import * as glyph from "./glyph-bundle.js";
-import { compileAndRender, runAudit } from "./glyph-runtime.js";
+import { compileAndRender, isSelfContainedSpec, runAudit } from "./glyph-runtime.js";
 import { mountSpecEditor } from "./monaco-bootstrap.js";
 import {
   GistRateLimitError,
@@ -32,31 +32,74 @@ let currentSpec = DEFAULT_SPEC;
 // should fail fast with a readable message instead.
 const CSV_SIZE_CAP_BYTES = 10 * 1024 * 1024;
 
-function mountCsvUpload(host, onLoaded) {
+function mountCsvUpload(host, onLoaded, onSpec) {
   host.innerHTML = `
     <input type="file" id="csv-file" accept=".csv,text/csv" />
     <p class="hint">or paste:</p>
     <textarea id="csv-paste" placeholder="hour,rides&#10;0,42&#10;1,38&#10;..." rows="8"></textarea>
     <p id="csv-status" class="hint">Initializing DuckDB…</p>
+    <p class="hint" style="margin-top:12px"><strong>Built-in examples</strong> — pick a category, then an example:</p>
     <select id="csv-example" disabled>
-      <option value="">— or load example —</option>
-      <option value="examples/rides.csv">rides.csv (12 rows)</option>
+      <option value="">— pick an example —</option>
     </select>
+    <p id="csv-example-desc" class="hint" style="min-height:1.2em;margin-top:6px;font-style:italic"></p>
   `;
   const status = host.querySelector("#csv-status");
   const selectExample = host.querySelector("#csv-example");
+  const exampleDesc = host.querySelector("#csv-example-desc");
+
+  /** @type {Array<{id:string,category:string,name:string,description:string,csv:string|null,spec:string|null}>} */
+  let manifest = [];
 
   // Eagerly warm DuckDB so the user finds out about wasm/SAB/COEP problems
-  // immediately on page load, not on first paste.
-  getDuckDb().then(
-    () => {
+  // immediately on page load, not on first paste. Also fetch the example
+  // manifest in parallel — neither blocks the other.
+  Promise.all([
+    getDuckDb().then(
+      () => "duckdb-ok",
+      (e) => `DuckDB init failed: ${e.message ?? e}`,
+    ),
+    fetch("examples/index.json", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : []))
+      .catch(() => []),
+  ]).then(([duckResult, examples]) => {
+    if (duckResult !== "duckdb-ok") {
+      status.textContent = duckResult;
+      // Still allow examples — many don't need DuckDB.
+    } else {
       status.textContent = "Ready — paste, upload, or pick an example.";
-      selectExample.disabled = false;
-    },
-    (e) => {
-      status.textContent = `DuckDB init failed: ${e.message ?? e}`;
-    },
-  );
+    }
+    manifest = Array.isArray(examples) ? examples : [];
+    populateDropdown();
+    selectExample.disabled = false;
+  });
+
+  // Build a grouped <optgroup> structure from the manifest. Categories
+  // are inserted in the order they first appear, so the manifest
+  // controls the visual ordering.
+  function populateDropdown() {
+    const categories = [];
+    const seen = new Set();
+    for (const item of manifest) {
+      if (!seen.has(item.category)) {
+        seen.add(item.category);
+        categories.push(item.category);
+      }
+    }
+    // Wipe the existing children and re-add the placeholder + groups.
+    selectExample.innerHTML = '<option value="">— pick an example —</option>';
+    for (const cat of categories) {
+      const group = document.createElement("optgroup");
+      group.label = cat;
+      for (const item of manifest.filter((m) => m.category === cat)) {
+        const opt = document.createElement("option");
+        opt.value = item.id;
+        opt.textContent = item.name;
+        group.appendChild(opt);
+      }
+      selectExample.appendChild(group);
+    }
+  }
 
   // In-flight token. Each load increments; stale callbacks are dropped.
   // Prevents a paste-then-pick-example race from emitting onLoaded out of
@@ -93,11 +136,45 @@ function mountCsvUpload(host, onLoaded) {
     if (e.target.value) handle(e.target.value);
   });
   selectExample.addEventListener("change", async (e) => {
-    if (!e.target.value) return;
-    const res = await fetch(e.target.value);
-    const csv = await res.text();
-    host.querySelector("#csv-paste").value = csv;
-    handle(csv);
+    const id = e.target.value;
+    if (!id) {
+      exampleDesc.textContent = "";
+      return;
+    }
+    const item = manifest.find((m) => m.id === id);
+    if (!item) return;
+    exampleDesc.textContent = item.description || "";
+
+    try {
+      // Spec first (if any). Always set the editor to the example spec so the
+      // user sees the JSON that produces the chart. The onSpec callback
+      // pushes the new text into the Monaco model + triggers rerender.
+      if (item.spec) {
+        const r = await fetch(item.spec, { cache: "no-store" });
+        if (r.ok) {
+          const specText = await r.text();
+          onSpec?.(specText);
+        }
+      }
+      // CSV (if any). Some examples are self-contained (compose / function /
+      // PDE) and don't need a dataset — skip the CSV load in that case.
+      if (item.csv) {
+        const r = await fetch(item.csv, { cache: "no-store" });
+        if (r.ok) {
+          const csv = await r.text();
+          host.querySelector("#csv-paste").value = csv;
+          handle(csv);
+        }
+      } else {
+        // Self-contained spec: clear the textarea + reset the status line.
+        host.querySelector("#csv-paste").value = "";
+        status.textContent = `Example loaded · ${item.name} (self-contained — no CSV needed)`;
+        // Force a rerender even though dataset hasn't changed, because the
+        // spec may have. Done by `onSpec` upstream.
+      }
+    } catch (err) {
+      status.textContent = `Example load failed: ${err.message ?? err}`;
+    }
   });
 }
 
@@ -132,6 +209,26 @@ function rerender() {
   // Audit is dataset-independent — runs on the spec alone. Row count is
   // passed when available so AUDIT-04 (excessive aggregation) can fire.
   renderAuditPanel(spec, dataset?.rows?.length);
+
+  // Self-contained specs (compose scenes, function/trajectory/PDE data
+  // shapes) bring their own data — render them with empty rows/schema
+  // and skip the dataset binding entirely. Glyph-in-Life + Joy of Math
+  // + Whyboard examples all hit this branch.
+  if (isSelfContainedSpec(spec)) {
+    try {
+      const svg = compileAndRender(spec, [], []);
+      chartHost.innerHTML = svg;
+    } catch (e) {
+      const raw = String(e?.message ?? e);
+      const msg =
+        raw.length > 1000
+          ? `${raw.slice(0, 1000)}\n\n… (truncated, see DevTools console for full message)`
+          : raw;
+      if (raw.length > 1000) console.error("Glyph compile error (full):", e);
+      chartHost.innerHTML = `<pre class="error">Compile error: ${escapeHtml(msg)}</pre>`;
+    }
+    return;
+  }
 
   // Defensive guard: a malformed dataset (e.g. an upstream PR's onLoaded
   // callback firing before rows/columns are set) would otherwise throw
@@ -243,11 +340,29 @@ function escapeHtml(s) {
     .replace(/'/g, "&#39;");
 }
 
-mountCsvUpload(csvHost, (loaded) => {
-  dataset = loaded;
-  console.log("data loaded:", dataset);
-  rerender();
-});
+mountCsvUpload(
+  csvHost,
+  (loaded) => {
+    dataset = loaded;
+    console.log("data loaded:", dataset);
+    rerender();
+  },
+  // onSpec — fires when the user picks an example that ships a spec. Push the
+  // text into the Monaco editor (if it has booted) and into our local
+  // `currentSpec` mirror so rerender() picks it up. For self-contained
+  // examples (compose / function / PDE) the spec drives the render
+  // entirely — no CSV needed.
+  (specText) => {
+    currentSpec = specText;
+    if (specEditor && typeof specEditor.setValue === "function") {
+      specEditor.setValue(specText);
+    }
+    // Clear the previous dataset so self-contained specs don't try to
+    // bind to stale columns. rerender() handles either case.
+    dataset = null;
+    rerender();
+  },
+);
 
 // Mount the Monaco spec editor. The onChange handler updates the
 // in-memory copy of the spec and triggers a re-render against the

@@ -1,0 +1,17 @@
+{
+  "version": "glyph/0.1",
+  "title": "Conversion funnel — Q3 acquisition cohort",
+  "layers": [
+    {
+      "mark": "bar",
+      "encoding": {
+        "x": { "field": "stage", "type": "ordinal" },
+        "y": {
+          "field": "users",
+          "type": "quantitative",
+          "scale": { "domain": [0, 100000] }
+        }
+      }
+    }
+  ]
+}
