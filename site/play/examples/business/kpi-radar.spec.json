@@ -1,0 +1,40 @@
+{
+  "version": "glyph/0.1",
+  "title": "Product KPI scorecard — Q3",
+  "width": 520,
+  "height": 520,
+  "coordinates": {
+    "type": "polar"
+  },
+  "layers": [
+    {
+      "mark": "line",
+      "encoding": {
+        "x": {
+          "field": "metric",
+          "type": "ordinal"
+        },
+        "y": {
+          "field": "score",
+          "type": "quantitative",
+          "scale": {
+            "domain": [0, 100]
+          }
+        }
+      }
+    },
+    {
+      "mark": "point",
+      "encoding": {
+        "x": {
+          "field": "metric",
+          "type": "ordinal"
+        },
+        "y": {
+          "field": "score",
+          "type": "quantitative"
+        }
+      }
+    }
+  ]
+}

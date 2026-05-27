@@ -320,6 +320,160 @@ function writeSpec(name, spec) {
   });
 }
 
+// ===========================================================================
+// 7. Donut chart (polar bar) — revenue mix by department
+// ===========================================================================
+// Three segments. Bar + polar with innerRadius:0.5 = donut, the canonical
+// "share of pie" board-meeting chart.
+{
+  const data = [
+    { department: "Engineering", share: 45 },
+    { department: "Sales", share: 30 },
+    { department: "Marketing", share: 25 },
+  ];
+  const rows = [["department", "share"]];
+  for (const d of data) rows.push([d.department, d.share]);
+  writeCsv("revenue-donut.csv", rows);
+  writeSpec("revenue-donut.spec.json", {
+    version: "glyph/0.1",
+    title: "Revenue share by department",
+    width: 560,
+    height: 420,
+    coordinates: { type: "polar", innerRadius: 0.5 },
+    layers: [
+      {
+        mark: "bar",
+        encoding: {
+          x: { field: "department", type: "ordinal" },
+          y: { field: "share", type: "quantitative" },
+          color: { field: "department", type: "nominal" },
+        },
+      },
+    ],
+  });
+}
+
+// ===========================================================================
+// 8. Radar chart (polar line) — product KPI scorecard
+// ===========================================================================
+// Six KPI axes scored 0-100. Line mark + polar coords = a closed radar
+// polygon — the canonical PM scorecard.
+{
+  const data = [
+    { metric: "Performance", score: 86 },
+    { metric: "Reliability", score: 92 },
+    { metric: "Security", score: 78 },
+    { metric: "Cost", score: 64 },
+    { metric: "UX", score: 88 },
+    { metric: "Velocity", score: 74 },
+  ];
+  const rows = [["metric", "score"]];
+  for (const d of data) rows.push([d.metric, d.score]);
+  writeCsv("kpi-radar.csv", rows);
+  writeSpec("kpi-radar.spec.json", {
+    version: "glyph/0.1",
+    title: "Product KPI scorecard — Q3",
+    width: 520,
+    height: 520,
+    coordinates: { type: "polar" },
+    layers: [
+      {
+        mark: "line",
+        encoding: {
+          x: { field: "metric", type: "ordinal" },
+          y: {
+            field: "score",
+            type: "quantitative",
+            scale: { domain: [0, 100] },
+          },
+        },
+      },
+      {
+        mark: "point",
+        encoding: {
+          x: { field: "metric", type: "ordinal" },
+          y: { field: "score", type: "quantitative" },
+        },
+      },
+    ],
+  });
+}
+
+// ===========================================================================
+// 9. Force-directed org graph (self-contained, data.graph)
+// ===========================================================================
+// 9-person engineering org. CEO at the top, two managers, six ICs split
+// across two groups. The seed pins layout so screenshots are reproducible.
+{
+  const graph = {
+    nodes: [
+      { id: "CEO", group: "exec" },
+      { id: "VP Eng", group: "exec" },
+      { id: "Mgr Platform", group: "platform" },
+      { id: "Mgr Product", group: "product" },
+      { id: "Eng A", group: "platform" },
+      { id: "Eng B", group: "platform" },
+      { id: "Eng C", group: "platform" },
+      { id: "Eng D", group: "product" },
+      { id: "Eng E", group: "product" },
+      { id: "Eng F", group: "product" },
+    ],
+    edges: [
+      { source: "CEO", target: "VP Eng" },
+      { source: "VP Eng", target: "Mgr Platform" },
+      { source: "VP Eng", target: "Mgr Product" },
+      { source: "Mgr Platform", target: "Eng A" },
+      { source: "Mgr Platform", target: "Eng B" },
+      { source: "Mgr Platform", target: "Eng C" },
+      { source: "Mgr Product", target: "Eng D" },
+      { source: "Mgr Product", target: "Eng E" },
+      { source: "Mgr Product", target: "Eng F" },
+      { source: "Eng A", target: "Eng D" },
+      { source: "Eng B", target: "Eng E" },
+    ],
+  };
+  writeSpec("org-graph.spec.json", {
+    version: "glyph/0.1",
+    title: "Engineering org — reporting + cross-team links",
+    width: 640,
+    height: 480,
+    data: { graph },
+    seed: 42,
+    layers: [{ mark: "force", encoding: {} }],
+  });
+}
+
+// ===========================================================================
+// 10. Contour density (self-contained, data.grid)
+// ===========================================================================
+// 2D Gaussian bump centered at (0.6, 0.4) plus a smaller bump at (0.2, 0.8).
+// Marching-squares isolines at five thresholds — the topographic / density
+// pattern you'd use for "where do customers cluster on the map?".
+{
+  const COLS = 40;
+  const ROWS = 28;
+  const values = new Array(ROWS * COLS);
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const x = c / (COLS - 1);
+      const y = r / (ROWS - 1);
+      // Two Gaussian bumps.
+      const g1 = Math.exp(-(((x - 0.6) ** 2 + (y - 0.4) ** 2) / 0.04));
+      const g2 = 0.55 * Math.exp(-(((x - 0.2) ** 2 + (y - 0.8) ** 2) / 0.02));
+      values[r * COLS + c] = g1 + g2;
+    }
+  }
+  writeSpec("density-contour.spec.json", {
+    version: "glyph/0.1",
+    title: "Customer density — two clusters, isolines at 5 levels",
+    width: 640,
+    height: 440,
+    data: { grid: { rows: ROWS, cols: COLS, values } },
+    thresholds: [0.1, 0.25, 0.45, 0.65, 0.85],
+    layers: [{ mark: "contour", encoding: {} }],
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Smoke render — make sure every spec turns into SVG before we ship them.
 // ---------------------------------------------------------------------------
@@ -342,6 +496,10 @@ const want = [
   ["api-latency", true],
   ["sales-calendar", true],
   ["marketing-sunburst", false],
+  ["revenue-donut", true],
+  ["kpi-radar", true],
+  ["org-graph", false],
+  ["density-contour", false],
 ];
 
 console.log("\nSmoke render:");

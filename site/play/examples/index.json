@@ -103,6 +103,38 @@
     "csv": null,
     "spec": "examples/business/marketing-sunburst.spec.json"
   },
+  {
+    "id": "revenue-donut",
+    "category": "Business charts",
+    "name": "Revenue donut (polar bar)",
+    "description": "Eng / Sales / Marketing revenue split — bar mark + polar coordinates = donut.",
+    "csv": "examples/business/revenue-donut.csv",
+    "spec": "examples/business/revenue-donut.spec.json"
+  },
+  {
+    "id": "kpi-radar",
+    "category": "Business charts",
+    "name": "KPI radar (polar line)",
+    "description": "Six-axis product scorecard — Performance, Reliability, Security, Cost, UX, Velocity.",
+    "csv": "examples/business/kpi-radar.csv",
+    "spec": "examples/business/kpi-radar.spec.json"
+  },
+  {
+    "id": "org-graph",
+    "category": "Business charts",
+    "name": "Engineering org graph (force)",
+    "description": "10-node reporting tree with cross-team collaboration edges. Seeded force layout.",
+    "csv": null,
+    "spec": "examples/business/org-graph.spec.json"
+  },
+  {
+    "id": "density-contour",
+    "category": "Business charts",
+    "name": "Customer density contour",
+    "description": "Two activity clusters on a 40×28 grid — marching-squares isolines at 5 thresholds.",
+    "csv": null,
+    "spec": "examples/business/density-contour.spec.json"
+  },
 
   {
     "id": "sine-wave",
@@ -269,8 +301,8 @@
   {
     "id": "whyboard",
     "category": "Whyboard",
-    "name": "Whyboard tree — Q3 revenue",
-    "description": "Static rendering of the kind of tree glyph_whyboard returns: root question, four branches, leaf findings.",
+    "name": "Why did rides spike at 8am?",
+    "description": "Static rendering of what glyph_whyboard returns: a root + three diagnostic branches (anomaly, decompose, forecast), each leaf a chained DataHandle. Mirrors the homepage example.",
     "csv": null,
     "spec": "examples/whyboard/sample-whyboard.json"
   }
