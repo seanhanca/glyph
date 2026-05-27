@@ -18,9 +18,9 @@
   {
     "id": "conversion-funnel",
     "category": "Business charts",
-    "name": "Conversion funnel",
-    "description": "Visit → Sign-up → Activate → Subscribe → Renew, with retention falloff.",
-    "csv": "examples/business/conversion-funnel.csv",
+    "name": "Conversion funnel (animated)",
+    "description": "Visit → Sign-up → Activate → Subscribe → Renew. Bars cascade in top-to-bottom with conversion-% labels.",
+    "csv": null,
     "spec": "examples/business/conversion-funnel.spec.json"
   },
   {

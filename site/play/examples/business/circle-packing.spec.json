@@ -4,8 +4,8 @@
       "width": 700,
       "height": 580
     },
-    "title": "Circle packing — Q3 revenue hierarchy",
-    "description": "Static circle-packing layout: three product-line bubbles, each surrounded by its three products. Child bubble radius is √revenue-scaled so visual size tracks impact.",
+    "title": "Circle packing — Q3 revenue (animated)",
+    "description": "On load, the three product-line bubbles scale up sequentially. After each parent settles, its child products pop in around it with stagger.",
     "children": [
       {
         "at": {
@@ -14,7 +14,7 @@
         },
         "mark": "text",
         "textMark": {
-          "text": "Revenue circle packing — Q3 by product line",
+          "text": "Circle packing — Q3 revenue hierarchy (animated)",
           "fontSize": 17,
           "fill": "#1a1a1a",
           "italic": false,
@@ -28,7 +28,7 @@
         },
         "mark": "text",
         "textMark": {
-          "text": "Outer circles = product lines, inner circles = products. Radius ∝ √revenue.",
+          "text": "On load, each category bubble grows from the center, then its children pop in.",
           "fontSize": 11.5,
           "fill": "#666",
           "italic": true,
@@ -37,452 +37,122 @@
       },
       {
         "at": {
-          "x": 220,
-          "y": 240
+          "x": 0,
+          "y": 0
         },
-        "mark": "circle",
-        "circle": {
-          "radius": 130,
-          "fill": "#4c78a8",
-          "stroke": "#4c78a8",
-          "strokeWidth": 0
+        "mark": "raw-svg",
+        "rawSvg": {
+          "xml": "<circle cx=\"220\" cy=\"240\" r=\"0\" fill=\"#4c78a8\"><animate attributeName=\"r\" from=\"0\" to=\"130\" dur=\"0.55s\" begin=\"0.20s\" fill=\"freeze\" calcMode=\"spline\" keyTimes=\"0;1\" keySplines=\"0.22 1 0.36 1\"/></circle><text x=\"220\" y=\"100\" font-family=\"system-ui,sans-serif\" font-size=\"13\" fill=\"#4c78a8\" text-anchor=\"middle\" opacity=\"0\"><animate attributeName=\"opacity\" from=\"0\" to=\"1\" dur=\"0.3s\" begin=\"0.60s\" fill=\"freeze\"/>Cloud</text>"
         }
       },
       {
         "at": {
-          "x": 220,
-          "y": 168.5
+          "x": 0,
+          "y": 0
         },
-        "mark": "circle",
-        "circle": {
-          "radius": 40,
-          "fill": "#ffffff",
-          "stroke": "#4c78a8",
-          "strokeWidth": 2.5
+        "mark": "raw-svg",
+        "rawSvg": {
+          "xml": "<circle cx=\"220\" cy=\"168.5\" r=\"0\" fill=\"#ffffff\" stroke=\"#4c78a8\" stroke-width=\"2.5\"><animate attributeName=\"r\" from=\"0\" to=\"40.00\" dur=\"0.4s\" begin=\"0.75s\" fill=\"freeze\" calcMode=\"spline\" keyTimes=\"0;1\" keySplines=\"0.22 1 0.36 1\"/></circle><text x=\"220\" y=\"166.5\" font-family=\"system-ui,sans-serif\" font-size=\"11\" fill=\"#1a1a1a\" text-anchor=\"middle\" opacity=\"0\"><animate attributeName=\"opacity\" from=\"0\" to=\"1\" dur=\"0.3s\" begin=\"1.00s\" fill=\"freeze\"/>Compute</text><text x=\"220\" y=\"180.5\" font-family=\"system-ui,sans-serif\" font-size=\"10\" fill=\"#666\" text-anchor=\"middle\" opacity=\"0\"><animate attributeName=\"opacity\" from=\"0\" to=\"1\" dur=\"0.3s\" begin=\"1.00s\" fill=\"freeze\"/>$6.8M</text>"
         }
       },
       {
         "at": {
-          "x": 220,
-          "y": 166.5
+          "x": 0,
+          "y": 0
         },
-        "mark": "text",
-        "textMark": {
-          "text": "Compute",
-          "fontSize": 11,
-          "fill": "#1a1a1a",
-          "italic": false,
-          "anchor": "middle"
+        "mark": "raw-svg",
+        "rawSvg": {
+          "xml": "<circle cx=\"281.9208163705874\" cy=\"275.75\" r=\"0\" fill=\"#ffffff\" stroke=\"#4c78a8\" stroke-width=\"2.5\"><animate attributeName=\"r\" from=\"0\" to=\"35.29\" dur=\"0.4s\" begin=\"0.87s\" fill=\"freeze\" calcMode=\"spline\" keyTimes=\"0;1\" keySplines=\"0.22 1 0.36 1\"/></circle><text x=\"281.9208163705874\" y=\"273.75\" font-family=\"system-ui,sans-serif\" font-size=\"11\" fill=\"#1a1a1a\" text-anchor=\"middle\" opacity=\"0\"><animate attributeName=\"opacity\" from=\"0\" to=\"1\" dur=\"0.3s\" begin=\"1.12s\" fill=\"freeze\"/>Storage</text><text x=\"281.9208163705874\" y=\"287.75\" font-family=\"system-ui,sans-serif\" font-size=\"10\" fill=\"#666\" text-anchor=\"middle\" opacity=\"0\"><animate attributeName=\"opacity\" from=\"0\" to=\"1\" dur=\"0.3s\" begin=\"1.12s\" fill=\"freeze\"/>$4.2M</text>"
         }
       },
       {
         "at": {
-          "x": 220,
-          "y": 180.5
+          "x": 0,
+          "y": 0
         },
-        "mark": "text",
-        "textMark": {
-          "text": "$6.8M",
-          "fontSize": 10,
-          "fill": "#666",
-          "italic": false,
-          "anchor": "middle"
+        "mark": "raw-svg",
+        "rawSvg": {
+          "xml": "<circle cx=\"158.07918362941265\" cy=\"275.75\" r=\"0\" fill=\"#ffffff\" stroke=\"#4c78a8\" stroke-width=\"2.5\"><animate attributeName=\"r\" from=\"0\" to=\"30.23\" dur=\"0.4s\" begin=\"0.99s\" fill=\"freeze\" calcMode=\"spline\" keyTimes=\"0;1\" keySplines=\"0.22 1 0.36 1\"/></circle><text x=\"158.07918362941265\" y=\"273.75\" font-family=\"system-ui,sans-serif\" font-size=\"11\" fill=\"#1a1a1a\" text-anchor=\"middle\" opacity=\"0\"><animate attributeName=\"opacity\" from=\"0\" to=\"1\" dur=\"0.3s\" begin=\"1.24s\" fill=\"freeze\"/>Network</text><text x=\"158.07918362941265\" y=\"287.75\" font-family=\"system-ui,sans-serif\" font-size=\"10\" fill=\"#666\" text-anchor=\"middle\" opacity=\"0\"><animate attributeName=\"opacity\" from=\"0\" to=\"1\" dur=\"0.3s\" begin=\"1.24s\" fill=\"freeze\"/>$2.1M</text>"
         }
       },
       {
         "at": {
-          "x": 281.9208163705874,
-          "y": 275.75
+          "x": 0,
+          "y": 0
         },
-        "mark": "circle",
-        "circle": {
-          "radius": 35.28991545585427,
-          "fill": "#ffffff",
-          "stroke": "#4c78a8",
-          "strokeWidth": 2.5
+        "mark": "raw-svg",
+        "rawSvg": {
+          "xml": "<circle cx=\"480\" cy=\"220\" r=\"0\" fill=\"#f58518\"><animate attributeName=\"r\" from=\"0\" to=\"110\" dur=\"0.55s\" begin=\"0.55s\" fill=\"freeze\" calcMode=\"spline\" keyTimes=\"0;1\" keySplines=\"0.22 1 0.36 1\"/></circle><text x=\"480\" y=\"100\" font-family=\"system-ui,sans-serif\" font-size=\"13\" fill=\"#f58518\" text-anchor=\"middle\" opacity=\"0\"><animate attributeName=\"opacity\" from=\"0\" to=\"1\" dur=\"0.3s\" begin=\"0.95s\" fill=\"freeze\"/>Pro Tools</text>"
         }
       },
       {
         "at": {
-          "x": 281.9208163705874,
-          "y": 273.75
+          "x": 0,
+          "y": 0
         },
-        "mark": "text",
-        "textMark": {
-          "text": "Storage",
-          "fontSize": 11,
-          "fill": "#1a1a1a",
-          "italic": false,
-          "anchor": "middle"
+        "mark": "raw-svg",
+        "rawSvg": {
+          "xml": "<circle cx=\"480\" cy=\"159.5\" r=\"0\" fill=\"#ffffff\" stroke=\"#f58518\" stroke-width=\"2.5\"><animate attributeName=\"r\" from=\"0\" to=\"40.00\" dur=\"0.4s\" begin=\"1.10s\" fill=\"freeze\" calcMode=\"spline\" keyTimes=\"0;1\" keySplines=\"0.22 1 0.36 1\"/></circle><text x=\"480\" y=\"157.5\" font-family=\"system-ui,sans-serif\" font-size=\"11\" fill=\"#1a1a1a\" text-anchor=\"middle\" opacity=\"0\"><animate attributeName=\"opacity\" from=\"0\" to=\"1\" dur=\"0.3s\" begin=\"1.35s\" fill=\"freeze\"/>IDE</text><text x=\"480\" y=\"171.5\" font-family=\"system-ui,sans-serif\" font-size=\"10\" fill=\"#666\" text-anchor=\"middle\" opacity=\"0\"><animate attributeName=\"opacity\" from=\"0\" to=\"1\" dur=\"0.3s\" begin=\"1.35s\" fill=\"freeze\"/>$3.4M</text>"
         }
       },
       {
         "at": {
-          "x": 281.9208163705874,
-          "y": 287.75
+          "x": 0,
+          "y": 0
         },
-        "mark": "text",
-        "textMark": {
-          "text": "$4.2M",
-          "fontSize": 10,
-          "fill": "#666",
-          "italic": false,
-          "anchor": "middle"
+        "mark": "raw-svg",
+        "rawSvg": {
+          "xml": "<circle cx=\"532.3945369289586\" cy=\"250.25\" r=\"0\" fill=\"#ffffff\" stroke=\"#f58518\" stroke-width=\"2.5\"><animate attributeName=\"r\" from=\"0\" to=\"34.01\" dur=\"0.4s\" begin=\"1.22s\" fill=\"freeze\" calcMode=\"spline\" keyTimes=\"0;1\" keySplines=\"0.22 1 0.36 1\"/></circle><text x=\"532.3945369289586\" y=\"248.25\" font-family=\"system-ui,sans-serif\" font-size=\"11\" fill=\"#1a1a1a\" text-anchor=\"middle\" opacity=\"0\"><animate attributeName=\"opacity\" from=\"0\" to=\"1\" dur=\"0.3s\" begin=\"1.47s\" fill=\"freeze\"/>Debug</text><text x=\"532.3945369289586\" y=\"262.25\" font-family=\"system-ui,sans-serif\" font-size=\"10\" fill=\"#666\" text-anchor=\"middle\" opacity=\"0\"><animate attributeName=\"opacity\" from=\"0\" to=\"1\" dur=\"0.3s\" begin=\"1.47s\" fill=\"freeze\"/>$1.8M</text>"
         }
       },
       {
         "at": {
-          "x": 158.07918362941265,
-          "y": 275.75
+          "x": 0,
+          "y": 0
         },
-        "mark": "circle",
-        "circle": {
-          "radius": 30.22581646497665,
-          "fill": "#ffffff",
-          "stroke": "#4c78a8",
-          "strokeWidth": 2.5
+        "mark": "raw-svg",
+        "rawSvg": {
+          "xml": "<circle cx=\"427.60546307104147\" cy=\"250.25000000000003\" r=\"0\" fill=\"#ffffff\" stroke=\"#f58518\" stroke-width=\"2.5\"><animate attributeName=\"r\" from=\"0\" to=\"37.24\" dur=\"0.4s\" begin=\"1.34s\" fill=\"freeze\" calcMode=\"spline\" keyTimes=\"0;1\" keySplines=\"0.22 1 0.36 1\"/></circle><text x=\"427.60546307104147\" y=\"248.25000000000003\" font-family=\"system-ui,sans-serif\" font-size=\"11\" fill=\"#1a1a1a\" text-anchor=\"middle\" opacity=\"0\"><animate attributeName=\"opacity\" from=\"0\" to=\"1\" dur=\"0.3s\" begin=\"1.59s\" fill=\"freeze\"/>Seats</text><text x=\"427.60546307104147\" y=\"262.25\" font-family=\"system-ui,sans-serif\" font-size=\"10\" fill=\"#666\" text-anchor=\"middle\" opacity=\"0\"><animate attributeName=\"opacity\" from=\"0\" to=\"1\" dur=\"0.3s\" begin=\"1.59s\" fill=\"freeze\"/>$2.6M</text>"
         }
       },
       {
         "at": {
-          "x": 158.07918362941265,
-          "y": 273.75
+          "x": 0,
+          "y": 0
         },
-        "mark": "text",
-        "textMark": {
-          "text": "Network",
-          "fontSize": 11,
-          "fill": "#1a1a1a",
-          "italic": false,
-          "anchor": "middle"
+        "mark": "raw-svg",
+        "rawSvg": {
+          "xml": "<circle cx=\"380\" cy=\"430\" r=\"0\" fill=\"#54a24b\"><animate attributeName=\"r\" from=\"0\" to=\"90\" dur=\"0.55s\" begin=\"0.90s\" fill=\"freeze\" calcMode=\"spline\" keyTimes=\"0;1\" keySplines=\"0.22 1 0.36 1\"/></circle><text x=\"380\" y=\"330\" font-family=\"system-ui,sans-serif\" font-size=\"13\" fill=\"#54a24b\" text-anchor=\"middle\" opacity=\"0\"><animate attributeName=\"opacity\" from=\"0\" to=\"1\" dur=\"0.3s\" begin=\"1.30s\" fill=\"freeze\"/>Edge</text>"
         }
       },
       {
         "at": {
-          "x": 158.07918362941265,
-          "y": 287.75
+          "x": 0,
+          "y": 0
         },
-        "mark": "text",
-        "textMark": {
-          "text": "$2.1M",
-          "fontSize": 10,
-          "fill": "#666",
-          "italic": false,
-          "anchor": "middle"
+        "mark": "raw-svg",
+        "rawSvg": {
+          "xml": "<circle cx=\"380\" cy=\"380.5\" r=\"0\" fill=\"#ffffff\" stroke=\"#54a24b\" stroke-width=\"2.5\"><animate attributeName=\"r\" from=\"0\" to=\"40.00\" dur=\"0.4s\" begin=\"1.45s\" fill=\"freeze\" calcMode=\"spline\" keyTimes=\"0;1\" keySplines=\"0.22 1 0.36 1\"/></circle><text x=\"380\" y=\"378.5\" font-family=\"system-ui,sans-serif\" font-size=\"11\" fill=\"#1a1a1a\" text-anchor=\"middle\" opacity=\"0\"><animate attributeName=\"opacity\" from=\"0\" to=\"1\" dur=\"0.3s\" begin=\"1.70s\" fill=\"freeze\"/>CDN</text><text x=\"380\" y=\"392.5\" font-family=\"system-ui,sans-serif\" font-size=\"10\" fill=\"#666\" text-anchor=\"middle\" opacity=\"0\"><animate attributeName=\"opacity\" from=\"0\" to=\"1\" dur=\"0.3s\" begin=\"1.70s\" fill=\"freeze\"/>$1.9M</text>"
         }
       },
       {
         "at": {
-          "x": 220,
-          "y": 100
+          "x": 0,
+          "y": 0
         },
-        "mark": "text",
-        "textMark": {
-          "text": "Cloud",
-          "fontSize": 13,
-          "fill": "#4c78a8",
-          "italic": false,
-          "anchor": "middle"
+        "mark": "raw-svg",
+        "rawSvg": {
+          "xml": "<circle cx=\"422.86825748732974\" cy=\"454.75\" r=\"0\" fill=\"#ffffff\" stroke=\"#54a24b\" stroke-width=\"2.5\"><animate attributeName=\"r\" from=\"0\" to=\"34.74\" dur=\"0.4s\" begin=\"1.57s\" fill=\"freeze\" calcMode=\"spline\" keyTimes=\"0;1\" keySplines=\"0.22 1 0.36 1\"/></circle><text x=\"422.86825748732974\" y=\"452.75\" font-family=\"system-ui,sans-serif\" font-size=\"11\" fill=\"#1a1a1a\" text-anchor=\"middle\" opacity=\"0\"><animate attributeName=\"opacity\" from=\"0\" to=\"1\" dur=\"0.3s\" begin=\"1.82s\" fill=\"freeze\"/>Workers</text><text x=\"422.86825748732974\" y=\"466.75\" font-family=\"system-ui,sans-serif\" font-size=\"10\" fill=\"#666\" text-anchor=\"middle\" opacity=\"0\"><animate attributeName=\"opacity\" from=\"0\" to=\"1\" dur=\"0.3s\" begin=\"1.82s\" fill=\"freeze\"/>$1.1M</text>"
         }
       },
       {
         "at": {
-          "x": 480,
-          "y": 220
+          "x": 0,
+          "y": 0
         },
-        "mark": "circle",
-        "circle": {
-          "radius": 110,
-          "fill": "#f58518",
-          "stroke": "#f58518",
-          "strokeWidth": 0
-        }
-      },
-      {
-        "at": {
-          "x": 480,
-          "y": 159.5
-        },
-        "mark": "circle",
-        "circle": {
-          "radius": 40,
-          "fill": "#ffffff",
-          "stroke": "#f58518",
-          "strokeWidth": 2.5
-        }
-      },
-      {
-        "at": {
-          "x": 480,
-          "y": 157.5
-        },
-        "mark": "text",
-        "textMark": {
-          "text": "IDE",
-          "fontSize": 11,
-          "fill": "#1a1a1a",
-          "italic": false,
-          "anchor": "middle"
-        }
-      },
-      {
-        "at": {
-          "x": 480,
-          "y": 171.5
-        },
-        "mark": "text",
-        "textMark": {
-          "text": "$3.4M",
-          "fontSize": 10,
-          "fill": "#666",
-          "italic": false,
-          "anchor": "middle"
-        }
-      },
-      {
-        "at": {
-          "x": 532.3945369289586,
-          "y": 250.25
-        },
-        "mark": "circle",
-        "circle": {
-          "radius": 34.007351252397974,
-          "fill": "#ffffff",
-          "stroke": "#f58518",
-          "strokeWidth": 2.5
-        }
-      },
-      {
-        "at": {
-          "x": 532.3945369289586,
-          "y": 248.25
-        },
-        "mark": "text",
-        "textMark": {
-          "text": "Debug",
-          "fontSize": 11,
-          "fill": "#1a1a1a",
-          "italic": false,
-          "anchor": "middle"
-        }
-      },
-      {
-        "at": {
-          "x": 532.3945369289586,
-          "y": 262.25
-        },
-        "mark": "text",
-        "textMark": {
-          "text": "$1.8M",
-          "fontSize": 10,
-          "fill": "#666",
-          "italic": false,
-          "anchor": "middle"
-        }
-      },
-      {
-        "at": {
-          "x": 427.60546307104147,
-          "y": 250.25000000000003
-        },
-        "mark": "circle",
-        "circle": {
-          "radius": 37.23844190829453,
-          "fill": "#ffffff",
-          "stroke": "#f58518",
-          "strokeWidth": 2.5
-        }
-      },
-      {
-        "at": {
-          "x": 427.60546307104147,
-          "y": 248.25000000000003
-        },
-        "mark": "text",
-        "textMark": {
-          "text": "Seats",
-          "fontSize": 11,
-          "fill": "#1a1a1a",
-          "italic": false,
-          "anchor": "middle"
-        }
-      },
-      {
-        "at": {
-          "x": 427.60546307104147,
-          "y": 262.25
-        },
-        "mark": "text",
-        "textMark": {
-          "text": "$2.6M",
-          "fontSize": 10,
-          "fill": "#666",
-          "italic": false,
-          "anchor": "middle"
-        }
-      },
-      {
-        "at": {
-          "x": 480,
-          "y": 100
-        },
-        "mark": "text",
-        "textMark": {
-          "text": "Pro Tools",
-          "fontSize": 13,
-          "fill": "#f58518",
-          "italic": false,
-          "anchor": "middle"
-        }
-      },
-      {
-        "at": {
-          "x": 380,
-          "y": 430
-        },
-        "mark": "circle",
-        "circle": {
-          "radius": 90,
-          "fill": "#54a24b",
-          "stroke": "#54a24b",
-          "strokeWidth": 0
-        }
-      },
-      {
-        "at": {
-          "x": 380,
-          "y": 380.5
-        },
-        "mark": "circle",
-        "circle": {
-          "radius": 40,
-          "fill": "#ffffff",
-          "stroke": "#54a24b",
-          "strokeWidth": 2.5
-        }
-      },
-      {
-        "at": {
-          "x": 380,
-          "y": 378.5
-        },
-        "mark": "text",
-        "textMark": {
-          "text": "CDN",
-          "fontSize": 11,
-          "fill": "#1a1a1a",
-          "italic": false,
-          "anchor": "middle"
-        }
-      },
-      {
-        "at": {
-          "x": 380,
-          "y": 392.5
-        },
-        "mark": "text",
-        "textMark": {
-          "text": "$1.9M",
-          "fontSize": 10,
-          "fill": "#666",
-          "italic": false,
-          "anchor": "middle"
-        }
-      },
-      {
-        "at": {
-          "x": 422.86825748732974,
-          "y": 454.75
-        },
-        "mark": "circle",
-        "circle": {
-          "radius": 34.73949002555901,
-          "fill": "#ffffff",
-          "stroke": "#54a24b",
-          "strokeWidth": 2.5
-        }
-      },
-      {
-        "at": {
-          "x": 422.86825748732974,
-          "y": 452.75
-        },
-        "mark": "text",
-        "textMark": {
-          "text": "Workers",
-          "fontSize": 11,
-          "fill": "#1a1a1a",
-          "italic": false,
-          "anchor": "middle"
-        }
-      },
-      {
-        "at": {
-          "x": 422.86825748732974,
-          "y": 466.75
-        },
-        "mark": "text",
-        "textMark": {
-          "text": "$1.1M",
-          "fontSize": 10,
-          "fill": "#666",
-          "italic": false,
-          "anchor": "middle"
-        }
-      },
-      {
-        "at": {
-          "x": 337.13174251267026,
-          "y": 454.75
-        },
-        "mark": "circle",
-        "circle": {
-          "radius": 30.362932712878358,
-          "fill": "#ffffff",
-          "stroke": "#54a24b",
-          "strokeWidth": 2.5
-        }
-      },
-      {
-        "at": {
-          "x": 337.13174251267026,
-          "y": 452.75
-        },
-        "mark": "text",
-        "textMark": {
-          "text": "DDoS",
-          "fontSize": 11,
-          "fill": "#1a1a1a",
-          "italic": false,
-          "anchor": "middle"
-        }
-      },
-      {
-        "at": {
-          "x": 337.13174251267026,
-          "y": 466.75
-        },
-        "mark": "text",
-        "textMark": {
-          "text": "$0.6M",
-          "fontSize": 10,
-          "fill": "#666",
-          "italic": false,
-          "anchor": "middle"
-        }
-      },
-      {
-        "at": {
-          "x": 380,
-          "y": 330
-        },
-        "mark": "text",
-        "textMark": {
-          "text": "Edge",
-          "fontSize": 13,
-          "fill": "#54a24b",
-          "italic": false,
-          "anchor": "middle"
+        "mark": "raw-svg",
+        "rawSvg": {
+          "xml": "<circle cx=\"337.13174251267026\" cy=\"454.75\" r=\"0\" fill=\"#ffffff\" stroke=\"#54a24b\" stroke-width=\"2.5\"><animate attributeName=\"r\" from=\"0\" to=\"30.36\" dur=\"0.4s\" begin=\"1.69s\" fill=\"freeze\" calcMode=\"spline\" keyTimes=\"0;1\" keySplines=\"0.22 1 0.36 1\"/></circle><text x=\"337.13174251267026\" y=\"452.75\" font-family=\"system-ui,sans-serif\" font-size=\"11\" fill=\"#1a1a1a\" text-anchor=\"middle\" opacity=\"0\"><animate attributeName=\"opacity\" from=\"0\" to=\"1\" dur=\"0.3s\" begin=\"1.94s\" fill=\"freeze\"/>DDoS</text><text x=\"337.13174251267026\" y=\"466.75\" font-family=\"system-ui,sans-serif\" font-size=\"10\" fill=\"#666\" text-anchor=\"middle\" opacity=\"0\"><animate attributeName=\"opacity\" from=\"0\" to=\"1\" dur=\"0.3s\" begin=\"1.94s\" fill=\"freeze\"/>$0.6M</text>"
         }
       }
     ]
