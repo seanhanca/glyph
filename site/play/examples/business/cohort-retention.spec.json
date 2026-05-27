@@ -1,0 +1,25 @@
+{
+  "version": "glyph/0.1",
+  "title": "Cohort retention — weekly % retained",
+  "width": 640,
+  "height": 320,
+  "layers": [
+    {
+      "mark": "heatmap",
+      "encoding": {
+        "x": {
+          "field": "week",
+          "type": "ordinal"
+        },
+        "y": {
+          "field": "cohort",
+          "type": "ordinal"
+        },
+        "color": {
+          "field": "retention",
+          "type": "quantitative"
+        }
+      }
+    }
+  ]
+}

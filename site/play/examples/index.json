@@ -55,6 +55,54 @@
     "csv": "examples/business/ab-test.csv",
     "spec": "examples/business/ab-test.spec.json"
   },
+  {
+    "id": "cohort-retention",
+    "category": "Business charts",
+    "name": "Cohort retention heatmap",
+    "description": "8 monthly cohorts × 8 weeks of retention %, the canonical SaaS health view.",
+    "csv": "examples/business/cohort-retention.csv",
+    "spec": "examples/business/cohort-retention.spec.json"
+  },
+  {
+    "id": "revenue-treemap",
+    "category": "Business charts",
+    "name": "Revenue treemap (Q3 by product)",
+    "description": "Hierarchical $24.5M Q3 breakdown — Cloud, Pro Tools, Edge — sized by revenue share.",
+    "csv": null,
+    "spec": "examples/business/revenue-treemap.spec.json"
+  },
+  {
+    "id": "cac-vs-ltv",
+    "category": "Business charts",
+    "name": "CAC vs LTV scatter",
+    "description": "Acquisition-channel efficiency: x = CAC, y = LTV, bubble size = monthly signups.",
+    "csv": "examples/business/cac-vs-ltv.csv",
+    "spec": "examples/business/cac-vs-ltv.spec.json"
+  },
+  {
+    "id": "api-latency",
+    "category": "Business charts",
+    "name": "API latency boxplot",
+    "description": "Per-endpoint latency distribution — quartiles, whiskers, outliers via Tukey 1.5×IQR.",
+    "csv": "examples/business/api-latency.csv",
+    "spec": "examples/business/api-latency.spec.json"
+  },
+  {
+    "id": "sales-calendar",
+    "category": "Business charts",
+    "name": "Sales calendar heatmap",
+    "description": "Orders by day-of-week × hour-of-day — the GitHub-contributions style activity map.",
+    "csv": "examples/business/sales-calendar.csv",
+    "spec": "examples/business/sales-calendar.spec.json"
+  },
+  {
+    "id": "marketing-sunburst",
+    "category": "Business charts",
+    "name": "Marketing spend sunburst",
+    "description": "$4.2M annual budget — Performance, Brand, Lifecycle — as a hierarchical ring chart.",
+    "csv": null,
+    "spec": "examples/business/marketing-sunburst.spec.json"
+  },
 
   {
     "id": "sine-wave",

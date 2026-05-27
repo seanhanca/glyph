@@ -1,0 +1,70 @@
+{
+  "version": "glyph/0.1",
+  "title": "Q3 revenue by product line ($M)",
+  "width": 720,
+  "height": 440,
+  "data": {
+    "hierarchy": {
+      "name": "Q3 revenue",
+      "children": [
+        {
+          "name": "Cloud",
+          "children": [
+            {
+              "name": "Compute",
+              "value": 6.8
+            },
+            {
+              "name": "Storage",
+              "value": 4.2
+            },
+            {
+              "name": "Network",
+              "value": 2.1
+            }
+          ]
+        },
+        {
+          "name": "Pro Tools",
+          "children": [
+            {
+              "name": "IDE Pro",
+              "value": 3.4
+            },
+            {
+              "name": "Debug Cloud",
+              "value": 1.8
+            },
+            {
+              "name": "Team Seats",
+              "value": 2.6
+            }
+          ]
+        },
+        {
+          "name": "Edge",
+          "children": [
+            {
+              "name": "CDN",
+              "value": 1.9
+            },
+            {
+              "name": "Workers",
+              "value": 1.1
+            },
+            {
+              "name": "DDoS",
+              "value": 0.6
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "layers": [
+    {
+      "mark": "treemap",
+      "encoding": {}
+    }
+  ]
+}
