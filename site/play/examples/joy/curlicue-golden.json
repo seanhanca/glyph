@@ -1,0 +1,32 @@
+{
+  "version": "glyph/0.1",
+  "title": "Curlicue (golden angle θ = 2.39996)",
+  "data": {
+    "recurrence": {
+      "shape": "recurrence",
+      "state": ["x", "y"],
+      "initial": { "x": 0, "y": 0 },
+      "step": {
+        "x": "x + cos(theta * n * n)",
+        "y": "y + sin(theta * n * n)"
+      },
+      "params": { "theta": 2.39996 },
+      "steps": 4000
+    }
+  },
+  "layers": [
+    {
+      "mark": "line",
+      "encoding": {
+        "x": {
+          "field": "x",
+          "type": "quantitative"
+        },
+        "y": {
+          "field": "y",
+          "type": "quantitative"
+        }
+      }
+    }
+  ]
+}

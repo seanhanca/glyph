@@ -1,0 +1,873 @@
+{
+  "compose": {
+    "viewBox": {
+      "width": 900,
+      "height": 1300
+    },
+    "title": "Notre-Dame west facade — Gothic order, professional draft",
+    "description": "West facade of a French Gothic cathedral, drawn in the style of a 19th-century architectural draftsman. Three horizontal stages — portal level (triple pointed-arch doorway), gallery level (Kings' Gallery with arcaded niches), rose-window level — capped by twin towers with belfry lancets, oculi, and tall pinnacled spires. Notre-Dame (1163), Chartres (1145), Reims (1211), Cologne (1248).",
+    "theme": {
+      "preset": "pencil-parchment"
+    },
+    "defs": {
+      "gradients": [
+        {
+          "id": "g-dawn",
+          "kind": "linear",
+          "x1": "0%",
+          "y1": "0%",
+          "x2": "0%",
+          "y2": "100%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#fef3c7",
+              "opacity": 1
+            },
+            {
+              "offset": "50%",
+              "color": "#fed7aa",
+              "opacity": 1
+            },
+            {
+              "offset": "100%",
+              "color": "#ebe1c4",
+              "opacity": 1
+            }
+          ]
+        },
+        {
+          "id": "g-rose",
+          "kind": "radial",
+          "cx": "50%",
+          "cy": "50%",
+          "r": "50%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#fef3c7",
+              "opacity": 1
+            },
+            {
+              "offset": "25%",
+              "color": "#dc2626",
+              "opacity": 0.9
+            },
+            {
+              "offset": "55%",
+              "color": "#1d4ed8",
+              "opacity": 0.95
+            },
+            {
+              "offset": "100%",
+              "color": "#581c87",
+              "opacity": 0.95
+            }
+          ]
+        },
+        {
+          "id": "g-stone",
+          "kind": "linear",
+          "x1": "0%",
+          "y1": "0%",
+          "x2": "100%",
+          "y2": "0%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#e7ddc6",
+              "opacity": 1
+            },
+            {
+              "offset": "50%",
+              "color": "#ebe1c4",
+              "opacity": 1
+            },
+            {
+              "offset": "100%",
+              "color": "#cbb89c",
+              "opacity": 1
+            }
+          ]
+        },
+        {
+          "id": "g-spire",
+          "kind": "linear",
+          "x1": "0%",
+          "y1": "0%",
+          "x2": "100%",
+          "y2": "0%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#3a4a2a",
+              "opacity": 1
+            },
+            {
+              "offset": "50%",
+              "color": "#5a6a3a",
+              "opacity": 1
+            },
+            {
+              "offset": "100%",
+              "color": "#3a4a2a",
+              "opacity": 1
+            }
+          ]
+        }
+      ]
+    },
+    "children": [
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 900 0 L 900 1240 L 0 1240 Z",
+          "fill": "url(#g-dawn)",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 1240
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 900 0 L 900 60 L 0 60 Z",
+          "fill": "#8b9968",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 1200
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 40 L 40 30 L 70 35 L 110 25 L 140 30 L 170 20 L 200 28 L 230 18 L 0 18 Z M 700 30 L 740 22 L 770 28 L 810 18 L 840 25 L 900 22 L 900 40 L 700 40 Z",
+          "fill": "rgba(124,45,18,.2)",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 90 1240 L 90 380 L 320 380 L 320 1240 Z",
+          "fill": "url(#g-stone)",
+          "stroke": "#3a2a14",
+          "strokeWidth": 2.4
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 580 1240 L 580 380 L 810 380 L 810 1240 Z",
+          "fill": "url(#g-stone)",
+          "stroke": "#3a2a14",
+          "strokeWidth": 2.4
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 320 1240 L 320 515 L 350 475 L 450 415 L 550 475 L 580 515 L 580 1240 Z",
+          "fill": "url(#g-stone)",
+          "stroke": "#3a2a14",
+          "strokeWidth": 2.4
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 820
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[90, 0], [810, 0]],
+          "fill": "none",
+          "stroke": "#3a2a14",
+          "strokeWidth": 1.2
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 760
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[90, 0], [810, 0]],
+          "fill": "none",
+          "stroke": "#3a2a14",
+          "strokeWidth": 1.2
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 540
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[90, 0], [810, 0]],
+          "fill": "none",
+          "stroke": "#3a2a14",
+          "strokeWidth": 1.2
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 390
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[90, 0], [810, 0]],
+          "fill": "none",
+          "stroke": "#3a2a14",
+          "strokeWidth": 1.2
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polygon",
+        "polygon": {
+          "points": [[74, 380], [336, 380], [205, 100]],
+          "fill": "url(#g-spire)",
+          "stroke": "#1f1a14",
+          "strokeWidth": 2
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polygon",
+        "polygon": {
+          "points": [[564, 380], [826, 380], [695, 100]],
+          "fill": "url(#g-spire)",
+          "stroke": "#1f1a14",
+          "strokeWidth": 2
+        }
+      },
+      {
+        "at": {
+          "x": 205,
+          "y": 94
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 0 -22 M -9 -14 L 9 -14",
+          "fill": "none",
+          "stroke": "#3a2a14",
+          "strokeWidth": 2
+        }
+      },
+      {
+        "at": {
+          "x": 695,
+          "y": 94
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 0 -22 M -9 -14 L 9 -14",
+          "fill": "none",
+          "stroke": "#3a2a14",
+          "strokeWidth": 2
+        }
+      },
+      {
+        "at": {
+          "x": 90,
+          "y": 380
+        },
+        "mark": "polygon",
+        "polygon": {
+          "points": [[-8, 0], [8, 0], [0, -28]],
+          "fill": "url(#g-stone)",
+          "stroke": "#3a2a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 320,
+          "y": 380
+        },
+        "mark": "polygon",
+        "polygon": {
+          "points": [[-8, 0], [8, 0], [0, -28]],
+          "fill": "url(#g-stone)",
+          "stroke": "#3a2a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 580,
+          "y": 380
+        },
+        "mark": "polygon",
+        "polygon": {
+          "points": [[-8, 0], [8, 0], [0, -28]],
+          "fill": "url(#g-stone)",
+          "stroke": "#3a2a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 810,
+          "y": 380
+        },
+        "mark": "polygon",
+        "polygon": {
+          "points": [[-8, 0], [8, 0], [0, -28]],
+          "fill": "url(#g-stone)",
+          "stroke": "#3a2a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 179,
+          "y": 580
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -14 0 L -14 -100 Q -14 -130, 0 -130 Q 14 -130, 14 -100 L 14 0 Z",
+          "fill": "#1f1a14",
+          "stroke": "#3a2a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 231,
+          "y": 580
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -14 0 L -14 -100 Q -14 -130, 0 -130 Q 14 -130, 14 -100 L 14 0 Z",
+          "fill": "#1f1a14",
+          "stroke": "#3a2a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 205,
+          "y": 470
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 14,
+          "fill": "#3a2a14",
+          "stroke": "#fefce8",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 669,
+          "y": 580
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -14 0 L -14 -100 Q -14 -130, 0 -130 Q 14 -130, 14 -100 L 14 0 Z",
+          "fill": "#1f1a14",
+          "stroke": "#3a2a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 721,
+          "y": 580
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -14 0 L -14 -100 Q -14 -130, 0 -130 Q 14 -130, 14 -100 L 14 0 Z",
+          "fill": "#1f1a14",
+          "stroke": "#3a2a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 695,
+          "y": 470
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 14,
+          "fill": "#3a2a14",
+          "stroke": "#fefce8",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 670
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 105,
+          "fill": "#3a2a14",
+          "stroke": "#fefce8",
+          "strokeWidth": 2.4
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 670
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 95,
+          "fill": "url(#g-rose)"
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 670
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[18, 0], [57, 12], [87.4, 0], [57, -12], [18, 0]],
+          "fill": "none",
+          "stroke": "#3a2a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 670
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[15.59, 9], [43.36, 38.89], [75.69, 43.7], [55.36, 18.11], [15.59, 9]],
+          "fill": "none",
+          "stroke": "#3a2a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 670
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[9, 15.59], [18.11, 55.36], [43.7, 75.69], [38.89, 43.36], [9, 15.59]],
+          "fill": "none",
+          "stroke": "#3a2a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 670
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 18], [-12, 57], [0, 87.4], [12, 57], [0, 18]],
+          "fill": "none",
+          "stroke": "#3a2a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 670
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-9, 15.59], [-38.89, 43.36], [-43.7, 75.69], [-18.11, 55.36], [-9, 15.59]],
+          "fill": "none",
+          "stroke": "#3a2a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 670
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-15.59, 9], [-55.36, 18.11], [-75.69, 43.7], [-43.36, 38.89], [-15.59, 9]],
+          "fill": "none",
+          "stroke": "#3a2a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 670
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[-18, 0], [-57, -12], [-87.4, 0], [-57, 12], [-18, 0]],
+          "fill": "none",
+          "stroke": "#3a2a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 670
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [
+            [-15.59, -9],
+            [-43.36, -38.89],
+            [-75.69, -43.7],
+            [-55.36, -18.11],
+            [-15.59, -9]
+          ],
+          "fill": "none",
+          "stroke": "#3a2a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 670
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [
+            [-9, -15.59],
+            [-18.11, -55.36],
+            [-43.7, -75.69],
+            [-38.89, -43.36],
+            [-9, -15.59]
+          ],
+          "fill": "none",
+          "stroke": "#3a2a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 670
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, -18], [12, -57], [0, -87.4], [-12, -57], [0, -18]],
+          "fill": "none",
+          "stroke": "#3a2a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 670
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[9, -15.59], [38.89, -43.36], [43.7, -75.69], [18.11, -55.36], [9, -15.59]],
+          "fill": "none",
+          "stroke": "#3a2a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 670
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[15.59, -9], [55.36, -18.11], [75.69, -43.7], [43.36, -38.89], [15.59, -9]],
+          "fill": "none",
+          "stroke": "#3a2a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 670
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 16,
+          "fill": "#fef3c7",
+          "stroke": "#3a2a14",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 670
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -125 -10 Q -125 -195, 0 -225 Q 125 -195, 125 -10",
+          "fill": "none",
+          "stroke": "#3a2a14",
+          "strokeWidth": 1.8
+        }
+      },
+      {
+        "at": {
+          "x": 350,
+          "y": 850
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -10 0 L -10 -32 Q -10 -42, 0 -42 Q 10 -42, 10 -32 L 10 0 Z",
+          "fill": "#3a2a14",
+          "stroke": "#1f1a14",
+          "strokeWidth": 0.8
+        }
+      },
+      {
+        "at": {
+          "x": 380,
+          "y": 850
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -10 0 L -10 -32 Q -10 -42, 0 -42 Q 10 -42, 10 -32 L 10 0 Z",
+          "fill": "#3a2a14",
+          "stroke": "#1f1a14",
+          "strokeWidth": 0.8
+        }
+      },
+      {
+        "at": {
+          "x": 410,
+          "y": 850
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -10 0 L -10 -32 Q -10 -42, 0 -42 Q 10 -42, 10 -32 L 10 0 Z",
+          "fill": "#3a2a14",
+          "stroke": "#1f1a14",
+          "strokeWidth": 0.8
+        }
+      },
+      {
+        "at": {
+          "x": 440,
+          "y": 850
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -10 0 L -10 -32 Q -10 -42, 0 -42 Q 10 -42, 10 -32 L 10 0 Z",
+          "fill": "#3a2a14",
+          "stroke": "#1f1a14",
+          "strokeWidth": 0.8
+        }
+      },
+      {
+        "at": {
+          "x": 470,
+          "y": 850
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -10 0 L -10 -32 Q -10 -42, 0 -42 Q 10 -42, 10 -32 L 10 0 Z",
+          "fill": "#3a2a14",
+          "stroke": "#1f1a14",
+          "strokeWidth": 0.8
+        }
+      },
+      {
+        "at": {
+          "x": 500,
+          "y": 850
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -10 0 L -10 -32 Q -10 -42, 0 -42 Q 10 -42, 10 -32 L 10 0 Z",
+          "fill": "#3a2a14",
+          "stroke": "#1f1a14",
+          "strokeWidth": 0.8
+        }
+      },
+      {
+        "at": {
+          "x": 530,
+          "y": 850
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -10 0 L -10 -32 Q -10 -42, 0 -42 Q 10 -42, 10 -32 L 10 0 Z",
+          "fill": "#3a2a14",
+          "stroke": "#1f1a14",
+          "strokeWidth": 0.8
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 890
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[90, 0], [810, 0]],
+          "fill": "none",
+          "stroke": "#3a2a14",
+          "strokeWidth": 2.4
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 1240
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -68 0 L -68 -150 Q -68 -210, 0 -210 Q 68 -210, 68 -150 L 68 0 Z",
+          "fill": "#3a2a14",
+          "stroke": "#1f1a14",
+          "strokeWidth": 2.4
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 1236
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -58 0 L -58 -140 Q -58 -195, 0 -195 Q 58 -195, 58 -140 L 58 0 Z",
+          "fill": "#1f1a14",
+          "stroke": "#fefce8",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 1236
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, -190], [0, 0]],
+          "fill": "none",
+          "stroke": "#fefce8",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 370,
+          "y": 1240
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -30 0 L -30 -90 Q -30 -130, 0 -130 Q 30 -130, 30 -90 L 30 0 Z",
+          "fill": "#3a2a14",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.8
+        }
+      },
+      {
+        "at": {
+          "x": 530,
+          "y": 1240
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -30 0 L -30 -90 Q -30 -130, 0 -130 Q 30 -130, 30 -90 L 30 0 Z",
+          "fill": "#3a2a14",
+          "stroke": "#1f1a14",
+          "strokeWidth": 1.8
+        }
+      },
+      {
+        "at": {
+          "x": 90,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -12 1240 L -12 770 L -8 730 L -8 1240 Z M -8 1240 L -8 770 L -4 730 L -4 1240 Z",
+          "fill": "url(#g-stone)",
+          "stroke": "#3a2a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 810,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -12 1240 L -12 770 L -8 730 L -8 1240 Z M -8 1240 L -8 770 L -4 730 L -4 1240 Z",
+          "fill": "url(#g-stone)",
+          "stroke": "#3a2a14",
+          "strokeWidth": 1.4
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 75
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Ecclesia Cathedralis · Notre-Dame de Paris, west facade",
+          "fontSize": 17,
+          "fill": "#1f1a14",
+          "italic": true,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 1290
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "pointed arch · flying buttress · rose window · stained glass · pinnacle · spire · Kings' Gallery",
+          "fontSize": 12,
+          "fill": "#4a3f30",
+          "italic": true,
+          "anchor": "middle"
+        }
+      }
+    ]
+  }
+}

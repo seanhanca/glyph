@@ -1,0 +1,558 @@
+{
+  "compose": {
+    "viewBox": {
+      "width": 600,
+      "height": 800
+    },
+    "title": "DNA double helix — base pairs spiraling in deep space",
+    "description": "Two phosphate-sugar strands wound at ~10 base pairs per turn. Adenine-Thymine rungs in blue, Guanine-Cytosine rungs in red. Background: a deterministic starfield, because life's blueprint is best read against the cosmos that hosts it.",
+    "theme": {
+      "background": "#020617",
+      "foreground": "#f1f5fb"
+    },
+    "defs": {
+      "gradients": [
+        {
+          "id": "g-bg",
+          "kind": "radial",
+          "cx": "50%",
+          "cy": "30%",
+          "r": "80%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#1e1b4b",
+              "opacity": 1
+            },
+            {
+              "offset": "70%",
+              "color": "#0f0a2e",
+              "opacity": 1
+            },
+            {
+              "offset": "100%",
+              "color": "#020617",
+              "opacity": 1
+            }
+          ]
+        },
+        {
+          "id": "g-strand-a",
+          "kind": "linear",
+          "x1": "0%",
+          "y1": "0%",
+          "x2": "0%",
+          "y2": "100%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#22d3ee",
+              "opacity": 0.95
+            },
+            {
+              "offset": "50%",
+              "color": "#a78bfa",
+              "opacity": 0.95
+            },
+            {
+              "offset": "100%",
+              "color": "#ec4899",
+              "opacity": 0.95
+            }
+          ]
+        },
+        {
+          "id": "g-strand-b",
+          "kind": "linear",
+          "x1": "0%",
+          "y1": "0%",
+          "x2": "0%",
+          "y2": "100%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#ec4899",
+              "opacity": 0.95
+            },
+            {
+              "offset": "50%",
+              "color": "#a78bfa",
+              "opacity": 0.95
+            },
+            {
+              "offset": "100%",
+              "color": "#22d3ee",
+              "opacity": 0.95
+            }
+          ]
+        },
+        {
+          "id": "g-halo",
+          "kind": "radial",
+          "cx": "50%",
+          "cy": "50%",
+          "r": "50%",
+          "stops": [
+            {
+              "offset": "0%",
+              "color": "#a78bfa",
+              "opacity": 0.55
+            },
+            {
+              "offset": "100%",
+              "color": "#a78bfa",
+              "opacity": 0
+            }
+          ]
+        }
+      ]
+    },
+    "children": [
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 600 0 L 600 800 L 0 800 Z",
+          "fill": "url(#g-bg)",
+          "stroke": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "starfield",
+        "starfield": {
+          "count": 60,
+          "seed": 7,
+          "region": {
+            "x": 0,
+            "y": 0,
+            "w": 600,
+            "h": 800
+          }
+        }
+      },
+      {
+        "at": {
+          "x": 300,
+          "y": 400
+        },
+        "mark": "glow",
+        "glow": {
+          "radius": 260,
+          "gradientId": "g-halo"
+        }
+      },
+      {
+        "at": {
+          "x": 261.3791452104652,
+          "y": 72
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [77.24, 0]],
+          "fill": "none",
+          "stroke": "#60a5fa",
+          "strokeWidth": 2.2
+        }
+      },
+      {
+        "at": {
+          "x": 212.58470712754976,
+          "y": 96
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [174.83, 0]],
+          "fill": "none",
+          "stroke": "#f87171",
+          "strokeWidth": 2.2
+        }
+      },
+      {
+        "at": {
+          "x": 228.17844954477843,
+          "y": 120
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [143.64, 0]],
+          "fill": "none",
+          "stroke": "#60a5fa",
+          "strokeWidth": 2.2
+        }
+      },
+      {
+        "at": {
+          "x": 232.38012993988144,
+          "y": 168
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [135.24, 0]],
+          "fill": "none",
+          "stroke": "#60a5fa",
+          "strokeWidth": 2.2
+        }
+      },
+      {
+        "at": {
+          "x": 211.24193273819378,
+          "y": 192
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [177.52, 0]],
+          "fill": "none",
+          "stroke": "#f87171",
+          "strokeWidth": 2.2
+        }
+      },
+      {
+        "at": {
+          "x": 255.48097409401987,
+          "y": 216
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [89.04, 0]],
+          "fill": "none",
+          "stroke": "#60a5fa",
+          "strokeWidth": 2.2
+        }
+      },
+      {
+        "at": {
+          "x": 267.48825004315637,
+          "y": 240
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [65.02, 0]],
+          "fill": "none",
+          "stroke": "#f87171",
+          "strokeWidth": 2.2
+        }
+      },
+      {
+        "at": {
+          "x": 214.40491353343617,
+          "y": 264
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [171.19, 0]],
+          "fill": "none",
+          "stroke": "#60a5fa",
+          "strokeWidth": 2.2
+        }
+      },
+      {
+        "at": {
+          "x": 224.3690335525896,
+          "y": 288
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [151.26, 0]],
+          "fill": "none",
+          "stroke": "#f87171",
+          "strokeWidth": 2.2
+        }
+      },
+      {
+        "at": {
+          "x": 290.0412586297649,
+          "y": 312
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [19.92, 0]],
+          "fill": "none",
+          "stroke": "#60a5fa",
+          "strokeWidth": 2.2
+        }
+      },
+      {
+        "at": {
+          "x": 236.95112661660386,
+          "y": 336
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [126.1, 0]],
+          "fill": "none",
+          "stroke": "#f87171",
+          "strokeWidth": 2.2
+        }
+      },
+      {
+        "at": {
+          "x": 210.3839241334469,
+          "y": 360
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [179.23, 0]],
+          "fill": "none",
+          "stroke": "#60a5fa",
+          "strokeWidth": 2.2
+        }
+      },
+      {
+        "at": {
+          "x": 249.82595045914024,
+          "y": 384
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [100.35, 0]],
+          "fill": "none",
+          "stroke": "#f87171",
+          "strokeWidth": 2.2
+        }
+      },
+      {
+        "at": {
+          "x": 273.7749227799609,
+          "y": 408
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [52.45, 0]],
+          "fill": "none",
+          "stroke": "#60a5fa",
+          "strokeWidth": 2.2
+        }
+      },
+      {
+        "at": {
+          "x": 216.69261061965994,
+          "y": 432
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [166.61, 0]],
+          "fill": "none",
+          "stroke": "#f87171",
+          "strokeWidth": 2.2
+        }
+      },
+      {
+        "at": {
+          "x": 220.9726876724672,
+          "y": 456
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [158.05, 0]],
+          "fill": "none",
+          "stroke": "#60a5fa",
+          "strokeWidth": 2.2
+        }
+      },
+      {
+        "at": {
+          "x": 283.4625433965088,
+          "y": 480
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [33.07, 0]],
+          "fill": "none",
+          "stroke": "#f87171",
+          "strokeWidth": 2.2
+        }
+      },
+      {
+        "at": {
+          "x": 241.8664743761892,
+          "y": 504
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [116.27, 0]],
+          "fill": "none",
+          "stroke": "#60a5fa",
+          "strokeWidth": 2.2
+        }
+      },
+      {
+        "at": {
+          "x": 210.01536745877524,
+          "y": 528
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [179.97, 0]],
+          "fill": "none",
+          "stroke": "#f87171",
+          "strokeWidth": 2.2
+        }
+      },
+      {
+        "at": {
+          "x": 244.44496008391846,
+          "y": 552
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [111.11, 0]],
+          "fill": "none",
+          "stroke": "#60a5fa",
+          "strokeWidth": 2.2
+        }
+      },
+      {
+        "at": {
+          "x": 280.20482779442995,
+          "y": 576
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [39.59, 0]],
+          "fill": "none",
+          "stroke": "#f87171",
+          "strokeWidth": 2.2
+        }
+      },
+      {
+        "at": {
+          "x": 219.4353037780444,
+          "y": 600
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [161.13, 0]],
+          "fill": "none",
+          "stroke": "#60a5fa",
+          "strokeWidth": 2.2
+        }
+      },
+      {
+        "at": {
+          "x": 218.00796156785194,
+          "y": 624
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [163.98, 0]],
+          "fill": "none",
+          "stroke": "#f87171",
+          "strokeWidth": 2.2
+        }
+      },
+      {
+        "at": {
+          "x": 276.9741500165009,
+          "y": 648
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [46.05, 0]],
+          "fill": "none",
+          "stroke": "#60a5fa",
+          "strokeWidth": 2.2
+        }
+      },
+      {
+        "at": {
+          "x": 247.09932729367748,
+          "y": 672
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [105.8, 0]],
+          "fill": "none",
+          "stroke": "#f87171",
+          "strokeWidth": 2.2
+        }
+      },
+      {
+        "at": {
+          "x": 210.13827564293095,
+          "y": 696
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [179.72, 0]],
+          "fill": "none",
+          "stroke": "#60a5fa",
+          "strokeWidth": 2.2
+        }
+      },
+      {
+        "at": {
+          "x": 239.3673920718097,
+          "y": 720
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[0, 0], [121.27, 0]],
+          "fill": "none",
+          "stroke": "#f87171",
+          "strokeWidth": 2.2
+        }
+      },
+      {
+        "at": {
+          "x": 300,
+          "y": 60
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 19.8 6 L 38.62 12 L 55.56 18 L 69.77 24 L 80.56 30 L 87.42 36 L 89.98 42 L 88.15 48 L 81.99 54 L 71.82 60 L 58.13 66 L 41.6 72 L 23.03 78 L 3.33 84 L -16.54 90 L -35.59 96 L -52.9 102 L -67.62 108 L -79.03 114 L -86.56 120 L -89.86 126 L -88.76 132 L -83.31 138 L -73.78 144 L -60.63 150 L -44.52 156 L -26.23 162 L -6.65 168 L 13.26 174 L 32.51 180 L 50.17 186 L 65.38 192 L 77.38 198 L 85.6 204 L 89.62 210 L 89.25 216 L 84.51 222 L 75.63 228 L 63.05 234 L 47.38 240 L 29.39 246 L 9.96 252 L -9.96 258 L -29.39 264 L -47.38 270 L -63.05 276 L -75.63 282 L -84.51 288 L -89.25 294 L -89.62 300 L -85.6 306 L -77.38 312 L -65.38 318 L -50.17 324 L -32.51 330 L -13.26 336 L 6.65 342 L 26.23 348 L 44.52 354 L 60.63 360 L 73.78 366 L 83.31 372 L 88.76 378 L 89.86 384 L 86.56 390 L 79.03 396 L 67.62 402 L 52.9 408 L 35.59 414 L 16.54 420 L -3.33 426 L -23.03 432 L -41.6 438 L -58.13 444 L -71.82 450 L -81.99 456 L -88.15 462 L -89.98 468 L -87.42 474 L -80.56 480 L -69.77 486 L -55.56 492 L -38.62 498 L -19.8 504 L 0 510 L 19.8 516 L 38.62 522 L 55.56 528 L 69.77 534 L 80.56 540 L 87.42 546 L 89.98 552 L 88.15 558 L 81.99 564 L 71.82 570 L 58.13 576 L 41.6 582 L 23.03 588 L 3.33 594 L -16.54 600 L -35.59 606 L -52.9 612 L -67.62 618 L -79.03 624 L -86.56 630 L -89.86 636 L -88.76 642 L -83.31 648 L -73.78 654 L -60.63 660 L -44.52 666 L -26.23 672 L -6.65 678",
+          "fill": "none",
+          "stroke": "url(#g-strand-a)",
+          "strokeWidth": 4
+        }
+      },
+      {
+        "at": {
+          "x": 300,
+          "y": 60
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L -19.8 6 L -38.62 12 L -55.56 18 L -69.77 24 L -80.56 30 L -87.42 36 L -89.98 42 L -88.15 48 L -81.99 54 L -71.82 60 L -58.13 66 L -41.6 72 L -23.03 78 L -3.33 84 L 16.54 90 L 35.59 96 L 52.9 102 L 67.62 108 L 79.03 114 L 86.56 120 L 89.86 126 L 88.76 132 L 83.31 138 L 73.78 144 L 60.63 150 L 44.52 156 L 26.23 162 L 6.65 168 L -13.26 174 L -32.51 180 L -50.17 186 L -65.38 192 L -77.38 198 L -85.6 204 L -89.62 210 L -89.25 216 L -84.51 222 L -75.63 228 L -63.05 234 L -47.38 240 L -29.39 246 L -9.96 252 L 9.96 258 L 29.39 264 L 47.38 270 L 63.05 276 L 75.63 282 L 84.51 288 L 89.25 294 L 89.62 300 L 85.6 306 L 77.38 312 L 65.38 318 L 50.17 324 L 32.51 330 L 13.26 336 L -6.65 342 L -26.23 348 L -44.52 354 L -60.63 360 L -73.78 366 L -83.31 372 L -88.76 378 L -89.86 384 L -86.56 390 L -79.03 396 L -67.62 402 L -52.9 408 L -35.59 414 L -16.54 420 L 3.33 426 L 23.03 432 L 41.6 438 L 58.13 444 L 71.82 450 L 81.99 456 L 88.15 462 L 89.98 468 L 87.42 474 L 80.56 480 L 69.77 486 L 55.56 492 L 38.62 498 L 19.8 504 L 0 510 L -19.8 516 L -38.62 522 L -55.56 528 L -69.77 534 L -80.56 540 L -87.42 546 L -89.98 552 L -88.15 558 L -81.99 564 L -71.82 570 L -58.13 576 L -41.6 582 L -23.03 588 L -3.33 594 L 16.54 600 L 35.59 606 L 52.9 612 L 67.62 618 L 79.03 624 L 86.56 630 L 89.86 636 L 88.76 642 L 83.31 648 L 73.78 654 L 60.63 660 L 44.52 666 L 26.23 672 L 6.65 678",
+          "fill": "none",
+          "stroke": "url(#g-strand-b)",
+          "strokeWidth": 4
+        }
+      },
+      {
+        "at": {
+          "x": 300,
+          "y": 36
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Deoxyribonucleic acid",
+          "fontSize": 18,
+          "fill": "#f1f5fb",
+          "italic": true,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 300,
+          "y": 776
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "~10 base pairs per turn · A-T (blue) · G-C (red)",
+          "fontSize": 13,
+          "fill": "#94a3b8",
+          "italic": true,
+          "anchor": "middle"
+        }
+      }
+    ]
+  }
+}

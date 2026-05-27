@@ -1,0 +1,23 @@
+{
+  "version": "glyph/0.1",
+  "data": {
+    "function": {
+      "shape": "function",
+      "x": { "min": -6.283185307179586, "max": 6.283185307179586, "samples": 200 },
+      "expr": "sin(x)"
+    }
+  },
+  "layers": [
+    {
+      "mark": "line",
+      "encoding": {
+        "x": { "field": "x", "type": "quantitative" },
+        "y": {
+          "field": "y",
+          "type": "quantitative",
+          "scale": { "domain": [-1.2, 1.2] }
+        }
+      }
+    }
+  ]
+}

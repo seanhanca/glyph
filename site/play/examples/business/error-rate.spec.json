@@ -1,0 +1,36 @@
+{
+  "version": "glyph/0.1",
+  "title": "API error rate — hour of day (%)",
+  "layers": [
+    {
+      "mark": "line",
+      "encoding": {
+        "x": {
+          "field": "hour",
+          "type": "quantitative",
+          "scale": { "domain": [0, 23] }
+        },
+        "y": {
+          "field": "error_rate",
+          "type": "quantitative",
+          "scale": { "domain": [0, 1] }
+        }
+      }
+    },
+    {
+      "mark": "area",
+      "encoding": {
+        "x": {
+          "field": "hour",
+          "type": "quantitative",
+          "scale": { "domain": [0, 23] }
+        },
+        "y": {
+          "field": "error_rate",
+          "type": "quantitative",
+          "scale": { "domain": [0, 1] }
+        }
+      }
+    }
+  ]
+}

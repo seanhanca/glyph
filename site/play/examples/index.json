@@ -1,0 +1,229 @@
+[
+  {
+    "id": "rides",
+    "category": "Business charts",
+    "name": "Bike rides by hour",
+    "description": "The original playground example — 12-row CSV, bar chart of hourly rides.",
+    "csv": "examples/rides.csv",
+    "spec": null
+  },
+  {
+    "id": "quarterly-revenue",
+    "category": "Business charts",
+    "name": "Quarterly revenue",
+    "description": "Eight quarters of revenue + prior-year comparison, as a bar chart.",
+    "csv": "examples/business/quarterly-revenue.csv",
+    "spec": "examples/business/quarterly-revenue.spec.json"
+  },
+  {
+    "id": "conversion-funnel",
+    "category": "Business charts",
+    "name": "Conversion funnel",
+    "description": "Visit → Sign-up → Activate → Subscribe → Renew, with retention falloff.",
+    "csv": "examples/business/conversion-funnel.csv",
+    "spec": "examples/business/conversion-funnel.spec.json"
+  },
+  {
+    "id": "dau-trend",
+    "category": "Business charts",
+    "name": "Daily active users",
+    "description": "30-day DAU growth — line + point marks layered on the same encoding.",
+    "csv": "examples/business/dau-trend.csv",
+    "spec": "examples/business/dau-trend.spec.json"
+  },
+  {
+    "id": "top-products",
+    "category": "Business charts",
+    "name": "Top-selling products",
+    "description": "Eight products ranked by units sold, ordinal x-axis bar chart.",
+    "csv": "examples/business/top-products.csv",
+    "spec": "examples/business/top-products.spec.json"
+  },
+  {
+    "id": "error-rate",
+    "category": "Business charts",
+    "name": "API error rate by hour",
+    "description": "Diurnal error rate pattern — line + area layered together.",
+    "csv": "examples/business/error-rate.csv",
+    "spec": "examples/business/error-rate.spec.json"
+  },
+  {
+    "id": "ab-test",
+    "category": "Business charts",
+    "name": "A/B test result",
+    "description": "Four-variant sign-up-conversion comparison, ordinal bars.",
+    "csv": "examples/business/ab-test.csv",
+    "spec": "examples/business/ab-test.spec.json"
+  },
+
+  {
+    "id": "sine-wave",
+    "category": "Joy of Math",
+    "name": "Sine wave — y = sin(x)",
+    "description": "Two full periods of the canonical wave. Function data shape, 200 samples.",
+    "csv": null,
+    "spec": "examples/joy/sine-wave.json"
+  },
+  {
+    "id": "lissajous",
+    "category": "Joy of Math",
+    "name": "Lissajous curve",
+    "description": "Parametric (sin(3t), cos(2t)) — the figure that traces both axes in one stroke.",
+    "csv": null,
+    "spec": "examples/joy/lissajous.json"
+  },
+  {
+    "id": "hypotrochoid-rosette",
+    "category": "Joy of Math",
+    "name": "Hypotrochoid rosette",
+    "description": "Spirograph-style rosette — the curve a point on a small circle traces inside a larger one.",
+    "csv": null,
+    "spec": "examples/joy/hypotrochoid-rosette.json"
+  },
+  {
+    "id": "curlicue-golden",
+    "category": "Joy of Math",
+    "name": "Golden curlicue",
+    "description": "Davis-Knuth-Pickover curlicue at the golden-ratio rotation step.",
+    "csv": null,
+    "spec": "examples/joy/curlicue-golden.json"
+  },
+  {
+    "id": "bezier-cubic",
+    "category": "Joy of Math",
+    "name": "Cubic Bezier — de Casteljau",
+    "description": "Cubic Bezier curve with the de Casteljau construction overlay at t=0.5.",
+    "csv": null,
+    "spec": "examples/joy/bezier-cubic.json"
+  },
+  {
+    "id": "gravity-lens",
+    "category": "Joy of Math",
+    "name": "Gravitational lensing",
+    "description": "A geodesic in Schwarzschild geometry — light bending around a black hole.",
+    "csv": null,
+    "spec": "examples/joy/gravity-lens.json"
+  },
+  {
+    "id": "predator-prey",
+    "category": "Joy of Math",
+    "name": "Predator-prey orbit",
+    "description": "Lotka-Volterra trajectory — the canonical limit cycle of ecology.",
+    "csv": null,
+    "spec": "examples/joy/predator-prey.json"
+  },
+  {
+    "id": "heartbeat",
+    "category": "Joy of Math",
+    "name": "Heartbeat (FitzHugh-Nagumo)",
+    "description": "Relaxation oscillator producing the spike-and-recover rhythm of a resting heart.",
+    "csv": null,
+    "spec": "examples/joy/heartbeat.json"
+  },
+  {
+    "id": "leopard-spots",
+    "category": "Joy of Math",
+    "name": "Leopard spots (Gray-Scott)",
+    "description": "Reaction-diffusion at F=k=0.062 — the leopard-spots regime of the Gray-Scott PDE.",
+    "csv": null,
+    "spec": "examples/joy/leopard-spots.json"
+  },
+  {
+    "id": "sunflower-seeds",
+    "category": "Joy of Math",
+    "name": "Sunflower phyllotaxis",
+    "description": "Vogel's 1979 model — 200 seeds at radius √n, angle n·137.5° (the golden angle).",
+    "csv": null,
+    "spec": "examples/joy/sunflower-seeds.json"
+  },
+
+  {
+    "id": "bio-dna",
+    "category": "Glyph in Life",
+    "name": "DNA double helix",
+    "description": "Two phosphate strands winding at 10 base pairs per turn, against a starfield.",
+    "csv": null,
+    "spec": "examples/life/bio-dna.json"
+  },
+  {
+    "id": "bio-circulation",
+    "category": "Glyph in Life",
+    "name": "Heart + circulation (animated)",
+    "description": "Anatomical heart with great vessels and lungs. Pulse-animated at 67 bpm via SMIL.",
+    "csv": null,
+    "spec": "examples/life/bio-circulation.json"
+  },
+  {
+    "id": "bio-jellyfish",
+    "category": "Glyph in Life",
+    "name": "Bioluminescent jellyfish",
+    "description": "Aurelia aurita — translucent bell, sine-modulated tentacles, plankton dots.",
+    "csv": null,
+    "spec": "examples/life/bio-jellyfish.json"
+  },
+  {
+    "id": "eng-locomotive",
+    "category": "Glyph in Life",
+    "name": "4-6-2 Pacific steam locomotive",
+    "description": "Side elevation: boiler, smokebox, brass side rod, four spoked driving wheels.",
+    "csv": null,
+    "spec": "examples/life/eng-locomotive.json"
+  },
+  {
+    "id": "eng-windmill",
+    "category": "Glyph in Life",
+    "name": "Dutch tower windmill (animated)",
+    "description": "Stone tower, 4 rotating sails on rotate-loop, morning sky with sun + clouds.",
+    "csv": null,
+    "spec": "examples/life/eng-windmill.json"
+  },
+  {
+    "id": "eng-bridge",
+    "category": "Glyph in Life",
+    "name": "Suspension bridge",
+    "description": "Golden Gate-style: art-deco towers, parabolic cable, 30 suspenders.",
+    "csv": null,
+    "spec": "examples/life/eng-bridge.json"
+  },
+  {
+    "id": "arch-cathedral",
+    "category": "Glyph in Life",
+    "name": "Gothic cathedral (Notre-Dame)",
+    "description": "West facade: twin towers, central spire, rose-window tracery, triple portal.",
+    "csv": null,
+    "spec": "examples/life/arch-cathedral.json"
+  },
+  {
+    "id": "arch-temple",
+    "category": "Glyph in Life",
+    "name": "Doric Greek temple",
+    "description": "Six fluted columns with entasis, triglyph frieze, pediment with tympanum.",
+    "csv": null,
+    "spec": "examples/life/arch-temple.json"
+  },
+  {
+    "id": "arch-skyscraper",
+    "category": "Glyph in Life",
+    "name": "Art Deco skyscraper at dusk",
+    "description": "4-tier Empire State-style setback massing, lit windows, pulsing antenna light.",
+    "csv": null,
+    "spec": "examples/life/arch-skyscraper.json"
+  },
+  {
+    "id": "ext-orrery",
+    "category": "Glyph in Life",
+    "name": "Solar system orrery (animated)",
+    "description": "Six planets, six rotate-loop animations scaled by real orbital years.",
+    "csv": null,
+    "spec": "examples/life/ext-orrery.json"
+  },
+
+  {
+    "id": "whyboard",
+    "category": "Whyboard",
+    "name": "Whyboard tree — Q3 revenue",
+    "description": "Static rendering of the kind of tree glyph_whyboard returns: root question, four branches, leaf findings.",
+    "csv": null,
+    "spec": "examples/whyboard/sample-whyboard.json"
+  }
+]

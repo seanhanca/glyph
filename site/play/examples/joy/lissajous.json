@@ -1,0 +1,28 @@
+{
+  "version": "glyph/0.1",
+  "data": {
+    "function": {
+      "shape": "function",
+      "parameter": { "name": "t", "min": 0, "max": 6.283185307179586, "samples": 400 },
+      "xExpr": "sin(3*t)",
+      "yExpr": "cos(2*t)"
+    }
+  },
+  "layers": [
+    {
+      "mark": "line",
+      "encoding": {
+        "x": {
+          "field": "x",
+          "type": "quantitative",
+          "scale": { "domain": [-1.2, 1.2] }
+        },
+        "y": {
+          "field": "y",
+          "type": "quantitative",
+          "scale": { "domain": [-1.2, 1.2] }
+        }
+      }
+    }
+  ]
+}
