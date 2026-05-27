@@ -1,0 +1,8 @@
+{
+  "threeD": {
+    "scene": "particle-galaxy",
+    "params": {
+      "count": 8000
+    }
+  }
+}

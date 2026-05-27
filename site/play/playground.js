@@ -14,6 +14,7 @@ import {
   fetchGist,
   openSaveToMyAccount,
 } from "./share.js";
+import { isThreeDSpec, renderThreeD } from "./threed-runtime.js";
 
 console.log("playground booting…");
 console.log("@glyph/core exports:", Object.keys(glyph).slice(0, 10));
@@ -245,6 +246,25 @@ function rerender() {
       chartHost.innerHTML = `<pre class="error">JSON parse error: ${escapeHtml(e.message)}</pre>`;
     }
     renderAuditError(`JSON parse error: ${e.message}`);
+    return;
+  }
+
+  // 3D specs (Three.js scenes) take a separate dispatch — they render
+  // to a <canvas> via WebGL, not to <svg>. They're playground-only and
+  // self-contained (no data binding, no audit applicable).
+  if (isThreeDSpec(spec)) {
+    // The audit panel reflects "not applicable" for 3D since the
+    // chart-spec auditor doesn't speak Three.js scene specs.
+    if (auditHost && trustHost) {
+      auditHost.innerHTML =
+        '<li class="placeholder">Audit doesn\'t apply to Three.js scenes (WebGL is GPU-dependent, not deterministic SVG).</li>';
+      trustHost.innerHTML = "";
+      trustHost.style.color = "";
+      if (auditMetaEl) auditMetaEl.textContent = "n/a (3D scene)";
+    }
+    renderThreeD(spec, chartHost).catch((e) => {
+      chartHost.innerHTML = `<pre class="error">3D render error: ${escapeHtml(e?.message ?? String(e))}</pre>`;
+    });
     return;
   }
 

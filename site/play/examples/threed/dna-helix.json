@@ -1,0 +1,9 @@
+{
+  "threeD": {
+    "scene": "dna-helix",
+    "params": {
+      "turns": 4,
+      "rungs": 56
+    }
+  }
+}

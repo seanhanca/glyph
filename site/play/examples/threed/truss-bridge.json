@@ -1,0 +1,8 @@
+{
+  "threeD": {
+    "scene": "truss-bridge",
+    "params": {
+      "bays": 8
+    }
+  }
+}
