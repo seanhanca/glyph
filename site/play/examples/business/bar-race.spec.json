@@ -1,0 +1,30 @@
+{
+  "version": "glyph/0.1",
+  "title": "Top products by revenue — 2020-2025 race ($M)",
+  "width": 700,
+  "height": 420,
+  "animation": {
+    "kind": "race",
+    "frame_field": "year",
+    "duration_ms": 8000
+  },
+  "layers": [
+    {
+      "mark": "bar",
+      "encoding": {
+        "x": {
+          "field": "product",
+          "type": "ordinal"
+        },
+        "y": {
+          "field": "revenue",
+          "type": "quantitative"
+        },
+        "color": {
+          "field": "product",
+          "type": "nominal"
+        }
+      }
+    }
+  ]
+}

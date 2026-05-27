@@ -1,0 +1,37 @@
+product,year,revenue
+Compute,2020,1.37
+Compute,2021,1.63
+Compute,2022,1.94
+Compute,2023,2.31
+Compute,2024,2.65
+Compute,2025,3.2
+Storage,2020,1.13
+Storage,2021,1.36
+Storage,2022,1.63
+Storage,2023,1.93
+Storage,2024,2.4
+Storage,2025,2.9
+IDE Pro,2020,0.79
+IDE Pro,2021,1.04
+IDE Pro,2022,1.39
+IDE Pro,2023,1.92
+IDE Pro,2024,2.54
+IDE Pro,2025,3.5
+CDN,2020,0.56
+CDN,2021,0.81
+CDN,2022,1.11
+CDN,2023,1.53
+CDN,2024,2.19
+CDN,2025,3.01
+Debug,2020,0.46
+Debug,2021,0.71
+Debug,2022,1.03
+Debug,2023,1.56
+Debug,2024,2.29
+Debug,2025,3.35
+Workers,2020,0.17
+Workers,2021,0.32
+Workers,2022,0.58
+Workers,2023,1.07
+Workers,2024,1.91
+Workers,2025,3.43
