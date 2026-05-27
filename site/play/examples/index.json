@@ -5,7 +5,7 @@
     "name": "Bike rides by hour",
     "description": "The original playground example — 12-row CSV, bar chart of hourly rides.",
     "csv": "examples/rides.csv",
-    "spec": null
+    "spec": "examples/rides.spec.json"
   },
   {
     "id": "quarterly-revenue",

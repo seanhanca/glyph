@@ -1,0 +1,13 @@
+{
+  "version": "glyph/0.1",
+  "title": "Bike rides by hour",
+  "layers": [
+    {
+      "mark": "bar",
+      "encoding": {
+        "x": { "field": "hour", "type": "ordinal" },
+        "y": { "field": "rides", "type": "quantitative" }
+      }
+    }
+  ]
+}
