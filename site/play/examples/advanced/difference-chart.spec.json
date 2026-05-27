@@ -1,0 +1,681 @@
+{
+  "compose": {
+    "viewBox": {
+      "width": 760,
+      "height": 380
+    },
+    "title": "Actual vs target — difference chart",
+    "description": "Two-line plot with the gap between actual and target shaded green (beats) or red (misses) per month-segment. Beats and misses are read at a glance from the band color.",
+    "children": [
+      {
+        "at": {
+          "x": 380,
+          "y": 30
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Actual vs target revenue — difference chart ($K)",
+          "fontSize": 17,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 380,
+          "y": 52
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Green band = beat target. Red band = missed. Below: actual (solid), target (dashed).",
+          "fontSize": 11.5,
+          "fill": "#666",
+          "italic": true,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 70 320 L 700 320 M 70 257.5 L 700 257.5 M 70 195 L 700 195 M 70 132.5 L 700 132.5 M 70 70 L 700 70",
+          "fill": "none",
+          "stroke": "#eef0f4",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 62,
+          "y": 324
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "280",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 62,
+          "y": 261.5
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "360",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 62,
+          "y": 199
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "440",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 62,
+          "y": 136.5
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "520",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 62,
+          "y": 74
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "600",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 70,
+          "y": 336
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Jan",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 184.54545454545456,
+          "y": 336
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Mar",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 299.0909090909091,
+          "y": 336
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "May",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 413.6363636363636,
+          "y": 336
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Jul",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 528.1818181818182,
+          "y": 336
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Sep",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 642.7272727272727,
+          "y": 336
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Nov",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polygon",
+        "polygon": {
+          "points": [
+            [70, 296.5625],
+            [127.27272727272728, 257.5],
+            [127.27272727272728, 273.125],
+            [70, 288.75]
+          ],
+          "fill": "#f4cfc7",
+          "stroke": "none",
+          "strokeWidth": 0
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polygon",
+        "polygon": {
+          "points": [
+            [127.27272727272728, 257.5],
+            [184.54545454545456, 273.125],
+            [184.54545454545456, 257.5],
+            [127.27272727272728, 273.125]
+          ],
+          "fill": "#f4cfc7",
+          "stroke": "none",
+          "strokeWidth": 0
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polygon",
+        "polygon": {
+          "points": [
+            [184.54545454545456, 273.125],
+            [241.8181818181818, 245.78125],
+            [241.8181818181818, 241.875],
+            [184.54545454545456, 257.5]
+          ],
+          "fill": "#f4cfc7",
+          "stroke": "none",
+          "strokeWidth": 0
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polygon",
+        "polygon": {
+          "points": [
+            [241.8181818181818, 245.78125],
+            [299.0909090909091, 202.8125],
+            [299.0909090909091, 226.25],
+            [241.8181818181818, 241.875]
+          ],
+          "fill": "#f4cfc7",
+          "stroke": "none",
+          "strokeWidth": 0
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polygon",
+        "polygon": {
+          "points": [
+            [299.0909090909091, 202.8125],
+            [356.3636363636364, 214.53125],
+            [356.3636363636364, 210.625],
+            [299.0909090909091, 226.25]
+          ],
+          "fill": "#f4cfc7",
+          "stroke": "none",
+          "strokeWidth": 0
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polygon",
+        "polygon": {
+          "points": [
+            [356.3636363636364, 214.53125],
+            [413.6363636363636, 171.5625],
+            [413.6363636363636, 195],
+            [356.3636363636364, 210.625]
+          ],
+          "fill": "#f4cfc7",
+          "stroke": "none",
+          "strokeWidth": 0
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polygon",
+        "polygon": {
+          "points": [
+            [413.6363636363636, 171.5625],
+            [470.9090909090909, 116.875],
+            [470.9090909090909, 179.375],
+            [413.6363636363636, 195]
+          ],
+          "fill": "#cce7d0",
+          "stroke": "none",
+          "strokeWidth": 0
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polygon",
+        "polygon": {
+          "points": [
+            [470.9090909090909, 116.875],
+            [528.1818181818182, 140.3125],
+            [528.1818181818182, 163.75],
+            [470.9090909090909, 179.375]
+          ],
+          "fill": "#cce7d0",
+          "stroke": "none",
+          "strokeWidth": 0
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polygon",
+        "polygon": {
+          "points": [
+            [528.1818181818182, 140.3125],
+            [585.4545454545455, 155.9375],
+            [585.4545454545455, 148.125],
+            [528.1818181818182, 163.75]
+          ],
+          "fill": "#f4cfc7",
+          "stroke": "none",
+          "strokeWidth": 0
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polygon",
+        "polygon": {
+          "points": [
+            [585.4545454545455, 155.9375],
+            [642.7272727272727, 124.6875],
+            [642.7272727272727, 132.5],
+            [585.4545454545455, 148.125]
+          ],
+          "fill": "#f4cfc7",
+          "stroke": "none",
+          "strokeWidth": 0
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polygon",
+        "polygon": {
+          "points": [
+            [642.7272727272727, 124.6875],
+            [700, 85.625],
+            [700, 116.875],
+            [642.7272727272727, 132.5]
+          ],
+          "fill": "#cce7d0",
+          "stroke": "none",
+          "strokeWidth": 0
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 70 288.75 L 127.27272727272728 273.125 L 184.54545454545456 257.5 L 241.8181818181818 241.875 L 299.0909090909091 226.25 L 356.3636363636364 210.625 L 413.6363636363636 195 L 470.9090909090909 179.375 L 528.1818181818182 163.75 L 585.4545454545455 148.125 L 642.7272727272727 132.5 L 700 116.875",
+          "stroke": "#888",
+          "strokeWidth": 2,
+          "strokeDasharray": "6,4",
+          "fill": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [
+            [70, 296.5625],
+            [127.27272727272728, 257.5],
+            [184.54545454545456, 273.125],
+            [241.8181818181818, 245.78125],
+            [299.0909090909091, 202.8125],
+            [356.3636363636364, 214.53125],
+            [413.6363636363636, 171.5625],
+            [470.9090909090909, 116.875],
+            [528.1818181818182, 140.3125],
+            [585.4545454545455, 155.9375],
+            [642.7272727272727, 124.6875],
+            [700, 85.625]
+          ],
+          "stroke": "#1a3855",
+          "strokeWidth": 2.5
+        }
+      },
+      {
+        "at": {
+          "x": 70,
+          "y": 296.5625
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 3,
+          "fill": "#1a3855"
+        }
+      },
+      {
+        "at": {
+          "x": 127.27272727272728,
+          "y": 257.5
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 3,
+          "fill": "#1a3855"
+        }
+      },
+      {
+        "at": {
+          "x": 184.54545454545456,
+          "y": 273.125
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 3,
+          "fill": "#1a3855"
+        }
+      },
+      {
+        "at": {
+          "x": 241.8181818181818,
+          "y": 245.78125
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 3,
+          "fill": "#1a3855"
+        }
+      },
+      {
+        "at": {
+          "x": 299.0909090909091,
+          "y": 202.8125
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 3,
+          "fill": "#1a3855"
+        }
+      },
+      {
+        "at": {
+          "x": 356.3636363636364,
+          "y": 214.53125
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 3,
+          "fill": "#1a3855"
+        }
+      },
+      {
+        "at": {
+          "x": 413.6363636363636,
+          "y": 171.5625
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 3,
+          "fill": "#1a3855"
+        }
+      },
+      {
+        "at": {
+          "x": 470.9090909090909,
+          "y": 116.875
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 3,
+          "fill": "#1a3855"
+        }
+      },
+      {
+        "at": {
+          "x": 528.1818181818182,
+          "y": 140.3125
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 3,
+          "fill": "#1a3855"
+        }
+      },
+      {
+        "at": {
+          "x": 585.4545454545455,
+          "y": 155.9375
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 3,
+          "fill": "#1a3855"
+        }
+      },
+      {
+        "at": {
+          "x": 642.7272727272727,
+          "y": 124.6875
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 3,
+          "fill": "#1a3855"
+        }
+      },
+      {
+        "at": {
+          "x": 700,
+          "y": 85.625
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 3,
+          "fill": "#1a3855"
+        }
+      },
+      {
+        "at": {
+          "x": 60,
+          "y": 364
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -8 -4 L 8 -4 L 8 4 L -8 4 Z",
+          "fill": "#cce7d0"
+        }
+      },
+      {
+        "at": {
+          "x": 74,
+          "y": 368
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Beat target",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 175,
+          "y": 364
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -8 -4 L 8 -4 L 8 4 L -8 4 Z",
+          "fill": "#f4cfc7"
+        }
+      },
+      {
+        "at": {
+          "x": 189,
+          "y": 368
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Missed target",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 295,
+          "y": 364
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -12 0 L 12 0",
+          "stroke": "#1a3855",
+          "strokeWidth": 2.5,
+          "fill": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 311,
+          "y": 368
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Actual",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 365,
+          "y": 364
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -12 0 L 12 0",
+          "stroke": "#888",
+          "strokeWidth": 2,
+          "strokeDasharray": "5,3",
+          "fill": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 381,
+          "y": 368
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Target",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "start"
+        }
+      }
+    ]
+  }
+}

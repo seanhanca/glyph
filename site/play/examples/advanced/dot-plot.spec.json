@@ -1,0 +1,247 @@
+{
+  "compose": {
+    "viewBox": {
+      "width": 720,
+      "height": 440
+    },
+    "title": "Dot plot — feature usage by role",
+    "description": "Strip plot: one dot per user per role. Dark dots are veterans (>1 yr), light dots are newer. Useful for spotting outliers and ranges per category without binning.",
+    "children": [
+      {
+        "at": {
+          "x": 360,
+          "y": 30
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Daily feature usage by role — dot plot",
+          "fontSize": 17,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 360,
+          "y": 52
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Each dot = one user's average feature touches per day. Dark = veteran (>1 yr), light = newer.",
+          "fontSize": 11.5,
+          "fill": "#666",
+          "italic": true,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 140,
+          "y": 396
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "0",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 244,
+          "y": 396
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "10",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 348,
+          "y": 396
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "20",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 452,
+          "y": 396
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "30",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 556,
+          "y": 396
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "40",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 660,
+          "y": 396
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "50",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 400,
+          "y": 414
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Feature touches per day",
+          "fontSize": 11.5,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 128,
+          "y": 105
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Admin",
+          "fontSize": 12,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 128,
+          "y": 167
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Developer",
+          "fontSize": 12,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 128,
+          "y": 229
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Analyst",
+          "fontSize": 12,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 128,
+          "y": 291
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Operator",
+          "fontSize": 12,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 128,
+          "y": 353
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Designer",
+          "fontSize": 12,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 140 132 L 660 132 M 140 194 L 660 194 M 140 256 L 660 256 M 140 318 L 660 318 M 140 380 L 660 380",
+          "stroke": "#eef0f4",
+          "strokeWidth": 1,
+          "fill": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 163.82 110.95 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 265.31 110.48 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 306.20 87.94 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 261.70 113.19 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 232.77 87.74 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 290.13 112.26 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 281.74 107.01 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 253.63 101.08 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 238.09 102.78 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 375.01 156.27 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 434.86 152.11 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 473.40 170.72 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 427.35 168.88 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 385.85 171.27 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 421.81 155.98 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 357.12 154.58 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 195.67 223.71 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 312.65 225.91 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 323.16 218.75 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 383.75 234.48 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 320.44 223.44 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 314.56 233.13 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 135.00 279.68 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 186.07 300.68 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 271.72 274.06 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 170.96 276.42 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 179.79 294.38 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 356.72 346.11 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 367.38 359.66 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 303.09 336.68 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 368.90 340.79 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 409.79 347.23 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 240.49 347.40 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 283.79 343.83 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 334.43 354.75 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 328.05 342.11 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 326.22 353.78 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0",
+          "fill": "#aac1d8",
+          "stroke": "#1a3855",
+          "strokeWidth": 0.8
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 208.79 102.18 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 252.57 94.06 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 326.50 111.65 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 453.08 150.76 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 461.33 164.54 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 385.55 175.12 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 271.10 150.26 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 581.60 172.60 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 334.51 220.65 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 284.15 225.47 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 326.36 219.91 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 413.24 233.18 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 313.15 238.57 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 272.74 212.08 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 135.00 300.09 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 271.13 295.42 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 189.70 280.18 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 180.57 286.46 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 152.68 278.95 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 187.97 281.91 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 190.58 285.17 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 342.45 356.94 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0 M 351.35 337.77 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0",
+          "fill": "#2c5683",
+          "stroke": "#1a3855",
+          "strokeWidth": 0.8
+        }
+      }
+    ]
+  }
+}

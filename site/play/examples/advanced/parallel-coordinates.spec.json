@@ -1,0 +1,528 @@
+{
+  "compose": {
+    "viewBox": {
+      "width": 780,
+      "height": 440
+    },
+    "title": "Parallel coordinates — multi-attribute product comparison",
+    "description": "Six attribute axes laid out vertically. Each colored polyline is one product crossing all six. Correlated attributes show parallel lines; tradeoffs show crossing lines.",
+    "children": [
+      {
+        "at": {
+          "x": 390,
+          "y": 32
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Parallel coordinates — product feature comparison",
+          "fontSize": 17,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 390,
+          "y": 54
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Six attributes laid out as vertical axes. Each colored line is one product crossing them.",
+          "fontSize": 11.5,
+          "fill": "#666",
+          "italic": true,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 60 80 L 60 390",
+          "stroke": "#bcc4cf",
+          "strokeWidth": 1,
+          "fill": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 60,
+          "y": 70
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Performance",
+          "fontSize": 11.5,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 54,
+          "y": 84
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "100",
+          "fontSize": 9.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 54,
+          "y": 394
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "50",
+          "fontSize": 9.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 176 80 L 176 390",
+          "stroke": "#bcc4cf",
+          "strokeWidth": 1,
+          "fill": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 176,
+          "y": 70
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Cost ($M)",
+          "fontSize": 11.5,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 170,
+          "y": 84
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "5",
+          "fontSize": 9.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 170,
+          "y": 394
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "0.5",
+          "fontSize": 9.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 292 80 L 292 390",
+          "stroke": "#bcc4cf",
+          "strokeWidth": 1,
+          "fill": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 292,
+          "y": 70
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "UX",
+          "fontSize": 11.5,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 286,
+          "y": 84
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "100",
+          "fontSize": 9.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 286,
+          "y": 394
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "60",
+          "fontSize": 9.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 408 80 L 408 390",
+          "stroke": "#bcc4cf",
+          "strokeWidth": 1,
+          "fill": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 408,
+          "y": 70
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Security",
+          "fontSize": 11.5,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 402,
+          "y": 84
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "100",
+          "fontSize": 9.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 402,
+          "y": 394
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "60",
+          "fontSize": 9.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 524 80 L 524 390",
+          "stroke": "#bcc4cf",
+          "strokeWidth": 1,
+          "fill": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 524,
+          "y": 70
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Reliability",
+          "fontSize": 11.5,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 518,
+          "y": 84
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "100",
+          "fontSize": 9.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 518,
+          "y": 394
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "80",
+          "fontSize": 9.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 640 80 L 640 390",
+          "stroke": "#bcc4cf",
+          "strokeWidth": 1,
+          "fill": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 640,
+          "y": 70
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Revenue ($M)",
+          "fontSize": 11.5,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 634,
+          "y": 84
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "10",
+          "fontSize": 9.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 634,
+          "y": 394
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "0",
+          "fontSize": 9.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [
+            [60, 129.6],
+            [176, 162.67],
+            [292, 250.5],
+            [408, 188.5],
+            [524, 95.5],
+            [640, 126.5]
+          ],
+          "stroke": "#4c78a8",
+          "strokeWidth": 2
+        }
+      },
+      {
+        "at": {
+          "x": 650,
+          "y": 130.5
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Compute",
+          "fontSize": 12,
+          "fill": "#4c78a8",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [
+            [60, 154.4],
+            [176, 245.33],
+            [292, 219.5],
+            [408, 149.75],
+            [524, 111],
+            [640, 235]
+          ],
+          "stroke": "#f58518",
+          "strokeWidth": 2
+        }
+      },
+      {
+        "at": {
+          "x": 650,
+          "y": 239
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Storage",
+          "fontSize": 12,
+          "fill": "#f58518",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [
+            [60, 228.8],
+            [176, 341.78],
+            [292, 118.75],
+            [408, 289.25],
+            [524, 173],
+            [640, 284.6]
+          ],
+          "stroke": "#54a24b",
+          "strokeWidth": 2
+        }
+      },
+      {
+        "at": {
+          "x": 650,
+          "y": 288.6
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "IDE Pro",
+          "fontSize": 12,
+          "fill": "#54a24b",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [
+            [60, 197.8],
+            [176, 362.44],
+            [292, 173],
+            [408, 312.5],
+            [524, 235],
+            [640, 334.2]
+          ],
+          "stroke": "#e45756",
+          "strokeWidth": 2
+        }
+      },
+      {
+        "at": {
+          "x": 650,
+          "y": 338.2
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Debug",
+          "fontSize": 12,
+          "fill": "#e45756",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [[60, 111], [176, 314.22], [292, 235], [408, 204], [524, 126.5], [640, 355.9]],
+          "stroke": "#72b7b2",
+          "strokeWidth": 2
+        }
+      },
+      {
+        "at": {
+          "x": 650,
+          "y": 359.9
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Workers",
+          "fontSize": 12,
+          "fill": "#72b7b2",
+          "italic": false,
+          "anchor": "start"
+        }
+      }
+    ]
+  }
+}
