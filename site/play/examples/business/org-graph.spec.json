@@ -1,105 +1,432 @@
 {
-  "version": "glyph/0.1",
-  "title": "Engineering org — reporting + cross-team links",
-  "width": 640,
-  "height": 480,
-  "data": {
-    "graph": {
-      "nodes": [
-        {
-          "id": "CEO",
-          "group": "exec"
+  "compose": {
+    "viewBox": {
+      "width": 720,
+      "height": 500
+    },
+    "title": "Engineering org — reporting + cross-team links",
+    "description": "10-node hierarchy with three groups (Executive, Platform, Product) plus two dashed cross-team collaboration edges. Hand-laid in compose: a labeled, deterministic alternative to running the seeded force layout, which produced a tight blob without labels.",
+    "children": [
+      {
+        "at": {
+          "x": 360,
+          "y": 30
         },
-        {
-          "id": "VP Eng",
-          "group": "exec"
-        },
-        {
-          "id": "Mgr Platform",
-          "group": "platform"
-        },
-        {
-          "id": "Mgr Product",
-          "group": "product"
-        },
-        {
-          "id": "Eng A",
-          "group": "platform"
-        },
-        {
-          "id": "Eng B",
-          "group": "platform"
-        },
-        {
-          "id": "Eng C",
-          "group": "platform"
-        },
-        {
-          "id": "Eng D",
-          "group": "product"
-        },
-        {
-          "id": "Eng E",
-          "group": "product"
-        },
-        {
-          "id": "Eng F",
-          "group": "product"
+        "mark": "text",
+        "textMark": {
+          "text": "Engineering org — reporting + cross-team links",
+          "fontSize": 17,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
         }
-      ],
-      "edges": [
-        {
-          "source": "CEO",
-          "target": "VP Eng"
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
         },
-        {
-          "source": "VP Eng",
-          "target": "Mgr Platform"
-        },
-        {
-          "source": "VP Eng",
-          "target": "Mgr Product"
-        },
-        {
-          "source": "Mgr Platform",
-          "target": "Eng A"
-        },
-        {
-          "source": "Mgr Platform",
-          "target": "Eng B"
-        },
-        {
-          "source": "Mgr Platform",
-          "target": "Eng C"
-        },
-        {
-          "source": "Mgr Product",
-          "target": "Eng D"
-        },
-        {
-          "source": "Mgr Product",
-          "target": "Eng E"
-        },
-        {
-          "source": "Mgr Product",
-          "target": "Eng F"
-        },
-        {
-          "source": "Eng A",
-          "target": "Eng D"
-        },
-        {
-          "source": "Eng B",
-          "target": "Eng E"
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 360 80 L 360 170 M 360 170 L 200 270 M 360 170 L 520 270 M 200 270 L 90 380 M 200 270 L 200 380 M 200 270 L 310 380 M 520 270 L 420 380 M 520 270 L 530 380 M 520 270 L 640 380",
+          "fill": "none",
+          "stroke": "#99a4b3",
+          "strokeWidth": 1.5
         }
-      ]
-    }
-  },
-  "seed": 42,
-  "layers": [
-    {
-      "mark": "force",
-      "encoding": {}
-    }
-  ]
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 90 380 L 420 380 M 200 380 L 530 380",
+          "fill": "none",
+          "stroke": "#aab2bd",
+          "strokeWidth": 1.2,
+          "strokeDasharray": "5,4"
+        }
+      },
+      {
+        "at": {
+          "x": 360,
+          "y": 80
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 22,
+          "fill": "#4c78a8",
+          "stroke": "#1a1a1a",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 360,
+          "y": 50
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "CEO",
+          "fontSize": 11.5,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 360,
+          "y": 170
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 22,
+          "fill": "#4c78a8",
+          "stroke": "#1a1a1a",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 360,
+          "y": 140
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "VP Eng",
+          "fontSize": 11.5,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 200,
+          "y": 270
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 22,
+          "fill": "#f58518",
+          "stroke": "#1a1a1a",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 200,
+          "y": 306
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Mgr Platform",
+          "fontSize": 11.5,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 520,
+          "y": 270
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 22,
+          "fill": "#54a24b",
+          "stroke": "#1a1a1a",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 520,
+          "y": 306
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Mgr Product",
+          "fontSize": 11.5,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 90,
+          "y": 380
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 17,
+          "fill": "#f58518",
+          "stroke": "#1a1a1a",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 90,
+          "y": 411
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Eng A",
+          "fontSize": 11.5,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 200,
+          "y": 380
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 17,
+          "fill": "#f58518",
+          "stroke": "#1a1a1a",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 200,
+          "y": 411
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Eng B",
+          "fontSize": 11.5,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 310,
+          "y": 380
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 17,
+          "fill": "#f58518",
+          "stroke": "#1a1a1a",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 310,
+          "y": 411
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Eng C",
+          "fontSize": 11.5,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 420,
+          "y": 380
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 17,
+          "fill": "#54a24b",
+          "stroke": "#1a1a1a",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 420,
+          "y": 411
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Eng D",
+          "fontSize": 11.5,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 530,
+          "y": 380
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 17,
+          "fill": "#54a24b",
+          "stroke": "#1a1a1a",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 530,
+          "y": 411
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Eng E",
+          "fontSize": 11.5,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 640,
+          "y": 380
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 17,
+          "fill": "#54a24b",
+          "stroke": "#1a1a1a",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 640,
+          "y": 411
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Eng F",
+          "fontSize": 11.5,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 200,
+          "y": 460
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 7,
+          "fill": "#4c78a8",
+          "stroke": "#1a1a1a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 214,
+          "y": 464
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Executive",
+          "fontSize": 12,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 330,
+          "y": 460
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 7,
+          "fill": "#f58518",
+          "stroke": "#1a1a1a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 344,
+          "y": 464
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Platform",
+          "fontSize": 12,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 460,
+          "y": 460
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 7,
+          "fill": "#54a24b",
+          "stroke": "#1a1a1a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 474,
+          "y": 464
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Product",
+          "fontSize": 12,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 590 460 L 618 460",
+          "fill": "none",
+          "stroke": "#aab2bd",
+          "strokeWidth": 1.2,
+          "strokeDasharray": "5,4"
+        }
+      },
+      {
+        "at": {
+          "x": 624,
+          "y": 464
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "cross-team",
+          "fontSize": 12,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "start"
+        }
+      }
+    ]
+  }
 }

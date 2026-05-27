@@ -1,40 +1,375 @@
 {
-  "version": "glyph/0.1",
-  "title": "Product KPI scorecard — Q3",
-  "width": 520,
-  "height": 520,
-  "coordinates": {
-    "type": "polar"
-  },
-  "layers": [
-    {
-      "mark": "line",
-      "encoding": {
-        "x": {
-          "field": "metric",
-          "type": "ordinal"
-        },
-        "y": {
-          "field": "score",
-          "type": "quantitative",
-          "scale": {
-            "domain": [0, 100]
-          }
-        }
-      }
+  "compose": {
+    "viewBox": {
+      "width": 640,
+      "height": 600
     },
-    {
-      "mark": "point",
-      "encoding": {
-        "x": {
-          "field": "metric",
-          "type": "ordinal"
+    "title": "Product KPI scorecard — Q3",
+    "description": "Six KPI axes (0–100) drawn as a labeled radar: concentric grid rings, spokes, axis labels, ring-value tick marks, filled polygon + dots. Hand-laid in compose so it ships with the labels the bare polar-line mark doesn't yet emit.",
+    "children": [
+      {
+        "at": {
+          "x": 320,
+          "y": 36
         },
-        "y": {
-          "field": "score",
-          "type": "quantitative"
+        "mark": "text",
+        "textMark": {
+          "text": "Product KPI scorecard — Q3",
+          "fontSize": 18,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 320,
+          "y": 58
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Each axis 0–100. Higher = better. Last 90 days.",
+          "fontSize": 12,
+          "fill": "#666",
+          "italic": true,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 270 340 a 50 50 0 1 0 100 0 a 50 50 0 1 0 -100 0 M 220 340 a 100 100 0 1 0 200 0 a 100 100 0 1 0 -200 0 M 170 340 a 150 150 0 1 0 300 0 a 150 150 0 1 0 -300 0 M 120 340 a 200 200 0 1 0 400 0 a 200 200 0 1 0 -400 0 M 320 340 L 320.00 140.00 M 320 340 L 493.21 240.00 M 320 340 L 493.21 440.00 M 320 340 L 320.00 540.00 M 320 340 L 146.79 440.00 M 320 340 L 146.79 240.00",
+          "fill": "none",
+          "stroke": "#dde3ec",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 326,
+          "y": 293
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "25",
+          "fontSize": 10,
+          "fill": "#aab2bd",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 326,
+          "y": 243
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "50",
+          "fontSize": 10,
+          "fill": "#aab2bd",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 326,
+          "y": 193
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "75",
+          "fontSize": 10,
+          "fill": "#aab2bd",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 326,
+          "y": 143
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "100",
+          "fontSize": 10,
+          "fill": "#aab2bd",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polygon",
+        "polygon": {
+          "points": [
+            [320, 168],
+            [479.35, 248],
+            [455.1, 418],
+            [320, 468],
+            [167.58, 428],
+            [191.83, 266]
+          ],
+          "fill": "rgba(76,120,168,0.22)",
+          "stroke": "#4c78a8",
+          "strokeWidth": 2
+        }
+      },
+      {
+        "at": {
+          "x": 320,
+          "y": 168
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 4.5,
+          "fill": "#4c78a8",
+          "stroke": "#1a1a1a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 320,
+          "y": 160
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "86",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 479.35,
+          "y": 248
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 4.5,
+          "fill": "#4c78a8",
+          "stroke": "#1a1a1a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 489.7423048454133,
+          "y": 246
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "92",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 455.1,
+          "y": 418
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 4.5,
+          "fill": "#4c78a8",
+          "stroke": "#1a1a1a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 465.4923048454133,
+          "y": 428
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "78",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 320,
+          "y": 468
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 4.5,
+          "fill": "#4c78a8",
+          "stroke": "#1a1a1a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 320,
+          "y": 484
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "64",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 167.58,
+          "y": 428
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 4.5,
+          "fill": "#4c78a8",
+          "stroke": "#1a1a1a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 157.18769515458675,
+          "y": 438
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "88",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 191.83,
+          "y": 266
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 4.5,
+          "fill": "#4c78a8",
+          "stroke": "#1a1a1a",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 181.43769515458675,
+          "y": 264
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "74",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 320,
+          "y": 116
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Performance",
+          "fontSize": 12.5,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 517.453792062852,
+          "y": 230
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Reliability",
+          "fontSize": 12.5,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 517.453792062852,
+          "y": 457.99999999999994
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Security",
+          "fontSize": 12.5,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 320,
+          "y": 572
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Cost",
+          "fontSize": 12.5,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 122.54620793714801,
+          "y": 458.00000000000006
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "UX",
+          "fontSize": 12.5,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 122.54620793714801,
+          "y": 229.99999999999997
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Velocity",
+          "fontSize": 12.5,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "end"
         }
       }
-    }
-  ]
+    ]
+  }
 }

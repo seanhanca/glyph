@@ -1,82 +1,473 @@
 {
-  "version": "glyph/0.1",
-  "title": "Marketing spend — annual budget ($K)",
-  "width": 560,
-  "height": 560,
-  "data": {
-    "hierarchy": {
-      "name": "Marketing $4.2M",
-      "children": [
-        {
-          "name": "Performance",
-          "children": [
-            {
-              "name": "Paid search",
-              "value": 720
-            },
-            {
-              "name": "Paid social",
-              "value": 480
-            },
-            {
-              "name": "Display",
-              "value": 240
-            },
-            {
-              "name": "Retargeting",
-              "value": 180
-            }
-          ]
+  "compose": {
+    "viewBox": {
+      "width": 640,
+      "height": 600
+    },
+    "title": "Marketing spend — annual budget",
+    "description": "Two-ring sunburst with full labels: inner ring shows the three categories (Performance, Brand, Lifecycle) sized by share of total spend; outer ring breaks each into channels, each labeled inline with name + $-value. Hand-laid in compose because the bare `mark: \"sunburst\"` doesn't yet ship labels.",
+    "children": [
+      {
+        "at": {
+          "x": 320,
+          "y": 38
         },
-        {
-          "name": "Brand",
-          "children": [
-            {
-              "name": "Content",
-              "value": 540
-            },
-            {
-              "name": "PR",
-              "value": 220
-            },
-            {
-              "name": "Events",
-              "value": 380
-            },
-            {
-              "name": "Sponsorships",
-              "value": 140
-            }
-          ]
-        },
-        {
-          "name": "Lifecycle",
-          "children": [
-            {
-              "name": "Email",
-              "value": 320
-            },
-            {
-              "name": "Webinars",
-              "value": 280
-            },
-            {
-              "name": "Referral",
-              "value": 240
-            },
-            {
-              "name": "Community",
-              "value": 160
-            }
-          ]
+        "mark": "text",
+        "textMark": {
+          "text": "Marketing spend — annual budget",
+          "fontSize": 17,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
         }
-      ]
-    }
-  },
-  "layers": [
-    {
-      "mark": "sunburst",
-      "encoding": {}
-    }
-  ]
+      },
+      {
+        "at": {
+          "x": 320,
+          "y": 60
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "3 categories · 12 channels · sized by % of total spend",
+          "fontSize": 12,
+          "fill": "#666",
+          "italic": true,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 320.00 185.00 A 145 145 0 0 1 393.51 454.99 L 355.49 390.34 A 70 70 0 0 0 320.00 260.00 Z",
+          "fill": "#4c78a8",
+          "stroke": "#ffffff",
+          "strokeWidth": 2
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 320.00 115.00 A 215 215 0 0 1 517.11 244.14 L 452.93 272.09 A 145 145 0 0 0 320.00 185.00 Z",
+          "fill": "#7eaad1",
+          "stroke": "#ffffff",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 446.5908891989288,
+          "y": 140.77539811963763
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Paid search · $720K",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 517.11 244.14 A 215 215 0 0 1 521.03 406.24 L 455.58 381.42 A 145 145 0 0 0 452.93 272.09 Z",
+          "fill": "#7eaad1",
+          "stroke": "#ffffff",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 550.9325512525246,
+          "y": 328.41817485045345
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Paid social · $480K",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 521.03 406.24 A 215 215 0 0 1 477.44 476.42 L 426.18 428.75 A 145 145 0 0 0 455.58 381.42 Z",
+          "fill": "#7eaad1",
+          "stroke": "#ffffff",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 516.2270930130713,
+          "y": 455.88489638851667
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Display · $240K",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 477.44 476.42 A 215 215 0 0 1 429.00 515.32 L 393.51 454.99 A 145 145 0 0 0 426.18 428.75 Z",
+          "fill": "#7eaad1",
+          "stroke": "#ffffff",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 464.64878063135046,
+          "y": 514.1047757886043
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Retargeting · $180K",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 423.7241219844318,
+          "y": 306.7589568436519
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Performance",
+          "fontSize": 13,
+          "fill": "#ffffff",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 393.51 454.99 A 145 145 0 0 1 175.12 335.84 L 250.06 332.82 A 70 70 0 0 0 355.49 390.34 Z",
+          "fill": "#f58518",
+          "stroke": "#ffffff",
+          "strokeWidth": 2
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 429.00 515.32 A 215 215 0 0 1 248.64 532.81 L 271.87 466.78 A 145 145 0 0 0 393.51 454.99 Z",
+          "fill": "#f8b25e",
+          "stroke": "#ffffff",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 342.29471573125295,
+          "y": 563.9216076197769
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Content · $540K",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 248.64 532.81 A 215 215 0 0 1 182.69 495.44 L 227.39 441.58 A 145 145 0 0 0 271.87 466.78 Z",
+          "fill": "#f8b25e",
+          "stroke": "#ffffff",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 206.11522086042137,
+          "y": 534.9757624200724
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "PR · $220K",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 182.69 495.44 A 215 215 0 0 1 112.55 386.48 L 180.09 368.09 A 145 145 0 0 0 227.39 441.58 Z",
+          "fill": "#f8b25e",
+          "stroke": "#ffffff",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 125.76194226490426,
+          "y": 459.03030403585205
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Events · $380K",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 112.55 386.48 A 215 215 0 0 1 105.17 338.66 L 175.12 335.84 A 145 145 0 0 0 180.09 368.09 Z",
+          "fill": "#f8b25e",
+          "stroke": "#ffffff",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 91.70029850849286,
+          "y": 369.21713075888977
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Sponsorships · $140K",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 268.5152840948842,
+          "y": 429.36934898667846
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Brand",
+          "fontSize": 13,
+          "fill": "#ffffff",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 175.12 335.84 A 145 145 0 0 1 320.00 185.00 L 320.00 260.00 A 70 70 0 0 0 250.06 332.82 Z",
+          "fill": "#54a24b",
+          "stroke": "#ffffff",
+          "strokeWidth": 2
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 105.17 338.66 A 215 215 0 0 1 128.83 231.62 L 191.07 263.65 A 145 145 0 0 0 175.12 335.84 Z",
+          "fill": "#88c182",
+          "stroke": "#ffffff",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 94.44211079043814,
+          "y": 284.15385054663676
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Email · $320K",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 128.83 231.62 A 215 215 0 0 1 190.84 158.12 L 232.89 214.08 A 145 145 0 0 0 191.07 263.65 Z",
+          "fill": "#88c182",
+          "stroke": "#ffffff",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 143.44306855390906,
+          "y": 185.04144885794457
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Webinars · $280K",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 190.84 158.12 A 215 215 0 0 1 265.19 122.10 L 283.04 189.79 A 145 145 0 0 0 232.89 214.08 Z",
+          "fill": "#88c182",
+          "stroke": "#ffffff",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 219.294118311062,
+          "y": 126.10741861900502
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Referral · $240K",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 265.19 122.10 A 215 215 0 0 1 320.00 115.00 L 320.00 185.00 A 145 145 0 0 0 283.04 189.79 Z",
+          "fill": "#88c182",
+          "stroke": "#ffffff",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 290.30972797175366,
+          "y": 104.91598103121916
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Community · $160K",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 242.47073691053993,
+          "y": 260.53213199771807
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Lifecycle",
+          "fontSize": 13,
+          "fill": "#ffffff",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 320,
+          "y": 324
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "$3.9M",
+          "fontSize": 22,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 320,
+          "y": 344
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "annual spend",
+          "fontSize": 11,
+          "fill": "#666",
+          "italic": true,
+          "anchor": "middle"
+        }
+      }
+    ]
+  }
 }
