@@ -99,7 +99,7 @@
     "id": "marketing-sunburst",
     "category": "Business charts",
     "name": "Marketing spend sunburst",
-    "description": "$4.2M annual budget — Performance, Brand, Lifecycle — as a hierarchical ring chart.",
+    "description": "$3.9M annual budget — Performance, Brand, Lifecycle — two labeled rings with name + $-value per channel.",
     "csv": null,
     "spec": "examples/business/marketing-sunburst.spec.json"
   },
@@ -114,16 +114,16 @@
   {
     "id": "kpi-radar",
     "category": "Business charts",
-    "name": "KPI radar (polar line)",
-    "description": "Six-axis product scorecard — Performance, Reliability, Security, Cost, UX, Velocity.",
-    "csv": "examples/business/kpi-radar.csv",
+    "name": "KPI radar (6-axis scorecard)",
+    "description": "Six-axis product scorecard — Performance, Reliability, Security, Cost, UX, Velocity — with grid rings, spokes, value dots, and per-axis labels.",
+    "csv": null,
     "spec": "examples/business/kpi-radar.spec.json"
   },
   {
     "id": "org-graph",
     "category": "Business charts",
-    "name": "Engineering org graph (force)",
-    "description": "10-node reporting tree with cross-team collaboration edges. Seeded force layout.",
+    "name": "Engineering org graph",
+    "description": "10-node reporting tree color-coded by group (Executive, Platform, Product), with dashed cross-team collaboration edges.",
     "csv": null,
     "spec": "examples/business/org-graph.spec.json"
   },
