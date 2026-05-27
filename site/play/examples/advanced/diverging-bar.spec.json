@@ -1,0 +1,783 @@
+{
+  "compose": {
+    "viewBox": {
+      "width": 760,
+      "height": 460
+    },
+    "title": "Diverging bar chart — NPS responses",
+    "description": "9 product features, each showing the share of Detractors (red, extends left) vs Promoters (green, extends right) from the 0 line down the middle. The 'net' column at the right is `promoters - detractors`.",
+    "children": [
+      {
+        "at": {
+          "x": 380,
+          "y": 30
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "NPS responses — diverging bar chart",
+          "fontSize": 17,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 380,
+          "y": 52
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Detractors stretch left (red); Promoters stretch right (green); 0 line down the middle.",
+          "fontSize": 11.5,
+          "fill": "#666",
+          "italic": true,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 420 64 L 420 426",
+          "stroke": "#bcc4cf",
+          "strokeWidth": 1,
+          "fill": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 160,
+          "y": 64
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 0 362",
+          "stroke": "#eef0f4",
+          "strokeWidth": 1,
+          "fill": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 160,
+          "y": 58
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "80%",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 225,
+          "y": 64
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 0 362",
+          "stroke": "#eef0f4",
+          "strokeWidth": 1,
+          "fill": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 225,
+          "y": 58
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "60%",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 290,
+          "y": 64
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 0 362",
+          "stroke": "#eef0f4",
+          "strokeWidth": 1,
+          "fill": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 290,
+          "y": 58
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "40%",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 355,
+          "y": 64
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 0 362",
+          "stroke": "#eef0f4",
+          "strokeWidth": 1,
+          "fill": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 355,
+          "y": 58
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "20%",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 485,
+          "y": 64
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 0 362",
+          "stroke": "#eef0f4",
+          "strokeWidth": 1,
+          "fill": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 485,
+          "y": 58
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "20%",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 550,
+          "y": 64
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 0 362",
+          "stroke": "#eef0f4",
+          "strokeWidth": 1,
+          "fill": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 550,
+          "y": 58
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "40%",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 615,
+          "y": 64
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 0 362",
+          "stroke": "#eef0f4",
+          "strokeWidth": 1,
+          "fill": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 615,
+          "y": 58
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "60%",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 680,
+          "y": 64
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 0 0 L 0 362",
+          "stroke": "#eef0f4",
+          "strokeWidth": 1,
+          "fill": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 680,
+          "y": 58
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "80%",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 290,
+          "y": 40
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Detractors",
+          "fontSize": 12,
+          "fill": "#c0392b",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 550,
+          "y": 40
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Promoters",
+          "fontSize": 12,
+          "fill": "#1f7a39",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 394 77.77777777777777 L 420 77.77777777777777 L 420 101.1111111111111 L 394 101.1111111111111 Z",
+          "fill": "#e8b3aa",
+          "stroke": "#c0392b",
+          "strokeWidth": 0.8
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 420 77.77777777777777 L 621.5 77.77777777777777 L 621.5 101.1111111111111 L 420 101.1111111111111 Z",
+          "fill": "#aedab7",
+          "stroke": "#1f7a39",
+          "strokeWidth": 0.8
+        }
+      },
+      {
+        "at": {
+          "x": 148,
+          "y": 93.44444444444444
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Onboarding",
+          "fontSize": 12,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 692,
+          "y": 93.44444444444444
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "+54",
+          "fontSize": 12,
+          "fill": "#1f7a39",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 374.5 116.66666666666664 L 420 116.66666666666664 L 420 139.99999999999997 L 374.5 139.99999999999997 Z",
+          "fill": "#e8b3aa",
+          "stroke": "#c0392b",
+          "strokeWidth": 0.8
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 420 116.66666666666664 L 647.5 116.66666666666664 L 647.5 139.99999999999997 L 420 139.99999999999997 Z",
+          "fill": "#aedab7",
+          "stroke": "#1f7a39",
+          "strokeWidth": 0.8
+        }
+      },
+      {
+        "at": {
+          "x": 148,
+          "y": 132.33333333333331
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Performance",
+          "fontSize": 12,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 692,
+          "y": 132.33333333333331
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "+56",
+          "fontSize": 12,
+          "fill": "#1f7a39",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 296.5 155.55555555555557 L 420 155.55555555555557 L 420 178.8888888888889 L 296.5 178.8888888888889 Z",
+          "fill": "#e8b3aa",
+          "stroke": "#c0392b",
+          "strokeWidth": 0.8
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 420 155.55555555555557 L 491.5 155.55555555555557 L 491.5 178.8888888888889 L 420 178.8888888888889 Z",
+          "fill": "#aedab7",
+          "stroke": "#1f7a39",
+          "strokeWidth": 0.8
+        }
+      },
+      {
+        "at": {
+          "x": 148,
+          "y": 171.22222222222223
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Pricing clarity",
+          "fontSize": 12,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 692,
+          "y": 171.22222222222223
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "-16",
+          "fontSize": 12,
+          "fill": "#c0392b",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 381 194.44444444444443 L 420 194.44444444444443 L 420 217.77777777777777 L 381 217.77777777777777 Z",
+          "fill": "#e8b3aa",
+          "stroke": "#c0392b",
+          "strokeWidth": 0.8
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 420 194.44444444444443 L 576 194.44444444444443 L 576 217.77777777777777 L 420 217.77777777777777 Z",
+          "fill": "#aedab7",
+          "stroke": "#1f7a39",
+          "strokeWidth": 0.8
+        }
+      },
+      {
+        "at": {
+          "x": 148,
+          "y": 210.1111111111111
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Documentation",
+          "fontSize": 12,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 692,
+          "y": 210.1111111111111
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "+36",
+          "fontSize": 12,
+          "fill": "#1f7a39",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 316 233.33333333333334 L 420 233.33333333333334 L 420 256.6666666666667 L 316 256.6666666666667 Z",
+          "fill": "#e8b3aa",
+          "stroke": "#c0392b",
+          "strokeWidth": 0.8
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 420 233.33333333333334 L 511 233.33333333333334 L 511 256.6666666666667 L 420 256.6666666666667 Z",
+          "fill": "#aedab7",
+          "stroke": "#1f7a39",
+          "strokeWidth": 0.8
+        }
+      },
+      {
+        "at": {
+          "x": 148,
+          "y": 249
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Mobile app",
+          "fontSize": 12,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 692,
+          "y": 249
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "-4",
+          "fontSize": 12,
+          "fill": "#c0392b",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 400.5 272.2222222222222 L 420 272.2222222222222 L 420 295.5555555555555 L 400.5 295.5555555555555 Z",
+          "fill": "#e8b3aa",
+          "stroke": "#c0392b",
+          "strokeWidth": 0.8
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 420 272.2222222222222 L 663.75 272.2222222222222 L 663.75 295.5555555555555 L 420 295.5555555555555 Z",
+          "fill": "#aedab7",
+          "stroke": "#1f7a39",
+          "strokeWidth": 0.8
+        }
+      },
+      {
+        "at": {
+          "x": 148,
+          "y": 287.88888888888886
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Reliability",
+          "fontSize": 12,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 692,
+          "y": 287.88888888888886
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "+69",
+          "fontSize": 12,
+          "fill": "#1f7a39",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 361.5 311.1111111111111 L 420 311.1111111111111 L 420 334.4444444444444 L 361.5 334.4444444444444 Z",
+          "fill": "#e8b3aa",
+          "stroke": "#c0392b",
+          "strokeWidth": 0.8
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 420 311.1111111111111 L 598.75 311.1111111111111 L 598.75 334.4444444444444 L 420 334.4444444444444 Z",
+          "fill": "#aedab7",
+          "stroke": "#1f7a39",
+          "strokeWidth": 0.8
+        }
+      },
+      {
+        "at": {
+          "x": 148,
+          "y": 326.77777777777777
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Customer support",
+          "fontSize": 12,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 692,
+          "y": 326.77777777777777
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "+37",
+          "fontSize": 12,
+          "fill": "#1f7a39",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 348.5 349.99999999999994 L 420 349.99999999999994 L 420 373.33333333333326 L 348.5 373.33333333333326 Z",
+          "fill": "#e8b3aa",
+          "stroke": "#c0392b",
+          "strokeWidth": 0.8
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 420 349.99999999999994 L 550 349.99999999999994 L 550 373.33333333333326 L 420 373.33333333333326 Z",
+          "fill": "#aedab7",
+          "stroke": "#1f7a39",
+          "strokeWidth": 0.8
+        }
+      },
+      {
+        "at": {
+          "x": 148,
+          "y": 365.66666666666663
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Search UX",
+          "fontSize": 12,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 692,
+          "y": 365.66666666666663
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "+18",
+          "fontSize": 12,
+          "fill": "#1f7a39",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 335.5 388.88888888888886 L 420 388.88888888888886 L 420 412.2222222222222 L 335.5 412.2222222222222 Z",
+          "fill": "#e8b3aa",
+          "stroke": "#c0392b",
+          "strokeWidth": 0.8
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 420 388.88888888888886 L 582.5 388.88888888888886 L 582.5 412.2222222222222 L 420 412.2222222222222 Z",
+          "fill": "#aedab7",
+          "stroke": "#1f7a39",
+          "strokeWidth": 0.8
+        }
+      },
+      {
+        "at": {
+          "x": 148,
+          "y": 404.55555555555554
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Integrations",
+          "fontSize": 12,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 692,
+          "y": 404.55555555555554
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "+24",
+          "fontSize": 12,
+          "fill": "#1f7a39",
+          "italic": false,
+          "anchor": "start"
+        }
+      }
+    ]
+  }
+}

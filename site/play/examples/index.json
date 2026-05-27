@@ -199,6 +199,71 @@
     "csv": null,
     "spec": "examples/business/circle-packing.spec.json"
   },
+  {
+    "id": "monthly-composite",
+    "category": "Business charts",
+    "name": "Composite: bars + trend + outliers",
+    "description": "Monthly revenue bars in accent blue, 3-month moving average overlay in orange, outliers (>1.6σ) called out in red with a launch annotation.",
+    "csv": null,
+    "spec": "examples/business/monthly-composite.spec.json"
+  },
+
+  {
+    "id": "ridgeline",
+    "category": "Advanced",
+    "name": "Ridgeline plot — API latency distribution",
+    "description": "Six API endpoints stacked vertically, each ridge a smoothed density-like profile of its latency distribution. Slower endpoints have a visible right tail.",
+    "csv": null,
+    "spec": "examples/advanced/ridgeline.spec.json"
+  },
+  {
+    "id": "dot-plot",
+    "category": "Advanced",
+    "name": "Dot plot — feature usage by role",
+    "description": "5 roles × 12 users each — one dot per user. Veterans dark, newer light; per-row jitter keeps overlaps readable.",
+    "csv": null,
+    "spec": "examples/advanced/dot-plot.spec.json"
+  },
+  {
+    "id": "diverging-bar",
+    "category": "Advanced",
+    "name": "Diverging bar — NPS responses",
+    "description": "9 product features, Detractors stretching left in red and Promoters stretching right in green from the 0 line. Net column on the right.",
+    "csv": null,
+    "spec": "examples/advanced/diverging-bar.spec.json"
+  },
+  {
+    "id": "horizontal-stacked-bar",
+    "category": "Advanced",
+    "name": "Horizontal stacked bar — population by age",
+    "description": "6 countries normalized to 100% so each age-bracket share reads directly. Labels inline when the slice is wide enough.",
+    "csv": null,
+    "spec": "examples/advanced/horizontal-stacked-bar.spec.json"
+  },
+  {
+    "id": "year-calendar",
+    "category": "Advanced",
+    "name": "Year calendar — daily activity heatmap",
+    "description": "53 weeks × 7 days, GitHub-contribution style. Two vacation gaps mid-year visible as cooler vertical strips.",
+    "csv": null,
+    "spec": "examples/advanced/year-calendar.spec.json"
+  },
+  {
+    "id": "parallel-coordinates",
+    "category": "Advanced",
+    "name": "Parallel coordinates — product comparison",
+    "description": "5 products plotted across 6 vertical axes (Performance, Cost, UX, Security, Reliability, Revenue). Correlations and tradeoffs read directly.",
+    "csv": null,
+    "spec": "examples/advanced/parallel-coordinates.spec.json"
+  },
+  {
+    "id": "difference-chart",
+    "category": "Advanced",
+    "name": "Difference chart — actual vs target",
+    "description": "Two-line plot with the gap between actual and target shaded green (beats) or red (misses) per month-segment.",
+    "csv": null,
+    "spec": "examples/advanced/difference-chart.spec.json"
+  },
 
   {
     "id": "sine-wave",

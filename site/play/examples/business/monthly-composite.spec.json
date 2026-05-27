@@ -1,0 +1,653 @@
+{
+  "compose": {
+    "viewBox": {
+      "width": 760,
+      "height": 440
+    },
+    "title": "Monthly revenue + trend + outliers",
+    "description": "Composite chart: monthly revenue bars in accent blue, 3-month trailing moving average overlay in orange, outlier months (>1.6σ from the mean) called out in red with a launch-month annotation. Hand-laid in compose so each bar's fill can be set per-row.",
+    "children": [
+      {
+        "at": {
+          "x": 380,
+          "y": 32
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Monthly revenue + 3-month trend (outliers in red)",
+          "fontSize": 17,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 380,
+          "y": 54
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Bars = monthly $K · solid line = 3-month moving average · red bars > 1.6σ from the mean",
+          "fontSize": 11.5,
+          "fill": "#666",
+          "italic": true,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 70 370 L 730 370 M 70 321.6666666666667 L 730 321.6666666666667 M 70 273.33333333333337 L 730 273.33333333333337 M 70 225 L 730 225 M 70 176.66666666666669 L 730 176.66666666666669 M 70 128.33333333333331 L 730 128.33333333333331 M 70 80 L 730 80",
+          "fill": "none",
+          "stroke": "#eef0f4",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 62,
+          "y": 374
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "0",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 62,
+          "y": 325.6666666666667
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "100",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 62,
+          "y": 277.33333333333337
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "200",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 62,
+          "y": 229
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "300",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 62,
+          "y": 180.66666666666669
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "400",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 62,
+          "y": 132.33333333333331
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "500",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 62,
+          "y": 84
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "600",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 80.45 220.17 L 114.55 220.17 L 114.55 370.00 L 80.45 370.00 Z M 135.45 205.67 L 169.55 205.67 L 169.55 370.00 L 135.45 370.00 Z M 190.45 198.42 L 224.55 198.42 L 224.55 370.00 L 190.45 370.00 Z M 300.45 186.33 L 334.55 186.33 L 334.55 370.00 L 300.45 370.00 Z M 355.45 179.08 L 389.55 179.08 L 389.55 370.00 L 355.45 370.00 Z M 410.45 171.83 L 444.55 171.83 L 444.55 370.00 L 410.45 370.00 Z M 520.45 162.17 L 554.55 162.17 L 554.55 370.00 L 520.45 370.00 Z M 575.45 154.92 L 609.55 154.92 L 609.55 370.00 L 575.45 370.00 Z M 630.45 147.67 L 664.55 147.67 L 664.55 370.00 L 630.45 370.00 Z M 685.45 142.83 L 719.55 142.83 L 719.55 370.00 L 685.45 370.00 Z",
+          "fill": "#4c78a8",
+          "stroke": "#ffffff",
+          "strokeWidth": 0.6
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 245.45 266.08 L 279.55 266.08 L 279.55 370.00 L 245.45 370.00 Z M 465.45 109.00 L 499.55 109.00 L 499.55 370.00 L 465.45 370.00 Z",
+          "fill": "#c0392b",
+          "stroke": "#ffffff",
+          "strokeWidth": 0.6
+        }
+      },
+      {
+        "at": {
+          "x": 97.5,
+          "y": 386
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Jan",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 97.5,
+          "y": 214.16666666666666
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "310",
+          "fontSize": 10,
+          "fill": "#555",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 152.5,
+          "y": 386
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Feb",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 152.5,
+          "y": 199.66666666666666
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "340",
+          "fontSize": 10,
+          "fill": "#555",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 207.5,
+          "y": 386
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Mar",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 207.5,
+          "y": 192.41666666666666
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "355",
+          "fontSize": 10,
+          "fill": "#555",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 262.5,
+          "y": 386
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Apr",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 262.5,
+          "y": 260.0833333333333
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "215",
+          "fontSize": 10,
+          "fill": "#c0392b",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 317.5,
+          "y": 386
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "May",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 317.5,
+          "y": 180.33333333333334
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "380",
+          "fontSize": 10,
+          "fill": "#555",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 372.5,
+          "y": 386
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Jun",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 372.5,
+          "y": 173.08333333333334
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "395",
+          "fontSize": 10,
+          "fill": "#555",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 427.5,
+          "y": 386
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Jul",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 427.5,
+          "y": 165.83333333333334
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "410",
+          "fontSize": 10,
+          "fill": "#555",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 482.5,
+          "y": 386
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Aug",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 482.5,
+          "y": 103
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "540",
+          "fontSize": 10,
+          "fill": "#c0392b",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 537.5,
+          "y": 386
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Sep",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 537.5,
+          "y": 156.16666666666666
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "430",
+          "fontSize": 10,
+          "fill": "#555",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 592.5,
+          "y": 386
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Oct",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 592.5,
+          "y": 148.91666666666666
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "445",
+          "fontSize": 10,
+          "fill": "#555",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 647.5,
+          "y": 386
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Nov",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 647.5,
+          "y": 141.66666666666666
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "460",
+          "fontSize": 10,
+          "fill": "#555",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 702.5,
+          "y": 386
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Dec",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 702.5,
+          "y": 136.83333333333334
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "470",
+          "fontSize": 10,
+          "fill": "#555",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [
+            [207.5, 208.08],
+            [262.5, 223.55],
+            [317.5, 216.78],
+            [372.5, 210.5],
+            [427.5, 179.08],
+            [482.5, 153.47],
+            [537.5, 147.67],
+            [592.5, 141.87],
+            [647.5, 154.92],
+            [702.5, 148.63]
+          ],
+          "stroke": "#f58518",
+          "strokeWidth": 2.5
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 204.30 208.08 a 3.2 3.2 0 1 0 6.4 0 a 3.2 3.2 0 1 0 -6.4 0 M 259.30 223.55 a 3.2 3.2 0 1 0 6.4 0 a 3.2 3.2 0 1 0 -6.4 0 M 314.30 216.78 a 3.2 3.2 0 1 0 6.4 0 a 3.2 3.2 0 1 0 -6.4 0 M 369.30 210.50 a 3.2 3.2 0 1 0 6.4 0 a 3.2 3.2 0 1 0 -6.4 0 M 424.30 179.08 a 3.2 3.2 0 1 0 6.4 0 a 3.2 3.2 0 1 0 -6.4 0 M 479.30 153.47 a 3.2 3.2 0 1 0 6.4 0 a 3.2 3.2 0 1 0 -6.4 0 M 534.30 147.67 a 3.2 3.2 0 1 0 6.4 0 a 3.2 3.2 0 1 0 -6.4 0 M 589.30 141.87 a 3.2 3.2 0 1 0 6.4 0 a 3.2 3.2 0 1 0 -6.4 0 M 644.30 154.92 a 3.2 3.2 0 1 0 6.4 0 a 3.2 3.2 0 1 0 -6.4 0 M 699.30 148.63 a 3.2 3.2 0 1 0 6.4 0 a 3.2 3.2 0 1 0 -6.4 0",
+          "fill": "#f58518",
+          "stroke": "#ffffff",
+          "strokeWidth": 1.2
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 532.5 79 L 490.5 103",
+          "stroke": "#1a1a1a",
+          "strokeWidth": 1,
+          "fill": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 537.5,
+          "y": 83
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "v3.0 launch · +35% MoM",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": true,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 60,
+          "y": 422
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -8 -4 L 8 -4 L 8 4 L -8 4 Z",
+          "fill": "#4c78a8"
+        }
+      },
+      {
+        "at": {
+          "x": 72,
+          "y": 426
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Monthly $K",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 175,
+          "y": 422
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -8 -4 L 8 -4 L 8 4 L -8 4 Z",
+          "fill": "#c0392b"
+        }
+      },
+      {
+        "at": {
+          "x": 187,
+          "y": 426
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Outlier",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 248,
+          "y": 422
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M -12 0 L 12 0",
+          "stroke": "#f58518",
+          "strokeWidth": 3,
+          "fill": "none"
+        }
+      },
+      {
+        "at": {
+          "x": 264,
+          "y": 426
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "3-mo MA",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "start"
+        }
+      }
+    ]
+  }
+}

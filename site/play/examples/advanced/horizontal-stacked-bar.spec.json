@@ -1,0 +1,668 @@
+{
+  "compose": {
+    "viewBox": {
+      "width": 740,
+      "height": 420
+    },
+    "title": "Population by age bracket — horizontal stacked bar",
+    "description": "Six countries, each row normalized to 100% so the share of each age bracket reads directly. Bracket totals are labeled when their slice is wide enough.",
+    "children": [
+      {
+        "at": {
+          "x": 370,
+          "y": 30
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Population by age bracket — horizontal stacked bar (%)",
+          "fontSize": 17,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 370,
+          "y": 52
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Each row sums to 100% — the share of total population in each age bracket.",
+          "fontSize": 11.5,
+          "fill": "#666",
+          "italic": true,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 140,
+          "y": 366
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "0%",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 280,
+          "y": 366
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "25%",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 420,
+          "y": 366
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "50%",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 560,
+          "y": 366
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "75%",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 700,
+          "y": 366
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "100%",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 187.6,
+          "y": 97.33333333333333
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "17%",
+          "fontSize": 10.5,
+          "fill": "#ffffff",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 296.8,
+          "y": 97.33333333333333
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "22%",
+          "fontSize": 10.5,
+          "fill": "#ffffff",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 473.2,
+          "y": 97.33333333333333
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "41%",
+          "fontSize": 10.5,
+          "fill": "#ffffff",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 644,
+          "y": 97.33333333333333
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "20%",
+          "fontSize": 10.5,
+          "fill": "#ffffff",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 128,
+          "y": 97.33333333333333
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Nordica",
+          "fontSize": 12,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 215.60000000000002,
+          "y": 144
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "27%",
+          "fontSize": 10.5,
+          "fill": "#ffffff",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 369.6,
+          "y": 144
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "28%",
+          "fontSize": 10.5,
+          "fill": "#ffffff",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 546,
+          "y": 144
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "35%",
+          "fontSize": 10.5,
+          "fill": "#ffffff",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 672,
+          "y": 144
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "10%",
+          "fontSize": 10.5,
+          "fill": "#ffffff",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 128,
+          "y": 144
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Latinia",
+          "fontSize": 12,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 254.8,
+          "y": 190.66666666666666
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "41%",
+          "fontSize": 10.5,
+          "fill": "#ffffff",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 453.6,
+          "y": 190.66666666666666
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "30%",
+          "fontSize": 10.5,
+          "fill": "#ffffff",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 604.8000000000001,
+          "y": 190.66666666666666
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "24%",
+          "fontSize": 10.5,
+          "fill": "#ffffff",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 128,
+          "y": 190.66666666666666
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Saharia",
+          "fontSize": 12,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 218.4,
+          "y": 237.33333333333331
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "28%",
+          "fontSize": 10.5,
+          "fill": "#ffffff",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 375.20000000000005,
+          "y": 237.33333333333331
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "28%",
+          "fontSize": 10.5,
+          "fill": "#ffffff",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 554.4,
+          "y": 237.33333333333331
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "36%",
+          "fontSize": 10.5,
+          "fill": "#ffffff",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 677.6,
+          "y": 237.33333333333331
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "8%",
+          "fontSize": 10.5,
+          "fill": "#ffffff",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 128,
+          "y": 237.33333333333331
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Maharashtra",
+          "fontSize": 12,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 193.2,
+          "y": 284
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "19%",
+          "fontSize": 10.5,
+          "fill": "#ffffff",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 305.2,
+          "y": 284
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "21%",
+          "fontSize": 10.5,
+          "fill": "#ffffff",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 478.8,
+          "y": 284
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "41%",
+          "fontSize": 10.5,
+          "fill": "#ffffff",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 646.8000000000001,
+          "y": 284
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "19%",
+          "fontSize": 10.5,
+          "fill": "#ffffff",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 128,
+          "y": 284
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Pacificana",
+          "fontSize": 12,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 190.4,
+          "y": 330.66666666666663
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "18%",
+          "fontSize": 10.5,
+          "fill": "#ffffff",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 302.40000000000003,
+          "y": 330.66666666666663
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "22%",
+          "fontSize": 10.5,
+          "fill": "#ffffff",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 481.6,
+          "y": 330.66666666666663
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "42%",
+          "fontSize": 10.5,
+          "fill": "#ffffff",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 649.6,
+          "y": 330.66666666666663
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "18%",
+          "fontSize": 10.5,
+          "fill": "#ffffff",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 128,
+          "y": 330.66666666666663
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Albion",
+          "fontSize": 12,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 140.00 78.87 L 235.20 78.87 L 235.20 107.80 L 140.00 107.80 Z M 140.00 125.53 L 291.20 125.53 L 291.20 154.47 L 140.00 154.47 Z M 140.00 172.20 L 369.60 172.20 L 369.60 201.13 L 140.00 201.13 Z M 140.00 218.87 L 296.80 218.87 L 296.80 247.80 L 140.00 247.80 Z M 140.00 265.53 L 246.40 265.53 L 246.40 294.47 L 140.00 294.47 Z M 140.00 312.20 L 240.80 312.20 L 240.80 341.13 L 140.00 341.13 Z",
+          "fill": "#4c78a8",
+          "stroke": "#ffffff",
+          "strokeWidth": 0.6
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 235.20 78.87 L 358.40 78.87 L 358.40 107.80 L 235.20 107.80 Z M 291.20 125.53 L 448.00 125.53 L 448.00 154.47 L 291.20 154.47 Z M 369.60 172.20 L 537.60 172.20 L 537.60 201.13 L 369.60 201.13 Z M 296.80 218.87 L 453.60 218.87 L 453.60 247.80 L 296.80 247.80 Z M 246.40 265.53 L 364.00 265.53 L 364.00 294.47 L 246.40 294.47 Z M 240.80 312.20 L 364.00 312.20 L 364.00 341.13 L 240.80 341.13 Z",
+          "fill": "#54a24b",
+          "stroke": "#ffffff",
+          "strokeWidth": 0.6
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 358.40 78.87 L 588.00 78.87 L 588.00 107.80 L 358.40 107.80 Z M 448.00 125.53 L 644.00 125.53 L 644.00 154.47 L 448.00 154.47 Z M 537.60 172.20 L 672.00 172.20 L 672.00 201.13 L 537.60 201.13 Z M 453.60 218.87 L 655.20 218.87 L 655.20 247.80 L 453.60 247.80 Z M 364.00 265.53 L 593.60 265.53 L 593.60 294.47 L 364.00 294.47 Z M 364.00 312.20 L 599.20 312.20 L 599.20 341.13 L 364.00 341.13 Z",
+          "fill": "#f58518",
+          "stroke": "#ffffff",
+          "strokeWidth": 0.6
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 588.00 78.87 L 700.00 78.87 L 700.00 107.80 L 588.00 107.80 Z M 644.00 125.53 L 700.00 125.53 L 700.00 154.47 L 644.00 154.47 Z M 672.00 172.20 L 700.00 172.20 L 700.00 201.13 L 672.00 201.13 Z M 655.20 218.87 L 700.00 218.87 L 700.00 247.80 L 655.20 247.80 Z M 593.60 265.53 L 700.00 265.53 L 700.00 294.47 L 593.60 294.47 Z M 599.20 312.20 L 700.00 312.20 L 700.00 341.13 L 599.20 341.13 Z",
+          "fill": "#c0392b",
+          "stroke": "#ffffff",
+          "strokeWidth": 0.6
+        }
+      },
+      {
+        "at": {
+          "x": 140,
+          "y": 402
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 5.5,
+          "fill": "#4c78a8"
+        }
+      },
+      {
+        "at": {
+          "x": 150,
+          "y": 406
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "< 18",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 250,
+          "y": 402
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 5.5,
+          "fill": "#54a24b"
+        }
+      },
+      {
+        "at": {
+          "x": 260,
+          "y": 406
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "18–34",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 360,
+          "y": 402
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 5.5,
+          "fill": "#f58518"
+        }
+      },
+      {
+        "at": {
+          "x": 370,
+          "y": 406
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "35–64",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 470,
+          "y": 402
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 5.5,
+          "fill": "#c0392b"
+        }
+      },
+      {
+        "at": {
+          "x": 480,
+          "y": 406
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "65+",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "start"
+        }
+      }
+    ]
+  }
+}
