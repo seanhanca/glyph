@@ -1,0 +1,29 @@
+{
+  "version": "glyph/0.1",
+  "title": "Revenue share by department",
+  "width": 560,
+  "height": 420,
+  "coordinates": {
+    "type": "polar",
+    "innerRadius": 0.5
+  },
+  "layers": [
+    {
+      "mark": "bar",
+      "encoding": {
+        "x": {
+          "field": "department",
+          "type": "ordinal"
+        },
+        "y": {
+          "field": "share",
+          "type": "quantitative"
+        },
+        "color": {
+          "field": "department",
+          "type": "nominal"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,105 @@
+{
+  "version": "glyph/0.1",
+  "title": "Engineering org — reporting + cross-team links",
+  "width": 640,
+  "height": 480,
+  "data": {
+    "graph": {
+      "nodes": [
+        {
+          "id": "CEO",
+          "group": "exec"
+        },
+        {
+          "id": "VP Eng",
+          "group": "exec"
+        },
+        {
+          "id": "Mgr Platform",
+          "group": "platform"
+        },
+        {
+          "id": "Mgr Product",
+          "group": "product"
+        },
+        {
+          "id": "Eng A",
+          "group": "platform"
+        },
+        {
+          "id": "Eng B",
+          "group": "platform"
+        },
+        {
+          "id": "Eng C",
+          "group": "platform"
+        },
+        {
+          "id": "Eng D",
+          "group": "product"
+        },
+        {
+          "id": "Eng E",
+          "group": "product"
+        },
+        {
+          "id": "Eng F",
+          "group": "product"
+        }
+      ],
+      "edges": [
+        {
+          "source": "CEO",
+          "target": "VP Eng"
+        },
+        {
+          "source": "VP Eng",
+          "target": "Mgr Platform"
+        },
+        {
+          "source": "VP Eng",
+          "target": "Mgr Product"
+        },
+        {
+          "source": "Mgr Platform",
+          "target": "Eng A"
+        },
+        {
+          "source": "Mgr Platform",
+          "target": "Eng B"
+        },
+        {
+          "source": "Mgr Platform",
+          "target": "Eng C"
+        },
+        {
+          "source": "Mgr Product",
+          "target": "Eng D"
+        },
+        {
+          "source": "Mgr Product",
+          "target": "Eng E"
+        },
+        {
+          "source": "Mgr Product",
+          "target": "Eng F"
+        },
+        {
+          "source": "Eng A",
+          "target": "Eng D"
+        },
+        {
+          "source": "Eng B",
+          "target": "Eng E"
+        }
+      ]
+    }
+  },
+  "seed": 42,
+  "layers": [
+    {
+      "mark": "force",
+      "encoding": {}
+    }
+  ]
+}
