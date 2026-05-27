@@ -1014,8 +1014,136 @@
         line-height: 1.5;
       }
 
+      /* PRIMITIVES — featured section anchored from the main nav. */
+      .prims-lead {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: 32px;
+        align-items: center;
+        margin: 16px 0 32px;
+      }
+      .prims-lead-art {
+        background: linear-gradient(135deg, #fafbfd 0%, #f1f4f9 100%);
+        border-radius: 14px;
+        padding: 26px;
+        border: 1px solid var(--border);
+      }
+      .prims-lead-art svg { width: 100%; height: auto; display: block; }
+      .prims-stat-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+        margin: 22px 0 18px;
+      }
+      .prims-stat {
+        padding: 16px 18px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: white;
+      }
+      .prims-stat strong {
+        font-family: var(--mono);
+        font-size: 26px;
+        font-weight: 700;
+        color: var(--fg);
+        display: block;
+        line-height: 1;
+      }
+      .prims-stat span {
+        font-size: 11.5px;
+        color: var(--fg-soft);
+        margin-top: 6px;
+        display: block;
+        line-height: 1.4;
+      }
+      .prims-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+        margin-top: 22px;
+      }
+      .prim-card {
+        display: flex;
+        flex-direction: column;
+        padding: 14px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: white;
+        transition: border-color 0.15s, box-shadow 0.15s;
+      }
+      .prim-card:hover {
+        border-color: var(--accent);
+        box-shadow: 0 2px 8px rgba(76, 120, 168, 0.08);
+      }
+      .prim-card-art {
+        height: 64px;
+        background: #fafbfd;
+        border-radius: 6px;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+      .prim-card-art svg { width: 100%; height: 100%; display: block; }
+      .prim-card code {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--accent);
+        font-weight: 600;
+        display: block;
+        margin-bottom: 4px;
+      }
+      .prim-card p {
+        margin: 0;
+        font-size: 11.5px;
+        color: var(--fg-soft);
+        line-height: 1.45;
+      }
+      .prims-patterns {
+        margin-top: 32px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+      .prims-pattern {
+        padding: 18px 20px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: white;
+      }
+      .prims-pattern h4 {
+        margin: 0 0 8px;
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .prims-pattern pre {
+        margin: 0;
+        background: #f6f8fa;
+        padding: 10px 12px;
+        border-radius: 6px;
+        font-size: 11.5px;
+        line-height: 1.5;
+        overflow-x: auto;
+      }
+      .prims-limits {
+        margin-top: 22px;
+        padding: 16px 20px;
+        border-left: 3px solid var(--accent);
+        background: #f6f8fa;
+        border-radius: 0 8px 8px 0;
+        font-size: 13px;
+        color: var(--fg-soft);
+        line-height: 1.6;
+      }
+      .prims-limits strong { color: var(--fg); }
+
       @media (max-width: 980px) {
         .inn-grid { grid-template-columns: repeat(2, 1fr); }
+        .prims-grid { grid-template-columns: repeat(2, 1fr); }
+        .prims-lead { grid-template-columns: 1fr; }
+        .prims-stat-row { grid-template-columns: 1fr; }
+        .prims-patterns { grid-template-columns: 1fr; }
       }
       @media (max-width: 760px) {
         .why-grid       { grid-template-columns: 1fr; }
@@ -1042,6 +1170,7 @@
           <a href="#why">Why</a>
           <a href="#use-cases">Use cases</a>
           <a href="#examples">Examples</a>
+          <a href="#primitives">Primitives</a>
           <a href="#wow">Demos</a>
           <a href="play/">Playground</a>
           <a href="#get-started">Get started</a>
@@ -1689,6 +1818,291 @@ const { uri: drill } =
               </g>
             </svg>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- PRIMITIVES — first-class compose grammar         -->
+    <!-- ============================================== -->
+    <section id="primitives">
+      <div class="wrap">
+        <h2>Primitives — the compose grammar</h2>
+        <p class="quote">
+          Glyph ships two layers of building blocks. The <strong>chart marks</strong> you've already seen
+          (<code>bar</code>, <code>line</code>, <code>heatmap</code>, …) take rows + a schema and resolve
+          to scaled scene marks. Underneath them sits a layer of <strong>compose primitives</strong> —
+          shapes, paths, text, structural pieces — that the chart marks themselves are built from, and
+          that you can reach for directly when you need pixel-precise control or a chart pattern that
+          isn't in the catalog yet.
+        </p>
+
+        <div class="prims-lead">
+          <div>
+            <p>
+              The compose grammar isn't an escape hatch — it's a first-class peer. Roughly
+              <strong>half the polished business examples in the playground</strong> (ridgeline,
+              parallel coordinates, streamgraph, circle packing, animated bar race, choropleths
+              with real US geography, every Glyph-in-Life illustration) are compose-built.
+              Same byte-stable SVG contract as the chart marks. Same audit. Same render pipeline.
+            </p>
+            <p style="margin-top: 14px;">
+              Each primitive is one schema-validated child inside a <code>compose</code> spec.
+              They share consistent <code>fill</code> / <code>stroke</code> / <code>strokeWidth</code>
+              / <code>opacity</code> conventions, and every coordinate goes through the same
+              <code>roundPx</code> stabilizer the chart marks use — so a compose scene rendered
+              today produces byte-identical output a decade from now.
+            </p>
+            <div class="cta" style="margin-top: 18px;">
+              <a class="btn btn-primary" href="https://github.com/seanhanca/glyph/blob/main/docs/primitives.md">Read the reference →</a>
+              <a class="btn btn-secondary" href="play/">Open in the playground</a>
+            </div>
+          </div>
+          <div class="prims-lead-art">
+            <!-- Schematic: chart marks (top row) sit on top of primitives (bottom row), all routed through one renderer. -->
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" role="img" aria-label="Primitives stack: chart marks compile down to compose primitives, which render to byte-stable SVG.">
+              <rect width="360" height="240" fill="none"/>
+              <!-- chart layer -->
+              <g>
+                <text x="180" y="22" font-family="system-ui" font-size="10" fill="#666" text-anchor="middle">CHART MARKS (15+)</text>
+                <g font-family="ui-monospace,Menlo,monospace" font-size="10" fill="#1a1a1a">
+                  <rect x="20" y="30" width="56" height="22" rx="4" fill="#e8eef5" stroke="#4c78a8" stroke-width="1"/><text x="48" y="44" text-anchor="middle">bar</text>
+                  <rect x="84" y="30" width="56" height="22" rx="4" fill="#e8eef5" stroke="#4c78a8" stroke-width="1"/><text x="112" y="44" text-anchor="middle">line</text>
+                  <rect x="148" y="30" width="56" height="22" rx="4" fill="#e8eef5" stroke="#4c78a8" stroke-width="1"/><text x="176" y="44" text-anchor="middle">heatmap</text>
+                  <rect x="212" y="30" width="56" height="22" rx="4" fill="#e8eef5" stroke="#4c78a8" stroke-width="1"/><text x="240" y="44" text-anchor="middle">treemap</text>
+                  <rect x="276" y="30" width="56" height="22" rx="4" fill="#e8eef5" stroke="#4c78a8" stroke-width="1"/><text x="304" y="44" text-anchor="middle">force</text>
+                </g>
+              </g>
+              <!-- arrows down -->
+              <g stroke="#999" fill="none">
+                <line x1="48" y1="58" x2="48" y2="78" stroke-width="1"/>
+                <line x1="112" y1="58" x2="112" y2="78" stroke-width="1"/>
+                <line x1="176" y1="58" x2="176" y2="78" stroke-width="1"/>
+                <line x1="240" y1="58" x2="240" y2="78" stroke-width="1"/>
+                <line x1="304" y1="58" x2="304" y2="78" stroke-width="1"/>
+              </g>
+              <!-- compose primitives layer -->
+              <g>
+                <text x="180" y="98" font-family="system-ui" font-size="10" fill="#666" text-anchor="middle">COMPOSE PRIMITIVES</text>
+                <g font-family="ui-monospace,Menlo,monospace" font-size="10" fill="#1a1a1a">
+                  <rect x="14" y="106" width="68" height="22" rx="4" fill="#fff" stroke="#aac1d8" stroke-width="1"/><text x="48" y="120" text-anchor="middle">silhouette-path</text>
+                  <rect x="90" y="106" width="50" height="22" rx="4" fill="#fff" stroke="#aac1d8" stroke-width="1"/><text x="115" y="120" text-anchor="middle">polygon</text>
+                  <rect x="148" y="106" width="56" height="22" rx="4" fill="#fff" stroke="#aac1d8" stroke-width="1"/><text x="176" y="120" text-anchor="middle">circle</text>
+                  <rect x="212" y="106" width="44" height="22" rx="4" fill="#fff" stroke="#aac1d8" stroke-width="1"/><text x="234" y="120" text-anchor="middle">text</text>
+                  <rect x="264" y="106" width="80" height="22" rx="4" fill="#fff" stroke="#aac1d8" stroke-width="1"/><text x="304" y="120" text-anchor="middle">gradient · raw-svg</text>
+                </g>
+              </g>
+              <!-- arrow down to renderer -->
+              <g stroke="#999" fill="none">
+                <line x1="180" y1="134" x2="180" y2="160" stroke-width="1.5"/>
+                <polygon points="176,156 180,164 184,156" fill="#999" stroke="none"/>
+              </g>
+              <!-- renderer -->
+              <rect x="120" y="166" width="120" height="34" rx="6" fill="#1a1a1a"/>
+              <text x="180" y="180" font-family="ui-monospace,Menlo,monospace" font-size="10" fill="#ffffff" text-anchor="middle">renderSvg(scene)</text>
+              <text x="180" y="193" font-family="ui-monospace,Menlo,monospace" font-size="9" fill="#aac1d8" text-anchor="middle">deterministic</text>
+              <!-- arrow out -->
+              <line x1="180" y1="200" x2="180" y2="218" stroke="#999" stroke-width="1.5"/>
+              <polygon points="176,214 180,222 184,214" fill="#999" stroke="none"/>
+              <text x="180" y="232" font-family="system-ui" font-size="10" fill="#666" text-anchor="middle" font-style="italic">byte-stable &lt;svg&gt;</text>
+            </svg>
+          </div>
+        </div>
+
+        <div class="prims-stat-row">
+          <div class="prims-stat">
+            <strong>19</strong>
+            <span>compose primitives shipped — shape, text, structural, decorative, composition</span>
+          </div>
+          <div class="prims-stat">
+            <strong>~50%</strong>
+            <span>of the playground's polished business charts are compose-built, not chart-spec</span>
+          </div>
+          <div class="prims-stat">
+            <strong>64 + 4 KB</strong>
+            <span>per-scene cap on compose children and per-element raw-svg — both proven sufficient for hand-laid streamgraphs, choropleths, full org charts</span>
+          </div>
+        </div>
+
+        <h3 style="margin: 28px 0 4px; font-size: 16px;">The primitive catalog, grouped</h3>
+        <p class="quote" style="margin-top: 4px;">
+          Each card shows the mark name + a tiny visual + the one-liner you'd hand a teammate.
+          The full schemas + every config knob live in <a href="https://github.com/seanhanca/glyph/blob/main/docs/primitives.md"><code>docs/primitives.md</code></a>.
+        </p>
+
+        <h4 style="margin: 18px 0 0; font-size: 12px; font-weight: 600; color: var(--fg-soft); letter-spacing: 0.06em; text-transform: uppercase;">Shape primitives</h4>
+        <div class="prims-grid">
+          <div class="prim-card">
+            <div class="prim-card-art">
+              <svg viewBox="0 0 80 64"><circle cx="40" cy="32" r="18" fill="#4c78a8"/></svg>
+            </div>
+            <code>circle</code>
+            <p>One circle at the child's anchor. radius + fill + optional stroke.</p>
+          </div>
+          <div class="prim-card">
+            <div class="prim-card-art">
+              <svg viewBox="0 0 80 64"><ellipse cx="40" cy="32" rx="26" ry="14" fill="#aac1d8" stroke="#4c78a8" stroke-width="1"/></svg>
+            </div>
+            <code>ellipse</code>
+            <p>Ellipse with rx, ry, optional rotation. Petals, halos, planetary orbits.</p>
+          </div>
+          <div class="prim-card">
+            <div class="prim-card-art">
+              <svg viewBox="0 0 80 64"><polygon points="40,12 64,28 56,52 24,52 16,28" fill="#f58518" stroke="#1a1a1a" stroke-width="1"/></svg>
+            </div>
+            <code>polygon</code>
+            <p>Closed shape from explicit points (3–200). Used for streamgraph bands, hexes, badges.</p>
+          </div>
+          <div class="prim-card">
+            <div class="prim-card-art">
+              <svg viewBox="0 0 80 64"><polyline points="8,48 22,28 36,40 50,18 64,32 72,22" fill="none" stroke="#4c78a8" stroke-width="2"/></svg>
+            </div>
+            <code>polyline</code>
+            <p>Open polyline — connecting line that doesn't auto-close. Time series, sparklines.</p>
+          </div>
+          <div class="prim-card">
+            <div class="prim-card-art">
+              <svg viewBox="0 0 80 64"><path d="M 12 50 Q 30 4 50 32 T 72 18" fill="none" stroke="#54a24b" stroke-width="2.5" stroke-linecap="round"/></svg>
+            </div>
+            <code>silhouette-path</code>
+            <p>Arbitrary SVG path (M/L/C/A/Z). The most powerful primitive — sunburst arcs, custom legends, the calendar heatmap.</p>
+          </div>
+          <div class="prim-card">
+            <div class="prim-card-art">
+              <svg viewBox="0 0 80 64"><rect x="12" y="20" width="56" height="24" rx="3" fill="#4c78a8"/></svg>
+            </div>
+            <code>rect (via path)</code>
+            <p>Rectangles via <code>silhouette-path</code>'s <code>M…L…Z</code>. Bundle hundreds in one child to stay under the 64-cap.</p>
+          </div>
+        </div>
+
+        <h4 style="margin: 22px 0 0; font-size: 12px; font-weight: 600; color: var(--fg-soft); letter-spacing: 0.06em; text-transform: uppercase;">Text + label primitives</h4>
+        <div class="prims-grid">
+          <div class="prim-card">
+            <div class="prim-card-art">
+              <svg viewBox="0 0 80 64"><text x="40" y="40" font-family="system-ui" font-size="20" font-weight="600" fill="#1a1a1a" text-anchor="middle">Label</text></svg>
+            </div>
+            <code>text</code>
+            <p>One label at the anchor — fontSize, fill, italic, anchor (start/middle/end).</p>
+          </div>
+          <div class="prim-card">
+            <div class="prim-card-art">
+              <svg viewBox="0 0 80 64"><line x1="14" y1="48" x2="50" y2="20" stroke="#1a1a1a" stroke-width="1"/><circle cx="50" cy="20" r="2.5" fill="#1a1a1a"/><text x="56" y="24" font-family="system-ui" font-size="10" fill="#1a1a1a">v3.0</text></svg>
+            </div>
+            <code>annotation-leader</code>
+            <p>Leader line + label. Used to call out outliers + launch moments in the composite chart.</p>
+          </div>
+          <div class="prim-card">
+            <div class="prim-card-art">
+              <svg viewBox="0 0 80 64"><rect x="8" y="14" width="64" height="36" rx="4" fill="none" stroke="#aac1d8" stroke-width="1"/><text x="40" y="34" font-family="system-ui" font-size="10" fill="#666" text-anchor="middle">framed group</text></svg>
+            </div>
+            <code>frame</code>
+            <p>A bordered panel with optional title — useful for grouping siblings into a labeled card.</p>
+          </div>
+          <div class="prim-card">
+            <div class="prim-card-art">
+              <svg viewBox="0 0 80 64"><circle cx="22" cy="32" r="14" fill="#fdecea" stroke="#c0392b" stroke-width="1"/><circle cx="22" cy="32" r="6" fill="#c0392b"/><text x="46" y="36" font-family="system-ui" font-size="10" fill="#1a1a1a">badge</text></svg>
+            </div>
+            <code>icon</code> · <code>heart-icon</code>
+            <p>Stylized icon shapes — for the heart + circulation page and similar showcases.</p>
+          </div>
+        </div>
+
+        <h4 style="margin: 22px 0 0; font-size: 12px; font-weight: 600; color: var(--fg-soft); letter-spacing: 0.06em; text-transform: uppercase;">Decorative + structural</h4>
+        <div class="prims-grid">
+          <div class="prim-card">
+            <div class="prim-card-art">
+              <svg viewBox="0 0 80 64"><defs><linearGradient id="pg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#4c78a8"/><stop offset="100%" stop-color="#54a24b"/></linearGradient></defs><rect x="8" y="16" width="64" height="32" rx="4" fill="url(#pg)"/></svg>
+            </div>
+            <code>gradients</code> (def)
+            <p>Linear or radial gradient definitions, reusable across siblings via <code>fill="url(#id)"</code>.</p>
+          </div>
+          <div class="prim-card">
+            <div class="prim-card-art">
+              <svg viewBox="0 0 80 64"><defs><pattern id="pp" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#4c78a8" stroke-width="1"/></pattern></defs><rect x="8" y="16" width="64" height="32" rx="4" fill="url(#pp)" stroke="#4c78a8" stroke-width="1"/></svg>
+            </div>
+            <code>patterns</code> (def)
+            <p>Tileable pattern fills — diagonal hatching for uncertainty, dots, grid textures.</p>
+          </div>
+          <div class="prim-card">
+            <div class="prim-card-art">
+              <svg viewBox="0 0 80 64"><rect width="80" height="64" fill="#0b0d12"/><g fill="#ffffff"><circle cx="14" cy="12" r="0.6"/><circle cx="28" cy="22" r="0.9"/><circle cx="42" cy="8" r="0.6"/><circle cx="56" cy="30" r="1.0"/><circle cx="64" cy="14" r="0.7"/><circle cx="20" cy="48" r="0.7"/><circle cx="50" cy="52" r="0.6"/><circle cx="70" cy="46" r="0.9"/></g></svg>
+            </div>
+            <code>starfield</code>
+            <p>Deterministic random-but-stable dots. Used in DNA, jellyfish, and orrery scenes.</p>
+          </div>
+          <div class="prim-card">
+            <div class="prim-card-art">
+              <svg viewBox="0 0 80 64"><defs><filter id="pf-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2"/></filter></defs><circle cx="40" cy="32" r="14" fill="#f58518" filter="url(#pf-glow)"/><circle cx="40" cy="32" r="10" fill="#f58518"/></svg>
+            </div>
+            <code>glow</code>
+            <p>Drop-shadow-style halo on a child — pulses on the windmill sun, jellyfish bioluminescence.</p>
+          </div>
+        </div>
+
+        <h4 style="margin: 22px 0 0; font-size: 12px; font-weight: 600; color: var(--fg-soft); letter-spacing: 0.06em; text-transform: uppercase;">Composition + escape hatch</h4>
+        <div class="prims-grid">
+          <div class="prim-card">
+            <div class="prim-card-art">
+              <svg viewBox="0 0 80 64"><rect x="6" y="6" width="68" height="52" rx="5" fill="none" stroke="#aac1d8" stroke-width="1" stroke-dasharray="3 3"/><g fill="#4c78a8" transform="translate(14, 18)"><rect x="0" y="22" width="6" height="14"/><rect x="10" y="12" width="6" height="24"/><rect x="20" y="6" width="6" height="30"/><rect x="30" y="16" width="6" height="20"/><rect x="40" y="2" width="6" height="34"/></g></svg>
+            </div>
+            <code>chart</code> + <code>size</code>
+            <p>Nest a full chart spec inside compose, scaled to fit. One-level recursion — chart inside compose, not vice versa.</p>
+          </div>
+          <div class="prim-card">
+            <div class="prim-card-art">
+              <svg viewBox="0 0 80 64"><rect width="80" height="64" fill="#f6f8fa"/><text x="40" y="24" font-family="ui-monospace,Menlo,monospace" font-size="9" fill="#1a1a1a" text-anchor="middle">&lt;circle</text><text x="40" y="36" font-family="ui-monospace,Menlo,monospace" font-size="9" fill="#1a1a1a" text-anchor="middle">  cx=… r=…&gt;</text><text x="40" y="48" font-family="ui-monospace,Menlo,monospace" font-size="9" fill="#c0392b" text-anchor="middle">  &lt;animate /&gt;</text></svg>
+            </div>
+            <code>raw-svg</code>
+            <p>Up to 4 KB of sanitized SVG/SMIL per child. Per-element animations, custom shapes the catalog doesn't reach.</p>
+          </div>
+          <div class="prim-card">
+            <div class="prim-card-art">
+              <svg viewBox="0 0 80 64"><g transform="translate(40, 32)"><circle cx="0" cy="0" r="3" fill="#4c78a8"/><circle cx="-18" cy="0" r="3" fill="#4c78a8"/><circle cx="18" cy="0" r="3" fill="#4c78a8"/><line x1="-18" y1="0" x2="18" y2="0" stroke="#aac1d8" stroke-width="1"/></g></svg>
+            </div>
+            <code>at: { x, y }</code>
+            <p>Every compose child carries an absolute anchor. The shape's coords are interpreted relative to it.</p>
+          </div>
+          <div class="prim-card">
+            <div class="prim-card-art">
+              <svg viewBox="0 0 80 64"><g transform="translate(40, 32) rotate(15)"><rect x="-20" y="-12" width="40" height="24" rx="3" fill="#f58518" opacity="0.85"/></g></svg>
+            </div>
+            <code>opacity</code> · transforms
+            <p>All shape primitives accept opacity, stroke-dasharray, line-cap/join. Animatable via raw-svg SMIL.</p>
+          </div>
+        </div>
+
+        <div class="prims-patterns">
+          <div class="prims-pattern">
+            <h4>Pattern: bundle same-color shapes into one path</h4>
+            <pre><code>// 371 calendar cells in 6 children (one per color tier)
+let d = "";
+for (const cell of cellsForTier(tier)) {
+  d += ` ${rectPath(cell.x, cell.y, w, h)}`;
+}
+children.push({
+  at: { x: 0, y: 0 },
+  mark: "silhouette-path",
+  silhouettePath: { d: d.trim(), fill: tierColor },
+});</code></pre>
+          </div>
+          <div class="prims-pattern">
+            <h4>Pattern: per-element SMIL via raw-svg</h4>
+            <pre><code>// Each bubble carries its own keyframes
+&lt;circle cx="100" cy="200" r="0" fill="#4c78a8"&gt;
+  &lt;animate attributeName="r"
+    from="0" to="22" dur="0.55s"
+    begin="0.2s" fill="freeze"/&gt;
+&lt;/circle&gt;</code></pre>
+          </div>
+        </div>
+
+        <div class="prims-limits">
+          <strong>Limits + invariants.</strong> 64 children per compose scene · 4 KB per <code>raw-svg</code>
+          <code>xml</code> field · <code>&lt;script&gt;</code> / <code>&lt;foreignObject&gt;</code> / <code>on*=</code>
+          handlers stripped at parse time · every primitive emits sorted, deterministic attribute
+          output. Same compose spec → byte-identical SVG on every machine, every Node version, every
+          decade. The audit panel + spec diff + lineage MCP verbs all work on compose scenes too.
         </div>
       </div>
     </section>
