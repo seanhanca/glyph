@@ -32,81 +32,40 @@ let currentSpec = DEFAULT_SPEC;
 // should fail fast with a readable message instead.
 const CSV_SIZE_CAP_BYTES = 10 * 1024 * 1024;
 
-function mountCsvUpload(host, onLoaded, onSpec) {
+// ---------- CSV widget ------------------------------------------------
+// Just the data-input bits (file picker + paste box + status line).
+// The example picker now lives in the sticky examples bar at the top
+// of the page (see mountExamplePicker) so the CSV widget itself stays
+// small and only appears when the user opens the "Your data" drawer.
+//
+// Returns a handle so the example picker can drive CSV loads through
+// the same code path (one tokenized loader, one status line).
+function mountCsvUpload(host, onLoaded) {
   host.innerHTML = `
     <input type="file" id="csv-file" accept=".csv,text/csv" />
-    <p class="hint">or paste:</p>
-    <textarea id="csv-paste" placeholder="hour,rides&#10;0,42&#10;1,38&#10;..." rows="8"></textarea>
-    <p id="csv-status" class="hint">Initializing DuckDB…</p>
-    <p class="hint" style="margin-top:12px"><strong>Built-in examples</strong> — pick a category, then an example:</p>
-    <select id="csv-example" disabled>
-      <option value="">— pick an example —</option>
-    </select>
-    <p id="csv-example-desc" class="hint" style="min-height:1.2em;margin-top:6px;font-style:italic"></p>
+    <textarea id="csv-paste" placeholder="hour,rides&#10;0,42&#10;1,38&#10;..." rows="6"></textarea>
+    <p id="csv-status">Initializing DuckDB…</p>
   `;
   const status = host.querySelector("#csv-status");
-  const selectExample = host.querySelector("#csv-example");
-  const exampleDesc = host.querySelector("#csv-example-desc");
-
-  /** @type {Array<{id:string,category:string,name:string,description:string,csv:string|null,spec:string|null}>} */
-  let manifest = [];
+  const paste = host.querySelector("#csv-paste");
 
   // Eagerly warm DuckDB so the user finds out about wasm/SAB/COEP problems
-  // immediately on page load, not on first paste. Also fetch the example
-  // manifest in parallel — neither blocks the other.
-  Promise.all([
-    getDuckDb().then(
-      () => "duckdb-ok",
-      (e) => `DuckDB init failed: ${e.message ?? e}`,
-    ),
-    fetch("examples/index.json", { cache: "no-store" })
-      .then((r) => (r.ok ? r.json() : []))
-      .catch(() => []),
-  ]).then(([duckResult, examples]) => {
-    if (duckResult !== "duckdb-ok") {
-      status.textContent = duckResult;
-      // Still allow examples — many don't need DuckDB.
-    } else {
-      status.textContent = "Ready — paste, upload, or pick an example.";
-    }
-    manifest = Array.isArray(examples) ? examples : [];
-    populateDropdown();
-    selectExample.disabled = false;
-  });
-
-  // Build a grouped <optgroup> structure from the manifest. Categories
-  // are inserted in the order they first appear, so the manifest
-  // controls the visual ordering.
-  function populateDropdown() {
-    const categories = [];
-    const seen = new Set();
-    for (const item of manifest) {
-      if (!seen.has(item.category)) {
-        seen.add(item.category);
-        categories.push(item.category);
-      }
-    }
-    // Wipe the existing children and re-add the placeholder + groups.
-    selectExample.innerHTML = '<option value="">— pick an example —</option>';
-    for (const cat of categories) {
-      const group = document.createElement("optgroup");
-      group.label = cat;
-      for (const item of manifest.filter((m) => m.category === cat)) {
-        const opt = document.createElement("option");
-        opt.value = item.id;
-        opt.textContent = item.name;
-        group.appendChild(opt);
-      }
-      selectExample.appendChild(group);
-    }
-  }
+  // immediately on page load, not on first paste.
+  getDuckDb().then(
+    () => {
+      status.textContent = "Ready — paste, upload, or pick an example above.";
+    },
+    (e) => {
+      status.textContent = `DuckDB init failed: ${e.message ?? e}`;
+    },
+  );
 
   // In-flight token. Each load increments; stale callbacks are dropped.
-  // Prevents a paste-then-pick-example race from emitting onLoaded out of
-  // order or against a stale CREATE OR REPLACE target.
+  // Prevents a paste-then-pick-example race from emitting onLoaded out
+  // of order or against a stale CREATE OR REPLACE target.
   let loadToken = 0;
 
-  const handle = async (csv) => {
+  const handle = async (csv, { source = "user" } = {}) => {
     if (csv.length > CSV_SIZE_CAP_BYTES) {
       const mb = (csv.length / 1024 / 1024).toFixed(1);
       status.textContent = `CSV too large (${mb} MB, max 10 MB).`;
@@ -120,7 +79,7 @@ function mountCsvUpload(host, onLoaded, onSpec) {
       const count = (await queryRows(`SELECT COUNT(*) AS n FROM ${table}`))[0].n;
       const rows = await queryRows(`SELECT * FROM ${table}`);
       if (myToken !== loadToken) return; // a newer load won; drop this one
-      status.textContent = `Loaded ${count} rows, ${cols.length} columns`;
+      status.textContent = `Loaded ${count} rows · ${cols.length} columns · ${source}`;
       onLoaded({ table, rows, columns: cols });
     } catch (e) {
       if (myToken !== loadToken) return;
@@ -130,58 +89,141 @@ function mountCsvUpload(host, onLoaded, onSpec) {
 
   host.querySelector("#csv-file").addEventListener("change", async (e) => {
     const file = e.target.files?.[0];
-    if (file) handle(await file.text());
+    if (file) handle(await file.text(), { source: "uploaded file" });
   });
-  host.querySelector("#csv-paste").addEventListener("blur", (e) => {
-    if (e.target.value) handle(e.target.value);
+  paste.addEventListener("blur", (e) => {
+    if (e.target.value) handle(e.target.value, { source: "pasted" });
   });
-  selectExample.addEventListener("change", async (e) => {
-    const id = e.target.value;
-    if (!id) {
-      exampleDesc.textContent = "";
-      return;
-    }
-    const item = manifest.find((m) => m.id === id);
-    if (!item) return;
-    exampleDesc.textContent = item.description || "";
 
+  return {
+    // The example picker calls this when an example ships a CSV.
+    loadCsv: (csv, label) => {
+      paste.value = csv;
+      return handle(csv, { source: label ?? "example" });
+    },
+    // When an example is self-contained we surface that in the status line.
+    clearDataset: (label) => {
+      paste.value = "";
+      status.textContent = label
+        ? `${label} — self-contained, no CSV needed`
+        : "Ready — paste, upload, or pick an example above.";
+    },
+    setStatus: (msg) => {
+      status.textContent = msg;
+    },
+    getPasteEl: () => paste,
+  };
+}
+
+// ---------- Example picker --------------------------------------------
+// Sticky chip strip at the top of the page. Tabs filter by category;
+// each chip loads an example end-to-end (spec + CSV when present).
+// Active chip highlighted; hover updates the blurb line so the user
+// can scan descriptions without committing to a click.
+function mountExamplePicker({ tabsEl, chipsEl, blurbEl, activeEl, onPick }) {
+  /** @type {Array<{id:string,category:string,name:string,description:string,csv:string|null,spec:string|null}>} */
+  let manifest = [];
+  let activeCategory = null;
+  let activeId = null;
+
+  fetch("examples/index.json", { cache: "no-store" })
+    .then((r) => (r.ok ? r.json() : []))
+    .catch(() => [])
+    .then((examples) => {
+      manifest = Array.isArray(examples) ? examples : [];
+      if (manifest.length === 0) {
+        blurbEl.textContent = "No examples found.";
+        return;
+      }
+      activeCategory = manifest[0].category;
+      renderTabs();
+      renderChips();
+      blurbEl.textContent = "Pick any example to load its spec (and data, if it has one).";
+    });
+
+  function renderTabs() {
+    const seen = new Set();
+    const categories = [];
+    for (const item of manifest) {
+      if (!seen.has(item.category)) {
+        seen.add(item.category);
+        categories.push(item.category);
+      }
+    }
+    tabsEl.innerHTML = "";
+    for (const cat of categories) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = `tab${cat === activeCategory ? " is-active" : ""}`;
+      btn.textContent = cat;
+      btn.setAttribute("role", "tab");
+      btn.setAttribute("aria-selected", String(cat === activeCategory));
+      btn.addEventListener("click", () => {
+        activeCategory = cat;
+        renderTabs();
+        renderChips();
+      });
+      tabsEl.appendChild(btn);
+    }
+  }
+
+  function renderChips() {
+    chipsEl.innerHTML = "";
+    const inCat = manifest.filter((m) => m.category === activeCategory);
+    for (const item of inCat) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = `chip${item.id === activeId ? " is-active" : ""}`;
+      btn.textContent = item.name;
+      btn.title = item.description || item.name;
+      btn.addEventListener("mouseenter", () => {
+        blurbEl.textContent = item.description || "";
+      });
+      btn.addEventListener("focus", () => {
+        blurbEl.textContent = item.description || "";
+      });
+      btn.addEventListener("click", () => pickExample(item));
+      chipsEl.appendChild(btn);
+    }
+  }
+
+  async function pickExample(item) {
+    activeId = item.id;
+    activeCategory = item.category;
+    renderTabs();
+    renderChips();
+    blurbEl.textContent = item.description || "";
+    if (activeEl) {
+      activeEl.textContent = `${item.category} · ${item.name}`;
+    }
     try {
-      // Spec first (if any). Always set the editor to the example spec so the
-      // user sees the JSON that produces the chart. The onSpec callback
-      // pushes the new text into the Monaco model + triggers rerender.
+      let specText = null;
       if (item.spec) {
         const r = await fetch(item.spec, { cache: "no-store" });
-        if (r.ok) {
-          const specText = await r.text();
-          onSpec?.(specText);
-        }
+        if (r.ok) specText = await r.text();
       }
-      // CSV (if any). Some examples are self-contained (compose / function /
-      // PDE) and don't need a dataset — skip the CSV load in that case.
+      let csvText = null;
       if (item.csv) {
         const r = await fetch(item.csv, { cache: "no-store" });
-        if (r.ok) {
-          const csv = await r.text();
-          host.querySelector("#csv-paste").value = csv;
-          handle(csv);
-        }
-      } else {
-        // Self-contained spec: clear the textarea + reset the status line.
-        host.querySelector("#csv-paste").value = "";
-        status.textContent = `Example loaded · ${item.name} (self-contained — no CSV needed)`;
-        // Force a rerender even though dataset hasn't changed, because the
-        // spec may have. Done by `onSpec` upstream.
+        if (r.ok) csvText = await r.text();
       }
+      onPick?.({ item, specText, csvText });
     } catch (err) {
-      status.textContent = `Example load failed: ${err.message ?? err}`;
+      blurbEl.textContent = `Example load failed: ${err.message ?? err}`;
     }
-  });
+  }
 }
 
 const csvHost = document.getElementById("csv-upload");
 const chartHost = document.getElementById("chart-preview");
 const auditHost = document.getElementById("audit-findings");
 const trustHost = document.getElementById("trust");
+const tabsEl = document.getElementById("examples-tabs");
+const chipsEl = document.getElementById("examples-chips");
+const blurbEl = document.getElementById("example-blurb");
+const activeExampleEl = document.getElementById("active-example");
+const auditMetaEl = document.getElementById("audit-meta");
+const dataMetaEl = document.getElementById("data-meta");
 let dataset = null;
 
 // Compile + render the current spec against the current dataset and
@@ -285,6 +327,12 @@ function renderAuditPanel(spec, rowCount) {
     return;
   }
   paintTrustChip(result.trust);
+  // Drawer summary mirrors the finding count + trust score so the user
+  // sees the audit state even when the drawer is collapsed.
+  if (auditMetaEl) {
+    const n = result.findings.length;
+    auditMetaEl.textContent = `${n} finding${n === 1 ? "" : "s"} · trust ${result.trust}/100`;
+  }
   if (result.findings.length === 0) {
     auditHost.innerHTML = '<li class="clean">✓ no findings</li>';
     return;
@@ -326,6 +374,7 @@ function renderAuditError(message) {
   auditHost.innerHTML = `<li class="severity-high">${escapeHtml(message)}</li>`;
   trustHost.innerHTML = "";
   trustHost.style.color = "";
+  if (auditMetaEl) auditMetaEl.textContent = "error";
 }
 
 // Minimal HTML escape for error messages. Errors from the compiler can
@@ -340,29 +389,46 @@ function escapeHtml(s) {
     .replace(/'/g, "&#39;");
 }
 
-mountCsvUpload(
-  csvHost,
-  (loaded) => {
-    dataset = loaded;
-    console.log("data loaded:", dataset);
-    rerender();
-  },
-  // onSpec — fires when the user picks an example that ships a spec. Push the
-  // text into the Monaco editor (if it has booted) and into our local
-  // `currentSpec` mirror so rerender() picks it up. For self-contained
-  // examples (compose / function / PDE) the spec drives the render
-  // entirely — no CSV needed.
-  (specText) => {
-    currentSpec = specText;
-    if (specEditor && typeof specEditor.setValue === "function") {
-      specEditor.setValue(specText);
+// Mount the CSV widget — just the upload/paste box now; the example
+// dropdown moved to the sticky chip strip above. The returned handle
+// exposes `loadCsv` so the example picker can feed CSVs through the
+// same tokenized loader (one queue, one status line).
+const csvWidget = mountCsvUpload(csvHost, (loaded) => {
+  dataset = loaded;
+  if (dataMetaEl) {
+    dataMetaEl.textContent = `${loaded.rows.length} rows · ${loaded.columns.length} columns`;
+  }
+  console.log("data loaded:", dataset);
+  rerender();
+});
+
+// Mount the example picker — chip strip + tabs in the sticky bar.
+// Picking an example sets the spec (always) and either loads the
+// paired CSV or clears the dataset for self-contained specs.
+mountExamplePicker({
+  tabsEl,
+  chipsEl,
+  blurbEl,
+  activeEl: activeExampleEl,
+  onPick: ({ item, specText, csvText }) => {
+    if (specText) {
+      currentSpec = specText;
+      if (specEditor && typeof specEditor.setValue === "function") {
+        specEditor.setValue(specText);
+      }
     }
-    // Clear the previous dataset so self-contained specs don't try to
-    // bind to stale columns. rerender() handles either case.
-    dataset = null;
-    rerender();
+    if (csvText) {
+      // Loads through the same path as a user paste; csvWidget will
+      // fire onLoaded and rerender once DuckDB returns.
+      csvWidget.loadCsv(csvText, `example · ${item.name}`);
+    } else {
+      dataset = null;
+      csvWidget.clearDataset(item.name);
+      if (dataMetaEl) dataMetaEl.textContent = "self-contained — no CSV needed";
+      rerender();
+    }
   },
-);
+});
 
 // Mount the Monaco spec editor. The onChange handler updates the
 // in-memory copy of the spec and triggers a re-render against the

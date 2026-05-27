@@ -4,9 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Glyph Playground</title>
-  <meta name="description" content="Paste a CSV, edit a spec, see the chart + audit findings + trust score." />
+  <meta name="description" content="Pick an example or paste a CSV, edit the spec, watch Glyph compile it to a deterministic SVG." />
   <meta property="og:title" content="Glyph Playground" />
-  <meta property="og:description" content="Paste a CSV, edit a spec, see the chart + audit findings + trust score." />
+  <meta property="og:description" content="Pick an example or paste a CSV, edit the spec, watch Glyph compile it to a deterministic SVG." />
   <meta property="og:url" content="https://seanhanca.github.io/glyph/play/" />
   <!-- og:image landed alongside the launch PR (PR6). 1200x630 PNG at
        site/og-playground.png. If the image file isn't yet rendered, the
@@ -16,51 +16,91 @@
   <meta property="og:image:height" content="630" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Glyph Playground" />
-  <meta name="twitter:description" content="Paste a CSV, edit a spec, see the chart + audit findings + trust score." />
+  <meta name="twitter:description" content="Pick an example or paste a CSV, edit the spec, watch Glyph compile it to a deterministic SVG." />
   <meta name="twitter:image" content="../og-playground.png" />
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
+  <!-- Topbar: brand on the left, links + share actions on the right. Share
+       buttons live here (not at the bottom) so the play area is uncluttered
+       and the actions stay visible while the user scrolls long examples. -->
   <header class="topbar">
-    <a href="../" class="brand">Glyph</a>
-    <nav>
-      <!-- No `category=` — the maintainer needs to create the "Playground" -->
-      <!-- category in repo Settings → Discussions → Categories first. Without -->
-      <!-- it, the param 404s. Template alone routes the user to the form. -->
-      <a href="https://github.com/seanhanca/glyph/discussions/new?template=playground.yml" target="_blank" rel="noopener">Submit to gallery</a>
-      <a href="https://github.com/seanhanca/glyph">GitHub</a>
-      <a href="../">Docs</a>
+    <a href="../" class="brand" aria-label="Glyph home">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-name">Glyph</span>
+      <span class="brand-tag">Playground</span>
+    </a>
+    <nav class="topbar-nav">
+      <a class="nav-link" href="../">Docs</a>
+      <a class="nav-link" href="https://github.com/seanhanca/glyph">GitHub</a>
+      <!-- No `category=` — the maintainer needs to create the "Playground"
+           category in repo Settings → Discussions → Categories first.
+           Without it, the param 404s. Template alone routes to the form. -->
+      <a class="nav-link" href="https://github.com/seanhanca/glyph/discussions/new?template=playground.yml" target="_blank" rel="noopener">Submit</a>
+      <span class="nav-sep" aria-hidden="true"></span>
+      <button id="share-url" class="btn btn-primary" type="button">Share URL</button>
+      <button id="share-gist" class="btn btn-ghost" type="button">Save to Gist</button>
     </nav>
   </header>
 
-  <main class="playground" id="playground">
-    <section class="pane pane-data">
-      <h2>Data</h2>
-      <div id="csv-upload"></div>
-    </section>
-    <section class="pane pane-spec">
-      <h2>Spec</h2>
-      <div id="spec-editor"></div>
-    </section>
-    <section class="pane pane-chart">
-      <h2>Chart</h2>
-      <!-- Filled by playground.js (PR4): live SVG from compileSpec+renderSvg
-           against the user's CSV. Empty until a dataset loads. -->
-      <div id="chart-preview"></div>
-    </section>
-    <aside class="pane pane-audit">
-      <h2>Audit <span class="trust" id="trust" aria-live="polite" aria-label="Trust score"></span></h2>
-      <!-- aria-live so screen-reader users hear new findings as they type. -->
-      <ul id="audit-findings" aria-live="polite" aria-label="Audit findings">
-        <li class="placeholder">Audit panel lands in PR5.</li>
-      </ul>
-    </aside>
-  </main>
+  <!-- Sticky examples bar — the primary discovery surface. Category tabs
+       filter the chip strip; chips load an example end-to-end (spec + CSV
+       if any). The blurb line beneath shows the description of the
+       focused chip so the user can scan without committing. -->
+  <section class="examples-bar" aria-label="Example gallery">
+    <div class="examples-bar-inner">
+      <div class="examples-row examples-row-tabs">
+        <div class="examples-label">Examples</div>
+        <div class="examples-tabs" id="examples-tabs" role="tablist"></div>
+      </div>
+      <div class="examples-chips" id="examples-chips" role="tabpanel"></div>
+      <div class="example-blurb" id="example-blurb">Loading examples…</div>
+    </div>
+  </section>
 
-  <div class="actions">
-    <button id="share-url">Share URL</button>
-    <button id="share-gist">Save to Gist</button>
-  </div>
+  <!-- Two-column play area. Spec + Data drawer on the left; Chart + Audit
+       drawer on the right. Drawers are <details> so they collapse cleanly
+       on small screens and keyboard-toggle reliably. -->
+  <main class="play" id="playground">
+    <section class="pane pane-spec" aria-label="Spec editor">
+      <header class="pane-head">
+        <h2>Spec</h2>
+        <span class="pane-hint" id="active-example">—</span>
+      </header>
+      <div id="spec-editor" class="pane-body"></div>
+      <details class="drawer" id="drawer-data">
+        <summary>
+          <span>Your data</span>
+          <span class="drawer-meta" id="data-meta">optional — most examples bring their own</span>
+        </summary>
+        <div class="drawer-body">
+          <div id="csv-upload"></div>
+        </div>
+      </details>
+    </section>
+
+    <section class="pane pane-chart" aria-label="Chart preview">
+      <header class="pane-head">
+        <h2>Chart</h2>
+        <span class="trust" id="trust" aria-live="polite" aria-label="Trust score"></span>
+      </header>
+      <!-- Filled by playground.js (PR4): live SVG from compileSpec+renderSvg
+           against the user's CSV. Shows a placeholder until first paint. -->
+      <div id="chart-preview" class="pane-body">
+        <div class="empty">Pick an example above, or paste a CSV → the chart appears here.</div>
+      </div>
+      <details class="drawer" id="drawer-audit" open>
+        <summary>
+          <span>Audit</span>
+          <span class="drawer-meta" id="audit-meta">checking…</span>
+        </summary>
+        <div class="drawer-body">
+          <!-- aria-live so screen-reader users hear new findings as they type. -->
+          <ul id="audit-findings" aria-live="polite" aria-label="Audit findings"></ul>
+        </div>
+      </details>
+    </section>
+  </main>
 
   <script type="module" src="./playground.js"></script>
 </body>
