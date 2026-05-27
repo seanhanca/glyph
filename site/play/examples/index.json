@@ -428,6 +428,55 @@
   },
 
   {
+    "id": "td-lorenz",
+    "category": "3D · Three.js",
+    "name": "Lorenz attractor (3D)",
+    "description": "The canonical chaos system unfolding in 3D. The path traces itself frame-by-frame; the whole scene slowly rotates so the strange attractor reads from every angle.",
+    "csv": null,
+    "spec": "examples/threed/lorenz-attractor.json"
+  },
+  {
+    "id": "td-dna",
+    "category": "3D · Three.js",
+    "name": "DNA double helix (3D)",
+    "description": "Two phosphate strands winding 4 turns around a central axis with 56 base-pair rungs between them. Slow rotation reveals the helical geometry.",
+    "csv": null,
+    "spec": "examples/threed/dna-helix.json"
+  },
+  {
+    "id": "td-gears",
+    "category": "3D · Three.js",
+    "name": "Planetary gears (3D)",
+    "description": "Sun gear with 4 planet gears meshing around it. Rotation speeds are properly geared (planet spins at sun_teeth/planet_teeth × sun rate).",
+    "csv": null,
+    "spec": "examples/threed/planetary-gears.json"
+  },
+  {
+    "id": "td-galaxy",
+    "category": "3D · Three.js",
+    "name": "Particle galaxy (3D)",
+    "description": "8,000 GPU-rendered particles in a 3-arm spiral. Each particle orbits at a radius-dependent rate (Kepler-ish), color shifts with distance from center.",
+    "csv": null,
+    "spec": "examples/threed/particle-galaxy.json"
+  },
+  {
+    "id": "td-torus-knot",
+    "category": "3D · Three.js",
+    "name": "Torus knot (3D)",
+    "description": "(3, 4) torus knot — a parametric mathematical surface with a translucent wireframe overlay. Slowly rotates on two axes so the topology reads from any angle.",
+    "csv": null,
+    "spec": "examples/threed/torus-knot.json"
+  },
+  {
+    "id": "td-truss",
+    "category": "3D · Three.js",
+    "name": "Truss bridge (3D)",
+    "description": "Parametric Warren-truss bridge with 8 bays, cross-bracing between the two trusses, and a deck slab. Camera orbits slowly to inspect from every side.",
+    "csv": null,
+    "spec": "examples/threed/truss-bridge.json"
+  },
+
+  {
     "id": "whyboard",
     "category": "Whyboard",
     "name": "Why did rides spike at 8am?",

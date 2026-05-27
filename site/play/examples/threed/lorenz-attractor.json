@@ -1,0 +1,12 @@
+{
+  "threeD": {
+    "scene": "lorenz-attractor",
+    "params": {
+      "sigma": 10,
+      "rho": 28,
+      "beta": 2.666666,
+      "dt": 0.005,
+      "totalPoints": 8000
+    }
+  }
+}

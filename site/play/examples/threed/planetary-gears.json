@@ -1,0 +1,8 @@
+{
+  "threeD": {
+    "scene": "planetary-gears",
+    "params": {
+      "planets": 4
+    }
+  }
+}

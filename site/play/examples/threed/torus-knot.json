@@ -1,0 +1,9 @@
+{
+  "threeD": {
+    "scene": "torus-knot",
+    "params": {
+      "p": 3,
+      "q": 4
+    }
+  }
+}
