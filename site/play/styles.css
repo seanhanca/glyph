@@ -1,122 +1,462 @@
-/* site/play/styles.css — matches site/index.html palette */
+/* site/play/styles.css
+ * Playground UI. The look targets "sleek-but-honest": a clean white
+ * workbench surface, a warm parchment example shelf at the top, and
+ * just enough shadow/contrast to give the panels weight without
+ * feeling chrome-heavy. Palette aligns with the rest of /site
+ * (accent #4c78a8 = Vega-Lite default) but tightens the neutrals.
+ */
 :root {
-  --bg: #ffffff;
-  --fg: #1a1a1a;
-  --fg-soft: #555;
-  --border: #e6e6e6;
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --surface-warm: #fbf7ee;
+  --surface-warm-edge: #f3ecdc;
+  --fg: #11151c;
+  --fg-muted: #4f5965;
+  --fg-soft: #8590a0;
+  --border: #e4e8ee;
+  --border-strong: #ccd3dc;
   --accent: #4c78a8;
-  --accent-soft: #e8eef5;
+  --accent-strong: #2f5a87;
+  --accent-soft: #e8eff7;
   --red: #c0392b;
+  --amber: #b9881f;
   --green: #1f7a39;
-  --mono: ui-monospace, "SF Mono", Menlo, monospace;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --shadow-1: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 1px rgba(15, 23, 42, 0.05);
+  --shadow-2: 0 4px 14px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04);
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --h-topbar: 56px;
 }
 * {
   box-sizing: border-box;
 }
+html,
 body {
-  font: 14px / 1.5 system-ui, -apple-system, sans-serif;
   margin: 0;
-  color: var(--fg);
+  padding: 0;
 }
+body {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--fg);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ---------- Topbar ----------------------------------------------------- */
 .topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 12px 24px;
+  justify-content: space-between;
+  gap: 16px;
+  height: var(--h-topbar);
+  padding: 0 24px;
+  background: var(--surface);
   border-bottom: 1px solid var(--border);
 }
-.topbar .brand {
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--fg);
+  text-decoration: none;
+  letter-spacing: -0.01em;
+}
+.brand-name {
   font-weight: 700;
-  font-size: 18px;
+  font-size: 17px;
+}
+.brand-tag {
+  font-weight: 400;
+  font-size: 13px;
+  color: var(--fg-muted);
+  padding-left: 10px;
+  border-left: 1px solid var(--border);
+}
+/* Tiny rotated square — a quiet brand mark; doesn't need to be literal. */
+.brand-mark {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+  transform: rotate(45deg);
+  border-radius: 2px;
+}
+
+.topbar-nav {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.nav-link {
+  font-size: 13px;
+  color: var(--fg-muted);
   text-decoration: none;
+  padding: 6px 4px;
+  border-radius: var(--r-sm);
+  transition: color 0.12s;
+}
+.nav-link:hover {
   color: var(--fg);
 }
-.topbar nav a {
-  margin-left: 16px;
-  color: var(--fg-soft);
-  text-decoration: none;
+.nav-sep {
+  width: 1px;
+  height: 20px;
+  background: var(--border);
+  margin: 0 2px;
 }
-.topbar nav a:hover {
+
+/* ---------- Buttons --------------------------------------------------- */
+.btn {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
   color: var(--fg);
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s, color 0.12s, box-shadow 0.12s;
 }
-.playground {
+.btn:hover {
+  border-color: var(--border-strong);
+}
+.btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+.btn-primary:hover {
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
+  box-shadow: var(--shadow-1);
+}
+.btn-ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--fg-muted);
+}
+.btn-ghost:hover {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+
+/* ---------- Examples bar --------------------------------------------- */
+.examples-bar {
+  position: sticky;
+  top: var(--h-topbar);
+  z-index: 20;
+  background: linear-gradient(180deg, var(--surface-warm), var(--surface-warm-edge));
+  border-bottom: 1px solid var(--border);
+}
+.examples-bar-inner {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 280px;
+  gap: 8px;
+  padding: 14px 24px 12px;
+}
+.examples-row {
+  display: flex;
+  align-items: center;
   gap: 12px;
-  padding: 12px;
-  height: calc(100vh - 110px);
+}
+.examples-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-soft);
+}
+.examples-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.tab {
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--fg-muted);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+.tab:hover {
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--fg);
+}
+.tab.is-active {
+  background: var(--fg);
+  color: white;
+  border-color: var(--fg);
+}
+.examples-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.chip {
+  font: inherit;
+  font-size: 12.5px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--fg);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.12s, background 0.12s, color 0.12s, box-shadow 0.12s;
+}
+.chip:hover {
+  border-color: var(--accent);
+  color: var(--accent-strong);
+}
+.chip.is-active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent-strong);
+  font-weight: 500;
+  box-shadow: var(--shadow-1);
+}
+.example-blurb {
+  min-height: 18px;
+  font-size: 12.5px;
+  color: var(--fg-muted);
+  font-style: italic;
+  padding: 0 2px;
+}
+
+/* ---------- Play area ------------------------------------------------- */
+.play {
+  display: grid;
+  grid-template-columns: minmax(420px, 1fr) minmax(520px, 1.3fr);
+  gap: 16px;
+  padding: 16px 24px 24px;
+  min-height: calc(100vh - var(--h-topbar) - 160px);
 }
 .pane {
-  background: white;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 12px;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
-}
-.pane h2 {
-  font-size: 12px;
-  margin: 0 0 8px 0;
-  color: var(--fg-soft);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-.actions {
-  display: flex;
-  gap: 8px;
-  justify-content: flex-end;
-  padding: 0 24px 12px 24px;
-}
-button {
-  padding: 8px 14px;
+  background: var(--surface);
   border: 1px solid var(--border);
-  background: white;
-  border-radius: 6px;
-  cursor: pointer;
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-1);
+  overflow: hidden;
+  min-height: 0;
+}
+.pane-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, #fdfdfd 0%, var(--surface) 100%);
+}
+.pane-head h2 {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-soft);
+}
+.pane-hint {
+  font-size: 12px;
+  color: var(--fg-muted);
+  font-family: var(--mono);
+  max-width: 60%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pane-body {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* Monaco needs a sized host or it renders 0×0. */
+#spec-editor {
+  min-height: 320px;
+}
+
+/* Chart pane — center the SVG with breathing room; show a soft empty state
+   before the first render. */
+#chart-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  overflow: auto;
+}
+#chart-preview svg {
+  max-width: 100%;
+  height: auto;
+  filter: drop-shadow(0 1px 2px rgba(15, 23, 42, 0.04));
+}
+#chart-preview .empty {
+  color: var(--fg-soft);
+  font-size: 13px;
+  text-align: center;
+  max-width: 320px;
+  line-height: 1.5;
+}
+#chart-preview .error {
+  width: 100%;
+  color: var(--red);
+  background: #fdecea;
+  border-left: 3px solid var(--red);
+  padding: 10px 12px;
   font-family: var(--mono);
   font-size: 12px;
+  border-radius: var(--r-sm);
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
 }
-button:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-}
+
+/* Trust chip — sits inside the chart pane header so trust visually
+   connects to what's drawn. */
 .trust {
-  float: right;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
   font-family: var(--mono);
+  font-size: 12px;
   font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
 }
 .trust .trust-score {
-  font-size: 14px;
+  font-size: 13px;
 }
 .trust .trust-label {
   font-weight: 400;
+  opacity: 0.7;
+}
+
+/* ---------- Drawers (Data + Audit) ----------------------------------- */
+.drawer {
+  border-top: 1px solid var(--border);
+  background: linear-gradient(180deg, #fafbfc 0%, var(--surface) 60%);
+}
+.drawer > summary {
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--fg-soft);
 }
+.drawer > summary::-webkit-details-marker {
+  display: none;
+}
+.drawer > summary::after {
+  content: "▾";
+  font-size: 10px;
+  color: var(--fg-soft);
+  transition: transform 0.15s;
+}
+.drawer[open] > summary::after {
+  transform: rotate(-180deg);
+}
+.drawer > summary:hover {
+  color: var(--fg);
+}
+.drawer .drawer-meta {
+  font-size: 12px;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: var(--mono);
+  color: var(--fg-muted);
+}
+.drawer-body {
+  padding: 4px 16px 16px;
+}
+
+/* ---------- CSV upload widget --------------------------------------- */
+#csv-upload {
+  display: grid;
+  gap: 8px;
+}
+#csv-upload input[type="file"] {
+  font: inherit;
+  font-size: 12px;
+  color: var(--fg-muted);
+}
+#csv-upload textarea {
+  width: 100%;
+  min-height: 84px;
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  resize: vertical;
+  background: var(--surface);
+  color: var(--fg);
+  transition: border-color 0.12s;
+}
+#csv-upload textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+#csv-status {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--fg-muted);
+  margin: 0;
+}
+
+/* ---------- Audit findings ------------------------------------------ */
 #audit-findings {
   list-style: none;
   padding: 0;
   margin: 0;
+  display: grid;
+  gap: 6px;
+  max-height: 280px;
   overflow-y: auto;
 }
 #audit-findings li {
-  padding: 8px;
+  padding: 9px 12px;
   border-left: 3px solid var(--accent);
-  margin-bottom: 6px;
   background: var(--accent-soft);
-  font-size: 12px;
-  border-radius: 3px;
+  font-size: 12.5px;
+  border-radius: var(--r-sm);
+  color: var(--fg);
 }
-/* Severity classes match @glyph/core's AuditFinding contract:
-   high → red, medium → amber, low → accent blue (the default).
-   The PR1 stubs used error/warning/info; those tier names don't exist
-   in the real audit module — we use low/medium/high directly. */
+/* Severity bands match @glyph/core's AuditFinding contract: low/medium/high. */
 #audit-findings li.severity-high {
   border-left-color: var(--red);
   background: #fdecea;
 }
 #audit-findings li.severity-medium {
-  border-left-color: #d4a017;
+  border-left-color: var(--amber);
   background: #fbf2d8;
 }
 #audit-findings li.severity-low {
@@ -127,122 +467,46 @@ button:hover {
   border-left-color: var(--green);
   background: #eaf6ee;
   color: var(--green);
+  font-family: var(--mono);
 }
 #audit-findings .audit-head {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
   margin-bottom: 4px;
+  gap: 12px;
+}
+#audit-findings .audit-head strong {
+  font-family: var(--mono);
+  font-size: 11.5px;
 }
 #audit-findings .audit-sev {
   font-family: var(--mono);
   font-size: 10px;
   text-transform: uppercase;
-  color: var(--fg-soft);
-  letter-spacing: 0.04em;
+  letter-spacing: 0.08em;
+  color: var(--fg-muted);
 }
 #audit-findings .audit-msg {
   color: var(--fg);
 }
 #audit-findings .audit-suggestion {
-  color: var(--fg-soft);
+  color: var(--fg-muted);
   font-style: italic;
   margin-top: 4px;
 }
 #audit-findings .audit-path {
   display: inline-block;
-  margin-top: 4px;
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--fg-soft);
-  background: rgba(0, 0, 0, 0.04);
-  padding: 1px 4px;
-  border-radius: 3px;
-}
-.placeholder {
-  color: var(--fg-soft);
-  font-family: var(--mono);
-  font-size: 12px;
-  padding: 6px 0;
-  margin: 0;
-}
-/* Live chart pane (PR4). The compiler emits an SVG with an explicit
-   width/height; clamp it to the pane width and let the height scale
-   proportionally so it never overflows the grid cell. */
-#chart-preview {
-  flex: 1 1 auto;
-  overflow: auto;
-  min-height: 200px;
-}
-#chart-preview svg {
-  max-width: 100%;
-  height: auto;
-}
-#chart-preview .error {
-  color: var(--red);
-  background: #fdecea;
-  border-left: 3px solid var(--red);
-  padding: 8px;
-  font-family: var(--mono);
-  font-size: 12px;
-  border-radius: 3px;
-  white-space: pre-wrap;
-  word-break: break-word;
-  margin: 0;
-}
-/* Monaco needs a sized host or it renders 0×0. The pane is already a
-   flex column; let the editor fill whatever vertical space is left. */
-#spec-editor {
-  flex: 1 1 auto;
-  height: 100%;
-  min-height: 240px;
-}
-.hint {
-  color: var(--fg-soft);
-  font-family: var(--mono);
-  font-size: 11px;
-  margin: 8px 0 4px 0;
-}
-#csv-upload input[type="file"] {
-  font-family: var(--mono);
-  font-size: 11px;
-  margin-bottom: 4px;
-}
-#csv-upload textarea {
-  width: 100%;
-  font-family: var(--mono);
-  font-size: 12px;
-  padding: 8px;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  resize: vertical;
-  background: white;
-  color: var(--fg);
-}
-#csv-upload textarea:focus {
-  outline: none;
-  border-color: var(--accent);
-}
-#csv-upload select {
-  font-family: var(--mono);
-  font-size: 12px;
-  padding: 6px;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  background: white;
-  color: var(--fg);
   margin-top: 6px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--fg-muted);
+  background: rgba(0, 0, 0, 0.04);
+  padding: 1px 6px;
+  border-radius: 3px;
 }
-#csv-upload select:hover {
-  border-color: var(--accent);
-}
-#audit-findings li.placeholder {
-  border-left-color: #ccc;
-  background: #f7f7f7;
-  color: var(--fg-soft);
-}
-/* Toast for share-button feedback (PR6). Bottom-right, ~2.5s lifetime.
-   `.flash-out` is set ~250ms before removal for the fade-out transition. */
+
+/* ---------- Flash toast (share feedback) ---------------------------- */
 .flash {
   position: fixed;
   right: 16px;
@@ -250,10 +514,10 @@ button:hover {
   padding: 10px 14px;
   background: var(--fg);
   color: white;
-  border-radius: 6px;
+  border-radius: var(--r-sm);
   font-family: var(--mono);
   font-size: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-2);
   z-index: 100;
   opacity: 1;
   transition: opacity 0.25s ease-out, transform 0.25s ease-out;
@@ -266,14 +530,26 @@ button:hover {
   transform: translateY(8px);
 }
 
+/* ---------- Responsive ---------------------------------------------- */
 @media (max-width: 1100px) {
-  .playground {
-    grid-template-columns: 1fr 1fr;
-    height: auto;
+  .play {
+    grid-template-columns: 1fr;
+  }
+  #spec-editor {
+    min-height: 260px;
   }
 }
-@media (max-width: 600px) {
-  .playground {
-    grid-template-columns: 1fr;
+@media (max-width: 720px) {
+  .topbar {
+    padding: 0 16px;
+  }
+  .topbar-nav .nav-link {
+    display: none;
+  }
+  .examples-bar-inner {
+    padding: 12px 16px 10px;
+  }
+  .play {
+    padding: 12px 16px 16px;
   }
 }

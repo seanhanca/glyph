@@ -101,6 +101,16 @@ export function isSelfContainedSpec(spec) {
  * @returns {{findings: ReadonlyArray<object>, trust: number}}
  */
 export function runAudit(spec, opts) {
+  // Compose scenes are hand-authored scene graphs — they don't carry the
+  // chart-spec encodings (`mark`, `encoding.x/y`, `data.shape`, …) that
+  // `auditSpec` knows how to lint. Calling it on one throws inside core
+  // (e.g. `Cannot read properties of undefined (reading 'length')`),
+  // which would surface as a red error in the playground audit pane.
+  // Return a clean stub so the trust chip + drawer summary still read
+  // sensibly for Glyph-in-Life / Whyboard examples.
+  if (spec && typeof spec === "object" && spec.compose) {
+    return { findings: [], trust: 100 };
+  }
   const findings = auditSpec({
     spec,
     rowCount: opts?.rowCount,
