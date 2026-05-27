@@ -1,17 +1,160 @@
 {
-  "version": "glyph/0.1",
-  "title": "Conversion funnel — Q3 acquisition cohort",
-  "layers": [
-    {
-      "mark": "bar",
-      "encoding": {
-        "x": { "field": "stage", "type": "ordinal" },
-        "y": {
-          "field": "users",
-          "type": "quantitative",
-          "scale": { "domain": [0, 100000] }
+  "compose": {
+    "viewBox": {
+      "width": 720,
+      "height": 420
+    },
+    "title": "Conversion funnel — visit → renew (animated cascade)",
+    "description": "Each stage's bar animates its width from 0 to its final size, staggered top-to-bottom. After each bar lands, its count + conversion % label fades in.",
+    "children": [
+      {
+        "at": {
+          "x": 360,
+          "y": 30
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Conversion funnel — visit → renew (animated)",
+          "fontSize": 17,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 360,
+          "y": 52
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Stages cascade in top-to-bottom; conversion % labels follow each bar.",
+          "fontSize": 11.5,
+          "fill": "#666",
+          "italic": true,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "raw-svg",
+        "rawSvg": {
+          "xml": "<rect x=\"130\" y=\"81.4\" width=\"0\" height=\"37.2\" rx=\"3\" fill=\"#4c78a8\"><animate attributeName=\"width\" from=\"0\" to=\"510.00\" dur=\"0.7s\" begin=\"0.15s\" fill=\"freeze\" calcMode=\"spline\" keyTimes=\"0;1\" keySplines=\"0.22 1 0.36 1\"/></rect><text x=\"646\" y=\"104.00\" font-family=\"system-ui,sans-serif\" font-size=\"12\" fill=\"#1a1a1a\" text-anchor=\"start\" opacity=\"0\"><animate attributeName=\"opacity\" from=\"0\" to=\"1\" dur=\"0.3s\" begin=\"0.75s\" fill=\"freeze\"/>10,000</text>"
+        }
+      },
+      {
+        "at": {
+          "x": 118,
+          "y": 104
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Visit",
+          "fontSize": 12.5,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "raw-svg",
+        "rawSvg": {
+          "xml": "<rect x=\"130\" y=\"141.4\" width=\"0\" height=\"37.2\" rx=\"3\" fill=\"#4c78a8\"><animate attributeName=\"width\" from=\"0\" to=\"163.20\" dur=\"0.7s\" begin=\"0.33s\" fill=\"freeze\" calcMode=\"spline\" keyTimes=\"0;1\" keySplines=\"0.22 1 0.36 1\"/></rect><text x=\"299.20000000000005\" y=\"164.00\" font-family=\"system-ui,sans-serif\" font-size=\"12\" fill=\"#1a1a1a\" text-anchor=\"start\" opacity=\"0\"><animate attributeName=\"opacity\" from=\"0\" to=\"1\" dur=\"0.3s\" begin=\"0.93s\" fill=\"freeze\"/>3,200  ·  32%</text>"
+        }
+      },
+      {
+        "at": {
+          "x": 118,
+          "y": 164
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Sign-up",
+          "fontSize": 12.5,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "raw-svg",
+        "rawSvg": {
+          "xml": "<rect x=\"130\" y=\"201.4\" width=\"0\" height=\"37.2\" rx=\"3\" fill=\"#4c78a8\"><animate attributeName=\"width\" from=\"0\" to=\"73.95\" dur=\"0.7s\" begin=\"0.51s\" fill=\"freeze\" calcMode=\"spline\" keyTimes=\"0;1\" keySplines=\"0.22 1 0.36 1\"/></rect><text x=\"209.95\" y=\"224.00\" font-family=\"system-ui,sans-serif\" font-size=\"12\" fill=\"#1a1a1a\" text-anchor=\"start\" opacity=\"0\"><animate attributeName=\"opacity\" from=\"0\" to=\"1\" dur=\"0.3s\" begin=\"1.11s\" fill=\"freeze\"/>1,450  ·  45%</text>"
+        }
+      },
+      {
+        "at": {
+          "x": 118,
+          "y": 224
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Activate",
+          "fontSize": 12.5,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "raw-svg",
+        "rawSvg": {
+          "xml": "<rect x=\"130\" y=\"261.4\" width=\"0\" height=\"37.2\" rx=\"3\" fill=\"#4c78a8\"><animate attributeName=\"width\" from=\"0\" to=\"31.62\" dur=\"0.7s\" begin=\"0.69s\" fill=\"freeze\" calcMode=\"spline\" keyTimes=\"0;1\" keySplines=\"0.22 1 0.36 1\"/></rect><text x=\"167.62\" y=\"284.00\" font-family=\"system-ui,sans-serif\" font-size=\"12\" fill=\"#1a1a1a\" text-anchor=\"start\" opacity=\"0\"><animate attributeName=\"opacity\" from=\"0\" to=\"1\" dur=\"0.3s\" begin=\"1.29s\" fill=\"freeze\"/>620  ·  43%</text>"
+        }
+      },
+      {
+        "at": {
+          "x": 118,
+          "y": 284
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Subscribe",
+          "fontSize": 12.5,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "raw-svg",
+        "rawSvg": {
+          "xml": "<rect x=\"130\" y=\"321.4\" width=\"0\" height=\"37.2\" rx=\"3\" fill=\"#4c78a8\"><animate attributeName=\"width\" from=\"0\" to=\"19.38\" dur=\"0.7s\" begin=\"0.87s\" fill=\"freeze\" calcMode=\"spline\" keyTimes=\"0;1\" keySplines=\"0.22 1 0.36 1\"/></rect><text x=\"155.38\" y=\"344.00\" font-family=\"system-ui,sans-serif\" font-size=\"12\" fill=\"#1a1a1a\" text-anchor=\"start\" opacity=\"0\"><animate attributeName=\"opacity\" from=\"0\" to=\"1\" dur=\"0.3s\" begin=\"1.47s\" fill=\"freeze\"/>380  ·  61%</text>"
+        }
+      },
+      {
+        "at": {
+          "x": 118,
+          "y": 344
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Renew",
+          "fontSize": 12.5,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "end"
         }
       }
-    }
-  ]
+    ]
+  }
 }
