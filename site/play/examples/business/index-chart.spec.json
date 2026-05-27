@@ -1,0 +1,462 @@
+{
+  "compose": {
+    "viewBox": {
+      "width": 720,
+      "height": 420
+    },
+    "title": "Index chart — relative performance",
+    "description": "5 tech stocks normalized to a starting value of 100, so each line shows relative cumulative return. Hand-laid in compose because Glyph's line mark doesn't yet group rows by a categorical color field — every ticker is its own polyline child.",
+    "children": [
+      {
+        "at": {
+          "x": 360,
+          "y": 30
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Index chart — 5 tech stocks, rebased to 100",
+          "fontSize": 17,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 360,
+          "y": 52
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Each line normalized to its starting value (100). Higher = better total return.",
+          "fontSize": 12,
+          "fill": "#666",
+          "italic": true,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 60 70 L 580 70 M 60 145 L 580 145 M 60 220 L 580 220 M 60 295 L 580 295 M 60 370 L 580 370",
+          "fill": "none",
+          "stroke": "#e6e9ee",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 52,
+          "y": 74
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "160",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 52,
+          "y": 149
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "135",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 52,
+          "y": 224
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "110",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 52,
+          "y": 299
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "85",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 52,
+          "y": 374
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "60",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 60,
+          "y": 386
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "M1",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 173.04347826086956,
+          "y": 386
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "M6",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 308.69565217391306,
+          "y": 386
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "M12",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 444.3478260869565,
+          "y": 386
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "M18",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 580,
+          "y": 386
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "M24",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 60 250 L 580 250",
+          "fill": "none",
+          "stroke": "#bcc4cf",
+          "strokeWidth": 1,
+          "strokeDasharray": "4,3"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [
+            [60, 250],
+            [82.61, 259.5],
+            [105.22, 265.78],
+            [127.83, 253.78],
+            [150.43, 263.06],
+            [173.04, 254.67],
+            [195.65, 251.13],
+            [218.26, 247.62],
+            [240.87, 255.41],
+            [263.48, 247.81],
+            [286.09, 245.97],
+            [308.7, 232.03],
+            [331.3, 241.5],
+            [353.91, 233.32],
+            [376.52, 232.39],
+            [399.13, 235.17],
+            [421.74, 218.49],
+            [444.35, 213.54],
+            [466.96, 218.74],
+            [489.57, 212.91],
+            [512.17, 209.81],
+            [534.78, 210.93],
+            [557.39, 199.68],
+            [580, 200.9]
+          ],
+          "stroke": "#4c78a8",
+          "strokeWidth": 2
+        }
+      },
+      {
+        "at": {
+          "x": 588,
+          "y": 204.90420719324962
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "ACME  116",
+          "fontSize": 11.5,
+          "fill": "#4c78a8",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [
+            [60, 250],
+            [82.61, 265.44],
+            [105.22, 272.26],
+            [127.83, 270.14],
+            [150.43, 249.46],
+            [173.04, 237.8],
+            [195.65, 224.39],
+            [218.26, 241.28],
+            [240.87, 237.13],
+            [263.48, 213.75],
+            [286.09, 223.39],
+            [308.7, 196.73],
+            [331.3, 186.16],
+            [353.91, 193.25],
+            [376.52, 201.93],
+            [399.13, 178.58],
+            [421.74, 174.19],
+            [444.35, 172.8],
+            [466.96, 182.95],
+            [489.57, 187.79],
+            [512.17, 185.11],
+            [534.78, 172.62],
+            [557.39, 184.29],
+            [580, 192.24]
+          ],
+          "stroke": "#f58518",
+          "strokeWidth": 2
+        }
+      },
+      {
+        "at": {
+          "x": 588,
+          "y": 196.24182165246629
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "BRIX  119",
+          "fontSize": 11.5,
+          "fill": "#f58518",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [
+            [60, 250],
+            [82.61, 262.49],
+            [105.22, 266.36],
+            [127.83, 277.5],
+            [150.43, 267.39],
+            [173.04, 261.84],
+            [195.65, 248.93],
+            [218.26, 246.04],
+            [240.87, 232.51],
+            [263.48, 240.5],
+            [286.09, 225.33],
+            [308.7, 237.54],
+            [331.3, 246.11],
+            [353.91, 234.12],
+            [376.52, 247.16],
+            [399.13, 246.49],
+            [421.74, 229.86],
+            [444.35, 234.52],
+            [466.96, 242.27],
+            [489.57, 255.09],
+            [512.17, 255.95],
+            [534.78, 241.45],
+            [557.39, 236.62],
+            [580, 246.16]
+          ],
+          "stroke": "#54a24b",
+          "strokeWidth": 2
+        }
+      },
+      {
+        "at": {
+          "x": 588,
+          "y": 250.16016372933083
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "COIL  101",
+          "fontSize": 11.5,
+          "fill": "#54a24b",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [
+            [60, 250],
+            [82.61, 263.41],
+            [105.22, 267.81],
+            [127.83, 266.32],
+            [150.43, 263.6],
+            [173.04, 263.1],
+            [195.65, 274.69],
+            [218.26, 286.39],
+            [240.87, 292.7],
+            [263.48, 295.4],
+            [286.09, 293.55],
+            [308.7, 302.35],
+            [331.3, 299.51],
+            [353.91, 302.83],
+            [376.52, 297.8],
+            [399.13, 308.46],
+            [421.74, 310.06],
+            [444.35, 317.96],
+            [466.96, 325.26],
+            [489.57, 322.25],
+            [512.17, 325.99],
+            [534.78, 332.3],
+            [557.39, 342.05],
+            [580, 351.16]
+          ],
+          "stroke": "#e45756",
+          "strokeWidth": 2
+        }
+      },
+      {
+        "at": {
+          "x": 588,
+          "y": 355.15881919402835
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "DYAD  66",
+          "fontSize": 11.5,
+          "fill": "#e45756",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polyline",
+        "polyline": {
+          "points": [
+            [60, 250],
+            [82.61, 269.29],
+            [105.22, 264.52],
+            [127.83, 271.26],
+            [150.43, 260.59],
+            [173.04, 250.62],
+            [195.65, 256.75],
+            [218.26, 247],
+            [240.87, 230.62],
+            [263.48, 211.48],
+            [286.09, 209.29],
+            [308.7, 217.75],
+            [331.3, 223.42],
+            [353.91, 187.1],
+            [376.52, 169.77],
+            [399.13, 151.63],
+            [421.74, 106.45],
+            [444.35, 133.06],
+            [466.96, 147.83],
+            [489.57, 140.96],
+            [512.17, 143.7],
+            [534.78, 133],
+            [557.39, 127.93],
+            [580, 85.88]
+          ],
+          "stroke": "#72b7b2",
+          "strokeWidth": 2
+        }
+      },
+      {
+        "at": {
+          "x": 588,
+          "y": 89.8810580604901
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "ECHO  155",
+          "fontSize": 11.5,
+          "fill": "#72b7b2",
+          "italic": false,
+          "anchor": "start"
+        }
+      }
+    ]
+  }
+}

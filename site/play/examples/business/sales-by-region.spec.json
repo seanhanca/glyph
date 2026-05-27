@@ -1,0 +1,80 @@
+{
+  "version": "glyph/0.1",
+  "title": "US sales by region ($M, Q3)",
+  "width": 720,
+  "height": 420,
+  "projection": {
+    "type": "equirectangular",
+    "center": [-97, 38],
+    "scale": 11
+  },
+  "geojson": {
+    "features": [
+      {
+        "type": "Feature",
+        "properties": {
+          "id": "Pacific"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-124, 32], [-114, 32], [-114, 49], [-124, 49], [-124, 32]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": "Mountain"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-114, 32], [-103, 32], [-103, 49], [-114, 49], [-114, 32]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": "Midwest"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-103, 36], [-82, 36], [-82, 49], [-103, 49], [-103, 36]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": "South"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-103, 25], [-77, 25], [-77, 36], [-103, 36], [-103, 25]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": "Northeast"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-82, 36], [-67, 36], [-67, 47], [-82, 47], [-82, 36]]]
+        }
+      }
+    ]
+  },
+  "layers": [
+    {
+      "mark": "geo-region",
+      "encoding": {
+        "region": {
+          "field": "region",
+          "type": "nominal"
+        },
+        "color": {
+          "field": "sales",
+          "type": "quantitative"
+        }
+      }
+    }
+  ]
+}

@@ -135,6 +135,70 @@
     "csv": null,
     "spec": "examples/business/density-contour.spec.json"
   },
+  {
+    "id": "sales-by-region",
+    "category": "Business charts",
+    "name": "US sales by region (choropleth)",
+    "description": "Five Census-style US regions colored by Q3 sales — `geo-region` mark with hand-crafted GeoJSON and an equirectangular projection.",
+    "csv": "examples/business/sales-by-region.csv",
+    "spec": "examples/business/sales-by-region.spec.json"
+  },
+  {
+    "id": "bar-race",
+    "category": "Business charts",
+    "name": "Bar chart race (animated)",
+    "description": "Top products by revenue across 6 years — SMIL race animation, bar widths interpolate frame-by-frame.",
+    "csv": "examples/business/bar-race.csv",
+    "spec": "examples/business/bar-race.spec.json"
+  },
+  {
+    "id": "wealth-health",
+    "category": "Business charts",
+    "name": "Wealth & health of nations",
+    "description": "Gapminder-style bubble chart — x=GDP/capita, y=life expectancy, bubble area=population, color=continent (2023 snapshot).",
+    "csv": null,
+    "spec": "examples/business/wealth-health.spec.json"
+  },
+  {
+    "id": "revenue-stacked-area",
+    "category": "Business charts",
+    "name": "Revenue stacked area",
+    "description": "Monthly revenue by 4 customer segments — Enterprise, Mid-market, Startup, Self-serve — each band a distinct color.",
+    "csv": null,
+    "spec": "examples/business/revenue-stacked-area.spec.json"
+  },
+  {
+    "id": "moving-average",
+    "category": "Business charts",
+    "name": "Moving average (raw + 14-day MA)",
+    "description": "60 days of noisy daily signups (light blue) overlaid with a 14-day trailing moving average (orange).",
+    "csv": null,
+    "spec": "examples/business/moving-average.spec.json"
+  },
+  {
+    "id": "index-chart",
+    "category": "Business charts",
+    "name": "Index chart — 5 tech stocks",
+    "description": "24 months of geometric-walk prices, every series rebased to 100 on day 1 — the canonical relative-return view.",
+    "csv": null,
+    "spec": "examples/business/index-chart.spec.json"
+  },
+  {
+    "id": "streamgraph",
+    "category": "Business charts",
+    "name": "Streamgraph (centered stacked area)",
+    "description": "Same 4-segment revenue data as the stacked-area example, drawn with a centered baseline so each band's thickness is what your eye reads.",
+    "csv": null,
+    "spec": "examples/business/streamgraph.spec.json"
+  },
+  {
+    "id": "circle-packing",
+    "category": "Business charts",
+    "name": "Circle packing — revenue hierarchy",
+    "description": "Three product-line bubbles, each surrounded by its child products. Inner radius scales with √revenue so visual size tracks impact.",
+    "csv": null,
+    "spec": "examples/business/circle-packing.spec.json"
+  },
 
   {
     "id": "sine-wave",

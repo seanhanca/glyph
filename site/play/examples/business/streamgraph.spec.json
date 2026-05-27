@@ -1,0 +1,473 @@
+{
+  "compose": {
+    "viewBox": {
+      "width": 720,
+      "height": 400
+    },
+    "title": "Streamgraph — centered stacked bands",
+    "description": "Centered-baseline alternative to the stacked-area chart. Hand-laid as compose polygons because Glyph's `area` mark only supports a 0 baseline.",
+    "children": [
+      {
+        "at": {
+          "x": 360,
+          "y": 30
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Revenue by segment — streamgraph (centered baseline)",
+          "fontSize": 17,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 360,
+          "y": 52
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Same data as the stacked-area example; baseline centered so each band's thickness is what your eye reads.",
+          "fontSize": 11.5,
+          "fill": "#666",
+          "italic": true,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 60 215 L 690 215",
+          "fill": "none",
+          "stroke": "#e6e9ee",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polygon",
+        "polygon": {
+          "points": [
+            [60, 217.85],
+            [117.27, 217.31],
+            [174.55, 217.4],
+            [231.82, 217.8],
+            [289.09, 218.57],
+            [346.36, 218.71],
+            [403.64, 219.34],
+            [460.91, 220.83],
+            [518.18, 220.92],
+            [575.45, 221.46],
+            [632.73, 222.86],
+            [690, 223.86],
+            [690, 287.5],
+            [632.73, 283.61],
+            [575.45, 279.59],
+            [518.18, 275.16],
+            [460.91, 271.09],
+            [403.64, 268.88],
+            [346.36, 265.35],
+            [289.09, 261.87],
+            [231.82, 259.57],
+            [174.55, 256.99],
+            [117.27, 253.28],
+            [60, 251.2]
+          ],
+          "fill": "#4c78a8",
+          "stroke": "#ffffff",
+          "strokeWidth": 0.6
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polygon",
+        "polygon": {
+          "points": [
+            [60, 197.96],
+            [117.27, 197.06],
+            [174.55, 195.79],
+            [231.82, 194.57],
+            [289.09, 194.52],
+            [346.36, 193.85],
+            [403.64, 192.76],
+            [460.91, 193.62],
+            [518.18, 192.99],
+            [575.45, 191.27],
+            [632.73, 191.23],
+            [690, 190.68],
+            [690, 223.86],
+            [632.73, 222.86],
+            [575.45, 221.46],
+            [518.18, 220.92],
+            [460.91, 220.83],
+            [403.64, 219.34],
+            [346.36, 218.71],
+            [289.09, 218.57],
+            [231.82, 217.8],
+            [174.55, 217.4],
+            [117.27, 217.31],
+            [60, 217.85]
+          ],
+          "fill": "#f58518",
+          "stroke": "#ffffff",
+          "strokeWidth": 0.6
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polygon",
+        "polygon": {
+          "points": [
+            [60, 185.94],
+            [117.27, 184.49],
+            [174.55, 181.87],
+            [231.82, 179.83],
+            [289.09, 178.52],
+            [346.36, 176.4],
+            [403.64, 173.87],
+            [460.91, 173.37],
+            [518.18, 170.66],
+            [575.45, 167.95],
+            [632.73, 165.46],
+            [690, 162.75],
+            [690, 190.68],
+            [632.73, 191.23],
+            [575.45, 191.27],
+            [518.18, 192.99],
+            [460.91, 193.62],
+            [403.64, 192.76],
+            [346.36, 193.85],
+            [289.09, 194.52],
+            [231.82, 194.57],
+            [174.55, 195.79],
+            [117.27, 197.06],
+            [60, 197.96]
+          ],
+          "fill": "#54a24b",
+          "stroke": "#ffffff",
+          "strokeWidth": 0.6
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "polygon",
+        "polygon": {
+          "points": [
+            [60, 178.8],
+            [117.27, 176.72],
+            [174.55, 173.01],
+            [231.82, 170.43],
+            [289.09, 168.13],
+            [346.36, 164.65],
+            [403.64, 161.12],
+            [460.91, 158.91],
+            [518.18, 154.84],
+            [575.45, 150.41],
+            [632.73, 146.39],
+            [690, 142.5],
+            [690, 162.75],
+            [632.73, 165.46],
+            [575.45, 167.95],
+            [518.18, 170.66],
+            [460.91, 173.37],
+            [403.64, 173.87],
+            [346.36, 176.4],
+            [289.09, 178.52],
+            [231.82, 179.83],
+            [174.55, 181.87],
+            [117.27, 184.49],
+            [60, 185.94]
+          ],
+          "fill": "#e45756",
+          "stroke": "#ffffff",
+          "strokeWidth": 0.6
+        }
+      },
+      {
+        "at": {
+          "x": 60,
+          "y": 376
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Jan",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 117.27272727272728,
+          "y": 376
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Feb",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 174.54545454545456,
+          "y": 376
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Mar",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 231.8181818181818,
+          "y": 376
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Apr",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 289.0909090909091,
+          "y": 376
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "May",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 346.3636363636364,
+          "y": 376
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Jun",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 403.6363636363636,
+          "y": 376
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Jul",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 460.9090909090909,
+          "y": 376
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Aug",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 518.1818181818182,
+          "y": 376
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Sep",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 575.4545454545455,
+          "y": 376
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Oct",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 632.7272727272727,
+          "y": 376
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Nov",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 690,
+          "y": 376
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Dec",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 60,
+          "y": 386
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 5.5,
+          "fill": "#4c78a8"
+        }
+      },
+      {
+        "at": {
+          "x": 70,
+          "y": 390
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Enterprise",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 190,
+          "y": 386
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 5.5,
+          "fill": "#f58518"
+        }
+      },
+      {
+        "at": {
+          "x": 200,
+          "y": 390
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Mid-market",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 320,
+          "y": 386
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 5.5,
+          "fill": "#54a24b"
+        }
+      },
+      {
+        "at": {
+          "x": 330,
+          "y": 390
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Startup",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 450,
+          "y": 386
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 5.5,
+          "fill": "#e45756"
+        }
+      },
+      {
+        "at": {
+          "x": 460,
+          "y": 390
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Self-serve",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "start"
+        }
+      }
+    ]
+  }
+}

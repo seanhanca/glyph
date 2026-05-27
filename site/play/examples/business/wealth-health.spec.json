@@ -1,0 +1,604 @@
+{
+  "compose": {
+    "viewBox": {
+      "width": 760,
+      "height": 480
+    },
+    "title": "Wealth & Health of Nations — 2023 snapshot",
+    "description": "Gapminder-style bubble chart: x = GDP/capita, y = life expectancy, bubble area = population, color = continent. Hand-laid in compose because Glyph's chart-spec size channel doesn't yet drive point radius — losing the visual 'big bubble = big country' signal that makes the chart famous.",
+    "children": [
+      {
+        "at": {
+          "x": 380,
+          "y": 30
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Wealth & Health of Nations — 2023 snapshot",
+          "fontSize": 17,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 380,
+          "y": 52
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "x = GDP/capita · y = life expectancy · bubble area = population · color = continent",
+          "fontSize": 11.5,
+          "fill": "#666",
+          "italic": true,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 70 70 L 70 420 M 178.33333333333331 70 L 178.33333333333331 420 M 286.66666666666663 70 L 286.66666666666663 420 M 395 70 L 395 420 M 503.3333333333333 70 L 503.3333333333333 420 M 611.6666666666667 70 L 611.6666666666667 420 M 720 70 L 720 420 M 70 70 L 720 70 M 70 128.33333333333331 L 720 128.33333333333331 M 70 186.66666666666666 L 720 186.66666666666666 M 70 245 L 720 245 M 70 303.3333333333333 L 720 303.3333333333333 M 70 361.6666666666667 L 720 361.6666666666667 M 70 420 L 720 420",
+          "fill": "none",
+          "stroke": "#eef0f4",
+          "strokeWidth": 1
+        }
+      },
+      {
+        "at": {
+          "x": 70,
+          "y": 436
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "$0k",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 178.33333333333331,
+          "y": 436
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "$10k",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 286.66666666666663,
+          "y": 436
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "$20k",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 395,
+          "y": 436
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "$30k",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 503.3333333333333,
+          "y": 436
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "$40k",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 611.6666666666667,
+          "y": 436
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "$50k",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 720,
+          "y": 436
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "$60k",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 62,
+          "y": 424
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "60",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 62,
+          "y": 365.6666666666667
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "65",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 62,
+          "y": 307.33333333333337
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "70",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 62,
+          "y": 249
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "75",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 62,
+          "y": 190.66666666666669
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "80",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 62,
+          "y": 132.33333333333331
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "85",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 62,
+          "y": 74
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "90",
+          "fontSize": 10.5,
+          "fill": "#888",
+          "italic": false,
+          "anchor": "end"
+        }
+      },
+      {
+        "at": {
+          "x": 395,
+          "y": 454
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "GDP per capita",
+          "fontSize": 11.5,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 644.1666666666666,
+          "y": 163.33333333333337
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 15.045388562740879,
+          "fill": "#4c78a8",
+          "stroke": "#1a1a1a",
+          "strokeWidth": 1.2
+        }
+      },
+      {
+        "at": {
+          "x": 644.1666666666666,
+          "y": 144.2879447705925
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Nordica",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 254.16666666666666,
+          "y": 233.33333333333334
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 24.454482671904334,
+          "fill": "#f58518",
+          "stroke": "#1a1a1a",
+          "strokeWidth": 1.2
+        }
+      },
+      {
+        "at": {
+          "x": 254.16666666666666,
+          "y": 204.878850661429
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Latinia",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 126.33333333333334,
+          "y": 361.6666666666667
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 28.704769981818202,
+          "fill": "#e45756",
+          "stroke": "#1a1a1a",
+          "strokeWidth": 1.2
+        }
+      },
+      {
+        "at": {
+          "x": 126.33333333333334,
+          "y": 328.9618966848485
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Saharia",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 152.33333333333334,
+          "y": 291.6666666666667
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 46,
+          "fill": "#54a24b",
+          "stroke": "#1a1a1a",
+          "strokeWidth": 1.2
+        }
+      },
+      {
+        "at": {
+          "x": 152.33333333333334,
+          "y": 241.66666666666669
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Maharashtra",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 579.1666666666667,
+          "y": 151.66666666666663
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 13.203364296299078,
+          "fill": "#72b7b2",
+          "stroke": "#1a1a1a",
+          "strokeWidth": 1.2
+        }
+      },
+      {
+        "at": {
+          "x": 579.1666666666667,
+          "y": 134.46330237036756
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Pacificana",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 189.16666666666666,
+          "y": 245
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 19.24055158788927,
+          "fill": "#f58518",
+          "stroke": "#1a1a1a",
+          "strokeWidth": 1.2
+        }
+      },
+      {
+        "at": {
+          "x": 189.16666666666666,
+          "y": 221.75944841211071
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Andesia",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 259.58333333333337,
+          "y": 210
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 36.5,
+          "fill": "#54a24b",
+          "stroke": "#1a1a1a",
+          "strokeWidth": 1.2
+        }
+      },
+      {
+        "at": {
+          "x": 259.58333333333337,
+          "y": 169.5
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Sinora",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 503.3333333333333,
+          "y": 175.00000000000003
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 23.75396775418815,
+          "fill": "#4c78a8",
+          "stroke": "#1a1a1a",
+          "strokeWidth": 1.2
+        }
+      },
+      {
+        "at": {
+          "x": 503.3333333333333,
+          "y": 147.24603224581188
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Albion",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 650,
+          "y": 78
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 6,
+          "fill": "#4c78a8"
+        }
+      },
+      {
+        "at": {
+          "x": 662,
+          "y": 82
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Europe",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 650,
+          "y": 98
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 6,
+          "fill": "#f58518"
+        }
+      },
+      {
+        "at": {
+          "x": 662,
+          "y": 102
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Americas",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 650,
+          "y": 118
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 6,
+          "fill": "#54a24b"
+        }
+      },
+      {
+        "at": {
+          "x": 662,
+          "y": 122
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Asia",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 650,
+          "y": 138
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 6,
+          "fill": "#e45756"
+        }
+      },
+      {
+        "at": {
+          "x": 662,
+          "y": 142
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Africa",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "start"
+        }
+      },
+      {
+        "at": {
+          "x": 650,
+          "y": 158
+        },
+        "mark": "circle",
+        "circle": {
+          "radius": 6,
+          "fill": "#72b7b2"
+        }
+      },
+      {
+        "at": {
+          "x": 662,
+          "y": 162
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Oceania",
+          "fontSize": 11,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "start"
+        }
+      }
+    ]
+  }
+}
