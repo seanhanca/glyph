@@ -1,6 +1,6 @@
 {
   "name": "@glyph/mcp",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "mcpName": "io.github.seanhanca/glyph",
   "description": "Glyph MCP server — 49 verbs for deterministic chart rendering, query, audit, anomaly, forecast, decompose, explain, story planning, and Whyboard analytics.",
   "license": "Apache-2.0",

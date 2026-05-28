@@ -64,7 +64,7 @@ git clone https://github.com/seanhanca/glyph
 cd glyph
 pnpm install
 pnpm build
-pnpm test     # 819 tests
+pnpm test     # 1022 tests
 pnpm lint     # 0 errors
 ```
 

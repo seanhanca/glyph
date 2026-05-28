@@ -1,6 +1,6 @@
 {
   "name": "@glyph/core",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Glyph core — spec AST, compiler, scenegraph, SVG renderer.",
   "license": "Apache-2.0",
   "type": "module",

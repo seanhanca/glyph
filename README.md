@@ -3,8 +3,8 @@
 > **Deterministic charts for AI agents.** Same JSON spec → same SVG bytes, every platform, every run. Built so an LLM can author, diff, and patch charts the way a developer authors code.
 
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](./LICENSE)
-[![Release](https://img.shields.io/badge/release-v0.2.0-blue.svg)](./CHANGELOG.md)
-[![Tests](https://img.shields.io/badge/tests-819%20passing-brightgreen.svg)](#status)
+[![Release](https://img.shields.io/badge/release-v0.3.0-blue.svg)](./CHANGELOG.md)
+[![Tests](https://img.shields.io/badge/tests-1022%20passing-brightgreen.svg)](#status)
 [![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen.svg)](#requirements)
 [![CI](https://img.shields.io/badge/CI-Ubuntu%20%2B%20macOS%20%2B%20Windows-brightgreen.svg)](.github/workflows/ci.yml)
 [![No telemetry](https://img.shields.io/badge/telemetry-none-brightgreen.svg)](#license)
@@ -40,7 +40,7 @@ No JS, no CDN. Deterministic. Same bytes a year from now.</em>
 
 ## What Glyph is best for
 
-- **LLM agents that draw charts.** Claude, ChatGPT, Gemini and any MCP client can call 52 verbs (`glyph_render`, `glyph_describe`, `glyph_audit_spec`, `glyph_story`, …) — no JS code generation, no client-side library to ship.
+- **LLM agents that draw charts.** Claude, ChatGPT, Gemini and any MCP client can call 53 verbs (`glyph_render`, `glyph_describe`, `glyph_audit_spec`, `glyph_seal`, `glyph_story`, …) — no JS code generation, no client-side library to ship.
 - **CI-stable visual regression tests.** Snapshot a chart's bytes; assert on them. Glyph is byte-identical across Ubuntu / macOS / Windows × Node 20 / 22.
 - **Provenance-auditable analytics.** Every rendered SVG embeds a SHA-256 seal over (spec, rows, schema). Anyone can recompute and verify.
 - **Charts that explain themselves.** The structured `Explanation` envelope (M2) lets an agent chain follow-up MCP calls without re-parsing prose.
@@ -318,7 +318,7 @@ Every box is a pure function: same input, same output, no global state. The MCP 
 |---|---|---|---|---|---|---|
 | Deterministic byte-stable output | no | partial | no | no | no | **yes** |
 | Embedded SQL engine | no | no | no | proprietary | proprietary | **DuckDB** |
-| MCP server (agent-native) | no | no | no | no | no | **52 verbs** |
+| MCP server (agent-native) | no | no | no | no | no | **53 verbs** |
 | Built-in chart auditor | no | no | no | no | no | **11 rules** |
 | Cryptographic provenance seal | no | no | no | no | no | **SHA-256** |
 | Spec diff / patch (RFC 6902) | no | no | no | no | no | **yes** |
@@ -335,7 +335,7 @@ Full 16-row matrix at [`site/index.html#compare`](./site/index.html).
 |---------|--------------|---------|
 | `@glyph/core` | Compiler, scene graph, SVG renderer | `npm i @glyph/core` |
 | `@glyph/duckdb` | DuckDB-backed materializer | `npm i @glyph/duckdb` |
-| `@glyph/mcp` | MCP server, 52 verbs | `npx -y @glyph/mcp` |
+| `@glyph/mcp` | MCP server, 53 verbs | `npx -y @glyph/mcp` |
 | `@glyph/live` | Browser hydration: sliders, hover, brush, zoom | `npm i @glyph/live` |
 | `@glyph/preview-server` | Local preview for Cursor / Jupyter | `npm i @glyph/preview-server` |
 | `@glyph/cli` | `glyph render` / `check` / `diff` | `npm i -g @glyph/cli` _(private — not yet released)_ |
@@ -345,9 +345,9 @@ Full 16-row matrix at [`site/index.html#compare`](./site/index.html).
 
 ## Status
 
-- **v0.2.0** on `main` ([`CHANGELOG.md`](./CHANGELOG.md))
-- **819 tests** passing on Ubuntu / macOS / Windows × Node 20 / 22
-- **52 MCP verbs**, **21 mark types**, **11 audit rules**, **4 data shapes**
+- **v0.3.0** on `main` ([`CHANGELOG.md`](./CHANGELOG.md))
+- **1022 tests** passing on Ubuntu / macOS / Windows × Node 20 / 22
+- **53 MCP verbs**, **24 mark types**, **16 audit rules**, **4 data shapes**
 - **4 brand presets** (`light`, `dark`, `playground`, `3b1b`), **5 animation kinds**
 - **0 telemetry**, **0 phone-home**, runs entirely on your machine
 

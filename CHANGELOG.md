@@ -5,6 +5,99 @@ All notable changes to Glyph are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] — 2026-05-28
+
+The "best-in-class" release. Closes five sharp gaps that separated Glyph
+from "another chart library" — five new audit rules, a standalone
+provenance-seal verb, canonical Whyboard + Story templates wired straight
+into the playground, and an audit-aware patch gate that stops agents from
+silently regressing chart trustworthiness.
+
+Counts after this release: **53 MCP verbs**, **24 mark types**, **16 audit
+rules**, **4 data shapes**, **1022 tests** passing on Ubuntu × macOS ×
+Windows × Node 20 / 22.
+
+### Added
+
+#### Five new audit rules
+
+Fills practical gaps in the misleading-chart linter that v0.2.0 left open.
+All deterministic, pure-fn — same input always returns the same finding
+set in the same order.
+
+- **AUDIT-05** (medium) — line / area mark on a CATEGORICAL x-encoding.
+  The connecting stroke implies an ordered progression that nominal
+  categories don't carry; viewers read a fake trend.
+- **AUDIT-12** (medium) — pie / donut / arc with more than 7 slices. Angle
+  comparison breaks down past ~5 slices (Cleveland-McGill); past 7 is
+  essentially unreadable.
+- **AUDIT-13** (low) — bar chart on a quantitative x. Bars on a continuous
+  axis usually want `mark: "rect"` or histogram semantics; otherwise the
+  chart conflates ordinal grouping with continuous space.
+- **AUDIT-14** (low) — more than 4 overlay layers on one chart. Visual
+  overload past 4 series makes individual lines hard to follow; suggest
+  small multiples or faceting.
+- **AUDIT-15** (low) — multi-layer chart with no title. A bare multi-
+  series chart is unreadable without context; title anchors what the
+  reader is comparing.
+
+#### `glyph_seal` — standalone provenance seal
+
+New MCP verb that emits the cryptographic provenance seal (format,
+specHash, dataHash, libraryVersion, rowCount, scaleDigest) WITHOUT
+rendering an SVG. Companion to `glyph_verify`: callers who already have
+the SVG and just need the seal (e.g. for a downstream attestation pipeline
+or a content-addressable cache lookup) no longer have to pay the full
+render cost. SHA-256 over canonical-JSON-stringified inputs; same inputs
+always produce the same seal across platforms and Node versions.
+
+#### Four canonical Whyboard templates
+
+Playground-ready compose scenes that mirror what `glyph_whyboard` returns
+for the four most common diagnostic shapes. Each template is a 1200×760
+scene with a root question + three branches (anomaly / decompose /
+forecast). Wired into the playground as a new **Whyboard** category.
+
+- `template-revenue-miss` — "Why did Q3 miss target?"
+- `template-conversion-drop` — "Why did the funnel collapse?"
+- `template-latency-spike` — "Why is API latency spiking?"
+- `template-churn-spike` — "Why did churn spike this month?"
+
+#### Three canonical Story templates
+
+Playground-ready compose scenes that mirror what `glyph_story` returns as
+a 4-panel narrative. 1200×760 scene with a 2×2 grid of 520×290 panels;
+each panel is a step badge + caption + subcaption + chart slot. Wired in
+as a new **Stories** category.
+
+- `template-quarterly-review` — revenue trend → segment mix → cohort
+  retention → growth forecast
+- `template-incident-retro` — latency spike → error budget burn →
+  root-cause attribution → recovery curve
+- `template-ab-test-readout` — traffic split → primary metric lift →
+  secondary metrics → decision matrix
+
+#### `glyph_spec_patch` — audit-regression gate
+
+The verb now re-runs `auditSpec` on the patched spec and diffs against
+the original's findings (keyed by `rule_id` + `path`). If the patch
+INTRODUCES any new HIGH-severity findings, the verb refuses with
+`error: "audit_regression"` and a `regressions: [...]` list of the new
+findings. Pass `acknowledged: true` to override the gate.
+
+This closes the loop on agentic chart refinement: an agent iteratively
+patching a chart can no longer silently introduce a truncated bar y-axis,
+an undisclosed log scale, or any other high-severity audit pattern that
+slipped past the original render. Pre-existing findings are NOT flagged
+— only new ones the patch introduced.
+
+### Compatibility
+
+Backward-compatible. All v0.2.0 verbs work unchanged. New behavior only
+appears when callers opt in: `glyph_seal` is a brand-new verb, the new
+audit rules fire only on specs that trigger them, the patch gate only
+blocks patches that introduce HIGH-severity regressions.
+
 ## [0.2.0] — 2026-05-22
 
 The "agent-driven game changer" release. Adds the entire **Joy of Math** track

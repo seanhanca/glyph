@@ -11,8 +11,8 @@ designed to be **operated by AI agents**, not hand-written by humans.
 
 - **Same JSON spec → same SVG bytes.** Byte-identical across Linux /
   macOS / Windows × Node 20 / 22. Snapshot-testable in CI.
-- **MCP-native.** 52 verbs in `@glyph/mcp` (`glyph_render`,
-  `glyph_describe`, `glyph_story`, `glyph_audit_spec`, …) — you call
+- **MCP-native.** 53 verbs in `@glyph/mcp` (`glyph_render`,
+  `glyph_describe`, `glyph_story`, `glyph_audit_spec`, `glyph_seal`, …) — you call
   them, you get a byte-stable SVG back, plus a structured
   `Explanation` envelope so you can chain follow-up calls without
   re-parsing prose.
