@@ -4079,6 +4079,18 @@ var GraphDataSchema = external_exports.object({
     distance: external_exports.number().positive().optional()
   }).strict()).optional()
 }).strict();
+var FlowDataSchema = external_exports.object({
+  nodes: external_exports.array(external_exports.object({
+    id: external_exports.string().min(1),
+    name: external_exports.string().optional(),
+    group: external_exports.string().optional()
+  }).strict()).min(1),
+  links: external_exports.array(external_exports.object({
+    source: external_exports.string().min(1),
+    target: external_exports.string().min(1),
+    value: external_exports.number().nonnegative()
+  }).strict()).min(1)
+}).strict();
 var ScalarFunctionDataSchema = external_exports.object({
   shape: external_exports.literal("function"),
   x: external_exports.object({
@@ -4255,6 +4267,13 @@ var DataSourceSchema = external_exports.object({
    */
   graph: GraphDataSchema.optional(),
   /**
+   * Tier-2 — sankey flow diagram. Inline DAG of named nodes + valued
+   * links. The compiler skips DuckDB and dispatches to compileSankey,
+   * which lays nodes out left-to-right by longest-path layer + runs
+   * a barycenter pass to minimize crossings. Pair with `mark: "sankey"`.
+   */
+  flow: FlowDataSchema.optional(),
+  /**
    * PR75 (D3 Gap 4) — inline 2D scalar-field grid for contour / density
    * viz. When set, the compiler skips DuckDB and dispatches to
    * `compileContour`. Pair with `mark: "contour"` and `thresholds`.
@@ -4359,6 +4378,12 @@ var MarkSchema = external_exports.enum([
   // Visually halfway between a strip plot and a violin — keeps every
   // individual data point visible while showing distribution shape.
   "beeswarm",
+  // Tier-2 — sankey flow diagram. Pair with `data.flow = { nodes,
+  // links }`. The compiler lays nodes left-to-right by longest-path
+  // layer, sorts within layers via barycenter to minimize link
+  // crossings, then emits a rect per node + a bezier path per link
+  // sized by `value`. DAG only — cycles reject.
+  "sankey",
   // PR50 — direct label annotation. Renders a text mark at each row's
   // (x, y) with the value of encoding.text. Composes with other marks
   // via multi-layer specs (e.g. bars + text labels).
@@ -26064,6 +26089,9 @@ function compileSpec(input) {
   if (spec.data?.graph) {
     return compileGraph(input);
   }
+  if (spec.data?.flow) {
+    return compileSankey(input);
+  }
   if (spec.data?.grid) {
     return compileContour(input);
   }
@@ -26156,7 +26184,11 @@ function compileSpec(input) {
       "bezier",
       // Tier-2 — packed strip plot. Categorical x, quantitative y;
       // per x-group the compiler runs 1D non-overlap packing.
-      "beeswarm"
+      "beeswarm",
+      // Tier-2 — sankey is dispatched at the top of compileSpec when
+      // data.flow is set; allowedMarks must include it so the layer
+      // validation doesn't reject before we get there.
+      "sankey"
     ];
     if (!allowedMarks.includes(l.mark)) {
       throw new Error(`Phase 1 supports marks ${allowedMarks.join("|")}; layer ${i} has ${l.mark}`);
@@ -27007,6 +27039,284 @@ function compileGraph(input) {
     provenance: scenePr
   };
 }
+function compileSankey(input) {
+  const { spec } = input;
+  const flow = spec.data?.flow;
+  if (!flow)
+    throw new Error("compileSankey called without spec.data.flow");
+  if (spec.layers.length === 0)
+    throw new Error("Spec has no layers");
+  const layer0 = spec.layers[0];
+  if (!layer0 || layer0.mark !== "sankey") {
+    throw new Error(`Flow data shape requires a "sankey" mark on the first layer, got "${layer0?.mark}".`);
+  }
+  const width = spec.width ?? DEFAULT_WIDTH;
+  const height = spec.height ?? DEFAULT_HEIGHT;
+  const theme = resolveTheme(spec);
+  const padL = 24;
+  const padR = 120;
+  const padT = 40;
+  const padB = 24;
+  const plotArea = input.plotAreaOverride ?? {
+    x: padL,
+    y: padT,
+    width: width - padL - padR,
+    height: height - padT - padB
+  };
+  const nodeWidth = 14;
+  const nodeGap = 8;
+  const nodeById = new Map(flow.nodes.map((n) => [n.id, n]));
+  const outLinks = /* @__PURE__ */ new Map();
+  const inLinks = /* @__PURE__ */ new Map();
+  for (const l of flow.links) {
+    if (!nodeById.has(l.source))
+      throw new Error(`Sankey: link references unknown source node "${l.source}"`);
+    if (!nodeById.has(l.target))
+      throw new Error(`Sankey: link references unknown target node "${l.target}"`);
+    let outs = outLinks.get(l.source);
+    if (!outs) {
+      outs = [];
+      outLinks.set(l.source, outs);
+    }
+    outs.push(l);
+    let ins = inLinks.get(l.target);
+    if (!ins) {
+      ins = [];
+      inLinks.set(l.target, ins);
+    }
+    ins.push(l);
+  }
+  const indeg = /* @__PURE__ */ new Map();
+  for (const n of flow.nodes)
+    indeg.set(n.id, (inLinks.get(n.id) ?? []).length);
+  const nodeLayer = /* @__PURE__ */ new Map();
+  const queue = [];
+  for (const n of flow.nodes) {
+    if ((indeg.get(n.id) ?? 0) === 0) {
+      nodeLayer.set(n.id, 0);
+      queue.push(n.id);
+    }
+  }
+  let processed = 0;
+  while (queue.length > 0) {
+    const nid = queue.shift();
+    processed++;
+    const cur = nodeLayer.get(nid) ?? 0;
+    for (const l of outLinks.get(nid) ?? []) {
+      const prev = nodeLayer.get(l.target) ?? -1;
+      if (cur + 1 > prev)
+        nodeLayer.set(l.target, cur + 1);
+      indeg.set(l.target, (indeg.get(l.target) ?? 1) - 1);
+      if ((indeg.get(l.target) ?? 0) === 0)
+        queue.push(l.target);
+    }
+  }
+  if (processed < flow.nodes.length) {
+    throw new Error("Sankey: input flow contains a cycle; the DAG constraint is required.");
+  }
+  let maxLayer = 0;
+  for (const l of nodeLayer.values())
+    if (l > maxLayer)
+      maxLayer = l;
+  const nodeFlowMag = /* @__PURE__ */ new Map();
+  for (const n of flow.nodes) {
+    const out = (outLinks.get(n.id) ?? []).reduce((s, l) => s + l.value, 0);
+    const inn = (inLinks.get(n.id) ?? []).reduce((s, l) => s + l.value, 0);
+    nodeFlowMag.set(n.id, Math.max(out, inn));
+  }
+  const layered = Array.from({ length: maxLayer + 1 }, () => []);
+  for (const n of flow.nodes) {
+    const li = nodeLayer.get(n.id) ?? 0;
+    layered[li].push(n.id);
+  }
+  function layoutLayer(nodeIds) {
+    const totalFlow = nodeIds.reduce((s, id) => s + (nodeFlowMag.get(id) ?? 0), 0);
+    if (totalFlow <= 0) {
+      const out2 = /* @__PURE__ */ new Map();
+      const h = plotArea.height / nodeIds.length;
+      for (let i = 0; i < nodeIds.length; i++) {
+        out2.set(nodeIds[i], { y: plotArea.y + i * h, h: Math.max(2, h * 0.85) });
+      }
+      return out2;
+    }
+    const totalGap = (nodeIds.length - 1) * nodeGap;
+    const availH = Math.max(40, plotArea.height - totalGap);
+    const scale = availH / totalFlow;
+    const out = /* @__PURE__ */ new Map();
+    let cursor = plotArea.y;
+    for (const id of nodeIds) {
+      const h = Math.max(2, (nodeFlowMag.get(id) ?? 0) * scale);
+      out.set(id, { y: cursor, h });
+      cursor += h + nodeGap;
+    }
+    return out;
+  }
+  const slots = layered.map((ids) => layoutLayer(ids));
+  for (let iter = 0; iter < 4; iter++) {
+    for (let l = 1; l <= maxLayer; l++) {
+      const ids = layered[l];
+      const prevSlots = slots[l - 1];
+      const bary = (id) => {
+        const ins = inLinks.get(id) ?? [];
+        if (ins.length === 0)
+          return 0;
+        let weightedY = 0;
+        let weightSum = 0;
+        for (const lk of ins) {
+          const s = prevSlots.get(lk.source);
+          if (!s)
+            continue;
+          weightedY += (s.y + s.h / 2) * lk.value;
+          weightSum += lk.value;
+        }
+        return weightSum > 0 ? weightedY / weightSum : 0;
+      };
+      ids.sort((a, b) => bary(a) - bary(b));
+      slots[l] = layoutLayer(ids);
+    }
+    for (let l = maxLayer - 1; l >= 0; l--) {
+      const ids = layered[l];
+      const nextSlots = slots[l + 1];
+      const bary = (id) => {
+        const outs = outLinks.get(id) ?? [];
+        if (outs.length === 0)
+          return 0;
+        let weightedY = 0;
+        let weightSum = 0;
+        for (const lk of outs) {
+          const t = nextSlots.get(lk.target);
+          if (!t)
+            continue;
+          weightedY += (t.y + t.h / 2) * lk.value;
+          weightSum += lk.value;
+        }
+        return weightSum > 0 ? weightedY / weightSum : 0;
+      };
+      ids.sort((a, b) => bary(a) - bary(b));
+      slots[l] = layoutLayer(ids);
+    }
+  }
+  const layerX = (l) => plotArea.x + (maxLayer === 0 ? 0 : l / maxLayer * (plotArea.width - nodeWidth));
+  function colorForNode(id) {
+    const node = nodeById.get(id);
+    const group = node?.group ?? id;
+    let h = 0;
+    for (let i = 0; i < group.length; i++)
+      h = h * 31 + group.charCodeAt(i) >>> 0;
+    return theme.marks[h % theme.marks.length] ?? "#4c78a8";
+  }
+  const marks = [];
+  for (let l = 0; l <= maxLayer; l++) {
+    const ids = layered[l];
+    const layerSlots = slots[l];
+    const x = layerX(l);
+    for (const id of ids) {
+      const s = layerSlots.get(id);
+      if (!s)
+        continue;
+      const node = nodeById.get(id);
+      marks.push({
+        type: "rect",
+        x: roundPx(x),
+        y: roundPx(s.y),
+        width: nodeWidth,
+        height: roundPx(s.h),
+        fill: colorForNode(id)
+      });
+      const labelAtRight = l < maxLayer;
+      marks.push({
+        type: "text",
+        x: roundPx(labelAtRight ? x + nodeWidth + 5 : x - 5),
+        y: roundPx(s.y + s.h / 2),
+        text: node?.name ?? id,
+        fontSize: 11,
+        fill: theme.fg,
+        anchor: labelAtRight ? "start" : "end",
+        baseline: "middle"
+      });
+    }
+  }
+  const sourceCursor = /* @__PURE__ */ new Map();
+  const targetCursor = /* @__PURE__ */ new Map();
+  const linksOrdered = [...flow.links].sort((a, b) => {
+    const la = nodeLayer.get(a.source) ?? 0;
+    const lb = nodeLayer.get(b.source) ?? 0;
+    if (la !== lb)
+      return la - lb;
+    const sA = layered[la].indexOf(a.source);
+    const sB = layered[lb].indexOf(b.source);
+    if (sA !== sB)
+      return sA - sB;
+    const tA = layered[nodeLayer.get(a.target) ?? 0].indexOf(a.target);
+    const tB = layered[nodeLayer.get(b.target) ?? 0].indexOf(b.target);
+    return tA - tB;
+  });
+  for (const lk of linksOrdered) {
+    const sLayer = nodeLayer.get(lk.source) ?? 0;
+    const tLayer = nodeLayer.get(lk.target) ?? 0;
+    const sSlot = slots[sLayer].get(lk.source);
+    const tSlot = slots[tLayer].get(lk.target);
+    if (!sSlot || !tSlot)
+      continue;
+    const sFlow = nodeFlowMag.get(lk.source) ?? 1;
+    const tFlow = nodeFlowMag.get(lk.target) ?? 1;
+    const sStripeH = lk.value / sFlow * sSlot.h;
+    const tStripeH = lk.value / tFlow * tSlot.h;
+    const sOffset = sourceCursor.get(lk.source) ?? 0;
+    const tOffset = targetCursor.get(lk.target) ?? 0;
+    const x0 = layerX(sLayer) + nodeWidth;
+    const x1 = layerX(tLayer);
+    const y0 = sSlot.y + sOffset + sStripeH / 2;
+    const y1 = tSlot.y + tOffset + tStripeH / 2;
+    const mid = (x0 + x1) / 2;
+    const stroke = colorForNode(lk.source);
+    const stripeW = Math.max(1, (sStripeH + tStripeH) / 2);
+    marks.push({
+      type: "path",
+      d: `M ${roundPx(x0)} ${roundPx(y0)} C ${roundPx(mid)} ${roundPx(y0)}, ${roundPx(mid)} ${roundPx(y1)}, ${roundPx(x1)} ${roundPx(y1)}`,
+      stroke,
+      strokeWidth: stripeW,
+      fill: "none",
+      // SceneMark.path has no strokeOpacity; bake transparency into
+      // the stroke color via rgba so opacity rides on the color.
+      opacity: 0.5
+    });
+    sourceCursor.set(lk.source, sOffset + sStripeH);
+    targetCursor.set(lk.target, tOffset + tStripeH);
+  }
+  for (let l = 0; l <= maxLayer; l++) {
+    const ids = layered[l];
+    const layerSlots = slots[l];
+    const x = layerX(l);
+    for (const id of ids) {
+      const s = layerSlots.get(id);
+      if (!s)
+        continue;
+      marks.push({
+        type: "rect",
+        x: roundPx(x),
+        y: roundPx(s.y),
+        width: nodeWidth,
+        height: roundPx(s.h),
+        fill: colorForNode(id)
+      });
+    }
+  }
+  const scenePr = buildSceneProvenance(spec, input.rows, input.schema, {
+    xDomain: [plotArea.x, plotArea.x + plotArea.width],
+    yDomain: [plotArea.y, plotArea.y + plotArea.height]
+  });
+  return {
+    width,
+    height,
+    background: theme.background,
+    plotArea,
+    axes: [],
+    marks,
+    ...spec.title ? { title: spec.title } : {},
+    provenance: scenePr
+  };
+}
 function compileContour(input) {
   const { spec } = input;
   const grid = spec.data?.grid;
@@ -27640,7 +27950,7 @@ function buildBeeswarm(out, rows, schema, encoding, xField, yField, xScale, ySca
     const xv = valueAt(r, schema, xField);
     if (xv == null)
       continue;
-    const yv = yIdx >= 0 ? Number(r[yIdx]) : NaN;
+    const yv = yIdx >= 0 ? Number(r[yIdx]) : Number.NaN;
     if (!Number.isFinite(yv))
       continue;
     const key = String(xv);
@@ -32853,6 +33163,7 @@ export {
   EncodingSchema,
   FacetSchema,
   FieldTypeSchema,
+  FlowDataSchema,
   FunctionDataSchema,
   GeodesicDataSchema,
   GlyphSpecSchema,

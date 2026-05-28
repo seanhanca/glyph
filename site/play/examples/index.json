@@ -239,6 +239,14 @@
     "csv": "examples/business/tenure-beeswarm.csv",
     "spec": "examples/business/tenure-beeswarm.spec.json"
   },
+  {
+    "id": "sankey-funnel",
+    "category": "Business charts",
+    "name": "Acquisition sankey",
+    "description": "3 acquisition channels → trial / freemium → paid + expanded, with churn at every step. First-class `mark: \"sankey\"`: longest-path layering + barycenter sort + bezier links sized by flow.",
+    "csv": null,
+    "spec": "examples/business/sankey-funnel.spec.json"
+  },
 
   {
     "id": "ridgeline",

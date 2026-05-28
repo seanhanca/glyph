@@ -187,6 +187,23 @@ export interface GraphData {
 }
 
 /**
+ * Tier-2 — sankey flow data. DAG of named nodes + weighted links.
+ * Cycles reject at compile time. Used by `mark: "sankey"`.
+ */
+export interface FlowData {
+  readonly nodes: ReadonlyArray<{
+    readonly id: string;
+    readonly name?: string;
+    readonly group?: string;
+  }>;
+  readonly links: ReadonlyArray<{
+    readonly source: string;
+    readonly target: string;
+    readonly value: number;
+  }>;
+}
+
+/**
  * Math PR1 — `data.shape: "function"` scalar form. The materializer
  * samples `expr` at `x.samples` evenly-spaced points across
  * `[x.min, x.max]` and routes the resulting rows through the normal

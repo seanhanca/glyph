@@ -99,6 +99,42 @@ export const GraphDataSchema = z
   .strict();
 
 /**
+ * Tier-2 — sankey flow shape. Inline DAG: a list of nodes (each with
+ * a unique `id` + optional human-readable `name` + optional `group`
+ * for color) and a list of links connecting them by source/target
+ * ids, weighted by a numeric `value`. The compiler's `compileSankey`
+ * runs longest-path layering + barycenter crossing minimization +
+ * rect / bezier-link emission. Cycles are rejected (sankey requires
+ * a DAG).
+ */
+export const FlowDataSchema = z
+  .object({
+    nodes: z
+      .array(
+        z
+          .object({
+            id: z.string().min(1),
+            name: z.string().optional(),
+            group: z.string().optional(),
+          })
+          .strict(),
+      )
+      .min(1),
+    links: z
+      .array(
+        z
+          .object({
+            source: z.string().min(1),
+            target: z.string().min(1),
+            value: z.number().nonnegative(),
+          })
+          .strict(),
+      )
+      .min(1),
+  })
+  .strict();
+
+/**
  * Math PR1 — `data.shape: "function"` (scalar form). Samples a single
  * math expression over an evenly-spaced range to produce y = f(x) rows
  * that flow into the existing line / area / point machinery. The hard
@@ -433,6 +469,13 @@ export const DataSourceSchema = z
      */
     graph: GraphDataSchema.optional(),
     /**
+     * Tier-2 — sankey flow diagram. Inline DAG of named nodes + valued
+     * links. The compiler skips DuckDB and dispatches to compileSankey,
+     * which lays nodes out left-to-right by longest-path layer + runs
+     * a barycenter pass to minimize crossings. Pair with `mark: "sankey"`.
+     */
+    flow: FlowDataSchema.optional(),
+    /**
      * PR75 (D3 Gap 4) — inline 2D scalar-field grid for contour / density
      * viz. When set, the compiler skips DuckDB and dispatches to
      * `compileContour`. Pair with `mark: "contour"` and `thresholds`.
@@ -556,6 +599,12 @@ export const MarkSchema = z.enum([
   // Visually halfway between a strip plot and a violin — keeps every
   // individual data point visible while showing distribution shape.
   "beeswarm",
+  // Tier-2 — sankey flow diagram. Pair with `data.flow = { nodes,
+  // links }`. The compiler lays nodes left-to-right by longest-path
+  // layer, sorts within layers via barycenter to minimize link
+  // crossings, then emits a rect per node + a bezier path per link
+  // sized by `value`. DAG only — cycles reject.
+  "sankey",
   // PR50 — direct label annotation. Renders a text mark at each row's
   // (x, y) with the value of encoding.text. Composes with other marks
   // via multi-layer specs (e.g. bars + text labels).

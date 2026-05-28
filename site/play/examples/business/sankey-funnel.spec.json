@@ -1,0 +1,35 @@
+{
+  "version": "glyph/0.1",
+  "title": "Acquisition → activation → expansion (sankey)",
+  "width": 760,
+  "height": 460,
+  "data": {
+    "flow": {
+      "nodes": [
+        { "id": "organic", "name": "Organic", "group": "src" },
+        { "id": "paid", "name": "Paid", "group": "src" },
+        { "id": "referral", "name": "Referral", "group": "src" },
+        { "id": "trial", "name": "Trial", "group": "mid" },
+        { "id": "freemium", "name": "Free tier", "group": "mid" },
+        { "id": "paid_plan", "name": "Paid plan", "group": "out" },
+        { "id": "churned", "name": "Churned", "group": "lost" },
+        { "id": "expanded", "name": "Expanded", "group": "out" }
+      ],
+      "links": [
+        { "source": "organic", "target": "trial", "value": 420 },
+        { "source": "organic", "target": "freemium", "value": 280 },
+        { "source": "paid", "target": "trial", "value": 360 },
+        { "source": "paid", "target": "freemium", "value": 140 },
+        { "source": "referral", "target": "trial", "value": 180 },
+        { "source": "referral", "target": "freemium", "value": 60 },
+        { "source": "trial", "target": "paid_plan", "value": 540 },
+        { "source": "trial", "target": "churned", "value": 420 },
+        { "source": "freemium", "target": "paid_plan", "value": 110 },
+        { "source": "freemium", "target": "churned", "value": 370 },
+        { "source": "paid_plan", "target": "expanded", "value": 230 },
+        { "source": "paid_plan", "target": "churned", "value": 60 }
+      ]
+    }
+  },
+  "layers": [{ "mark": "sankey", "encoding": {} }]
+}
