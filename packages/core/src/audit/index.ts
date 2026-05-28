@@ -36,10 +36,24 @@
  *                     `minContrastRatio`, or when `colorBlindSafe` is set
  *                     and the categorical palette collapses under
  *                     deuteranopia simulation.
- *
- * Reserved (planned for a follow-up; not yet implemented):
- *   AUDIT-05 — Time axis with gaps. Needs a temporal-axis schema check
- *              that the audit module doesn't have full coverage for yet.
+ *   AUDIT-05 (medium) Line / area mark with a CATEGORICAL x-encoding.
+ *                     The connecting line implies an ordered progression
+ *                     that nominal categories don't carry — viewers
+ *                     read a fake trend.
+ *   AUDIT-12 (medium) Pie / donut / arc with too many slices (>7). Angle
+ *                     comparison drops sharply past ~5 slices (Cleveland-
+ *                     McGill); past 7 is essentially unreadable.
+ *   AUDIT-13 (low)    Bar chart with a quantitative x. Bars on a
+ *                     continuous axis usually want `mark: "rect"` or
+ *                     binned histogram semantics; otherwise the chart
+ *                     conflates ordinal grouping with continuous space.
+ *   AUDIT-14 (low)    More than 4 overlay layers in one chart. Visual
+ *                     overload past 4 layers makes individual series
+ *                     hard to follow; small multiples or faceting reads
+ *                     better.
+ *   AUDIT-15 (low)    Multi-layer chart with no title. A bare multi-
+ *                     series chart is unreadable without context; title
+ *                     anchors what the reader is comparing.
  *
  *
  * Deterministic, no clock, no LLM. Each rule lives in its own function so
@@ -87,6 +101,8 @@ export function auditSpec(input: AuditInput): ReadonlyArray<AuditFinding> {
     auditTruncatedYAxis(out, layer, i);
     auditLogScaleDisclosure(out, layer, i, spec.title);
     auditDivergingPalette(out, layer, i);
+    auditLineOnCategoricalX(out, layer, i);
+    auditBarOnQuantitativeX(out, layer, i);
   }
   auditDualAxis(out, spec);
   auditExcessiveAggregation(out, spec, input.rowCount);
@@ -94,6 +110,9 @@ export function auditSpec(input: AuditInput): ReadonlyArray<AuditFinding> {
   auditAspectRatio(out, spec);
   auditStackedNegatives(out, spec);
   auditBrandContrast(out, spec);
+  auditTooManyArcSlices(out, spec, input.rowCount);
+  auditOverlayLayerCount(out, spec);
+  auditMissingTitle(out, spec);
   return out.sort((a, b) => {
     const sa = severityRank(a.severity);
     const sb = severityRank(b.severity);
@@ -347,6 +366,129 @@ function auditBrandContrast(out: AuditFinding[], spec: GlyphSpec): void {
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Rule: AUDIT-05 — line / area mark on a categorical x
+// ---------------------------------------------------------------------------
+// A connecting line implies ordered progression. Nominal categories like
+// "Engineering / Sales / Marketing" don't carry that order, so the slope
+// between two adjacent categories is artifactual — viewers read a fake
+// trend. Bar / point marks are the right alternative.
+
+function auditLineOnCategoricalX(out: AuditFinding[], layer: Layer, idx: number): void {
+  if (layer.mark !== "line" && layer.mark !== "area") return;
+  const x = layer.encoding?.x;
+  if (!x || typeof x === "string") return;
+  // Look only at explicit nominal/ordinal-no-order signal.
+  const t = (x as { type?: string }).type;
+  if (t !== "nominal") return;
+  out.push({
+    rule_id: "AUDIT-05",
+    severity: "medium",
+    message: `Layer ${idx}: ${layer.mark} mark connects across a nominal x-encoding. The connecting line implies ordered progression that nominal categories don't have — readers see a fake trend.`,
+    suggestion:
+      'Switch to `mark: "bar"` (or `mark: "point"`), or change x.type to `"ordinal"` if there is a real ordering.',
+    path: `/layers/${idx}/encoding/x`,
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Rule: AUDIT-13 — bar chart on a quantitative x
+// ---------------------------------------------------------------------------
+// Bars on a continuous numeric axis usually wants `mark: "rect"` (binned
+// heat) or histogram semantics. A `mark: "bar"` on quantitative x leaves
+// gaps that imply each bar is a categorical bucket; readers misjudge
+// magnitudes when bar widths don't sum to the axis range.
+
+function auditBarOnQuantitativeX(out: AuditFinding[], layer: Layer, idx: number): void {
+  if (layer.mark !== "bar") return;
+  const x = layer.encoding?.x;
+  if (!x || typeof x === "string") return;
+  const t = (x as { type?: string }).type;
+  if (t !== "quantitative") return;
+  out.push({
+    rule_id: "AUDIT-13",
+    severity: "low",
+    message: `Layer ${idx}: bar mark on a quantitative x-encoding. Bars suggest categorical bins, but a continuous x suggests a histogram or rect mark.`,
+    suggestion:
+      'Either switch to `mark: "rect"` for binned data, or change x.type to `"ordinal"` if each bar is a discrete category.',
+    path: `/layers/${idx}/encoding/x`,
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Rule: AUDIT-12 — too many pie / arc slices
+// ---------------------------------------------------------------------------
+// Cleveland-McGill rank angle judgment near the bottom; past ~5 slices
+// readers can't distinguish 18% from 22%. Past 7 the whole chart is
+// noise. Detection: when the spec has a `mark: "arc"` layer and the
+// caller passes `rowCount` (or colorCardinality), flag the threshold.
+
+function auditTooManyArcSlices(
+  out: AuditFinding[],
+  spec: GlyphSpec,
+  rowCount: number | undefined,
+): void {
+  const hasArc = spec.layers.some((l) => l.mark === "arc");
+  if (!hasArc) return;
+  const n = rowCount ?? 0;
+  if (n <= 7) return;
+  out.push({
+    rule_id: "AUDIT-12",
+    severity: "medium",
+    message: `Pie / donut chart with ${n} slices. Angle comparison drops sharply past ~5 slices; past 7 the chart is essentially unreadable.`,
+    suggestion:
+      "Group small slices into an 'Other' bucket, or switch to a horizontal bar chart sorted by value.",
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Rule: AUDIT-14 — overlay layer count too high
+// ---------------------------------------------------------------------------
+// More than 4 overlay layers makes individual series indistinguishable.
+// Faceting / small multiples reads better past that count. Doesn't fire
+// for compose specs (a compose with 20 silhouette-path children isn't
+// "overlay confusion", it's a hand-laid illustration).
+
+function auditOverlayLayerCount(out: AuditFinding[], spec: GlyphSpec): void {
+  if (spec.layers.length <= 4) return;
+  if (spec.facet) return; // small-multiple layout handles the cognitive load
+  out.push({
+    rule_id: "AUDIT-14",
+    severity: "low",
+    message: `Chart has ${spec.layers.length} overlay layers. Viewer accuracy on individual series drops sharply past ~4 overlaid layers.`,
+    suggestion:
+      "Use `spec.facet` to split into small multiples, or normalize the data and use a single layer with a color encoding.",
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Rule: AUDIT-15 — multi-layer chart with no title
+// ---------------------------------------------------------------------------
+// A bare multi-layer chart is unreadable without context. Even a 30-
+// character title anchors what the reader is comparing. Single-layer
+// charts with a clear y-encoding don't trigger; this is for layered or
+// faceted charts where ambiguity is real.
+
+function auditMissingTitle(out: AuditFinding[], spec: GlyphSpec): void {
+  if (spec.title && spec.title.trim().length > 0) return;
+  const layered = spec.layers.length > 1;
+  const faceted = !!spec.facet;
+  const hasColor = spec.layers.some((l) => {
+    const c = l.encoding?.color;
+    if (typeof c === "string") return true;
+    return (c as { field?: string } | undefined)?.field !== undefined;
+  });
+  if (!layered && !faceted && !hasColor) return;
+  out.push({
+    rule_id: "AUDIT-15",
+    severity: "low",
+    message:
+      "Multi-layer / faceted / color-encoded chart has no title. Readers need a title to anchor what the chart is comparing.",
+    suggestion: "Add a `title` to the spec — even a short one prevents misreading.",
+    path: "/title",
+  });
+}
 
 function channelDomain(c: Channel | undefined): ReadonlyArray<unknown> | undefined {
   if (!c || typeof c === "string") return undefined;
