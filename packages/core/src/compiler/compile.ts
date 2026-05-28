@@ -1097,6 +1097,9 @@ export function compileSpec(input: CompileInput): Scene {
       // control points (no row data; configuration lives in
       // `layer.bezier`). Cartesian path with linear x/y.
       "bezier",
+      // Tier-2 — packed strip plot. Categorical x, quantitative y;
+      // per x-group the compiler runs 1D non-overlap packing.
+      "beeswarm",
     ];
     if (!allowedMarks.includes(l.mark)) {
       throw new Error(`Phase 1 supports marks ${allowedMarks.join("|")}; layer ${i} has ${l.mark}`);
@@ -3113,6 +3116,100 @@ function buildRules(
 }
 
 /**
+ * buildBeeswarm — packed strip plot (Tier-2).
+ *
+ * For each x-band (categorical), collects all the rows whose x value
+ * matches, then runs a 1D non-overlap pack: dots are placed at their
+ * encoded y, but nudged horizontally within the band so adjacent dots
+ * don't overlap. Halfway visually between a strip plot and a violin
+ * — keeps every individual point visible while letting density shape
+ * emerge.
+ *
+ * Determinism: rows are processed in source order; the placement
+ * algorithm is a deterministic offset search (no random tiebreaks).
+ * Same rows → same offsets → byte-identical SVG.
+ */
+function buildBeeswarm(
+  out: SceneMark[],
+  rows: ReadonlyArray<ReadonlyArray<unknown>>,
+  schema: ReadonlyArray<CompileFieldInfo>,
+  encoding: Encoding,
+  xField: string,
+  yField: string,
+  xScale: ReturnType<typeof bandScale>,
+  yScale: ReturnType<typeof linearScale>,
+  theme: Theme,
+): void {
+  const colorField = fieldOf(encoding.color);
+  const colorDomain = colorField ? distinctOrdered(rows, schema, colorField) : [];
+  const yIdx = schema.findIndex((c) => c.name === yField);
+  const radius = 4;
+  // Group rows by x-band.
+  type Point = { y: number; row: ReadonlyArray<unknown>; rowIdx: number };
+  const bands = new Map<string, Point[]>();
+  for (let i = 0; i < rows.length; i++) {
+    const r = rows[i];
+    if (!r) continue;
+    const xv = valueAt(r, schema, xField);
+    if (xv == null) continue;
+    const yv = yIdx >= 0 ? Number(r[yIdx]) : Number.NaN;
+    if (!Number.isFinite(yv)) continue;
+    const key = String(xv);
+    let list = bands.get(key);
+    if (!list) {
+      list = [];
+      bands.set(key, list);
+    }
+    list.push({ y: yScale.apply(yv), row: r, rowIdx: i });
+  }
+  // Per-band layout: sort by y, then place each point at the closest
+  // x-offset that doesn't collide with already-placed neighbors.
+  // Search candidates: bandCenter, ±radius·2, ±radius·4, … This is
+  // d3-beeswarm's "force-x clamped to a band" pattern, simplified.
+  const bandHalfWidth = xScale.bandwidth / 2 - radius;
+  for (const [bandKey, ptsRaw] of bands) {
+    const bandCenter = xScale.apply(bandKey) + xScale.bandwidth / 2;
+    const pts = [...ptsRaw].sort((a, b) => a.y - b.y);
+    const placed: Array<{ x: number; y: number; row: ReadonlyArray<unknown>; rowIdx: number }> = [];
+    for (const p of pts) {
+      let chosenX = bandCenter;
+      // Generate up to N offset candidates outward from bandCenter.
+      const candidates = [0];
+      for (let i = 1; i < 50; i++) {
+        candidates.push(i * radius);
+        candidates.push(-i * radius);
+      }
+      let found = false;
+      for (const dx of candidates) {
+        if (Math.abs(dx) > bandHalfWidth) continue;
+        const x = bandCenter + dx;
+        // Collision check: distance to any already-placed point in
+        // this band must be ≥ 2r.
+        const collides = placed.some((q) => Math.hypot(x - q.x, p.y - q.y) < radius * 2);
+        if (!collides) {
+          chosenX = x;
+          found = true;
+          break;
+        }
+      }
+      // Fallback: if every candidate inside the band collides, allow
+      // overlap at the closest legal x (caps overflowing slightly).
+      if (!found) chosenX = bandCenter;
+      placed.push({ x: chosenX, y: p.y, row: p.row, rowIdx: p.rowIdx });
+    }
+    for (const q of placed) {
+      out.push({
+        type: "circle",
+        cx: roundPx(q.x),
+        cy: q.y,
+        r: radius,
+        fill: colorForRow(encoding, schema, q.row, colorDomain, theme, rows),
+      });
+    }
+  }
+}
+
+/**
  * buildBoxplot — distribution mark (PR50).
  *
  * For each x-group, compute Tukey's five-number summary
@@ -3975,6 +4072,24 @@ registerMark({
   compile(args) {
     if (!args.yScale) return;
     buildBoxplot(
+      args.out,
+      args.rows,
+      args.schema,
+      args.layer.encoding,
+      args.xField,
+      args.yField,
+      args.xScale,
+      args.yScale,
+      args.theme,
+    );
+  },
+});
+registerMark({
+  type: "beeswarm",
+  compile(args) {
+    if (!args.yScale) return;
+    if (args.xScale.type !== "band") return;
+    buildBeeswarm(
       args.out,
       args.rows,
       args.schema,

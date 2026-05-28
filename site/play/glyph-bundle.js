@@ -4353,6 +4353,12 @@ var MarkSchema = external_exports.enum([
   // the compiler computes Q1 / median / Q3 / whiskers (Tukey, 1.5 × IQR)
   // and outliers beyond the whisker bounds.
   "boxplot",
+  // Tier-2 — beeswarm packing. Categorical x, quantitative y; per
+  // x-group the compiler runs a 1D non-overlap pack that nudges
+  // dots horizontally within the band so they don't overlap.
+  // Visually halfway between a strip plot and a violin — keeps every
+  // individual data point visible while showing distribution shape.
+  "beeswarm",
   // PR50 — direct label annotation. Renders a text mark at each row's
   // (x, y) with the value of encoding.text. Composes with other marks
   // via multi-layer specs (e.g. bars + text labels).
@@ -26147,7 +26153,10 @@ function compileSpec(input) {
       // Math Phase 2 Track A PR A5 — bezier renders a Bezier curve from
       // control points (no row data; configuration lives in
       // `layer.bezier`). Cartesian path with linear x/y.
-      "bezier"
+      "bezier",
+      // Tier-2 — packed strip plot. Categorical x, quantitative y;
+      // per x-group the compiler runs 1D non-overlap packing.
+      "beeswarm"
     ];
     if (!allowedMarks.includes(l.mark)) {
       throw new Error(`Phase 1 supports marks ${allowedMarks.join("|")}; layer ${i} has ${l.mark}`);
@@ -27618,6 +27627,69 @@ function buildRules(out, rows, schema, encoding, xScale, yScale, theme) {
     }
   }
 }
+function buildBeeswarm(out, rows, schema, encoding, xField, yField, xScale, yScale, theme) {
+  const colorField = fieldOf(encoding.color);
+  const colorDomain = colorField ? distinctOrdered(rows, schema, colorField) : [];
+  const yIdx = schema.findIndex((c) => c.name === yField);
+  const radius = 4;
+  const bands = /* @__PURE__ */ new Map();
+  for (let i = 0; i < rows.length; i++) {
+    const r = rows[i];
+    if (!r)
+      continue;
+    const xv = valueAt(r, schema, xField);
+    if (xv == null)
+      continue;
+    const yv = yIdx >= 0 ? Number(r[yIdx]) : NaN;
+    if (!Number.isFinite(yv))
+      continue;
+    const key = String(xv);
+    let list = bands.get(key);
+    if (!list) {
+      list = [];
+      bands.set(key, list);
+    }
+    list.push({ y: yScale.apply(yv), row: r, rowIdx: i });
+  }
+  const bandHalfWidth = xScale.bandwidth / 2 - radius;
+  for (const [bandKey, ptsRaw] of bands) {
+    const bandCenter = xScale.apply(bandKey) + xScale.bandwidth / 2;
+    const pts = [...ptsRaw].sort((a, b) => a.y - b.y);
+    const placed = [];
+    for (const p of pts) {
+      let chosenX = bandCenter;
+      const candidates = [0];
+      for (let i = 1; i < 50; i++) {
+        candidates.push(i * radius);
+        candidates.push(-i * radius);
+      }
+      let found = false;
+      for (const dx of candidates) {
+        if (Math.abs(dx) > bandHalfWidth)
+          continue;
+        const x = bandCenter + dx;
+        const collides = placed.some((q2) => Math.hypot(x - q2.x, p.y - q2.y) < radius * 2);
+        if (!collides) {
+          chosenX = x;
+          found = true;
+          break;
+        }
+      }
+      if (!found)
+        chosenX = bandCenter;
+      placed.push({ x: chosenX, y: p.y, row: p.row, rowIdx: p.rowIdx });
+    }
+    for (const q2 of placed) {
+      out.push({
+        type: "circle",
+        cx: roundPx(q2.x),
+        cy: q2.y,
+        r: radius,
+        fill: colorForRow(encoding, schema, q2.row, colorDomain, theme, rows)
+      });
+    }
+  }
+}
 function buildBoxplot(out, rows, schema, encoding, xField, yField, xScale, yScale, theme) {
   if (xScale.type !== "band")
     return;
@@ -28185,6 +28257,16 @@ registerMark({
     if (!args.yScale)
       return;
     buildBoxplot(args.out, args.rows, args.schema, args.layer.encoding, args.xField, args.yField, args.xScale, args.yScale, args.theme);
+  }
+});
+registerMark({
+  type: "beeswarm",
+  compile(args) {
+    if (!args.yScale)
+      return;
+    if (args.xScale.type !== "band")
+      return;
+    buildBeeswarm(args.out, args.rows, args.schema, args.layer.encoding, args.xField, args.yField, args.xScale, args.yScale, args.theme);
   }
 });
 registerMark({

@@ -1,0 +1,15 @@
+{
+  "version": "glyph/0.1",
+  "title": "Employee tenure by team — beeswarm (months at company)",
+  "width": 640,
+  "height": 420,
+  "layers": [
+    {
+      "mark": "beeswarm",
+      "encoding": {
+        "x": { "field": "team", "type": "ordinal" },
+        "y": { "field": "tenure_months", "type": "quantitative", "scale": { "domain": [0, 80] } }
+      }
+    }
+  ]
+}
