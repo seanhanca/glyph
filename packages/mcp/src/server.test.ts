@@ -1954,6 +1954,115 @@ describe("Glyph MCP server", () => {
       });
       expect(r2.isError).toBe(true);
     });
+
+    // 0.3.0 — audit-aware patch gate. A patch that flips a clean bar chart
+    // into a y-axis-doesn't-start-at-zero chart (AUDIT-01, high) must be
+    // refused unless the caller explicitly acknowledges the regression.
+    describe("0.3.0 — audit-regression gate", () => {
+      it("refuses a patch that introduces a HIGH-severity finding", async () => {
+        // Original render: clean bar chart, no AUDIT-01 because there's no
+        // y.scale.zeroBaseline override.
+        const r1 = await callText(client, "glyph_render", {
+          spec: {
+            data: { source: fixture, format: "csv" },
+            layers: [{ mark: "bar", encoding: { x: "pickup_hour", y: "rides" } }],
+          },
+        });
+        const out1 = JSON.parse(r1.text);
+        // Patch: explicitly disable the zero baseline → AUDIT-01 fires high.
+        const r2 = await callText(client, "glyph_spec_patch", {
+          handle_id: out1.handle_id,
+          patches: [
+            {
+              op: "replace",
+              path: "/layers/0/encoding/y",
+              value: { field: "rides", scale: { domain: [100, 200] } },
+            },
+          ],
+        });
+        expect(r2.isError).toBe(true);
+        const out2 = JSON.parse(r2.text);
+        expect(out2.error).toBe("audit_regression");
+        expect(Array.isArray(out2.regressions)).toBe(true);
+        expect(out2.regressions.length).toBeGreaterThan(0);
+        expect(out2.regressions.every((f: { severity: string }) => f.severity === "high")).toBe(
+          true,
+        );
+        expect(out2.regressions.some((f: { rule_id: string }) => f.rule_id === "AUDIT-01")).toBe(
+          true,
+        );
+      });
+
+      it("accepts the same patch with acknowledged: true", async () => {
+        const r1 = await callText(client, "glyph_render", {
+          spec: {
+            data: { source: fixture, format: "csv" },
+            layers: [{ mark: "bar", encoding: { x: "pickup_hour", y: "rides" } }],
+          },
+        });
+        const out1 = JSON.parse(r1.text);
+        const r2 = await callText(client, "glyph_spec_patch", {
+          handle_id: out1.handle_id,
+          patches: [
+            {
+              op: "replace",
+              path: "/layers/0/encoding/y",
+              value: { field: "rides", scale: { domain: [100, 200] } },
+            },
+          ],
+          acknowledged: true,
+        });
+        expect(r2.isError).toBe(false);
+        const out2 = JSON.parse(r2.text);
+        expect(out2.handle_id).toBeTruthy();
+        expect(out2.svg).toContain("<svg");
+      });
+
+      it("allows a benign patch through unchanged (no audit regression)", async () => {
+        const r1 = await callText(client, "glyph_render", {
+          spec: {
+            data: { source: fixture, format: "csv" },
+            layers: [{ mark: "bar", encoding: { x: "pickup_hour", y: "rides" } }],
+          },
+        });
+        const out1 = JSON.parse(r1.text);
+        // Just rename the field — no new high-severity audit findings.
+        const r2 = await callText(client, "glyph_spec_patch", {
+          handle_id: out1.handle_id,
+          patches: [{ op: "replace", path: "/layers/0/encoding/y", value: "fare" }],
+        });
+        expect(r2.isError).toBe(false);
+        const out2 = JSON.parse(r2.text);
+        expect(out2.handle_id).toBeTruthy();
+      });
+
+      it("does not flag a HIGH finding that was already present pre-patch", async () => {
+        // Pre-existing AUDIT-01 violation in the original spec. The patch
+        // touches an unrelated field; the gate should NOT treat the
+        // pre-existing finding as a new regression.
+        const r1 = await callText(client, "glyph_render", {
+          spec: {
+            data: { source: fixture, format: "csv" },
+            layers: [
+              {
+                mark: "bar",
+                encoding: {
+                  x: "pickup_hour",
+                  y: { field: "rides", scale: { domain: [100, 200] } },
+                },
+              },
+            ],
+          },
+        });
+        const out1 = JSON.parse(r1.text);
+        const r2 = await callText(client, "glyph_spec_patch", {
+          handle_id: out1.handle_id,
+          // Swap the x field — orthogonal change, doesn't add findings.
+          patches: [{ op: "replace", path: "/layers/0/encoding/x", value: "fare" }],
+        });
+        expect(r2.isError).toBe(false);
+      });
+    });
   });
 
   describe("glyph_whyboard_diff (PR62 / PLAN 2.4)", () => {
@@ -2357,7 +2466,7 @@ describe("Glyph MCP server", () => {
         /<metadata id="glyph-provenance"[^>]*>[\s\S]*?<!\[CDATA\[([\s\S]*?)\]\]>[\s\S]*?<\/metadata>/,
       );
       expect(embeddedMatch).not.toBeNull();
-      const embedded = JSON.parse(embeddedMatch![1]!);
+      const embedded = JSON.parse(embeddedMatch?.[1]!);
       expect(embedded.specHash).toBe(seal.specHash);
       expect(embedded.dataHash).toBe(seal.dataHash);
       expect(embedded.scaleDigest).toBe(seal.scaleDigest);
