@@ -1,0 +1,107 @@
+{
+  "compose": {
+    "viewBox": {
+      "width": 1200,
+      "height": 760
+    },
+    "title": "Incident Retro — INC-0847 · checkout 5xx spike",
+    "children": [
+      {
+        "at": {
+          "x": 600,
+          "y": 32
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Incident Retro — INC-0847 · checkout 5xx spike",
+          "fontSize": 18,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 600,
+          "y": 54
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "glyph_story → 4-panel post-incident review · timeline + impact + root cause + prevention",
+          "fontSize": 12,
+          "fill": "#666",
+          "italic": true,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 60,
+          "y": 90
+        },
+        "mark": "raw-svg",
+        "rawSvg": {
+          "xml": "<rect x=\"0\" y=\"0\" width=\"520\" height=\"290\" rx=\"10\" fill=\"#ffffff\" stroke=\"#e6e6e6\"/><rect x=\"14\" y=\"14\" width=\"32\" height=\"20\" rx=\"4\" fill=\"#c0392b\"/><text x=\"30\" y=\"28\" font-family=\"system-ui, sans-serif\" font-size=\"11\" fill=\"#ffffff\" text-anchor=\"middle\" font-weight=\"600\">1</text><text x=\"56\" y=\"29\" font-family=\"system-ui, sans-serif\" font-size=\"14\" fill=\"#1a1a1a\" font-weight=\"600\">Timeline · 14:22 → 16:08 UTC</text><text x=\"14\" y=\"50\" font-family=\"system-ui, sans-serif\" font-size=\"11.5\" fill=\"#666\">Detect 14:22 · ack 14:25 · mitigate 15:14 · resolve 16:08</text><rect x=\"14\" y=\"64\" width=\"492\" height=\"210\" fill=\"#fafbfd\" stroke=\"#eef0f4\"/><line x1=\"40\" y1=\"170\" x2=\"460\" y2=\"170\" stroke=\"#999\" stroke-width=\"2\"/><g><circle cx=\"60\" cy=\"170\" r=\"6\" fill=\"#c0392b\"/><text x=\"60\" y=\"155\" font-family=\"system-ui, sans-serif\" font-size=\"10\" fill=\"#1a1a1a\" text-anchor=\"middle\" font-weight=\"600\">14:22</text><text x=\"60\" y=\"195\" font-family=\"system-ui, sans-serif\" font-size=\"10\" fill=\"#666\" text-anchor=\"middle\">detect</text></g><g><circle cx=\"160\" cy=\"170\" r=\"5\" fill=\"#d4a017\"/><text x=\"160\" y=\"155\" font-family=\"system-ui, sans-serif\" font-size=\"10\" fill=\"#1a1a1a\" text-anchor=\"middle\" font-weight=\"600\">14:25</text><text x=\"160\" y=\"195\" font-family=\"system-ui, sans-serif\" font-size=\"10\" fill=\"#666\" text-anchor=\"middle\">ack</text></g><g><circle cx=\"290\" cy=\"170\" r=\"5\" fill=\"#4c78a8\"/><text x=\"290\" y=\"155\" font-family=\"system-ui, sans-serif\" font-size=\"10\" fill=\"#1a1a1a\" text-anchor=\"middle\" font-weight=\"600\">15:14</text><text x=\"290\" y=\"195\" font-family=\"system-ui, sans-serif\" font-size=\"10\" fill=\"#666\" text-anchor=\"middle\">mitigate</text></g><g><circle cx=\"440\" cy=\"170\" r=\"6\" fill=\"#1f7a39\"/><text x=\"440\" y=\"155\" font-family=\"system-ui, sans-serif\" font-size=\"10\" fill=\"#1a1a1a\" text-anchor=\"middle\" font-weight=\"600\">16:08</text><text x=\"440\" y=\"195\" font-family=\"system-ui, sans-serif\" font-size=\"10\" fill=\"#666\" text-anchor=\"middle\">resolve</text></g><text x=\"250\" y=\"240\" font-family=\"system-ui, sans-serif\" font-size=\"11\" fill=\"#666\" text-anchor=\"middle\" font-style=\"italic\">total: 1h 46m · MTTM 52min</text>"
+        }
+      },
+      {
+        "at": {
+          "x": 620,
+          "y": 90
+        },
+        "mark": "raw-svg",
+        "rawSvg": {
+          "xml": "<rect x=\"0\" y=\"0\" width=\"520\" height=\"290\" rx=\"10\" fill=\"#ffffff\" stroke=\"#e6e6e6\"/><rect x=\"14\" y=\"14\" width=\"32\" height=\"20\" rx=\"4\" fill=\"#c0392b\"/><text x=\"30\" y=\"28\" font-family=\"system-ui, sans-serif\" font-size=\"11\" fill=\"#ffffff\" text-anchor=\"middle\" font-weight=\"600\">2</text><text x=\"56\" y=\"29\" font-family=\"system-ui, sans-serif\" font-size=\"14\" fill=\"#1a1a1a\" font-weight=\"600\">Impact: 3,420 failed checkouts</text><text x=\"14\" y=\"50\" font-family=\"system-ui, sans-serif\" font-size=\"11.5\" fill=\"#666\">~$84K GMV at risk · 12% of session volume</text><rect x=\"14\" y=\"64\" width=\"492\" height=\"210\" fill=\"#fafbfd\" stroke=\"#eef0f4\"/><g fill=\"#aac1d8\"><rect x=\"40\" y=\"180\" width=\"40\" height=\"80\"/><rect x=\"90\" y=\"170\" width=\"40\" height=\"90\"/><rect x=\"140\" y=\"172\" width=\"40\" height=\"88\"/></g><rect x=\"190\" y=\"92\" width=\"40\" height=\"168\" fill=\"#c0392b\" stroke=\"#1a1a1a\" stroke-width=\"1.5\"/><rect x=\"240\" y=\"98\" width=\"40\" height=\"162\" fill=\"#c0392b\" stroke=\"#1a1a1a\" stroke-width=\"1.5\"/><g fill=\"#aac1d8\"><rect x=\"290\" y=\"170\" width=\"40\" height=\"90\"/><rect x=\"340\" y=\"172\" width=\"40\" height=\"88\"/><rect x=\"390\" y=\"170\" width=\"40\" height=\"90\"/></g><text x=\"210\" y=\"84\" font-family=\"system-ui, sans-serif\" font-size=\"11\" fill=\"#c0392b\" text-anchor=\"middle\" font-weight=\"600\">5xx spike</text><text x=\"40\" y=\"280\" font-family=\"system-ui, sans-serif\" font-size=\"10\" fill=\"#666\">13h  14h  15h  16h  17h</text>"
+        }
+      },
+      {
+        "at": {
+          "x": 60,
+          "y": 400
+        },
+        "mark": "raw-svg",
+        "rawSvg": {
+          "xml": "<rect x=\"0\" y=\"0\" width=\"520\" height=\"290\" rx=\"10\" fill=\"#ffffff\" stroke=\"#e6e6e6\"/><rect x=\"14\" y=\"14\" width=\"32\" height=\"20\" rx=\"4\" fill=\"#d4a017\"/><text x=\"30\" y=\"28\" font-family=\"system-ui, sans-serif\" font-size=\"11\" fill=\"#ffffff\" text-anchor=\"middle\" font-weight=\"600\">3</text><text x=\"56\" y=\"29\" font-family=\"system-ui, sans-serif\" font-size=\"14\" fill=\"#1a1a1a\" font-weight=\"600\">Root cause · cache config bug</text><text x=\"14\" y=\"50\" font-family=\"system-ui, sans-serif\" font-size=\"11.5\" fill=\"#666\">Stale TTL drove repeat upstream calls · 78% of failures</text><rect x=\"14\" y=\"64\" width=\"492\" height=\"210\" fill=\"#fafbfd\" stroke=\"#eef0f4\"/><text x=\"40\" y=\"115\" font-family=\"system-ui, sans-serif\" font-size=\"11\" fill=\"#333\">Cache TTL bug</text><rect x=\"160\" y=\"102\" width=\"252\" height=\"22\" fill=\"#d4a017\"/><text x=\"420\" y=\"118\" font-family=\"system-ui, sans-serif\" font-size=\"11\" fill=\"#ffffff\" text-anchor=\"end\" font-weight=\"600\">78%</text><text x=\"40\" y=\"165\" font-family=\"system-ui, sans-serif\" font-size=\"11\" fill=\"#333\">DB pool exhausted</text><rect x=\"160\" y=\"152\" width=\"56\" height=\"22\" fill=\"#e8d09b\"/><text x=\"220\" y=\"168\" font-family=\"system-ui, sans-serif\" font-size=\"11\" fill=\"#7a6730\" font-weight=\"600\">17%</text><text x=\"40\" y=\"215\" font-family=\"system-ui, sans-serif\" font-size=\"11\" fill=\"#333\">other</text><rect x=\"160\" y=\"202\" width=\"20\" height=\"22\" fill=\"#f2e3b9\"/><text x=\"185\" y=\"218\" font-family=\"system-ui, sans-serif\" font-size=\"11\" fill=\"#7a6730\">5%</text>"
+        }
+      },
+      {
+        "at": {
+          "x": 620,
+          "y": 400
+        },
+        "mark": "raw-svg",
+        "rawSvg": {
+          "xml": "<rect x=\"0\" y=\"0\" width=\"520\" height=\"290\" rx=\"10\" fill=\"#ffffff\" stroke=\"#e6e6e6\"/><rect x=\"14\" y=\"14\" width=\"32\" height=\"20\" rx=\"4\" fill=\"#1a1a1a\"/><text x=\"30\" y=\"28\" font-family=\"system-ui, sans-serif\" font-size=\"11\" fill=\"#ffffff\" text-anchor=\"middle\" font-weight=\"600\">4</text><text x=\"56\" y=\"29\" font-family=\"system-ui, sans-serif\" font-size=\"14\" fill=\"#1a1a1a\" font-weight=\"600\">Preventive actions · 3 follow-ups</text><text x=\"14\" y=\"50\" font-family=\"system-ui, sans-serif\" font-size=\"11.5\" fill=\"#666\">Owners assigned · linked to JIRA epic PREV-217</text><rect x=\"14\" y=\"64\" width=\"492\" height=\"210\" fill=\"#fafbfd\" stroke=\"#eef0f4\"/><g font-family=\"system-ui, sans-serif\"><text x=\"40\" y=\"110\" font-size=\"13\" fill=\"#1a1a1a\" font-weight=\"600\">1. Cache-config validation in CI</text><text x=\"40\" y=\"128\" font-size=\"11\" fill=\"#666\">Priya · ETA Oct 18 · PREV-217.1</text></g><g font-family=\"system-ui, sans-serif\"><text x=\"40\" y=\"160\" font-size=\"13\" fill=\"#1a1a1a\" font-weight=\"600\">2. Runbook: stale-TTL detection</text><text x=\"40\" y=\"178\" font-size=\"11\" fill=\"#666\">Diego · ETA Oct 25 · PREV-217.2</text></g><g font-family=\"system-ui, sans-serif\"><text x=\"40\" y=\"210\" font-size=\"13\" fill=\"#1a1a1a\" font-weight=\"600\">3. DB pool size alarm at 80%</text><text x=\"40\" y=\"228\" font-size=\"11\" fill=\"#666\">Sasha · ETA Nov 1 · PREV-217.3</text></g>"
+        }
+      },
+      {
+        "at": {
+          "x": 600,
+          "y": 712
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "glyph_story({ template: \"incident-retro\", handle_id: \"inc_0847\" }) → 4-panel storyboard.",
+          "fontSize": 12,
+          "fill": "#4a3f30",
+          "italic": true,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 600,
+          "y": 736
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Deterministic · Auditable · One MCP call produces the full storyboard.",
+          "fontSize": 11,
+          "fill": "#888",
+          "italic": true,
+          "anchor": "middle"
+        }
+      }
+    ]
+  }
+}

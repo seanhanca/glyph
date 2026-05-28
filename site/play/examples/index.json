@@ -555,5 +555,29 @@
     "description": "\"Why did churn spike this month?\" Trial-to-paid drop 32→17%; price-test cohort explains 71% of variance; 3-mo forecast assumes price reverts.",
     "csv": null,
     "spec": "examples/whyboard/template-churn-spike.json"
+  },
+  {
+    "id": "story-quarterly-review",
+    "category": "Stories",
+    "name": "Template — quarterly review",
+    "description": "4-panel narrative: revenue trend → segment mix → cohort retention → growth forecast. Compose scene mirrors glyph_story output.",
+    "csv": null,
+    "spec": "examples/stories/template-quarterly-review.json"
+  },
+  {
+    "id": "story-incident-retro",
+    "category": "Stories",
+    "name": "Template — incident retro",
+    "description": "4-panel postmortem: latency spike → error budget burn → root-cause attribution → recovery curve. Compose scene mirrors glyph_story output.",
+    "csv": null,
+    "spec": "examples/stories/template-incident-retro.json"
+  },
+  {
+    "id": "story-ab-test-readout",
+    "category": "Stories",
+    "name": "Template — A/B test readout",
+    "description": "4-panel experiment readout: traffic split → primary metric lift → secondary metrics → decision matrix. Compose scene mirrors glyph_story output.",
+    "csv": null,
+    "spec": "examples/stories/template-ab-test-readout.json"
   }
 ]
