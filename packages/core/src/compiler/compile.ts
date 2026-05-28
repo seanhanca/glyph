@@ -887,6 +887,51 @@ export function compileSpec(input: CompileInput): Scene {
   if (spec.coordinates?.type === "polar") {
     return compilePolar(input);
   }
+  // Tier-2 — `mark: "arc"` is syntactic sugar for "bar + polar". The
+  // spec author writes
+  //   { mark: "arc", encoding: { theta: "share", color: "department" } }
+  // and we rewrite it internally into the polar bar pipeline:
+  //   - coordinates auto-injected as { type: "polar", innerRadius: 0 }
+  //   - encoding.theta → encoding.y  (the angle-weight field)
+  //   - encoding.color stays as the slice color field
+  //   - mark switches to "bar" so compilePolar's existing branch fires
+  // Per-layer `innerRadius` (0..1) sets the donut hole proportionally.
+  // Mixed-mark specs (an arc layer alongside non-arc layers) aren't
+  // supported here — drop the sugar and write polar explicitly.
+  if (spec.layers.some((l) => l.mark === "arc")) {
+    const allArc = spec.layers.every((l) => l.mark === "arc");
+    if (!allArc) {
+      throw new Error(
+        '`mark: "arc"` cannot be mixed with other marks in the same spec. ' +
+          "Use polar coordinates explicitly for mixed-mark specs.",
+      );
+    }
+    // Use the first arc layer's innerRadius as the donut config (more
+    // than one arc layer is unusual; we honor the leading one).
+    const firstArc = spec.layers[0] as {
+      innerRadius?: number;
+      encoding: { theta?: unknown; color?: unknown };
+    };
+    const innerRadius = Math.max(0, Math.min(0.95, firstArc.innerRadius ?? 0));
+    const rewritten = {
+      ...spec,
+      coordinates: { type: "polar" as const, innerRadius },
+      layers: spec.layers.map((l) => {
+        const enc = l.encoding as Encoding & { theta?: Channel };
+        const theta = enc.theta;
+        // theta → x (the categorical axis for polar bar) AND → y (the
+        // weight). Use the same field for both since polar bar treats
+        // x as the category and y as the slice weight. If color is set,
+        // the categorical x defaults to color so each slice gets its
+        // own band.
+        const xField = enc.color !== undefined ? enc.color : theta;
+        const { theta: _omit, ...restEnc } = enc;
+        const newEnc: Encoding = { ...restEnc, x: xField, y: theta };
+        return { ...l, mark: "bar" as const, encoding: newEnc };
+      }),
+    } as typeof spec;
+    return compilePolar({ ...input, spec: rewritten });
+  }
   // PR67 — hierarchy data shape. Skips DuckDB entirely; the layout
   // algorithm reads the inline tree and emits rect / arc marks.
   if (spec.data?.hierarchy) {

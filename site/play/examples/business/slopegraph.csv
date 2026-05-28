@@ -1,0 +1,13 @@
+metric,period,score
+Performance,2023,78
+Performance,2024,86
+Reliability,2023,86
+Reliability,2024,92
+Security,2023,72
+Security,2024,78
+Cost,2023,72
+Cost,2024,64
+UX,2023,80
+UX,2024,88
+Velocity,2023,66
+Velocity,2024,74

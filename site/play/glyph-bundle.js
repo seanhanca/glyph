@@ -4331,6 +4331,13 @@ var MarkSchema = external_exports.enum([
   "area",
   "rect",
   "rule",
+  // Tier-2 — first-class pie/donut. `mark: "arc"` is sugar for
+  // `mark: "bar" + coordinates: { type: "polar" }`: the compiler
+  // auto-injects polar coordinates, treats encoding.theta as the
+  // angle field, and routes through the existing polar-bar pipeline.
+  // Use `innerRadius: 0.5` on the layer for a donut; leave it
+  // unset/0 for a pie.
+  "arc",
   // PR42 — geo viz primitives. `geo-point` plots lat/lon points through a
   // projection; the compiler translates to plain points after projection.
   "geo-point",
@@ -4475,6 +4482,13 @@ var EncodingSchema = external_exports.object({
   color: ChannelSchema.optional(),
   size: ChannelSchema.optional(),
   opacity: ChannelSchema.optional(),
+  /**
+   * Tier-2 — angle weight channel for `mark: "arc"`. The compiler
+   * rewrites theta → y when routing the arc through the polar-bar
+   * pipeline; the resulting slice angle is proportional to this
+   * field's value.
+   */
+  theta: ChannelSchema.optional(),
   tooltip: external_exports.union([ChannelSchema, external_exports.array(ChannelSchema)]).optional(),
   /** Latitude column for `geo-*` marks (PR42). */
   lat: ChannelSchema.optional(),
@@ -4519,6 +4533,12 @@ var LayerSchema = external_exports.object({
    * Ignored by other marks. Tier-2 RFC.
    */
   interpolate: external_exports.enum(["linear", "step", "step-before"]).optional(),
+  /**
+   * Tier-2 — donut hole proportion for `mark: "arc"` (0..1).
+   * 0 (default) renders a solid pie; 0.5 renders a donut whose
+   * inner radius is half the outer radius. Ignored by other marks.
+   */
+  innerRadius: external_exports.number().min(0).max(0.95).optional(),
   /**
    * Math PR4 — LaTeX source for `mark: "math-text"`. Required when
    * `mark === "math-text"`; the compiler enforces this via a
@@ -26010,6 +26030,27 @@ function compileSpec(input) {
   }
   if (spec.coordinates?.type === "polar") {
     return compilePolar(input);
+  }
+  if (spec.layers.some((l) => l.mark === "arc")) {
+    const allArc = spec.layers.every((l) => l.mark === "arc");
+    if (!allArc) {
+      throw new Error('`mark: "arc"` cannot be mixed with other marks in the same spec. Use polar coordinates explicitly for mixed-mark specs.');
+    }
+    const firstArc = spec.layers[0];
+    const innerRadius = Math.max(0, Math.min(0.95, firstArc.innerRadius ?? 0));
+    const rewritten = {
+      ...spec,
+      coordinates: { type: "polar", innerRadius },
+      layers: spec.layers.map((l) => {
+        const enc = l.encoding;
+        const theta = enc.theta;
+        const xField = enc.color !== void 0 ? enc.color : theta;
+        const { theta: _omit, ...restEnc } = enc;
+        const newEnc = { ...restEnc, x: xField, y: theta };
+        return { ...l, mark: "bar", encoding: newEnc };
+      })
+    };
+    return compilePolar({ ...input, spec: rewritten });
   }
   if (spec.data?.hierarchy) {
     return compileHierarchy(input);

@@ -528,6 +528,13 @@ export const MarkSchema = z.enum([
   "area",
   "rect",
   "rule",
+  // Tier-2 — first-class pie/donut. `mark: "arc"` is sugar for
+  // `mark: "bar" + coordinates: { type: "polar" }`: the compiler
+  // auto-injects polar coordinates, treats encoding.theta as the
+  // angle field, and routes through the existing polar-bar pipeline.
+  // Use `innerRadius: 0.5` on the layer for a donut; leave it
+  // unset/0 for a pie.
+  "arc",
   // PR42 — geo viz primitives. `geo-point` plots lat/lon points through a
   // projection; the compiler translates to plain points after projection.
   "geo-point",
@@ -747,6 +754,13 @@ export const EncodingSchema = z
     color: ChannelSchema.optional(),
     size: ChannelSchema.optional(),
     opacity: ChannelSchema.optional(),
+    /**
+     * Tier-2 — angle weight channel for `mark: "arc"`. The compiler
+     * rewrites theta → y when routing the arc through the polar-bar
+     * pipeline; the resulting slice angle is proportional to this
+     * field's value.
+     */
+    theta: ChannelSchema.optional(),
     tooltip: z.union([ChannelSchema, z.array(ChannelSchema)]).optional(),
     /** Latitude column for `geo-*` marks (PR42). */
     lat: ChannelSchema.optional(),
@@ -806,6 +820,12 @@ export const LayerSchema = z
      * Ignored by other marks. Tier-2 RFC.
      */
     interpolate: z.enum(["linear", "step", "step-before"]).optional(),
+    /**
+     * Tier-2 — donut hole proportion for `mark: "arc"` (0..1).
+     * 0 (default) renders a solid pie; 0.5 renders a donut whose
+     * inner radius is half the outer radius. Ignored by other marks.
+     */
+    innerRadius: z.number().min(0).max(0.95).optional(),
     /**
      * Math PR4 — LaTeX source for `mark: "math-text"`. Required when
      * `mark === "math-text"`; the compiler enforces this via a
