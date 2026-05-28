@@ -71,6 +71,9 @@ export function isSelfContainedSpec(spec) {
       "grid",
       "graph",
       "hierarchy",
+      // Tier-2 — sankey flow shape. DAG + bezier links rendered
+      // by `compileSankey`; no row/schema binding needed.
+      "flow",
     ]) {
       if (spec.data[key]) return true;
     }
