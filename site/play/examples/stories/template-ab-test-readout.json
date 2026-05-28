@@ -1,0 +1,107 @@
+{
+  "compose": {
+    "viewBox": {
+      "width": 1200,
+      "height": 760
+    },
+    "title": "A/B test readout — EXP-114 · new checkout flow",
+    "children": [
+      {
+        "at": {
+          "x": 600,
+          "y": 32
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "A/B test readout — EXP-114 · new checkout flow",
+          "fontSize": 18,
+          "fill": "#1a1a1a",
+          "italic": false,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 600,
+          "y": 54
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "glyph_story → 4-panel experiment summary · setup + primary + segments + recommendation",
+          "fontSize": 12,
+          "fill": "#666",
+          "italic": true,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 60,
+          "y": 90
+        },
+        "mark": "raw-svg",
+        "rawSvg": {
+          "xml": "<rect x=\"0\" y=\"0\" width=\"520\" height=\"290\" rx=\"10\" fill=\"#ffffff\" stroke=\"#e6e6e6\"/><rect x=\"14\" y=\"14\" width=\"32\" height=\"20\" rx=\"4\" fill=\"#4c78a8\"/><text x=\"30\" y=\"28\" font-family=\"system-ui, sans-serif\" font-size=\"11\" fill=\"#ffffff\" text-anchor=\"middle\" font-weight=\"600\">1</text><text x=\"56\" y=\"29\" font-family=\"system-ui, sans-serif\" font-size=\"14\" fill=\"#1a1a1a\" font-weight=\"600\">Setup</text><text x=\"14\" y=\"50\" font-family=\"system-ui, sans-serif\" font-size=\"11.5\" fill=\"#666\">Control vs new checkout · 14-day run · 50/50 split</text><rect x=\"14\" y=\"64\" width=\"492\" height=\"210\" fill=\"#fafbfd\" stroke=\"#eef0f4\"/><g font-family=\"system-ui, sans-serif\"><text x=\"40\" y=\"110\" font-size=\"12\" fill=\"#1a1a1a\"><tspan font-weight=\"600\">Sample size</tspan>: 184,210 users (92,105 / arm)</text><text x=\"40\" y=\"138\" font-size=\"12\" fill=\"#1a1a1a\"><tspan font-weight=\"600\">Primary metric</tspan>: checkout conversion %</text><text x=\"40\" y=\"166\" font-size=\"12\" fill=\"#1a1a1a\"><tspan font-weight=\"600\">Power</tspan>: 80% to detect ±0.5 pp</text><text x=\"40\" y=\"194\" font-size=\"12\" fill=\"#1a1a1a\"><tspan font-weight=\"600\">Window</tspan>: 2025-09-01 → 2025-09-14</text><text x=\"40\" y=\"222\" font-size=\"12\" fill=\"#1a1a1a\"><tspan font-weight=\"600\">Owner</tspan>: growth-experiments@</text></g>"
+        }
+      },
+      {
+        "at": {
+          "x": 620,
+          "y": 90
+        },
+        "mark": "raw-svg",
+        "rawSvg": {
+          "xml": "<rect x=\"0\" y=\"0\" width=\"520\" height=\"290\" rx=\"10\" fill=\"#ffffff\" stroke=\"#e6e6e6\"/><rect x=\"14\" y=\"14\" width=\"32\" height=\"20\" rx=\"4\" fill=\"#1f7a39\"/><text x=\"30\" y=\"28\" font-family=\"system-ui, sans-serif\" font-size=\"11\" fill=\"#ffffff\" text-anchor=\"middle\" font-weight=\"600\">2</text><text x=\"56\" y=\"29\" font-family=\"system-ui, sans-serif\" font-size=\"14\" fill=\"#1a1a1a\" font-weight=\"600\">Primary: +0.84 pp (p < 0.001)</text><text x=\"14\" y=\"50\" font-family=\"system-ui, sans-serif\" font-size=\"11.5\" fill=\"#666\">Control 7.2% · Variant 8.04% · 95% CI [+0.42, +1.26]</text><rect x=\"14\" y=\"64\" width=\"492\" height=\"210\" fill=\"#fafbfd\" stroke=\"#eef0f4\"/><g><text x=\"60\" y=\"120\" font-family=\"system-ui, sans-serif\" font-size=\"11\" fill=\"#333\">Control</text><rect x=\"160\" y=\"106\" width=\"170\" height=\"22\" fill=\"#aac1d8\"/><text x=\"338\" y=\"122\" font-family=\"system-ui, sans-serif\" font-size=\"11\" fill=\"#1a1a1a\">7.20%</text></g><g><text x=\"60\" y=\"170\" font-family=\"system-ui, sans-serif\" font-size=\"11\" fill=\"#333\">Variant</text><rect x=\"160\" y=\"156\" width=\"190\" height=\"22\" fill=\"#1f7a39\"/><text x=\"358\" y=\"172\" font-family=\"system-ui, sans-serif\" font-size=\"11\" fill=\"#1a1a1a\" font-weight=\"600\">8.04%</text></g><text x=\"100\" y=\"220\" font-family=\"system-ui, sans-serif\" font-size=\"11\" fill=\"#1f7a39\" font-weight=\"600\" text-anchor=\"start\">95% CI [+0.42, +1.26 pp]</text><text x=\"100\" y=\"240\" font-family=\"system-ui, sans-serif\" font-size=\"10\" fill=\"#666\" text-anchor=\"start\">p &lt; 0.001 · two-sided t-test</text>"
+        }
+      },
+      {
+        "at": {
+          "x": 60,
+          "y": 400
+        },
+        "mark": "raw-svg",
+        "rawSvg": {
+          "xml": "<rect x=\"0\" y=\"0\" width=\"520\" height=\"290\" rx=\"10\" fill=\"#ffffff\" stroke=\"#e6e6e6\"/><rect x=\"14\" y=\"14\" width=\"32\" height=\"20\" rx=\"4\" fill=\"#d4a017\"/><text x=\"30\" y=\"28\" font-family=\"system-ui, sans-serif\" font-size=\"11\" fill=\"#ffffff\" text-anchor=\"middle\" font-weight=\"600\">3</text><text x=\"56\" y=\"29\" font-family=\"system-ui, sans-serif\" font-size=\"14\" fill=\"#1a1a1a\" font-weight=\"600\">Segments · effect concentrated mobile</text><text x=\"14\" y=\"50\" font-family=\"system-ui, sans-serif\" font-size=\"11.5\" fill=\"#666\">Mobile +1.6pp · desktop +0.4pp · tablet +0.2pp</text><rect x=\"14\" y=\"64\" width=\"492\" height=\"210\" fill=\"#fafbfd\" stroke=\"#eef0f4\"/><text x=\"40\" y=\"120\" font-family=\"system-ui, sans-serif\" font-size=\"11\" fill=\"#333\">Mobile</text><rect x=\"160\" y=\"108\" width=\"240\" height=\"20\" fill=\"#1f7a39\"/><text x=\"408\" y=\"122\" font-family=\"system-ui, sans-serif\" font-size=\"11\" fill=\"#1f7a39\" font-weight=\"600\">+1.6 pp</text><text x=\"40\" y=\"170\" font-family=\"system-ui, sans-serif\" font-size=\"11\" fill=\"#333\">Desktop</text><rect x=\"160\" y=\"158\" width=\"60\" height=\"20\" fill=\"#88c182\"/><text x=\"228\" y=\"172\" font-family=\"system-ui, sans-serif\" font-size=\"11\" fill=\"#1f7a39\">+0.4 pp</text><text x=\"40\" y=\"220\" font-family=\"system-ui, sans-serif\" font-size=\"11\" fill=\"#333\">Tablet</text><rect x=\"160\" y=\"208\" width=\"30\" height=\"20\" fill=\"#aedab7\"/><text x=\"198\" y=\"222\" font-family=\"system-ui, sans-serif\" font-size=\"11\" fill=\"#666\">+0.2 pp</text>"
+        }
+      },
+      {
+        "at": {
+          "x": 620,
+          "y": 400
+        },
+        "mark": "raw-svg",
+        "rawSvg": {
+          "xml": "<rect x=\"0\" y=\"0\" width=\"520\" height=\"290\" rx=\"10\" fill=\"#ffffff\" stroke=\"#e6e6e6\"/><rect x=\"14\" y=\"14\" width=\"32\" height=\"20\" rx=\"4\" fill=\"#1f7a39\"/><text x=\"30\" y=\"28\" font-family=\"system-ui, sans-serif\" font-size=\"11\" fill=\"#ffffff\" text-anchor=\"middle\" font-weight=\"600\">4</text><text x=\"56\" y=\"29\" font-family=\"system-ui, sans-serif\" font-size=\"14\" fill=\"#1a1a1a\" font-weight=\"600\">Recommendation: SHIP to mobile, hold desktop</text><text x=\"14\" y=\"50\" font-family=\"system-ui, sans-serif\" font-size=\"11.5\" fill=\"#666\">Projected +$2.1M ARR · revisit desktop after dark-mode launch</text><rect x=\"14\" y=\"64\" width=\"492\" height=\"210\" fill=\"#fafbfd\" stroke=\"#eef0f4\"/><g font-family=\"system-ui, sans-serif\"><rect x=\"40\" y=\"86\" width=\"440\" height=\"44\" rx=\"6\" fill=\"#eaf6ee\" stroke=\"#1f7a39\"/><text x=\"56\" y=\"108\" font-size=\"12\" fill=\"#1f7a39\" font-weight=\"600\">✓ Ship variant to 100% mobile</text><text x=\"56\" y=\"124\" font-size=\"11\" fill=\"#1f7a39\">Rollout: 25% Mon, 50% Wed, 100% Fri.</text></g><g font-family=\"system-ui, sans-serif\"><rect x=\"40\" y=\"148\" width=\"440\" height=\"44\" rx=\"6\" fill=\"#fbf2d8\" stroke=\"#d4a017\"/><text x=\"56\" y=\"170\" font-size=\"12\" fill=\"#7a6730\" font-weight=\"600\">⊙ Hold variant on desktop</text><text x=\"56\" y=\"186\" font-size=\"11\" fill=\"#7a6730\">Effect smaller than desktop dark-mode noise — re-test in Q4.</text></g><g font-family=\"system-ui, sans-serif\"><rect x=\"40\" y=\"210\" width=\"440\" height=\"44\" rx=\"6\" fill=\"#e8eef5\" stroke=\"#4c78a8\"/><text x=\"56\" y=\"232\" font-size=\"12\" fill=\"#4c78a8\" font-weight=\"600\">→ Projected impact: +$2.1M ARR</text><text x=\"56\" y=\"248\" font-size=\"11\" fill=\"#666\">Based on current mobile mix + retention; 90% CI [+1.5, +2.7M].</text></g>"
+        }
+      },
+      {
+        "at": {
+          "x": 600,
+          "y": 712
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "glyph_story({ template: \"ab-test-readout\", handle_id: \"exp_114\" }) → 4-panel storyboard.",
+          "fontSize": 12,
+          "fill": "#4a3f30",
+          "italic": true,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 600,
+          "y": 736
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Deterministic · Auditable · One MCP call produces the full storyboard.",
+          "fontSize": 11,
+          "fill": "#888",
+          "italic": true,
+          "anchor": "middle"
+        }
+      }
+    ]
+  }
+}
