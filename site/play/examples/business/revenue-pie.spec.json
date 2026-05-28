@@ -1,0 +1,16 @@
+{
+  "version": "glyph/0.1",
+  "title": "Revenue share by department (arc mark)",
+  "width": 560,
+  "height": 420,
+  "layers": [
+    {
+      "mark": "arc",
+      "innerRadius": 0,
+      "encoding": {
+        "theta": { "field": "share", "type": "quantitative" },
+        "color": { "field": "department", "type": "nominal" }
+      }
+    }
+  ]
+}

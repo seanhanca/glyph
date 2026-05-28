@@ -1,0 +1,23 @@
+{
+  "version": "glyph/0.1",
+  "title": "Plan tier over time — step line (1=Starter, 2=Pro, 3=Team, 4=Enterprise)",
+  "width": 640,
+  "height": 320,
+  "layers": [
+    {
+      "mark": "line",
+      "interpolate": "step",
+      "encoding": {
+        "x": { "field": "month", "type": "quantitative", "scale": { "domain": [1, 12] } },
+        "y": { "field": "tier_level", "type": "quantitative", "scale": { "domain": [0.5, 4.5] } }
+      }
+    },
+    {
+      "mark": "point",
+      "encoding": {
+        "x": { "field": "month", "type": "quantitative" },
+        "y": { "field": "tier_level", "type": "quantitative" }
+      }
+    }
+  ]
+}

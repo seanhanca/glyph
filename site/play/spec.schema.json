@@ -577,6 +577,7 @@
                   "area",
                   "rect",
                   "rule",
+                  "arc",
                   "geo-point",
                   "geo-region",
                   "heatmap",
@@ -737,6 +738,9 @@
                   "opacity": {
                     "$ref": "#/definitions/GlyphSpec/properties/layers/items/properties/encoding/properties/x"
                   },
+                  "theta": {
+                    "$ref": "#/definitions/GlyphSpec/properties/layers/items/properties/encoding/properties/x"
+                  },
                   "tooltip": {
                     "anyOf": [
                       {
@@ -809,6 +813,11 @@
                   "step",
                   "step-before"
                 ]
+              },
+              "innerRadius": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 0.95
               },
               "expr": {
                 "type": "string",

@@ -1,0 +1,24 @@
+{
+  "version": "glyph/0.1",
+  "title": "KPI year-over-year — slopegraph (2023 → 2024)",
+  "width": 640,
+  "height": 420,
+  "layers": [
+    {
+      "mark": "line",
+      "encoding": {
+        "x": { "field": "period", "type": "ordinal" },
+        "y": { "field": "score", "type": "quantitative", "scale": { "domain": [60, 100] } },
+        "color": { "field": "metric", "type": "nominal" }
+      }
+    },
+    {
+      "mark": "point",
+      "encoding": {
+        "x": { "field": "period", "type": "ordinal" },
+        "y": { "field": "score", "type": "quantitative" },
+        "color": { "field": "metric", "type": "nominal" }
+      }
+    }
+  ]
+}

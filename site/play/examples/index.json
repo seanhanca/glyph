@@ -207,6 +207,30 @@
     "csv": null,
     "spec": "examples/business/monthly-composite.spec.json"
   },
+  {
+    "id": "revenue-pie",
+    "category": "Business charts",
+    "name": "Revenue pie (arc mark)",
+    "description": "Eng / Sales / Marketing split — first-class `mark: \"arc\"` (no manual polar setup needed). Slice angle proportional to share.",
+    "csv": "examples/business/revenue-pie.csv",
+    "spec": "examples/business/revenue-pie.spec.json"
+  },
+  {
+    "id": "slopegraph",
+    "category": "Business charts",
+    "name": "Slopegraph — 2023 vs 2024",
+    "description": "Six KPIs year-over-year. Lines connect each metric's two periods; the eye picks up direction + magnitude of change in one glance.",
+    "csv": "examples/business/slopegraph.csv",
+    "spec": "examples/business/slopegraph.spec.json"
+  },
+  {
+    "id": "step-line",
+    "category": "Business charts",
+    "name": "Step line — plan tier over time",
+    "description": "Customer plan tier across 12 months. `interpolate: \"step\"` keeps the value flat between samples, vertical at the change.",
+    "csv": "examples/business/step-line.csv",
+    "spec": "examples/business/step-line.spec.json"
+  },
 
   {
     "id": "ridgeline",
