@@ -192,6 +192,8 @@ const MCP_TOOLS = [
   // a verify verb. Without it, the seal is opaque — agents can't ask
   // "is this SVG genuinely from this spec + data?" through MCP.
   { name: "glyph_verify", since: "0.0.21" },
+  // ---- 0.3.0 — `glyph_seal` standalone-seal companion to glyph_verify --
+  { name: "glyph_seal", since: "0.3.0" },
   // ---- Joy of Math PR E5 — natural-language story composer -----------
   // The "bar-raiser" agent-facing endpoint. Same `(intent, audience,
   // theme, duration_ms)` → same JSON; no LLM call. See the
@@ -3388,6 +3390,86 @@ export function createServer(state: ServerState = new ServerState()): {
           return {
             isError: true,
             content: [{ type: "text" as const, text: (err as Error).message ?? String(err) }],
+          };
+        }
+      }),
+  );
+
+  // ----- glyph_seal (0.3.0) ------------------------------------------------
+  // Emit the provenance seal as a standalone JSON object — without
+  // requiring (or producing) an SVG. The companion to glyph_verify:
+  // store the seal next to your audit log, then later prove the SVG you
+  // received matches by re-computing the seal from (spec, rows, schema)
+  // and comparing. Useful in pipelines where the SVG is rendered
+  // downstream (e.g. by a separate worker) and the seal must travel
+  // independently for compliance / audit-trail purposes.
+  //
+  // Pure function — same (spec, rows, schema) → byte-identical seal.
+  // Same hash inputs as the seal embedded in renderSvg's output, so a
+  // standalone-sealed JSON object verifies cleanly against the SVG
+  // returned by glyph_render against the same inputs.
+  server.registerTool(
+    "glyph_seal",
+    {
+      title: "Compute the cryptographic provenance seal for a chart",
+      description:
+        "0.3.0 — emit the provenance seal for a (spec, rows, schema) tuple as JSON, without producing an SVG. Returns `{ format, specHash, dataHash, libraryVersion, rowCount, scaleDigest }` — the same block embedded in `glyph_render`'s SVG `<metadata>`. Use this when you want to store the seal alongside an audit log, sign it with an external key, or send it through a pipeline where the SVG is rendered downstream.",
+      inputSchema: {
+        spec: z.unknown().describe("The Glyph spec to seal."),
+        rows: z
+          .array(z.array(z.unknown()))
+          .default([])
+          .describe(
+            "Positional rows matching `schema`. Pass an empty array for self-contained specs (compose, function-data, hierarchy, …) where the spec carries its own inputs.",
+          ),
+        schema: z
+          .array(z.object({ name: z.string(), type: z.string() }))
+          .default([])
+          .describe(
+            "Column schema (name + DuckDB type) for the rows. Empty for self-contained specs.",
+          ),
+      },
+    },
+    async ({ spec, rows, schema }) =>
+      state.serial(async () => {
+        const parsed = safeParseSpec(spec);
+        if (!parsed.ok) {
+          return {
+            isError: true,
+            content: [
+              {
+                type: "text" as const,
+                text: `glyph_seal: spec invalid: ${parsed.error.message}`,
+              },
+            ],
+          };
+        }
+        try {
+          const scene = compileSpec({ spec: parsed.spec, rows, schema });
+          const prov = scene.provenance;
+          if (!prov) {
+            return {
+              isError: true,
+              content: [
+                {
+                  type: "text" as const,
+                  text: "glyph_seal: compiler produced a scene without provenance (regression)",
+                },
+              ],
+            };
+          }
+          return {
+            content: [{ type: "text" as const, text: JSON.stringify(prov, null, 2) }],
+          };
+        } catch (err) {
+          return {
+            isError: true,
+            content: [
+              {
+                type: "text" as const,
+                text: `glyph_seal: compile failed: ${(err as Error).message ?? String(err)}`,
+              },
+            ],
           };
         }
       }),

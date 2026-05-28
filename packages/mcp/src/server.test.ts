@@ -116,6 +116,7 @@ describe("Glyph MCP server", () => {
       "glyph_query",
       "glyph_regression",
       "glyph_render",
+      "glyph_seal",
       "glyph_spec_diff",
       "glyph_spec_patch",
       "glyph_story",
@@ -180,6 +181,7 @@ describe("Glyph MCP server", () => {
       "glyph_query",
       "glyph_regression",
       "glyph_render",
+      "glyph_seal",
       "glyph_spec_diff",
       "glyph_spec_patch",
       "glyph_story",
@@ -2315,6 +2317,79 @@ describe("Glyph MCP server", () => {
       });
       expect(r.isError).toBe(true);
       expect(r.text).toContain("spec invalid");
+    });
+  });
+
+  describe("glyph_seal (0.3.0 — standalone seal companion to verify)", () => {
+    const spec = {
+      data: { source: "inline" },
+      layers: [{ mark: "bar", encoding: { x: "a", y: "b" } }],
+    } as const;
+    const schema = [
+      { name: "a", type: "VARCHAR" },
+      { name: "b", type: "INTEGER" },
+    ];
+    const rows: ReadonlyArray<ReadonlyArray<unknown>> = [
+      ["hi", 1],
+      ["bye", 2],
+    ];
+
+    it("returns the provenance block with deterministic hashes", async () => {
+      const r1 = await callText(client, "glyph_seal", { spec, rows, schema });
+      expect(r1.isError).toBeFalsy();
+      const seal = JSON.parse(r1.text);
+      expect(seal.format).toBeDefined();
+      expect(seal.specHash).toMatch(/^[0-9a-f]{64}$/);
+      expect(seal.dataHash).toMatch(/^[0-9a-f]{64}$/);
+      expect(seal.rowCount).toBe(2);
+      // Second call with the same inputs produces the same hashes.
+      const r2 = await callText(client, "glyph_seal", { spec, rows, schema });
+      expect(JSON.parse(r2.text)).toEqual(seal);
+    });
+
+    it("seal matches the one embedded in the rendered SVG (round-trip with glyph_verify)", async () => {
+      const sealResp = await callText(client, "glyph_seal", { spec, rows, schema });
+      const seal = JSON.parse(sealResp.text);
+      const { compileSpec, parseSpec, renderSvg } = await import("@glyph/core");
+      const svg = renderSvg(compileSpec({ spec: parseSpec(spec), rows, schema }));
+      // The embedded seal in the SVG must match the standalone seal byte-for-byte.
+      const embeddedMatch = svg.match(
+        /<metadata id="glyph-provenance"[^>]*>[\s\S]*?<!\[CDATA\[([\s\S]*?)\]\]>[\s\S]*?<\/metadata>/,
+      );
+      expect(embeddedMatch).not.toBeNull();
+      const embedded = JSON.parse(embeddedMatch![1]!);
+      expect(embedded.specHash).toBe(seal.specHash);
+      expect(embedded.dataHash).toBe(seal.dataHash);
+      expect(embedded.scaleDigest).toBe(seal.scaleDigest);
+    });
+
+    it("rejects an invalid spec", async () => {
+      const r = await callText(client, "glyph_seal", {
+        spec: { layers: [{ mark: "not-a-real-mark", encoding: {} }] },
+        rows: [],
+        schema: [],
+      });
+      expect(r.isError).toBe(true);
+      expect(r.text).toContain("spec invalid");
+    });
+
+    it("works for self-contained chart specs with empty rows (e.g. hierarchy / function data)", async () => {
+      // A chart-spec with self-contained data shape — no rows/schema needed.
+      const hierarchySpec = {
+        data: {
+          hierarchy: { name: "root", children: [{ name: "a", value: 1 }] },
+        },
+        layers: [{ mark: "treemap", encoding: {} }],
+      };
+      const r = await callText(client, "glyph_seal", {
+        spec: hierarchySpec,
+        rows: [],
+        schema: [],
+      });
+      expect(r.isError).toBeFalsy();
+      const seal = JSON.parse(r.text);
+      expect(seal.specHash).toMatch(/^[0-9a-f]{64}$/);
+      expect(seal.rowCount).toBe(0);
     });
   });
 
