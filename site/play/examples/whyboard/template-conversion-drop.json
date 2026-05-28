@@ -1,0 +1,116 @@
+{
+  "compose": {
+    "viewBox": {
+      "width": 1200,
+      "height": 760
+    },
+    "title": "Why did conversion drop last week?",
+    "children": [
+      {
+        "at": {
+          "x": 600,
+          "y": 32
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "User: \"Why did conversion drop last week?\"",
+          "fontSize": 14,
+          "fill": "#4a3f30",
+          "italic": true,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 60,
+          "y": 60
+        },
+        "mark": "raw-svg",
+        "rawSvg": {
+          "xml": "<rect x=\"0\" y=\"0\" width=\"1080\" height=\"220\" rx=\"12\" fill=\"#ffffff\" stroke=\"#e6e6e6\" stroke-width=\"1\"/><rect x=\"16\" y=\"16\" width=\"54\" height=\"20\" rx=\"4\" fill=\"#4c78a8\"/><text x=\"43\" y=\"30\" font-family=\"system-ui, sans-serif\" font-size=\"11\" fill=\"#ffffff\" text-anchor=\"middle\" font-weight=\"600\" letter-spacing=\"0.04em\">ROOT</text><text x=\"82\" y=\"31\" font-family=\"system-ui, sans-serif\" font-size=\"15\" fill=\"#1a1a1a\" font-weight=\"600\">Sign-up conversion fell from 8.2% to 5.4% (−34%).</text><text x=\"16\" y=\"54\" font-family=\"system-ui, sans-serif\" font-size=\"11.5\" fill=\"#666\">Source funnel · 7 days · confidence: high · gdf://conv/week-source</text>"
+        }
+      },
+      {
+        "at": {
+          "x": 90,
+          "y": 130
+        },
+        "mark": "raw-svg",
+        "rawSvg": {
+          "xml": "<rect x=\"0\" y=\"0\" width=\"1020\" height=\"140\" fill=\"#fafbfd\" stroke=\"#eef0f4\"/><g fill=\"#aac1d8\"><rect x=\"40\" y=\"40\" width=\"60\" height=\"80\"/><rect x=\"120\" y=\"36\" width=\"60\" height=\"84\"/><rect x=\"200\" y=\"42\" width=\"60\" height=\"78\"/><rect x=\"280\" y=\"40\" width=\"60\" height=\"80\"/><rect x=\"360\" y=\"38\" width=\"60\" height=\"82\"/></g><rect x=\"440\" y=\"70\" width=\"60\" height=\"50\" fill=\"#c0392b\" stroke=\"#1a1a1a\" stroke-width=\"1.5\"/><rect x=\"520\" y=\"72\" width=\"60\" height=\"48\" fill=\"#c0392b\" stroke=\"#1a1a1a\" stroke-width=\"1.5\"/><line x1=\"20\" y1=\"120\" x2=\"600\" y2=\"120\" stroke=\"#ccc\"/><text x=\"470\" y=\"64\" font-family=\"system-ui, sans-serif\" font-size=\"11\" fill=\"#c0392b\" text-anchor=\"middle\" font-weight=\"600\">drop</text><text x=\"20\" y=\"135\" font-family=\"system-ui, sans-serif\" font-size=\"10\" fill=\"#666\">M  T  W  Th  F  Sa  Su</text>"
+        }
+      },
+      {
+        "at": {
+          "x": 0,
+          "y": 0
+        },
+        "mark": "silhouette-path",
+        "silhouettePath": {
+          "d": "M 600 282 L 240 310 M 600 282 L 600 310 M 600 282 L 960 310",
+          "fill": "none",
+          "stroke": "#bcc4cf",
+          "strokeWidth": 1.5
+        }
+      },
+      {
+        "at": {
+          "x": 60,
+          "y": 318
+        },
+        "mark": "raw-svg",
+        "rawSvg": {
+          "xml": "<rect x=\"0\" y=\"0\" width=\"340\" height=\"360\" rx=\"10\" fill=\"#ffffff\" stroke=\"#e6e6e6\"/><rect x=\"16\" y=\"16\" width=\"74\" height=\"20\" rx=\"4\" fill=\"#c0392b\"/><text x=\"53\" y=\"30\" font-family=\"system-ui, sans-serif\" font-size=\"11\" fill=\"#ffffff\" text-anchor=\"middle\" font-weight=\"600\" letter-spacing=\"0.04em\">ANOMALY</text><text x=\"16\" y=\"68\" font-family=\"system-ui, sans-serif\" font-size=\"14\" fill=\"#1a1a1a\" font-weight=\"600\">Bounce rate jumped</text><text x=\"16\" y=\"88\" font-family=\"system-ui, sans-serif\" font-size=\"14\" fill=\"#1a1a1a\" font-weight=\"600\">+18 pp on landing page</text><text x=\"16\" y=\"112\" font-family=\"system-ui, sans-serif\" font-size=\"11.5\" fill=\"#666\">outlier · 4.2σ from baseline</text><rect x=\"16\" y=\"132\" width=\"308\" height=\"160\" fill=\"#fafbfd\" stroke=\"#eef0f4\"/><g fill=\"#aac1d8\"><rect x=\"30\" y=\"200\" width=\"20\" height=\"60\"/><rect x=\"60\" y=\"195\" width=\"20\" height=\"65\"/><rect x=\"90\" y=\"205\" width=\"20\" height=\"55\"/><rect x=\"120\" y=\"200\" width=\"20\" height=\"60\"/><rect x=\"150\" y=\"195\" width=\"20\" height=\"65\"/></g><rect x=\"180\" y=\"140\" width=\"20\" height=\"120\" fill=\"#c0392b\" stroke=\"#1a1a1a\" stroke-width=\"1.5\"/><rect x=\"210\" y=\"145\" width=\"20\" height=\"115\" fill=\"#c0392b\" stroke=\"#1a1a1a\" stroke-width=\"1.5\"/><text x=\"200\" y=\"132\" font-family=\"system-ui, sans-serif\" font-size=\"10\" fill=\"#c0392b\" text-anchor=\"middle\" font-weight=\"600\">+18 pp</text><line x1=\"16\" y1=\"310\" x2=\"324\" y2=\"310\" stroke=\"#eee\"/><text x=\"16\" y=\"330\" font-family=\"system-ui, sans-serif\" font-size=\"11\" fill=\"#666\">relation: filter</text><text x=\"16\" y=\"346\" font-family=\"ui-monospace, Menlo, monospace\" font-size=\"10\" fill=\"#888\">gdf://conv/a-bounce</text>"
+        }
+      },
+      {
+        "at": {
+          "x": 420,
+          "y": 318
+        },
+        "mark": "raw-svg",
+        "rawSvg": {
+          "xml": "<rect x=\"0\" y=\"0\" width=\"340\" height=\"360\" rx=\"10\" fill=\"#ffffff\" stroke=\"#e6e6e6\"/><rect x=\"16\" y=\"16\" width=\"90\" height=\"20\" rx=\"4\" fill=\"#d4a017\"/><text x=\"61\" y=\"30\" font-family=\"system-ui, sans-serif\" font-size=\"11\" fill=\"#ffffff\" text-anchor=\"middle\" font-weight=\"600\" letter-spacing=\"0.04em\">DECOMPOSE</text><text x=\"16\" y=\"68\" font-family=\"system-ui, sans-serif\" font-size=\"14\" fill=\"#1a1a1a\" font-weight=\"600\">Device explains 58% of drop.</text><text x=\"16\" y=\"92\" font-family=\"system-ui, sans-serif\" font-size=\"11.5\" fill=\"#666\">Mobile down 62% · desktop −8% · tablet flat</text><rect x=\"16\" y=\"132\" width=\"308\" height=\"160\" fill=\"#fafbfd\" stroke=\"#eef0f4\"/><text x=\"32\" y=\"180\" font-family=\"system-ui, sans-serif\" font-size=\"12\" fill=\"#333\">mobile</text><rect x=\"100\" y=\"166\" width=\"180\" height=\"22\" fill=\"#d4a017\"/><text x=\"290\" y=\"182\" font-family=\"system-ui, sans-serif\" font-size=\"11\" fill=\"#ffffff\" text-anchor=\"end\" font-weight=\"600\">58%</text><text x=\"32\" y=\"232\" font-family=\"system-ui, sans-serif\" font-size=\"12\" fill=\"#333\">desktop</text><rect x=\"100\" y=\"218\" width=\"74\" height=\"22\" fill=\"#e8d09b\"/><text x=\"180\" y=\"234\" font-family=\"system-ui, sans-serif\" font-size=\"11\" fill=\"#7a6730\" font-weight=\"600\">24%</text><text x=\"32\" y=\"272\" font-family=\"system-ui, sans-serif\" font-size=\"12\" fill=\"#333\">tablet</text><rect x=\"100\" y=\"258\" width=\"56\" height=\"22\" fill=\"#f2e3b9\"/><text x=\"162\" y=\"274\" font-family=\"system-ui, sans-serif\" font-size=\"11\" fill=\"#7a6730\">18%</text><line x1=\"16\" y1=\"310\" x2=\"324\" y2=\"310\" stroke=\"#eee\"/><text x=\"16\" y=\"330\" font-family=\"system-ui, sans-serif\" font-size=\"11\" fill=\"#666\">relation: agg</text><text x=\"16\" y=\"346\" font-family=\"ui-monospace, Menlo, monospace\" font-size=\"10\" fill=\"#888\">gdf://conv/d-device</text>"
+        }
+      },
+      {
+        "at": {
+          "x": 780,
+          "y": 318
+        },
+        "mark": "raw-svg",
+        "rawSvg": {
+          "xml": "<rect x=\"0\" y=\"0\" width=\"340\" height=\"360\" rx=\"10\" fill=\"#ffffff\" stroke=\"#e6e6e6\"/><rect x=\"16\" y=\"16\" width=\"82\" height=\"20\" rx=\"4\" fill=\"#2ea84d\"/><text x=\"57\" y=\"30\" font-family=\"system-ui, sans-serif\" font-size=\"11\" fill=\"#ffffff\" text-anchor=\"middle\" font-weight=\"600\" letter-spacing=\"0.04em\">FORECAST</text><text x=\"16\" y=\"68\" font-family=\"system-ui, sans-serif\" font-size=\"14\" fill=\"#1a1a1a\" font-weight=\"600\">Next 7-day forecast: 5.7%</text><text x=\"16\" y=\"88\" font-family=\"system-ui, sans-serif\" font-size=\"14\" fill=\"#1a1a1a\" font-weight=\"600\">(if mobile bug not fixed)</text><text x=\"16\" y=\"112\" font-family=\"system-ui, sans-serif\" font-size=\"11.5\" fill=\"#666\">ARIMA(1,1,1) · residual σ 0.4%</text><rect x=\"16\" y=\"132\" width=\"308\" height=\"160\" fill=\"#fafbfd\" stroke=\"#eef0f4\"/><path d=\"M 30 200 L 60 195 L 90 210 L 120 215 L 150 220 L 180 240 L 210 250\" fill=\"none\" stroke=\"#4c78a8\" stroke-width=\"2.5\"/><path d=\"M 210 235 L 305 250 L 305 270 L 210 265 Z\" fill=\"#d4edda\" opacity=\"0.65\"/><path d=\"M 210 250 L 305 258\" fill=\"none\" stroke=\"#2ea84d\" stroke-width=\"2.5\" stroke-dasharray=\"5,3\"/><line x1=\"210\" y1=\"140\" x2=\"210\" y2=\"285\" stroke=\"#bbb\" stroke-dasharray=\"2,3\"/><text x=\"218\" y=\"152\" font-family=\"system-ui, sans-serif\" font-size=\"10\" fill=\"#2ea84d\" font-weight=\"600\">forecast →</text><line x1=\"16\" y1=\"310\" x2=\"324\" y2=\"310\" stroke=\"#eee\"/><text x=\"16\" y=\"330\" font-family=\"system-ui, sans-serif\" font-size=\"11\" fill=\"#666\">relation: transform</text><text x=\"16\" y=\"346\" font-family=\"ui-monospace, Menlo, monospace\" font-size=\"10\" fill=\"#888\">gdf://conv/f-7day</text>"
+        }
+      },
+      {
+        "at": {
+          "x": 600,
+          "y": 712
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "glyph_whyboard({ handle: \"conv_w23\", question: \"Why did conversion drop last week?\", link_group: \"growth-w23\" }) → one tree.",
+          "fontSize": 12,
+          "fill": "#4a3f30",
+          "italic": true,
+          "anchor": "middle"
+        }
+      },
+      {
+        "at": {
+          "x": 600,
+          "y": 736
+        },
+        "mark": "text",
+        "textMark": {
+          "text": "Deterministic · Auditable · Same source rows → same tree, every time.",
+          "fontSize": 11,
+          "fill": "#888",
+          "italic": true,
+          "anchor": "middle"
+        }
+      }
+    ]
+  }
+}
