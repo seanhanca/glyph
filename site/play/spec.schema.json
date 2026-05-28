@@ -582,6 +582,7 @@
                   "geo-region",
                   "heatmap",
                   "boxplot",
+                  "beeswarm",
                   "text",
                   "treemap",
                   "sunburst",

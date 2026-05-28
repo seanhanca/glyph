@@ -231,6 +231,14 @@
     "csv": "examples/business/step-line.csv",
     "spec": "examples/business/step-line.spec.json"
   },
+  {
+    "id": "tenure-beeswarm",
+    "category": "Business charts",
+    "name": "Tenure beeswarm — by team",
+    "description": "12 employees × 4 teams. Each dot is one person; the `beeswarm` mark packs them horizontally inside each band so density shows without losing individual points.",
+    "csv": "examples/business/tenure-beeswarm.csv",
+    "spec": "examples/business/tenure-beeswarm.spec.json"
+  },
 
   {
     "id": "ridgeline",

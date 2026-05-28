@@ -550,6 +550,12 @@ export const MarkSchema = z.enum([
   // the compiler computes Q1 / median / Q3 / whiskers (Tukey, 1.5 × IQR)
   // and outliers beyond the whisker bounds.
   "boxplot",
+  // Tier-2 — beeswarm packing. Categorical x, quantitative y; per
+  // x-group the compiler runs a 1D non-overlap pack that nudges
+  // dots horizontally within the band so they don't overlap.
+  // Visually halfway between a strip plot and a violin — keeps every
+  // individual data point visible while showing distribution shape.
+  "beeswarm",
   // PR50 — direct label annotation. Renders a text mark at each row's
   // (x, y) with the value of encoding.text. Composes with other marks
   // via multi-layer specs (e.g. bars + text labels).
