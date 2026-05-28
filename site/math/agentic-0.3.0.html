@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Glyph 0.3.0 — charts for agentic frameworks</title>
+<meta name="description" content="Six things 0.3.0 enables for agent stacks — byte-stable rendering, audit gates that block misleading patches, provenance verbs, Whyboard + Story templates. Each chapter ships a live demo.">
+<meta property="og:title" content="Glyph 0.3.0 — charts for agentic frameworks">
+<meta property="og:description" content="Six capabilities the 0.3.0 release adds to the agent stack — with live playground demos for each.">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{
+    background:#0a0d18;
+    color:#e2dccb;
+    font-family:"Iowan Old Style","Palatino Linotype",Georgia,"Times New Roman",serif;
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+    font-feature-settings:"liga","onum","kern";
+  }
+  ::selection{background:#a78bfa;color:#0a0d18}
+  a{color:#c4b5fd;text-underline-offset:3px;text-decoration-thickness:1px}
+  a:hover{color:#ddd6fe}
+
+  .wrap{max-width:780px;margin:0 auto;padding:64px 24px 96px}
+
+  .meta{font-family:-apple-system,system-ui,sans-serif;font-size:.78rem;text-transform:uppercase;letter-spacing:.18em;color:#6b7280;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+  .meta a{color:#6b7280;text-decoration:none;border-bottom:1px dashed transparent;transition:color .15s,border-color .15s}
+  .meta a:hover{color:#e2dccb;border-bottom-color:#e2dccb}
+
+  h1.title{
+    font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;
+    font-size:clamp(2.4rem,5.2vw,3.8rem);
+    font-weight:600;
+    letter-spacing:-.015em;
+    line-height:1.1;
+    color:#f5f0e0;
+    margin-bottom:18px;
+    text-wrap:balance;
+  }
+  h1.title .accent{color:#c4b5fd;font-style:italic}
+
+  .standfirst{
+    font-family:-apple-system,system-ui,sans-serif;
+    font-size:1.18rem;
+    line-height:1.6;
+    color:#9ca3af;
+    margin-bottom:40px;
+    max-width:65ch;
+  }
+  .standfirst strong{color:#e2dccb;font-weight:500}
+
+  .byline{font-family:-apple-system,system-ui,sans-serif;font-size:.84rem;color:#6b7280;border-top:1px solid #1f2937;border-bottom:1px solid #1f2937;padding:14px 0;margin-bottom:48px;display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap}
+
+  .intro{font-size:1.06rem;line-height:1.75;color:#cdc4b0;margin-bottom:64px}
+  .intro p{margin-bottom:18px}
+  .intro p::first-letter{
+    font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;
+    font-size:3.6rem;
+    line-height:.85;
+    float:left;
+    margin:6px 8px 0 0;
+    color:#c4b5fd;
+    font-weight:600;
+  }
+  .intro code{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;background:#13192a;color:#c4b5fd;padding:1px 6px;border-radius:3px;font-size:.92em}
+
+  .chapter{margin-bottom:96px}
+  .chapter-num{
+    font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;
+    font-style:italic;
+    font-size:1.4rem;
+    color:#a78bfa;
+    margin-bottom:8px;
+    letter-spacing:.05em;
+  }
+  .chapter h2{
+    font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;
+    font-size:2.1rem;
+    font-weight:600;
+    line-height:1.15;
+    color:#f5f0e0;
+    margin-bottom:14px;
+    text-wrap:balance;
+    letter-spacing:-.01em;
+  }
+  .chapter .summary{
+    font-family:-apple-system,system-ui,sans-serif;
+    font-style:italic;
+    font-size:1.04rem;
+    color:#a78bfa;
+    margin-bottom:24px;
+    line-height:1.5;
+  }
+  .chapter p{font-size:1.04rem;line-height:1.75;color:#cdc4b0;margin-bottom:18px}
+  .chapter p strong{color:#f5f0e0;font-weight:500}
+  .chapter code{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;background:#13192a;color:#c4b5fd;padding:1px 6px;border-radius:3px;font-size:.92em}
+
+  pre.snippet{
+    background:#020617;
+    border:1px solid #1f2937;
+    border-radius:6px;
+    padding:16px 18px;
+    margin:18px 0 22px;
+    overflow-x:auto;
+    font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    font-size:.86rem;
+    line-height:1.55;
+    color:#cdc4b0;
+  }
+  pre.snippet .k{color:#a78bfa}
+  pre.snippet .s{color:#86efac}
+  pre.snippet .c{color:#6b7280;font-style:italic}
+
+  .demo-link{
+    display:inline-block;
+    margin-top:6px;
+    font-family:-apple-system,system-ui,sans-serif;
+    font-size:.92rem;
+    padding:9px 16px;
+    background:#13192a;
+    border:1px solid #1f2937;
+    border-radius:5px;
+    color:#c4b5fd;
+    text-decoration:none;
+    transition:background .15s,border-color .15s;
+  }
+  .demo-link:hover{background:#1f2937;border-color:#a78bfa;color:#ddd6fe}
+  .demo-link::before{content:"▸ ";color:#a78bfa}
+  .demo-link.secondary{margin-left:10px}
+
+  .pull{
+    border-left:3px solid #a78bfa;
+    padding:6px 0 6px 22px;
+    margin:22px 0;
+    font-style:italic;
+    color:#9ca3af;
+    font-size:1.02rem;
+  }
+
+  hr.section{border:none;height:1px;background:linear-gradient(90deg, transparent, #1f2937 30%, #1f2937 70%, transparent);margin:80px 0 64px}
+
+  .ship-table{margin-top:96px}
+  .ship-table h2{
+    font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;
+    font-size:1.75rem;
+    font-weight:600;
+    color:#f5f0e0;
+    margin-bottom:14px;
+    text-wrap:balance;
+  }
+  .ship-table > p{font-size:1.04rem;color:#cdc4b0;margin-bottom:28px;line-height:1.7}
+
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-family:-apple-system,system-ui,sans-serif;
+    font-size:.92rem;
+    margin-top:16px;
+  }
+  table th{
+    text-align:left;
+    padding:14px 16px;
+    background:#13192a;
+    color:#a78bfa;
+    font-weight:600;
+    border-bottom:2px solid #1f2937;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+    font-size:.72rem;
+  }
+  table td{padding:14px 16px;border-bottom:1px solid #1f2937;color:#cdc4b0;vertical-align:top}
+  table td:first-child{color:#f5f0e0;font-weight:500;width:36%}
+  table td:nth-child(2){text-align:right;color:#a78bfa;font-family:ui-monospace,monospace;font-size:.88rem;width:14%}
+  table td:last-child{color:#a78bfa;font-family:ui-monospace,monospace;font-size:.88rem;text-align:right;width:14%;font-weight:600}
+
+  .closing{
+    margin-top:96px;
+    padding:32px 0 0;
+    border-top:1px solid #1f2937;
+    font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;
+    font-size:1.1rem;
+    font-style:italic;
+    line-height:1.7;
+    color:#cdc4b0;
+  }
+  .closing strong{font-style:normal;color:#f5f0e0;font-weight:500}
+
+  footer{
+    margin-top:64px;
+    padding:24px 0;
+    border-top:1px solid #1f2937;
+    font-family:-apple-system,system-ui,sans-serif;
+    font-size:.84rem;
+    color:#6b7280;
+    text-align:center;
+  }
+  footer a{color:#6b7280}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="meta">
+    <span><a href="../index.html">← Glyph</a> · <a href="strengths.html">Strengths essay</a> · <a href="../play/">Playground</a></span>
+    <span>Release · v0.3.0</span>
+  </div>
+
+  <h1 class="title"><span class="accent">Glyph 0.3.0</span> — charts for agentic frameworks</h1>
+
+  <p class="standfirst"><strong>The release that closes the loop on agentic chart refinement.</strong> Six capabilities the 0.3.0 push adds to the agent stack — guardrails against misleading patches, provenance verbs, canonical Whyboard + Story templates, and a deterministic compiler that doesn&#x2019;t flinch when an LLM is the one holding the pen.</p>
+
+  <div class="byline">
+    <span>Five PRs · 1,022 tests · 53 MCP verbs</span>
+    <span>Apache 2.0 · <a href="https://github.com/seanhanca/glyph/releases/tag/v0.3.0">release notes</a></span>
+  </div>
+
+  <div class="intro">
+    <p>Most chart libraries were designed when humans typed code. Glyph is designed for the next stack: an agent emits a JSON spec, the compiler returns a byte-identical SVG, and another agent verifies it by recomputing a SHA-256 seal. The interesting question isn&#x2019;t whether agents <em>can</em> use existing libraries — they can, awkwardly. The question is what an agent-native library looks like when you build one on purpose.</p>
+    <p>0.3.0 answers that with five sharp PRs. None of them ship a new mark. None of them chase a Plotly feature. Each one closes a specific gap that an agent stack actually hits in production: <code>glyph_seal</code> for the verifier that wants the hash without the SVG, audit-aware <code>glyph_spec_patch</code> for the refinement loop that would otherwise silently regress, four Whyboard and three Story templates so a planner doesn&#x2019;t have to invent the layout from scratch, and five new audit rules covering the misleading patterns the v0.2.0 linter missed.</p>
+    <p>This essay walks through what each capability unlocks for an agentic framework, with a live playground demo per chapter. The closing table catalogs every verb and every audit rule by version.</p>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────────────────────────── -->
+
+  <article class="chapter">
+    <div class="chapter-num">I.</div>
+    <h2>Byte-stable rendering, so agents can diff what they drew</h2>
+    <p class="summary">Same JSON spec → same SVG bytes on Ubuntu, macOS, Windows, Node 20, Node 22. Snapshot-testable in CI; diffable in git.</p>
+
+    <p>An LLM regenerates code on every turn. A renderer that emits a slightly different byte stream every time — fractional rounding, font fallback, random IDs — destroys the agent&#x2019;s ability to assert <em>&#x201C;the chart didn&#x2019;t change.&#x201D;</em> Glyph emits the same bytes from the same inputs, full stop. That single property unlocks a regression-test pattern that&#x2019;s normal for code and unusual for graphics: snapshot a chart&#x2019;s SVG; assert on it.</p>
+
+    <p>It also makes the artifact a <strong>durable handle</strong>. The agent can put the SVG in a git commit, attach it to a PR, embed it in a Markdown comment — the same way it would treat a code file. No CDN, no JavaScript runtime, no embed iframe. Just text.</p>
+
+    <div class="pull">&#x201C;The agent emits a spec. The compiler returns the bytes. Another agent verifies them. The whole loop is text, the whole loop is reproducible.&#x201D;</div>
+
+    <a class="demo-link" href="../play/?example=quarterly-revenue">Live demo · quarterly revenue (compile in browser)</a>
+    <a class="demo-link secondary" href="../play/?example=conversion-funnel">A/B funnel · animated</a>
+  </article>
+
+  <!-- ─────────────────────────────────────────────────────────────────────── -->
+
+  <article class="chapter">
+    <div class="chapter-num">II.</div>
+    <h2>16 audit rules — guardrails against misleading agent output</h2>
+    <p class="summary">A pure-fn linter the agent calls before publishing. <code>glyph_audit_spec</code> returns sorted findings; the compiler can refuse to render when <code>strictness: "error"</code>.</p>
+
+    <p>The risk an agent-authored chart introduces isn&#x2019;t that it&#x2019;s ugly — it&#x2019;s that it&#x2019;s subtly wrong in ways no one notices. Truncated bar y-axis. Undisclosed log scale. Pie chart with 14 slices. Bar chart on a continuous axis. v0.3.0 ships <strong>five new audit rules</strong> bringing the total to 16, every one of them a real misleading-chart pattern the agent stack will eventually emit:</p>
+
+    <ul style="margin: 0 0 22px 22px; font-size:1.02rem; line-height:1.8; color:#cdc4b0">
+      <li><strong>AUDIT-05</strong> &#x2014; line or area mark on a categorical x-axis. The connecting stroke implies an ordered progression nominal categories don&#x2019;t carry; readers see a fake trend.</li>
+      <li><strong>AUDIT-12</strong> &#x2014; pie / donut / arc with more than 7 slices. Angle comparison breaks past ~5 (Cleveland-McGill); past 7 it&#x2019;s unreadable.</li>
+      <li><strong>AUDIT-13</strong> &#x2014; bar chart on a quantitative x. Usually wants <code>mark: "rect"</code> or histogram semantics.</li>
+      <li><strong>AUDIT-14</strong> &#x2014; more than four overlay layers. Visual overload past 4; suggest small multiples.</li>
+      <li><strong>AUDIT-15</strong> &#x2014; multi-layer chart with no title. A bare multi-series chart has no anchor for what the reader is comparing.</li>
+    </ul>
+
+    <p>The earlier 11 rules cover truncated y-axes, dual-axis traps, color-blind palette collapse, diverging palettes without midpoints, brand-kit contrast failures, and silent missing-data dropouts. Every rule is pure-fn, deterministic, and emits a stable <code>rule_id</code> the agent can suppress or fix.</p>
+
+    <pre class="snippet"><span class="c">// Audit before rendering — same call, same findings, every time.</span>
+{
+  <span class="k">"tool"</span>: <span class="s">"glyph_audit_spec"</span>,
+  <span class="k">"arguments"</span>: { <span class="k">"spec"</span>: <span class="s">{...}</span> }
+}
+<span class="c">// → { count: 1, highSeverity: 1, findings: [{ rule_id: "AUDIT-01", ... }] }</span></pre>
+
+    <a class="demo-link" href="../play/?example=quarterly-revenue">Live demo · audit a spec (toggle scale.domain in the playground)</a>
+  </article>
+
+  <!-- ─────────────────────────────────────────────────────────────────────── -->
+
+  <article class="chapter">
+    <div class="chapter-num">III.</div>
+    <h2>Audit-aware <code style="font-size:0.85em">glyph_spec_patch</code> — refinement that can&#x2019;t silently regress</h2>
+    <p class="summary">An agent refining a chart via JSON Patch can no longer introduce a misleading pattern the original didn&#x2019;t have. The verb diffs audit findings before and after; HIGH-severity introductions are refused unless the caller passes <code>acknowledged: true</code>.</p>
+
+    <p>v0.2.0 shipped <code>glyph_spec_patch</code>: an agent can hand a handle and an RFC 6902 patch list and get back a refined chart. Useful — but it bypassed the audit pass. An agent that tweaked a bar chart&#x2019;s y-domain to <code>[100, 200]</code> for visual emphasis would silently introduce AUDIT-01 (truncated y-axis) without any signal that the refinement had crossed a trustworthiness boundary.</p>
+
+    <p>0.3.0 fixes this. After applying the patch, the verb re-runs <code>auditSpec</code> on the patched spec and diffs against the original&#x2019;s findings (keyed by <code>rule_id</code> + <code>path</code>). If the patch <strong>introduces</strong> a new HIGH-severity finding, the verb refuses with a structured error:</p>
+
+    <pre class="snippet">{
+  <span class="k">"error"</span>: <span class="s">"audit_regression"</span>,
+  <span class="k">"message"</span>: <span class="s">"Patch would introduce HIGH-severity findings the original spec didn't have."</span>,
+  <span class="k">"regressions"</span>: [
+    { <span class="k">"rule_id"</span>: <span class="s">"AUDIT-01"</span>, <span class="k">"severity"</span>: <span class="s">"high"</span>, <span class="k">"path"</span>: <span class="s">"/layers/0/encoding/y"</span>, ... }
+  ]
+}</pre>
+
+    <p>The agent has two responses: fix the patch, or pass <code>acknowledged: true</code> when the regression is intentional (annotating a deviation, emphasizing a known caveat). Pre-existing findings aren&#x2019;t flagged — only what the patch added. This <strong>closes the loop on agentic chart refinement</strong>: the iteration cycle has a guardrail.</p>
+
+    <a class="demo-link" href="https://github.com/seanhanca/glyph/pull/113">Read the PR · audit-aware spec patch</a>
+  </article>
+
+  <!-- ─────────────────────────────────────────────────────────────────────── -->
+
+  <article class="chapter">
+    <div class="chapter-num">IV.</div>
+    <h2>Provenance verbs — any other agent can verify byte-stable</h2>
+    <p class="summary">Every Glyph SVG carries a SHA-256 seal over <code>(spec, rows, schema, library version)</code>. <code>glyph_verify</code> recomputes it. v0.3.0 adds <code>glyph_seal</code> — the seal without the SVG.</p>
+
+    <p>An MCP-native chart library is interesting in a multi-agent context only if a <em>second</em> agent can verify what the first one drew. Glyph SVGs carry a cryptographic seal: SHA-256 over canonical-JSON-stringified spec + rows + schema + library version. <code>glyph_verify</code> takes the SVG (or just the seal), recomputes the hashes, and tells you whether the bytes you have match the inputs that allegedly produced them.</p>
+
+    <p>0.3.0 closes the asymmetry by adding <strong><code>glyph_seal</code></strong>: emits the seal as standalone JSON without rendering an SVG. Useful for a verifier that already has the SVG, a content-addressable cache that wants the hash before the bytes, or an attestation pipeline that signs over <code>(spec, rows, schema)</code> without needing the rendered output. The seal is the same one <code>glyph_verify</code> matches against, so the loop closes:</p>
+
+    <pre class="snippet">{
+  <span class="k">"tool"</span>: <span class="s">"glyph_seal"</span>,
+  <span class="k">"arguments"</span>: { <span class="k">"spec"</span>: {...}, <span class="k">"rows"</span>: [...], <span class="k">"schema"</span>: [...] }
+}
+<span class="c">// → { "format": "glyph-provenance/1", "specHash": "20b9...", "dataHash": "f1c3...",</span>
+<span class="c">//     "libraryVersion": "0.3.0", "rowCount": 120, "scaleDigest": "ba4e..." }</span></pre>
+
+    <a class="demo-link" href="https://github.com/seanhanca/glyph/pull/110">Read the PR · glyph_seal</a>
+  </article>
+
+  <!-- ─────────────────────────────────────────────────────────────────────── -->
+
+  <article class="chapter">
+    <div class="chapter-num">V.</div>
+    <h2>Whyboard templates — a planner doesn&#x2019;t have to invent the layout</h2>
+    <p class="summary">Four canonical diagnostic shapes: root question + three branches (anomaly · decompose · forecast). Pre-rendered compose scenes in the playground; <code>glyph_whyboard</code> emits the same structure live.</p>
+
+    <p>A &#x201C;why is X happening?&#x201D; investigation is recursive: the agent picks a root question, decomposes it into branches (anomalies, breakdowns, forecasts), and assembles the result as a board. Glyph has shipped <code>glyph_whyboard</code> since 0.0.x — what was missing was a <strong>canonical visual layout</strong> the agent can hand the user as a starting point.</p>
+
+    <p>0.3.0 ships four templates, one per common investigation shape:</p>
+
+    <ul style="margin: 0 0 22px 22px; font-size:1.02rem; line-height:1.8; color:#cdc4b0">
+      <li><strong>Revenue miss</strong> — &#x201C;Why did Q3 miss target?&#x201D; (segment breakdown, last 8 quarters, scenario forecast)</li>
+      <li><strong>Conversion drop</strong> — &#x201C;Why did the funnel collapse?&#x201D; (step-by-step funnel, anomaly on the step that broke, root-cause attribution)</li>
+      <li><strong>Latency spike</strong> — &#x201C;Why is API latency spiking?&#x201D; (per-endpoint p50/p95, anomaly bands, recovery ETA)</li>
+      <li><strong>Churn spike</strong> — &#x201C;Why did churn spike this month?&#x201D; (cohort retention, trial-to-paid drop, 3-month forecast)</li>
+    </ul>
+
+    <p>Each template is a 1200×760 compose scene with the same shape the <code>glyph_whyboard</code> verb returns. A planner that detects &#x201C;the user is asking why X dropped&#x201D; picks the closest template, swaps in real data via <code>glyph_spec_patch</code>, and gets back a board with branch summaries the next reasoning hop can chain into.</p>
+
+    <a class="demo-link" href="../play/?example=wb-revenue-miss">Live demo · revenue miss</a>
+    <a class="demo-link secondary" href="../play/?example=wb-latency-spike">latency spike</a>
+  </article>
+
+  <!-- ─────────────────────────────────────────────────────────────────────── -->
+
+  <article class="chapter">
+    <div class="chapter-num">VI.</div>
+    <h2>Story templates — narrative panel chains, ready-to-use</h2>
+    <p class="summary">Three canonical 4-panel storyboards: quarterly review, incident retro, A/B test readout. Compose-scene mirrors of what <code>glyph_story</code> emits as a panel chain.</p>
+
+    <p>The other half of the agentic-presentation loop: not &#x201C;why,&#x201D; but &#x201C;tell.&#x201D; A retrospective, a quarterly review, an experiment readout — these are sequence-of-panels, not one-big-chart. <code>glyph_story</code> has shipped multi-scene narrative spec generation since 0.2.0. What 0.3.0 adds is <strong>three reference templates</strong> the agent can fall back on:</p>
+
+    <ul style="margin: 0 0 22px 22px; font-size:1.02rem; line-height:1.8; color:#cdc4b0">
+      <li><strong>Quarterly review</strong> — revenue trend → segment mix → cohort retention → growth forecast</li>
+      <li><strong>Incident retro</strong> — latency spike → error budget burn → root-cause attribution → recovery curve</li>
+      <li><strong>A/B test readout</strong> — traffic split → primary metric lift → secondary metrics → decision matrix</li>
+    </ul>
+
+    <p>Each panel is a 520×290 raw-svg block with a step badge, caption, subcaption, and chart slot — exactly the shape an LLM can patch field-by-field. A multi-agent stack where one model generates the data narrative and another renders the panels can now share a typed layout instead of negotiating one from scratch on every turn.</p>
+
+    <a class="demo-link" href="../play/?example=story-quarterly-review">Live demo · quarterly review</a>
+    <a class="demo-link secondary" href="../play/?example=story-incident-retro">incident retro</a>
+  </article>
+
+  <hr class="section">
+
+  <!-- ─────────────────────────────────────────────────────────────────────── -->
+
+  <section class="ship-table">
+    <h2>What shipped in 0.3.0</h2>
+    <p>Five PRs, all merged. Backward-compatible with v0.2.0. Below: the verb / rule / template surface across versions.</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Capability</th>
+          <th>v0.2.0</th>
+          <th>v0.3.0</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>MCP verbs</td><td>52</td><td>53</td></tr>
+        <tr><td>Mark types</td><td>21</td><td>24</td></tr>
+        <tr><td>Audit rules</td><td>11</td><td>16</td></tr>
+        <tr><td>Whyboard templates</td><td>0</td><td>4</td></tr>
+        <tr><td>Story templates</td><td>0</td><td>3</td></tr>
+        <tr><td>Tests passing (Ubuntu × macOS × Windows × Node 20 / 22)</td><td>819</td><td>1,022</td></tr>
+        <tr><td>Audit-aware patch gate</td><td>—</td><td>&#x2713;</td></tr>
+        <tr><td>Standalone provenance seal (<code>glyph_seal</code>)</td><td>—</td><td>&#x2713;</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────────────────── -->
+
+  <div class="closing">
+    <p>The five PRs were all written by Claude, reviewed by Claude, and merged by Claude. The same loop the library is designed to support is the loop that maintains it. <strong>That recursion is the point.</strong></p>
+    <p style="margin-top:18px">If you build agent stacks, the new verbs are <code>glyph_seal</code> and the updated <code>glyph_spec_patch</code>. If you build the chart-generation side, the new audit rules and templates are where 0.3.0 reduces your work. Either way, the install is the same:</p>
+    <pre class="snippet" style="margin-top:14px">npx -y @glyph/mcp@0.3.0</pre>
+  </div>
+
+  <footer>
+    <p>Glyph 0.3.0 · <a href="https://github.com/seanhanca/glyph/releases/tag/v0.3.0">release notes</a> · <a href="https://github.com/seanhanca/glyph">source</a> · <a href="../play/">playground</a> · <a href="https://github.com/seanhanca/glyph/discussions">discussions</a></p>
+  </footer>
+
+</div>
+
+</body>
+</html>

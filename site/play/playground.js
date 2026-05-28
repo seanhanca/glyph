@@ -137,9 +137,22 @@ function mountExamplePicker({ tabsEl, chipsEl, blurbEl, activeEl, onPick }) {
         return;
       }
       activeCategory = manifest[0].category;
+      // ?example=<id> in the URL deep-links straight to a specific chip —
+      // used by blog pages and discussion posts that want to land the
+      // reader on a particular template without making them hunt the
+      // category strip. Falls back to the default first-category view
+      // when the id is missing or unknown.
+      const wantedId = new URLSearchParams(location.search).get("example");
+      const wanted = wantedId ? manifest.find((m) => m.id === wantedId) : null;
+      if (wanted) {
+        activeCategory = wanted.category;
+      }
       renderTabs();
       renderChips();
       blurbEl.textContent = "Pick any example to load its spec (and data, if it has one).";
+      if (wanted) {
+        pickExample(wanted);
+      }
     });
 
   function renderTabs() {
