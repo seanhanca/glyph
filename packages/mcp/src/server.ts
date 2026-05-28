@@ -2890,12 +2890,18 @@ export function createServer(state: ServerState = new ServerState()): {
   // Apply RFC 6902 JSON patches to the spec that produced an existing handle
   // and re-run the pipeline. Returns the new handle id + SVG. Lineage marks
   // the relation as "transform" so glyph_lineage walks back to the origin.
+  //
+  // 0.3.0 — audit-aware gate: after applying patches, re-run auditSpec on the
+  // patched spec and diff against the original's findings (keyed by rule_id +
+  // path). If the patch INTRODUCES any new HIGH-severity findings, refuse the
+  // patch and return them in `regressions`. The caller can override by setting
+  // `acknowledged: true` (signals "I've seen the warnings, render anyway").
   server.registerTool(
     "glyph_spec_patch",
     {
       title: "Incrementally edit a spec via JSON Patch (RFC 6902)",
       description:
-        "Refine an existing chart without regenerating the full spec. Pass the originating handle_id plus an array of RFC 6902 patches (add/remove/replace/copy/move/test). The server applies the patches to the spec stored at render time, re-runs the pipeline, and returns the new handle. Lineage chains back to the original handle.",
+        "Refine an existing chart without regenerating the full spec. Pass the originating handle_id plus an array of RFC 6902 patches (add/remove/replace/copy/move/test). The server applies the patches to the spec stored at render time, re-runs the pipeline, and returns the new handle. Lineage chains back to the original handle. 0.3.0: blocks patches that INTRODUCE high-severity audit findings unless `acknowledged: true`.",
       inputSchema: {
         handle_id: z.string().min(1).describe("The handle whose spec to patch."),
         patches: z
@@ -2904,9 +2910,15 @@ export function createServer(state: ServerState = new ServerState()): {
           .describe(
             "Array of RFC 6902 JSON Patch operations. Each op has { op: 'add'|'remove'|'replace'|'copy'|'move'|'test', path: '/json/pointer', value?: any, from?: '/json/pointer' }.",
           ),
+        acknowledged: z
+          .boolean()
+          .optional()
+          .describe(
+            "0.3.0 — set true to override the audit-regression gate when the patch introduces new HIGH-severity findings. Without this, such patches are refused with `regressions: [...]` so the agent has to either fix the patch or explicitly accept the misleading rendering.",
+          ),
       },
     },
-    async ({ handle_id, patches }) => {
+    async ({ handle_id, patches, acknowledged }) => {
       const original = state.getSpec(handle_id);
       if (original === undefined) {
         return {
@@ -2940,6 +2952,40 @@ export function createServer(state: ServerState = new ServerState()): {
             },
           ],
         };
+      }
+      // 0.3.0 audit-regression gate. We diff *structural* audit findings only
+      // (the pure-fn pass) — render-time AUDIT-10 needs rows we haven't
+      // materialized yet. The original spec parses cleanly because it was
+      // accepted at render time; if for any reason it doesn't, we skip the
+      // diff rather than blocking on a pre-existing bug.
+      const originalParsed = safeParseSpec(original);
+      if (originalParsed.ok && acknowledged !== true) {
+        const beforeFindings = auditSpec({ spec: originalParsed.spec });
+        const afterFindings = auditSpec({ spec: reparse.spec });
+        const beforeKeys = new Set(beforeFindings.map((f) => `${f.rule_id}@${f.path ?? ""}`));
+        const newHigh = afterFindings.filter(
+          (f) => f.severity === "high" && !beforeKeys.has(`${f.rule_id}@${f.path ?? ""}`),
+        );
+        if (newHigh.length > 0) {
+          return {
+            isError: true,
+            content: [
+              {
+                type: "text" as const,
+                text: JSON.stringify(
+                  {
+                    error: "audit_regression",
+                    message:
+                      "Patch would introduce HIGH-severity audit findings the original spec didn't have. Either fix the patch or re-call with `acknowledged: true` to accept the regression.",
+                    regressions: newHigh,
+                  },
+                  null,
+                  2,
+                ),
+              },
+            ],
+          };
+        }
       }
       const engine = await state.getEngine();
       // PR67 / PR68 — hierarchy and graph patches bypass DuckDB just like
