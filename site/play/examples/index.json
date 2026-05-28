@@ -523,5 +523,37 @@
     "description": "Static rendering of what glyph_whyboard returns: a root + three diagnostic branches (anomaly, decompose, forecast), each leaf a chained DataHandle. Mirrors the homepage example.",
     "csv": null,
     "spec": "examples/whyboard/sample-whyboard.json"
+  },
+  {
+    "id": "wb-revenue-miss",
+    "category": "Whyboard",
+    "name": "Template — revenue miss",
+    "description": "Canonical \"Why did Q3 revenue miss target?\" tree. APAC tier-1 weakness drives the miss; region explains 64% of variance; Q4 forecast still below target.",
+    "csv": null,
+    "spec": "examples/whyboard/template-revenue-miss.json"
+  },
+  {
+    "id": "wb-conversion-drop",
+    "category": "Whyboard",
+    "name": "Template — conversion drop",
+    "description": "\"Why did conversion drop last week?\" Bounce-rate spike on mobile landing page; device explains 58% of the variance; 7-day forecast stays soft.",
+    "csv": null,
+    "spec": "examples/whyboard/template-conversion-drop.json"
+  },
+  {
+    "id": "wb-latency-spike",
+    "category": "Whyboard",
+    "name": "Template — latency spike",
+    "description": "\"Why is API latency spiking?\" /search + /feed jumped at 14:22 UTC; DB query time explains 78% of variance; recovery ETA ~22 min.",
+    "csv": null,
+    "spec": "examples/whyboard/template-latency-spike.json"
+  },
+  {
+    "id": "wb-churn-spike",
+    "category": "Whyboard",
+    "name": "Template — churn spike",
+    "description": "\"Why did churn spike this month?\" Trial-to-paid drop 32→17%; price-test cohort explains 71% of variance; 3-mo forecast assumes price reverts.",
+    "csv": null,
+    "spec": "examples/whyboard/template-churn-spike.json"
   }
 ]
