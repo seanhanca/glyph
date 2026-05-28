@@ -1,6 +1,6 @@
 {
   "name": "@glyph/live",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "description": "Browser hydration for Glyph SVGs — click, hover, brush handlers that drive SQL queries.",
   "license": "Apache-2.0",

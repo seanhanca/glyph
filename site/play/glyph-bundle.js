@@ -32126,6 +32126,8 @@ function auditSpec(input) {
     auditTruncatedYAxis(out, layer, i);
     auditLogScaleDisclosure(out, layer, i, spec.title);
     auditDivergingPalette(out, layer, i);
+    auditLineOnCategoricalX(out, layer, i);
+    auditBarOnQuantitativeX(out, layer, i);
   }
   auditDualAxis(out, spec);
   auditExcessiveAggregation(out, spec, input.rowCount);
@@ -32133,6 +32135,9 @@ function auditSpec(input) {
   auditAspectRatio(out, spec);
   auditStackedNegatives(out, spec);
   auditBrandContrast(out, spec);
+  auditTooManyArcSlices(out, spec, input.rowCount);
+  auditOverlayLayerCount(out, spec);
+  auditMissingTitle(out, spec);
   return out.sort((a, b) => {
     const sa = severityRank(a.severity);
     const sb = severityRank(b.severity);
@@ -32315,6 +32320,87 @@ function auditBrandContrast(out, spec) {
     message: `Categorical palette pair collapses under deuteranopia: ${failure.a} and ${failure.b} differ by only ${failure.distance.toFixed(2)} units in simulated RGB (threshold ${failure.threshold}). Viewers with red-green color blindness will see them as the same color.`,
     suggestion: "Replace one of the colliding hues with a distinct lightness or chroma. Sites like https://colorbrewer2.org/ list deuteranope-safe palettes.",
     path: "/brand/palette/categorical"
+  });
+}
+function auditLineOnCategoricalX(out, layer, idx) {
+  if (layer.mark !== "line" && layer.mark !== "area")
+    return;
+  const x = layer.encoding?.x;
+  if (!x || typeof x === "string")
+    return;
+  const t = x.type;
+  if (t !== "nominal")
+    return;
+  out.push({
+    rule_id: "AUDIT-05",
+    severity: "medium",
+    message: `Layer ${idx}: ${layer.mark} mark connects across a nominal x-encoding. The connecting line implies ordered progression that nominal categories don't have \u2014 readers see a fake trend.`,
+    suggestion: 'Switch to `mark: "bar"` (or `mark: "point"`), or change x.type to `"ordinal"` if there is a real ordering.',
+    path: `/layers/${idx}/encoding/x`
+  });
+}
+function auditBarOnQuantitativeX(out, layer, idx) {
+  if (layer.mark !== "bar")
+    return;
+  const x = layer.encoding?.x;
+  if (!x || typeof x === "string")
+    return;
+  const t = x.type;
+  if (t !== "quantitative")
+    return;
+  out.push({
+    rule_id: "AUDIT-13",
+    severity: "low",
+    message: `Layer ${idx}: bar mark on a quantitative x-encoding. Bars suggest categorical bins, but a continuous x suggests a histogram or rect mark.`,
+    suggestion: 'Either switch to `mark: "rect"` for binned data, or change x.type to `"ordinal"` if each bar is a discrete category.',
+    path: `/layers/${idx}/encoding/x`
+  });
+}
+function auditTooManyArcSlices(out, spec, rowCount) {
+  const hasArc = spec.layers.some((l) => l.mark === "arc");
+  if (!hasArc)
+    return;
+  const n = rowCount ?? 0;
+  if (n <= 7)
+    return;
+  out.push({
+    rule_id: "AUDIT-12",
+    severity: "medium",
+    message: `Pie / donut chart with ${n} slices. Angle comparison drops sharply past ~5 slices; past 7 the chart is essentially unreadable.`,
+    suggestion: "Group small slices into an 'Other' bucket, or switch to a horizontal bar chart sorted by value."
+  });
+}
+function auditOverlayLayerCount(out, spec) {
+  if (spec.layers.length <= 4)
+    return;
+  if (spec.facet)
+    return;
+  out.push({
+    rule_id: "AUDIT-14",
+    severity: "low",
+    message: `Chart has ${spec.layers.length} overlay layers. Viewer accuracy on individual series drops sharply past ~4 overlaid layers.`,
+    suggestion: "Use `spec.facet` to split into small multiples, or normalize the data and use a single layer with a color encoding."
+  });
+}
+function auditMissingTitle(out, spec) {
+  if (spec.title && spec.title.trim().length > 0)
+    return;
+  const layered = spec.layers.length > 1;
+  const faceted = !!spec.facet;
+  const hasColor = spec.layers.some((l) => {
+    const c = l.encoding?.color;
+    if (typeof c === "string")
+      return true;
+    return c?.field !== void 0;
+  });
+  if (!layered && !faceted && !hasColor)
+    return;
+  out.push({
+    rule_id: "AUDIT-15",
+    severity: "low",
+    message: "Multi-layer / faceted / color-encoded chart has no title. Readers need a title to anchor what the chart is comparing.",
+    suggestion: "Add a `title` to the spec \u2014 even a short one prevents misreading.",
+    path: "/title"
   });
 }
 function channelDomain(c) {

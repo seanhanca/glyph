@@ -26,7 +26,7 @@ Glyph is a deterministic chart-and-compute library where:
 - **Charts are JSON specs** an LLM can author, diff, and patch.
 - **Compilation is a pure function**: same spec → same SVG bytes,
   every platform, every run.
-- **The agent surface is the primary API**: 52 MCP verbs Claude /
+- **The agent surface is the primary API**: 53 MCP verbs Claude /
   ChatGPT / Gemini can call directly.
 
 When an agent asks Glyph to "show a sine wave for an 8-year-old," it
@@ -66,7 +66,7 @@ Want to vary it? Try these prompts:
 > Draw a circle and explain pi.
 > Show me a vector field with three arrows.
 
-Five recipes ship in 0.2.0: `sine`, `cosine`, `circle`, `parabola`,
+Five recipes ship in 0.3.0: `sine`, `cosine`, `circle`, `parabola`,
 `vector field`. Three audiences: `kid`, `high-school`, `adult`. The
 recipe registry is in [`packages/core/src/story/compose.ts`](../packages/core/src/story/compose.ts)
 — adding a new one is the easiest PR in the project ([recipe-idea
@@ -148,7 +148,7 @@ echo '{"data":{"source":"<inline:rides>"},"layers":[{"mark":"bar","encoding":{"x
 ```
 
 The audit rules live in [`packages/core/src/audit/`](../packages/core/src/audit/).
-AUDIT-1..AUDIT-11 ship in 0.2.0. Adding an audit rule is a small PR
+AUDIT-1..AUDIT-15 ship in 0.3.0. Adding an audit rule is a small PR
 — see [CONTRIBUTING.md §4](../CONTRIBUTING.md#4-i-want-to-add-an-audit-rule--small).
 
 ---
@@ -164,7 +164,7 @@ Every Glyph-rendered SVG embeds a cryptographic seal:
   "format": "glyph-provenance/1",
   "specHash": "20b940795d11e164...",
   "dataHash": "f1c3ee5c630f7cfe...",
-  "libraryVersion": "0.2.0",
+  "libraryVersion": "0.3.0",
   "rowCount": 120,
   "scaleDigest": "ba4e393d19a68aac..."
 }]]></metadata>

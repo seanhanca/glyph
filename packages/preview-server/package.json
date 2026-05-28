@@ -1,6 +1,6 @@
 {
   "name": "@glyph/preview-server",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Opt-in, localhost-only HTTP server that hosts an interactive Glyph chart preview. Used by @glyph/mcp to close the click → agent loop.",
   "license": "Apache-2.0",
   "type": "module",
