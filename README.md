@@ -29,6 +29,7 @@ No JS, no CDN. Deterministic. Same bytes a year from now.</em>
 </p>
 
 <p align="center">
+<a href="https://seanhanca.github.io/glyph/math/agentic-0.3.0.html">🚀 0.3.0 release essay</a> ·
 <a href="https://seanhanca.github.io/glyph/math/life-in-glyph.html">🖼️ Gallery</a> ·
 <a href="https://seanhanca.github.io/glyph/math/strengths.html">📝 What it's for (essay)</a> ·
 <a href="https://seanhanca.github.io/glyph/math/two-agents.html">🤝 Two-agents demo</a> ·
