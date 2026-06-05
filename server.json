@@ -1,17 +1,17 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.seanhanca/glyph",
-  "description": "Deterministic chart compiler with 49 agent-callable verbs. Render JSON specs to byte-stable SVG, query the underlying DuckDB view, audit charts (8 rules) for misleading patterns, forecast and detect anomalies, decompose time series, build cross-agent analytic narratives (Whyboard) — all via one MCP server.",
+  "description": "Deterministic chart compiler with 53 agent-callable verbs. Render JSON specs to byte-stable SVG (24 mark types), query the underlying DuckDB view, audit charts (16 rules) for misleading patterns, refine specs through an audit-aware glyph_spec_patch that refuses regressions, seal provenance with glyph_seal (SHA-256 over spec+rows+schema), forecast and detect anomalies, decompose time series, and build cross-agent analytic narratives (Whyboard + Story templates) — all via one MCP server. 1,022 tests.",
   "repository": {
     "url": "https://github.com/seanhanca/glyph",
     "source": "github"
   },
-  "version": "0.1.0",
+  "version": "0.3.0",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "@glyph/mcp",
-      "version": "0.1.0",
+      "version": "0.3.0",
       "transport": {
         "type": "stdio"
       }
